@@ -65,12 +65,6 @@ export function Header() {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4">
             <LanguageToggle />
-            <Link to="/auth">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <User className="w-4 h-4" />
-                {t("sign_in")}
-              </Button>
-            </Link>
             <Link to="/services">
               <Button variant="hero" size="default" className="gap-2">
                 <Calendar className="w-4 h-4" />
@@ -111,12 +105,6 @@ export function Header() {
                 </Link>
               ))}
               <div className="flex flex-col gap-3 pt-4 border-t border-border">
-                <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full gap-2">
-                    <User className="w-4 h-4" />
-                    {t("sign_in")}
-                  </Button>
-                </Link>
                 <Link to="/services" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button variant="hero" className="w-full gap-2">
                     <Calendar className="w-4 h-4" />
