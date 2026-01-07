@@ -86,6 +86,144 @@ export type Database = {
           },
         ]
       }
+      campaigns: {
+        Row: {
+          budget: number | null
+          channel: string
+          created_at: string
+          id: string
+          name: string
+          primary_kpi: string | null
+          status: Database["public"]["Enums"]["campaign_status"] | null
+          updated_at: string
+          utm_campaign: string | null
+        }
+        Insert: {
+          budget?: number | null
+          channel: string
+          created_at?: string
+          id?: string
+          name: string
+          primary_kpi?: string | null
+          status?: Database["public"]["Enums"]["campaign_status"] | null
+          updated_at?: string
+          utm_campaign?: string | null
+        }
+        Update: {
+          budget?: number | null
+          channel?: string
+          created_at?: string
+          id?: string
+          name?: string
+          primary_kpi?: string | null
+          status?: Database["public"]["Enums"]["campaign_status"] | null
+          updated_at?: string
+          utm_campaign?: string | null
+        }
+        Relationships: []
+      }
+      clients: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          instagram: string | null
+          last_visit_at: string | null
+          name: string
+          phone: string | null
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          instagram?: string | null
+          last_visit_at?: string | null
+          name: string
+          phone?: string | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          instagram?: string | null
+          last_visit_at?: string | null
+          name?: string
+          phone?: string | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      offers: {
+        Row: {
+          active: boolean | null
+          body: string | null
+          created_at: string
+          end_at: string | null
+          headline: string | null
+          id: string
+          limit_spots: number | null
+          name: string
+          package_id: string | null
+          price_display: string | null
+          service_id: string | null
+          start_at: string | null
+          type: Database["public"]["Enums"]["offer_type"]
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          body?: string | null
+          created_at?: string
+          end_at?: string | null
+          headline?: string | null
+          id?: string
+          limit_spots?: number | null
+          name: string
+          package_id?: string | null
+          price_display?: string | null
+          service_id?: string | null
+          start_at?: string | null
+          type: Database["public"]["Enums"]["offer_type"]
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          body?: string | null
+          created_at?: string
+          end_at?: string | null
+          headline?: string | null
+          id?: string
+          limit_spots?: number | null
+          name?: string
+          package_id?: string | null
+          price_display?: string | null
+          service_id?: string | null
+          start_at?: string | null
+          type?: Database["public"]["Enums"]["offer_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       package_services: {
         Row: {
           id: string
@@ -124,43 +262,43 @@ export type Database = {
       }
       packages: {
         Row: {
+          active: boolean | null
           created_at: string
           description: string | null
+          expires_days: number | null
           id: string
-          is_active: boolean | null
           is_featured: boolean | null
           name: string
           original_price: number | null
-          price: number
-          sessions_included: number
+          sessions_qty: number
+          total_price: number
           updated_at: string
-          valid_days: number | null
         }
         Insert: {
+          active?: boolean | null
           created_at?: string
           description?: string | null
+          expires_days?: number | null
           id?: string
-          is_active?: boolean | null
           is_featured?: boolean | null
           name: string
           original_price?: number | null
-          price: number
-          sessions_included?: number
+          sessions_qty?: number
+          total_price: number
           updated_at?: string
-          valid_days?: number | null
         }
         Update: {
+          active?: boolean | null
           created_at?: string
           description?: string | null
+          expires_days?: number | null
           id?: string
-          is_active?: boolean | null
           is_featured?: boolean | null
           name?: string
           original_price?: number | null
-          price?: number
-          sessions_included?: number
+          sessions_qty?: number
+          total_price?: number
           updated_at?: string
-          valid_days?: number | null
         }
         Relationships: []
       }
@@ -196,6 +334,7 @@ export type Database = {
       }
       services: {
         Row: {
+          base_price: number | null
           category: string | null
           created_at: string
           description: string | null
@@ -204,9 +343,12 @@ export type Database = {
           is_active: boolean | null
           name: string
           price: number
+          promo_price: number | null
+          status: Database["public"]["Enums"]["service_status"] | null
           updated_at: string
         }
         Insert: {
+          base_price?: number | null
           category?: string | null
           created_at?: string
           description?: string | null
@@ -215,9 +357,12 @@ export type Database = {
           is_active?: boolean | null
           name: string
           price: number
+          promo_price?: number | null
+          status?: Database["public"]["Enums"]["service_status"] | null
           updated_at?: string
         }
         Update: {
+          base_price?: number | null
           category?: string | null
           created_at?: string
           description?: string | null
@@ -226,6 +371,8 @@ export type Database = {
           is_active?: boolean | null
           name?: string
           price?: number
+          promo_price?: number | null
+          status?: Database["public"]["Enums"]["service_status"] | null
           updated_at?: string
         }
         Relationships: []
@@ -266,6 +413,16 @@ export type Database = {
     }
     Enums: {
       app_role: "admin_owner" | "staff" | "marketing"
+      booking_status:
+        | "requested"
+        | "confirmed"
+        | "completed"
+        | "cancelled"
+        | "no_show"
+      campaign_status: "draft" | "active" | "paused" | "completed"
+      offer_type: "entry_offer" | "package_offer" | "consultation_offer"
+      payment_status: "unpaid" | "paid"
+      service_status: "entry" | "upsell" | "premium" | "inactive"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -394,6 +551,17 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin_owner", "staff", "marketing"],
+      booking_status: [
+        "requested",
+        "confirmed",
+        "completed",
+        "cancelled",
+        "no_show",
+      ],
+      campaign_status: ["draft", "active", "paused", "completed"],
+      offer_type: ["entry_offer", "package_offer", "consultation_offer"],
+      payment_status: ["unpaid", "paid"],
+      service_status: ["entry", "upsell", "premium", "inactive"],
     },
   },
 } as const
