@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Sparkles, Heart, Shield, MapPin, Calendar } from "lucide-react";
 import { Header } from "@/components/layout/Header";
+import founderImage from "@/assets/founder.jpg";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -83,12 +84,11 @@ export default function About() {
               transition={{ duration: 0.6 }}
               className="order-1 md:order-2"
             >
-              {/* Founder image placeholder */}
-              <div className="aspect-[4/5] rounded-2xl bg-gradient-to-br from-champagne/50 to-rose-gold/20 flex items-center justify-center border border-rose-gold/20">
-                <span className="text-muted-foreground text-sm">
-                  {t("about_founder_image_placeholder")}
-                </span>
-              </div>
+              <img 
+                src={founderImage} 
+                alt={t("about_founder_title")}
+                className="aspect-[4/5] w-full rounded-2xl object-cover object-top border border-rose-gold/20 shadow-soft"
+              />
             </motion.div>
           </div>
         </div>
