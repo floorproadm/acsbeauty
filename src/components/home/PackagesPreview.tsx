@@ -1,57 +1,32 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Check, Star } from "lucide-react";
+import { ArrowRight, Star, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const packages = [
+const offers = [
   {
-    nameKey: "Essential Glow",
-    descriptionKey: "Perfect introduction to our signature treatments",
-    price: 199,
-    originalPrice: 250,
-    sessions: 3,
-    features: [
-      "Deep Cleansing Facial",
-      "Hydrating Mask Treatment",
-      "LED Light Therapy",
-    ],
+    name: "Beauty Start",
+    description: "Uma experiência inicial pensada para você conhecer o cuidado e a excelência da ACS.",
+    descriptionEn: "An introductory experience designed for you to discover the care and excellence of ACS.",
     featured: false,
   },
   {
-    nameKey: "Radiance Package",
-    descriptionKey: "Our most popular choice for complete rejuvenation",
-    price: 399,
-    originalPrice: 520,
-    sessions: 6,
-    features: [
-      "Premium Anti-Aging Facial",
-      "Chemical Peel Treatment",
-      "Microdermabrasion",
-      "Eye Contour Treatment",
-      "Take-Home Skincare Kit",
-    ],
+    name: "Glow Signature",
+    description: "Nosso cuidado mais procurado para quem busca resultado, acabamento impecável e autoestima elevada.",
+    descriptionEn: "Our most sought-after care for those seeking results, flawless finishing, and elevated self-esteem.",
     featured: true,
   },
   {
-    nameKey: "Bridal Beauty",
-    descriptionKey: "Complete pre-wedding preparation package",
-    price: 899,
-    originalPrice: 1200,
-    sessions: 12,
-    features: [
-      "Monthly Facial Treatments",
-      "Body Polishing Sessions",
-      "Trial Makeup Session",
-      "Wedding Day Makeup",
-      "Complimentary Touch-ups",
-    ],
+    name: "Beauty Event",
+    description: "Ideal para eventos, datas especiais ou momentos importantes. Beleza pensada nos mínimos detalhes.",
+    descriptionEn: "Perfect for events, special dates, or important moments. Beauty crafted in every detail.",
     featured: false,
   },
 ];
 
 export function PackagesPreview() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <section className="py-24 bg-background">
@@ -64,7 +39,8 @@ export function PackagesPreview() {
           transition={{ duration: 0.6 }}
           className="text-center max-w-2xl mx-auto mb-16"
         >
-          <span className="inline-block text-sm font-medium tracking-wider text-rose-gold uppercase mb-4">
+          <span className="inline-flex items-center gap-2 text-sm font-medium tracking-wider text-rose-gold uppercase mb-4">
+            <Sparkles className="w-4 h-4" />
             {t("packages_badge")}
           </span>
           <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
@@ -75,22 +51,22 @@ export function PackagesPreview() {
           </p>
         </motion.div>
 
-        {/* Packages Grid */}
+        {/* Offers Grid */}
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {packages.map((pkg, index) => (
+          {offers.map((offer, index) => (
             <motion.div
-              key={pkg.nameKey}
+              key={offer.name}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className={`relative rounded-2xl p-8 transition-all duration-500 ${
-                pkg.featured
+                offer.featured
                   ? "bg-primary text-primary-foreground shadow-elevated scale-105"
                   : "bg-card shadow-card hover:shadow-elevated"
               }`}
             >
-              {pkg.featured && (
+              {offer.featured && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-1 px-4 py-1 rounded-full bg-rose-gold text-foreground text-sm font-medium">
                   <Star className="w-4 h-4" />
                   {t("most_popular")}
@@ -98,41 +74,19 @@ export function PackagesPreview() {
               )}
 
               <div className="mb-6">
-                <h3 className="font-serif text-2xl font-bold mb-2">{pkg.nameKey}</h3>
-                <p className={pkg.featured ? "text-primary-foreground/70" : "text-muted-foreground"}>
-                  {pkg.descriptionKey}
+                <h3 className="font-serif text-2xl font-bold mb-3">{offer.name}</h3>
+                <p className={`text-sm leading-relaxed ${offer.featured ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                  {language === "pt" ? offer.description : offer.descriptionEn}
                 </p>
               </div>
 
-              <div className="mb-6">
-                <div className="flex items-baseline gap-2">
-                  <span className="font-serif text-4xl font-bold">${pkg.price}</span>
-                  <span className={`text-sm line-through ${pkg.featured ? "text-primary-foreground/50" : "text-muted-foreground"}`}>
-                    ${pkg.originalPrice}
-                  </span>
-                </div>
-                <span className={`text-sm ${pkg.featured ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-                  {pkg.sessions} {t("sessions_included")}
-                </span>
-              </div>
-
-              <ul className="space-y-3 mb-8">
-                {pkg.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3">
-                    <Check className={`w-5 h-5 shrink-0 mt-0.5 ${pkg.featured ? "text-rose-gold" : "text-rose-gold"}`} />
-                    <span className={`text-sm ${pkg.featured ? "text-primary-foreground/90" : "text-foreground"}`}>
-                      {feature}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link to="/packages" className="block">
+              <Link to="/packages" className="block mt-auto">
                 <Button
-                  variant={pkg.featured ? "rose" : "hero"}
+                  variant={offer.featured ? "rose" : "hero"}
                   className="w-full"
                 >
-                  {t("book_this_package")}
+                  {t("book_this_offer")}
+                  <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
             </motion.div>
@@ -149,7 +103,7 @@ export function PackagesPreview() {
         >
           <Link to="/packages">
             <Button variant="hero-outline" size="lg" className="group">
-              {t("view_all_packages")}
+              {t("view_all_offers")}
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>

@@ -66,11 +66,12 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Packages Preview (now "Special Offers")
     packages_badge: "Special Offers",
-    packages_title: "Special Offers for Those Who Seek Results",
-    packages_description: "Save by caring for yourself with frequency and planning.",
+    packages_title: "Special Offers to Enhance Your Beauty",
+    packages_description: "Exclusive conditions for you to care for your hair, brows, and nails with quality and sophistication.",
     most_popular: "Most Popular",
     sessions_included: "sessions included",
     book_this_package: "Book This Offer",
+    book_this_offer: "Book This Offer",
     view_all_packages: "View All Offers",
     
     // Testimonials
@@ -240,11 +241,12 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Packages Preview (now "Ofertas Especiais")
     packages_badge: "Ofertas Especiais",
-    packages_title: "Ofertas Especiais para Quem Busca Resultado",
-    packages_description: "Economize ao cuidar de você com frequência e planejamento.",
+    packages_title: "Ofertas Especiais para Realçar Sua Beleza",
+    packages_description: "Condições exclusivas para você cuidar do cabelo, das sobrancelhas e das unhas com qualidade e sofisticação.",
     most_popular: "Mais Popular",
     sessions_included: "sessões incluídas",
     book_this_package: "Agendar Esta Oferta",
+    book_this_offer: "Agendar Esta Oferta",
     view_all_packages: "Ver Todas as Ofertas",
     
     // Testimonials
