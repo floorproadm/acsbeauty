@@ -29,7 +29,7 @@ export type Database = {
           service_id: string | null
           staff_id: string | null
           start_time: string
-          status: string | null
+          status: string
           total_price: number | null
           updated_at: string
         }
@@ -47,7 +47,7 @@ export type Database = {
           service_id?: string | null
           staff_id?: string | null
           start_time: string
-          status?: string | null
+          status?: string
           total_price?: number | null
           updated_at?: string
         }
@@ -65,7 +65,7 @@ export type Database = {
           service_id?: string | null
           staff_id?: string | null
           start_time?: string
-          status?: string | null
+          status?: string
           total_price?: number | null
           updated_at?: string
         }
