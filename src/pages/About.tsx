@@ -1,14 +1,41 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sparkles, Heart, Shield, MapPin, Calendar } from "lucide-react";
+import { Sparkles, Heart, Shield, MapPin, Calendar, Navigation } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import founderImage from "@/assets/founder.jpg";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function About() {
   const { t } = useLanguage();
+
+  const address = "123 Beauty Lane, Suite 100, New York, NY 10001";
+  const encodedAddress = encodeURIComponent(address);
+
+  const mapLinks = [
+    {
+      name: "Google Maps",
+      url: `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`,
+      icon: "🗺️",
+    },
+    {
+      name: "Apple Maps",
+      url: `https://maps.apple.com/?q=${encodedAddress}`,
+      icon: "🍎",
+    },
+    {
+      name: "Waze",
+      url: `https://waze.com/ul?q=${encodedAddress}`,
+      icon: "🚗",
+    },
+  ];
 
   const pillars = [
     {
@@ -33,17 +60,22 @@ export default function About() {
       <Header />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 bg-gradient-to-b from-champagne/30 to-background">
+      <section className="pt-32 pb-10 px-6 bg-gradient-to-b from-champagne/30 to-background">
         <div className="container mx-auto max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <span className="inline-block px-4 py-1.5 bg-rose-gold/10 text-rose-gold text-sm font-medium rounded-full mb-6">
+            <motion.span 
+              className="inline-block px-4 py-1.5 bg-rose-gold/10 text-rose-gold text-sm font-medium rounded-full mb-6"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+            >
               {t("about_badge")}
-            </span>
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
+            </motion.span>
+            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
               {t("about_hero_title")}
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -54,9 +86,9 @@ export default function About() {
       </section>
 
       {/* Founder Section */}
-      <section className="py-20 px-6">
+      <section className="py-12 px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -64,9 +96,15 @@ export default function About() {
               transition={{ duration: 0.6 }}
               className="order-2 md:order-1"
             >
-              <span className="text-rose-gold font-medium text-sm uppercase tracking-wider">
+              <motion.span 
+                className="text-rose-gold font-medium text-sm uppercase tracking-wider"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+              >
                 {t("about_founder_badge")}
-              </span>
+              </motion.span>
               <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mt-2 mb-6">
                 {t("about_founder_title")}
               </h2>
@@ -78,16 +116,18 @@ export default function About() {
               </p>
             </motion.div>
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, x: 30, scale: 0.95 }}
+              whileInView={{ opacity: 1, x: 0, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
               className="order-1 md:order-2"
             >
-              <img 
+              <motion.img 
                 src={founderImage} 
                 alt={t("about_founder_title")}
                 className="aspect-[4/5] w-full rounded-2xl object-cover object-top border border-rose-gold/20 shadow-soft"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.3 }}
               />
             </motion.div>
           </div>
@@ -138,7 +178,7 @@ export default function About() {
       </section>
 
       {/* Location Section */}
-      <section className="py-20 px-6">
+      <section className="py-16 px-6">
         <div className="container mx-auto max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -146,19 +186,50 @@ export default function About() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <div className="w-16 h-16 rounded-full bg-rose-gold/10 flex items-center justify-center mx-auto mb-6">
+            <motion.div 
+              className="w-16 h-16 rounded-full bg-rose-gold/10 flex items-center justify-center mx-auto mb-6"
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              transition={{ duration: 0.3 }}
+            >
               <MapPin className="w-8 h-8 text-rose-gold" />
-            </div>
+            </motion.div>
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
               {t("about_location_title")}
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto mb-6">
               {t("about_location_description")}
             </p>
-            <p className="text-foreground font-medium">
-              123 Beauty Lane, Suite 100<br />
-              New York, NY 10001
-            </p>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <motion.button 
+                  className="inline-flex items-center gap-2 text-foreground font-medium hover:text-rose-gold transition-colors cursor-pointer group"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Navigation className="w-4 h-4 text-rose-gold group-hover:animate-pulse" />
+                  <span className="border-b border-dashed border-rose-gold/50">
+                    123 Beauty Lane, Suite 100<br />
+                    New York, NY 10001
+                  </span>
+                </motion.button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-48">
+                {mapLinks.map((link) => (
+                  <DropdownMenuItem key={link.name} asChild>
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <span>{link.icon}</span>
+                      <span>{link.name}</span>
+                    </a>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </motion.div>
         </div>
       </section>
