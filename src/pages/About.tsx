@@ -60,7 +60,7 @@ export default function About() {
       <Header />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-10 px-6 bg-gradient-to-b from-champagne/30 to-background">
+      <section className="pt-32 pb-4 px-6 bg-gradient-to-b from-champagne/30 to-background">
         <div className="container mx-auto max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -68,14 +68,14 @@ export default function About() {
             transition={{ duration: 0.6 }}
           >
             <motion.span 
-              className="inline-block px-4 py-1.5 bg-rose-gold/10 text-rose-gold text-sm font-medium rounded-full mb-6"
+              className="inline-block px-4 py-1.5 bg-rose-gold/10 text-rose-gold text-sm font-medium rounded-full mb-4"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.4 }}
             >
               {t("about_badge")}
             </motion.span>
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
+            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-3 leading-tight">
               {t("about_hero_title")}
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -86,9 +86,9 @@ export default function About() {
       </section>
 
       {/* Founder Section */}
-      <section className="py-12 px-6">
+      <section className="pt-6 pb-12 px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-10 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
