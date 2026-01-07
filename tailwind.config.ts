@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ['Cormorant Garamond', 'Playfair Display', 'Georgia', 'serif'],
+        serif: ['Playfair Display', 'Georgia', 'serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
@@ -52,20 +52,18 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         // ACS Beauty custom colors
-        gold: {
-          DEFAULT: "hsl(var(--gold))",
-          light: "hsl(var(--gold-light))",
-          soft: "hsl(var(--gold-soft))",
+        rose: {
+          gold: "hsl(var(--rose-gold))",
+          light: "hsl(var(--rose-gold-light))",
         },
         champagne: "hsl(var(--champagne))",
-        nude: "hsl(var(--nude))",
         ivory: "hsl(var(--ivory))",
-        charcoal: {
-          DEFAULT: "hsl(var(--charcoal))",
-          light: "hsl(var(--charcoal-light))",
+        espresso: {
+          DEFAULT: "hsl(var(--espresso))",
+          light: "hsl(var(--espresso-light))",
         },
+        blush: "hsl(var(--blush))",
         cream: "hsl(var(--cream))",
-        beige: "hsl(var(--beige))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

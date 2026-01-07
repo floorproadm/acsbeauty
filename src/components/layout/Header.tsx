@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Calendar, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import logoFull from "@/assets/logo-full.png";
 
 const navItems = [
   { label: "Services", href: "/services" },
@@ -30,35 +29,30 @@ export function Header() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         isScrolled
-          ? "bg-background/95 backdrop-blur-md shadow-soft py-2"
-          : "bg-transparent py-4"
+          ? "bg-background/95 backdrop-blur-md shadow-soft py-3"
+          : "bg-transparent py-6"
       )}
     >
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <img 
-              src={logoFull} 
-              alt="ACS Beauty" 
-              className={cn(
-                "transition-all duration-500",
-                isScrolled ? "h-12" : "h-14 md:h-16"
-              )}
-            />
+          <Link to="/" className="flex items-center gap-2">
+            <span className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+              ACS <span className="text-rose-gold">BEAUTY</span>
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-10">
+          <nav className="hidden md:flex items-center gap-8">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
                 className={cn(
-                  "text-sm font-light tracking-widest uppercase transition-colors duration-300 hover:text-gold",
+                  "text-sm font-medium tracking-wide transition-colors duration-300 hover:text-rose-gold",
                   location.pathname === item.href
                     ? "text-foreground"
-                    : "text-charcoal-light"
+                    : "text-muted-foreground"
                 )}
               >
                 {item.label}
@@ -69,13 +63,13 @@ export function Header() {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4">
             <Link to="/auth">
-              <Button variant="ghost" size="sm" className="gap-2 font-light tracking-wide">
+              <Button variant="ghost" size="sm" className="gap-2">
                 <User className="w-4 h-4" />
                 Sign In
               </Button>
             </Link>
             <Link to="/booking">
-              <Button variant="hero" size="default" className="gap-2 font-light tracking-wide">
+              <Button variant="hero" size="default" className="gap-2">
                 <Calendar className="w-4 h-4" />
                 Book Now
               </Button>
@@ -104,7 +98,7 @@ export function Header() {
                 <Link
                   key={item.href}
                   to={item.href}
-                  className="text-sm font-light tracking-widest uppercase py-2 hover:text-gold transition-colors"
+                  className="text-base font-medium py-2 hover:text-rose-gold transition-colors"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.label}
@@ -112,13 +106,13 @@ export function Header() {
               ))}
               <div className="flex flex-col gap-3 pt-4 border-t border-border">
                 <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full gap-2 font-light">
+                  <Button variant="outline" className="w-full gap-2">
                     <User className="w-4 h-4" />
                     Sign In
                   </Button>
                 </Link>
                 <Link to="/booking" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="hero" className="w-full gap-2 font-light">
+                  <Button variant="hero" className="w-full gap-2">
                     <Calendar className="w-4 h-4" />
                     Book Now
                   </Button>

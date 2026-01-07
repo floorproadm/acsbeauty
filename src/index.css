@@ -3,133 +3,128 @@
 @tailwind utilities;
 
 /* ACS BEAUTY Design System
-   Soft luxury aesthetic — elegant, feminine, clean, calm
-   Champagne gold, nude, ivory, warm neutrals
+   Luxury beauty aesthetic - sophisticated, warm, elegant
    All colors in HSL format
 */
 
 @layer base {
   :root {
-    /* Core palette - Soft nude/ivory base */
-    --background: 30 30% 97%;
-    --foreground: 30 15% 18%;
+    /* Core palette - Warm luxury neutrals */
+    --background: 40 33% 98%;
+    --foreground: 30 15% 15%;
 
-    /* Card surfaces - Pure soft ivory */
-    --card: 35 35% 98%;
-    --card-foreground: 30 15% 18%;
+    /* Card surfaces */
+    --card: 40 40% 99%;
+    --card-foreground: 30 15% 15%;
 
     /* Popover */
-    --popover: 35 35% 98%;
-    --popover-foreground: 30 15% 18%;
+    --popover: 40 40% 99%;
+    --popover-foreground: 30 15% 15%;
 
-    /* Primary - Charcoal for contrast */
-    --primary: 30 10% 22%;
-    --primary-foreground: 35 35% 98%;
+    /* Primary - Rich Espresso */
+    --primary: 30 25% 20%;
+    --primary-foreground: 40 33% 98%;
 
-    /* Secondary - Soft beige/nude */
-    --secondary: 30 25% 94%;
-    --secondary-foreground: 30 15% 22%;
+    /* Secondary - Soft Champagne */
+    --secondary: 40 30% 94%;
+    --secondary-foreground: 30 25% 20%;
 
-    /* Muted - Warm neutral */
-    --muted: 30 20% 94%;
+    /* Muted - Warm grey */
+    --muted: 35 20% 93%;
     --muted-foreground: 30 10% 45%;
 
-    /* Accent - Soft champagne gold (warm, not yellow) */
-    --accent: 35 45% 88%;
-    --accent-foreground: 35 35% 28%;
+    /* Accent - Rose Gold */
+    --accent: 15 45% 85%;
+    --accent-foreground: 15 50% 25%;
 
     /* Destructive */
-    --destructive: 0 65% 50%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders and inputs - Subtle warm */
-    --border: 30 20% 90%;
-    --input: 30 20% 90%;
-    --ring: 38 50% 55%;
+    /* Borders and inputs */
+    --border: 35 25% 88%;
+    --input: 35 25% 88%;
+    --ring: 15 45% 65%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
 
     /* Custom tokens for ACS Beauty */
-    --gold: 38 55% 52%;
-    --gold-light: 38 45% 72%;
-    --gold-soft: 35 40% 85%;
-    --champagne: 35 35% 93%;
-    --nude: 25 25% 92%;
-    --ivory: 40 45% 97%;
-    --charcoal: 30 10% 22%;
-    --charcoal-light: 30 8% 40%;
-    --cream: 38 40% 96%;
-    --beige: 30 30% 90%;
+    --rose-gold: 15 45% 65%;
+    --rose-gold-light: 15 45% 85%;
+    --champagne: 40 40% 92%;
+    --ivory: 45 50% 97%;
+    --espresso: 30 25% 20%;
+    --espresso-light: 30 20% 35%;
+    --blush: 350 35% 90%;
+    --cream: 42 45% 95%;
 
-    /* Gradients - Soft, subtle, no harsh contrasts */
-    --gradient-hero: linear-gradient(160deg, hsl(35 35% 98%) 0%, hsl(30 30% 95%) 50%, hsl(35 35% 93%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(38 55% 62%) 0%, hsl(35 45% 52%) 100%);
-    --gradient-warm: linear-gradient(180deg, hsl(35 35% 98%) 0%, hsl(30 30% 95%) 100%);
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(40 33% 98%) 0%, hsl(15 45% 95%) 50%, hsl(40 40% 92%) 100%);
+    --gradient-rose: linear-gradient(135deg, hsl(15 45% 85%) 0%, hsl(350 35% 90%) 100%);
+    --gradient-warm: linear-gradient(180deg, hsl(40 33% 98%) 0%, hsl(42 45% 95%) 100%);
 
-    /* Shadows - Very soft */
-    --shadow-soft: 0 4px 24px -6px hsl(30 20% 30% / 0.06);
-    --shadow-card: 0 8px 32px -8px hsl(30 20% 30% / 0.08);
-    --shadow-elevated: 0 16px 48px -12px hsl(30 20% 30% / 0.1);
+    /* Shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(30 25% 20% / 0.08);
+    --shadow-card: 0 8px 30px -8px hsl(30 25% 20% / 0.12);
+    --shadow-elevated: 0 20px 50px -12px hsl(30 25% 20% / 0.15);
 
     /* Sidebar */
-    --sidebar-background: 35 35% 98%;
-    --sidebar-foreground: 30 15% 18%;
-    --sidebar-primary: 30 10% 22%;
-    --sidebar-primary-foreground: 35 35% 98%;
-    --sidebar-accent: 35 45% 88%;
-    --sidebar-accent-foreground: 35 35% 28%;
-    --sidebar-border: 30 20% 90%;
-    --sidebar-ring: 38 50% 55%;
+    --sidebar-background: 40 33% 98%;
+    --sidebar-foreground: 30 15% 15%;
+    --sidebar-primary: 30 25% 20%;
+    --sidebar-primary-foreground: 40 33% 98%;
+    --sidebar-accent: 15 45% 85%;
+    --sidebar-accent-foreground: 15 50% 25%;
+    --sidebar-border: 35 25% 88%;
+    --sidebar-ring: 15 45% 65%;
   }
 
   .dark {
-    --background: 30 12% 8%;
-    --foreground: 35 30% 95%;
+    --background: 30 15% 8%;
+    --foreground: 40 30% 95%;
 
-    --card: 30 12% 10%;
-    --card-foreground: 35 30% 95%;
+    --card: 30 15% 10%;
+    --card-foreground: 40 30% 95%;
 
-    --popover: 30 12% 10%;
-    --popover-foreground: 35 30% 95%;
+    --popover: 30 15% 10%;
+    --popover-foreground: 40 30% 95%;
 
-    --primary: 38 50% 70%;
-    --primary-foreground: 30 12% 8%;
+    --primary: 15 45% 75%;
+    --primary-foreground: 30 15% 8%;
 
-    --secondary: 30 12% 14%;
-    --secondary-foreground: 35 30% 95%;
+    --secondary: 30 15% 15%;
+    --secondary-foreground: 40 30% 95%;
 
-    --muted: 30 12% 14%;
-    --muted-foreground: 30 12% 55%;
+    --muted: 30 15% 15%;
+    --muted-foreground: 35 15% 60%;
 
-    --accent: 35 35% 22%;
-    --accent-foreground: 38 45% 78%;
+    --accent: 15 40% 25%;
+    --accent-foreground: 15 45% 85%;
 
-    --destructive: 0 55% 45%;
+    --destructive: 0 62% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 30 12% 16%;
-    --input: 30 12% 16%;
-    --ring: 38 50% 55%;
+    --border: 30 15% 18%;
+    --input: 30 15% 18%;
+    --ring: 15 45% 65%;
 
-    --gold: 38 55% 62%;
-    --gold-light: 38 40% 35%;
-    --gold-soft: 35 30% 20%;
-    --champagne: 35 20% 14%;
-    --nude: 25 15% 12%;
-    --ivory: 30 12% 10%;
-    --charcoal: 35 30% 92%;
-    --charcoal-light: 30 15% 70%;
-    --cream: 30 12% 10%;
-    --beige: 30 15% 14%;
+    --rose-gold: 15 45% 65%;
+    --rose-gold-light: 15 40% 25%;
+    --champagne: 40 20% 15%;
+    --ivory: 30 15% 12%;
+    --espresso: 40 30% 90%;
+    --espresso-light: 35 20% 70%;
+    --blush: 350 30% 20%;
+    --cream: 30 15% 12%;
 
-    --sidebar-background: 30 12% 10%;
-    --sidebar-foreground: 35 30% 95%;
-    --sidebar-primary: 38 50% 70%;
-    --sidebar-primary-foreground: 30 12% 8%;
-    --sidebar-accent: 35 35% 22%;
-    --sidebar-accent-foreground: 38 45% 78%;
-    --sidebar-border: 30 12% 16%;
-    --sidebar-ring: 38 50% 55%;
+    --sidebar-background: 30 15% 10%;
+    --sidebar-foreground: 40 30% 95%;
+    --sidebar-primary: 15 45% 75%;
+    --sidebar-primary-foreground: 30 15% 8%;
+    --sidebar-accent: 15 40% 25%;
+    --sidebar-accent-foreground: 15 45% 85%;
+    --sidebar-border: 30 15% 18%;
+    --sidebar-ring: 15 45% 65%;
   }
 }
 
@@ -143,25 +138,17 @@
     font-feature-settings: "kern" 1, "liga" 1;
   }
 
-  /* Typography - Thin, elegant, minimal */
+  /* Typography */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif tracking-tight font-light;
+    @apply font-serif tracking-tight;
   }
 
   .font-display {
-    font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
-    letter-spacing: 0.02em;
+    font-family: 'Playfair Display', Georgia, serif;
   }
 
   .font-body {
     font-family: 'Inter', system-ui, sans-serif;
-    font-weight: 300;
-  }
-
-  .font-elegant {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-weight: 300;
-    letter-spacing: 0.04em;
   }
 }
 
@@ -195,8 +182,8 @@
     background: var(--gradient-hero);
   }
 
-  .bg-gradient-gold {
-    background: var(--gradient-gold);
+  .bg-gradient-rose {
+    background: var(--gradient-rose);
   }
 
   .bg-gradient-warm {
@@ -223,17 +210,12 @@
     -webkit-backdrop-filter: blur(12px);
   }
 
-  /* Text gradient - Champagne gold */
-  .text-gradient-gold {
-    background: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--gold-light)) 100%);
+  /* Text gradient */
+  .text-gradient-rose {
+    background: linear-gradient(135deg, hsl(var(--rose-gold)) 0%, hsl(var(--espresso)) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-  }
-
-  /* Gold text */
-  .text-gold {
-    color: hsl(var(--gold));
   }
 }
 
