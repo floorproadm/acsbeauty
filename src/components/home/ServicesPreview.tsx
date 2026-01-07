@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Heart, Zap, Sun } from "lucide-react";
+import { ArrowRight, Scissors, Eye, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -9,28 +9,28 @@ export function ServicesPreview() {
 
   const services = [
     {
+      icon: Scissors,
+      titleKey: "service_hair",
+      descKey: "service_hair_desc",
+      ctaKey: "service_hair_cta",
+      image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=600&q=80",
+      href: "/services",
+    },
+    {
+      icon: Eye,
+      titleKey: "service_brows",
+      descKey: "service_brows_desc",
+      ctaKey: "service_brows_cta",
+      image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80",
+      href: "/services",
+    },
+    {
       icon: Sparkles,
-      titleKey: "service_facial",
-      descKey: "service_facial_desc",
-      image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      icon: Heart,
-      titleKey: "service_body",
-      descKey: "service_body_desc",
-      image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      icon: Zap,
-      titleKey: "service_advanced",
-      descKey: "service_advanced_desc",
-      image: "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      icon: Sun,
-      titleKey: "service_makeup",
-      descKey: "service_makeup_desc",
-      image: "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=600&q=80",
+      titleKey: "service_nails",
+      descKey: "service_nails_desc",
+      ctaKey: "service_nails_cta",
+      image: "https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=600&q=80",
+      href: "/services",
     },
   ];
 
@@ -56,8 +56,8 @@ export function ServicesPreview() {
           </p>
         </motion.div>
 
-        {/* Services Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Services Grid - 3 Pillars */}
+        <div className="grid md:grid-cols-3 gap-8">
           {services.map((service, index) => (
             <motion.div
               key={service.titleKey}
@@ -73,16 +73,22 @@ export function ServicesPreview() {
                   alt={t(service.titleKey)}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-6 text-primary-foreground">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-3">
                   <service.icon className="w-5 h-5 text-rose-gold" />
-                  <h3 className="font-serif text-xl font-semibold">{t(service.titleKey)}</h3>
+                  <h3 className="font-serif text-2xl font-semibold">{t(service.titleKey)}</h3>
                 </div>
-                <p className="text-primary-foreground/80 text-sm leading-relaxed">
+                <p className="text-primary-foreground/80 text-sm leading-relaxed mb-4">
                   {t(service.descKey)}
                 </p>
+                <Link to={service.href}>
+                  <Button variant="ghost" size="sm" className="text-rose-gold hover:text-rose-gold/80 hover:bg-transparent p-0 h-auto group/btn">
+                    {t(service.ctaKey)}
+                    <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover/btn:translate-x-1" />
+                  </Button>
+                </Link>
               </div>
             </motion.div>
           ))}
