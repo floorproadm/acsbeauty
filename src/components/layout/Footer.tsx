@@ -46,12 +46,6 @@ export function Footer() {
                 {t("nav_services")}
               </Link>
               <Link
-                to="/packages"
-                className="text-primary-foreground/70 hover:text-rose-gold text-sm transition-colors"
-              >
-                {t("nav_packages")}
-              </Link>
-              <Link
                 to="/services"
                 className="text-primary-foreground/70 hover:text-rose-gold text-sm transition-colors"
               >
@@ -72,21 +66,18 @@ export function Footer() {
             </nav>
           </div>
 
-          {/* Services */}
+          {/* Services - 3 Core Pillars */}
           <div className="space-y-4">
             <h4 className="font-medium text-lg">{t("our_services")}</h4>
             <nav className="flex flex-col gap-2">
               <span className="text-primary-foreground/70 text-sm">
-                {t("service_facial")}
+                {t("service_hair")}
               </span>
               <span className="text-primary-foreground/70 text-sm">
-                {t("service_body")}
+                {t("service_brows")}
               </span>
               <span className="text-primary-foreground/70 text-sm">
-                {t("service_advanced")}
-              </span>
-              <span className="text-primary-foreground/70 text-sm">
-                {t("service_makeup")}
+                {t("service_nails")}
               </span>
             </nav>
           </div>

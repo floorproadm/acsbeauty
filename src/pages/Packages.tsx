@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Package, ArrowRight, Check } from "lucide-react";
+import { Sparkles, ArrowRight, Check } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,7 @@ export default function Packages() {
             className="text-center mb-12"
           >
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/50 text-accent-foreground text-sm font-medium mb-4">
-              <Package className="w-4 h-4" />
+              <Sparkles className="w-4 h-4" />
               {t("packages_page_badge")}
             </span>
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">

@@ -17,8 +17,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Core UI Strings
     book_now: "Book Now",
     view_offers: "View Offers",
-    view_packages: "View Packages",
-    buy_package: "Buy Package",
+    view_packages: "View Offers",
+    buy_package: "Buy Offer",
     confirm_booking: "Confirm Booking",
     booking_confirmed: "Booking Confirmed!",
     select_date_time: "Select Date & Time",
@@ -64,14 +64,14 @@ const translations: Record<Language, Record<string, string>> = {
     service_nails_cta: "View Nail Services",
     view_all_services: "View All Services",
     
-    // Packages Preview
-    packages_badge: "Smart Packages",
-    packages_title: "Smart Packages for Those Who Seek Results",
+    // Packages Preview (now "Special Offers")
+    packages_badge: "Special Offers",
+    packages_title: "Special Offers for Those Who Seek Results",
     packages_description: "Save by caring for yourself with frequency and planning.",
     most_popular: "Most Popular",
     sessions_included: "sessions included",
-    book_this_package: "Book This Package",
-    view_all_packages: "View All Packages",
+    book_this_package: "Book This Offer",
+    view_all_packages: "View All Offers",
     
     // Testimonials
     testimonials_badge: "Testimonials",
@@ -103,13 +103,13 @@ const translations: Record<Language, Record<string, string>> = {
     new_client_special: "New Client Special",
     free_consultation: "Free Consultation",
     learn_more: "Learn More",
-    view_our_packages: "View Our Packages",
+    view_our_packages: "View Our Offers",
     
-    // Packages Page
-    packages_page_badge: "Save More",
-    packages_page_title: "Treatment Packages",
-    packages_page_description: "Commit to your skincare journey and save with our curated treatment packages.",
-    view_package: "View Package",
+    // Packages Page (now "Special Offers")
+    packages_page_badge: "Special Offers",
+    packages_page_title: "Special Offers",
+    packages_page_description: "Commit to your beauty journey and save with our curated special offers.",
+    view_package: "View Offer",
     
     // Offer Landing
     back_to_offers: "Back to Offers",
@@ -120,9 +120,9 @@ const translations: Record<Language, Record<string, string>> = {
     offer_not_found_desc: "This offer may have expired or is no longer available.",
     view_all_offers: "View All Offers",
     
-    // Package Landing
-    back_to_packages: "Back to Packages",
-    treatment_package: "Treatment Package",
+    // Package Landing (now "Special Offers")
+    back_to_packages: "Back to Offers",
+    treatment_package: "Special Offer",
     save: "Save",
     package_includes: "Package Includes",
     treatment_sessions: "treatment sessions",
@@ -191,8 +191,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Core UI Strings
     book_now: "Agendar",
     view_offers: "Ver Ofertas",
-    view_packages: "Ver Pacotes",
-    buy_package: "Comprar Pacote",
+    view_packages: "Ver Ofertas",
+    buy_package: "Comprar Oferta",
     confirm_booking: "Confirmar Agendamento",
     booking_confirmed: "Agendamento Confirmado!",
     select_date_time: "Escolha Data e Horário",
@@ -238,14 +238,14 @@ const translations: Record<Language, Record<string, string>> = {
     service_nails_cta: "Ver Serviços de Unhas",
     view_all_services: "Ver Todos os Serviços",
     
-    // Packages Preview
-    packages_badge: "Pacotes Inteligentes",
-    packages_title: "Pacotes Inteligentes para Quem Busca Resultado",
+    // Packages Preview (now "Ofertas Especiais")
+    packages_badge: "Ofertas Especiais",
+    packages_title: "Ofertas Especiais para Quem Busca Resultado",
     packages_description: "Economize ao cuidar de você com frequência e planejamento.",
     most_popular: "Mais Popular",
     sessions_included: "sessões incluídas",
-    book_this_package: "Agendar Este Pacote",
-    view_all_packages: "Ver Todos os Pacotes",
+    book_this_package: "Agendar Esta Oferta",
+    view_all_packages: "Ver Todas as Ofertas",
     
     // Testimonials
     testimonials_badge: "Depoimentos",
@@ -277,13 +277,13 @@ const translations: Record<Language, Record<string, string>> = {
     new_client_special: "Especial Primeira Visita",
     free_consultation: "Consulta Gratuita",
     learn_more: "Saiba Mais",
-    view_our_packages: "Ver Nossos Pacotes",
+    view_our_packages: "Ver Nossas Ofertas",
     
-    // Packages Page
-    packages_page_badge: "Economize Mais",
-    packages_page_title: "Pacotes de Tratamento",
-    packages_page_description: "Comprometa-se com sua jornada de cuidados e economize com nossos pacotes selecionados.",
-    view_package: "Ver Pacote",
+    // Packages Page (now "Ofertas Especiais")
+    packages_page_badge: "Ofertas Especiais",
+    packages_page_title: "Ofertas Especiais",
+    packages_page_description: "Comprometa-se com sua jornada de beleza e economize com nossas ofertas especiais.",
+    view_package: "Ver Oferta",
     
     // Offer Landing
     back_to_offers: "Voltar para Ofertas",
@@ -294,9 +294,9 @@ const translations: Record<Language, Record<string, string>> = {
     offer_not_found_desc: "Esta oferta pode ter expirado ou não está mais disponível.",
     view_all_offers: "Ver Todas as Ofertas",
     
-    // Package Landing
-    back_to_packages: "Voltar para Pacotes",
-    treatment_package: "Pacote de Tratamento",
+    // Package Landing (now "Ofertas Especiais")
+    back_to_packages: "Voltar para Ofertas",
+    treatment_package: "Oferta Especial",
     save: "Economize",
     package_includes: "O Pacote Inclui",
     treatment_sessions: "sessões de tratamento",
