@@ -19,15 +19,29 @@ export default function Auth() {
   const { toast } = useToast();
 
   useEffect(() => {
+    const checkAndRedirect = async (userId: string) => {
+      // Check if user has admin role
+      const { data: isAdmin } = await supabase
+        .rpc('has_role', { _user_id: userId, _role: 'admin_owner' });
+      
+      if (isAdmin) {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        navigate("/");
+        setTimeout(() => {
+          checkAndRedirect(session.user.id);
+        }, 0);
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        navigate("/");
+        checkAndRedirect(session.user.id);
       }
     });
 
