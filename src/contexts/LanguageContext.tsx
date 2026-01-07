@@ -14,13 +14,27 @@ const STORAGE_KEY = "acs_lang";
 
 const translations: Record<Language, Record<string, string>> = {
   en: {
+    // Core UI Strings
+    book_now: "Book Now",
+    view_offers: "View Offers",
+    view_packages: "View Packages",
+    buy_package: "Buy Package",
+    confirm_booking: "Confirm Booking",
+    booking_confirmed: "Booking Confirmed!",
+    select_date_time: "Select Date & Time",
+    full_name: "Full Name",
+    phone_number: "Phone Number",
+    instagram_optional: "Instagram (optional)",
+    back: "Back",
+    limited_spots: "Limited Spots",
+    save_more: "Save More",
+    
     // Header & Navigation
     nav_services: "Services",
     nav_packages: "Packages",
     nav_about: "About",
     nav_contact: "Contact",
     sign_in: "Sign In",
-    book_now: "Book Now",
     
     // Hero Section
     hero_badge: "Premium Beauty Studio",
@@ -95,7 +109,6 @@ const translations: Record<Language, Record<string, string>> = {
     packages_page_title: "Treatment Packages",
     packages_page_description: "Commit to your skincare journey and save with our curated treatment packages.",
     view_package: "View Package",
-    view_offers: "View Offers",
     
     // Offer Landing
     back_to_offers: "Back to Offers",
@@ -114,27 +127,21 @@ const translations: Record<Language, Record<string, string>> = {
     treatment_sessions: "treatment sessions",
     valid_for_days: "Valid for",
     days: "days",
-    buy_package: "Buy Package (Coming Soon)",
     stripe_coming_soon: "Stripe integration coming soon",
     book_using_package: "Book Using Existing Package",
     package_not_found: "Package Not Found",
     package_not_found_desc: "This package may no longer be available.",
     
     // Book Page
-    back: "Back",
     book_appointment_badge: "Book Appointment",
     complete_booking: "Complete Your Booking",
     booking: "Booking",
-    full_name: "Full Name",
     your_full_name: "Your full name",
-    phone_number: "Phone Number",
     instagram_handle: "Instagram Handle (optional)",
-    confirm_booking: "Confirm Booking",
     processing: "Processing...",
     contact_to_schedule: "We will contact you to schedule the exact appointment time.",
     
     // Booking Success
-    booking_confirmed: "Booking Confirmed!",
     booking_success_message: "Thank you for booking. We will contact you shortly to confirm your appointment time.",
     return_home: "Return Home",
     
@@ -143,20 +150,34 @@ const translations: Record<Language, Record<string, string>> = {
     phone_error: "Please enter a valid phone number",
   },
   pt: {
+    // Core UI Strings
+    book_now: "Agendar",
+    view_offers: "Ver Ofertas",
+    view_packages: "Ver Pacotes",
+    buy_package: "Comprar Pacote",
+    confirm_booking: "Confirmar Agendamento",
+    booking_confirmed: "Agendamento Confirmado!",
+    select_date_time: "Escolha Data e Horário",
+    full_name: "Nome Completo",
+    phone_number: "Telefone",
+    instagram_optional: "Instagram (opcional)",
+    back: "Voltar",
+    limited_spots: "Vagas Limitadas",
+    save_more: "Economize Mais",
+    
     // Header & Navigation
     nav_services: "Serviços",
     nav_packages: "Pacotes",
     nav_about: "Sobre",
     nav_contact: "Contato",
     sign_in: "Entrar",
-    book_now: "Agendar",
     
     // Hero Section
     hero_badge: "Estúdio de Beleza Premium",
     hero_title_1: "Eleve a Sua",
     hero_title_2: "Beleza Natural",
     hero_description: "Experimente tratamentos de beleza transformadores, pensados para realçar suas características únicas. Nossas esteticistas oferecem cuidado personalizado em um ambiente luxuoso e relaxante.",
-    hero_cta_offers: "Ver Ofertas",
+    hero_cta_offers: "Ver Nossas Ofertas",
     hero_cta_services: "Explorar Serviços",
     stat_years: "Anos de Experiência",
     stat_clients: "Clientes Satisfeitas",
@@ -224,7 +245,6 @@ const translations: Record<Language, Record<string, string>> = {
     packages_page_title: "Pacotes de Tratamento",
     packages_page_description: "Comprometa-se com sua jornada de cuidados e economize com nossos pacotes selecionados.",
     view_package: "Ver Pacote",
-    view_offers: "Ver Ofertas",
     
     // Offer Landing
     back_to_offers: "Voltar para Ofertas",
@@ -243,27 +263,21 @@ const translations: Record<Language, Record<string, string>> = {
     treatment_sessions: "sessões de tratamento",
     valid_for_days: "Válido por",
     days: "dias",
-    buy_package: "Comprar Pacote (Em Breve)",
     stripe_coming_soon: "Integração com pagamento em breve",
     book_using_package: "Agendar com Pacote Existente",
     package_not_found: "Pacote Não Encontrado",
     package_not_found_desc: "Este pacote pode não estar mais disponível.",
     
     // Book Page
-    back: "Voltar",
     book_appointment_badge: "Agendar Horário",
     complete_booking: "Complete Seu Agendamento",
     booking: "Agendando",
-    full_name: "Nome Completo",
     your_full_name: "Seu nome completo",
-    phone_number: "Telefone",
     instagram_handle: "Instagram (opcional)",
-    confirm_booking: "Confirmar Agendamento",
     processing: "Processando...",
     contact_to_schedule: "Entraremos em contato para confirmar o horário exato.",
     
     // Booking Success
-    booking_confirmed: "Agendamento Confirmado!",
     booking_success_message: "Obrigada por agendar. Entraremos em contato em breve para confirmar o horário.",
     return_home: "Voltar ao Início",
     
