@@ -63,6 +63,12 @@ export function Footer() {
               >
                 {t("about_us")}
               </Link>
+              <Link
+                to="/contact"
+                className="text-primary-foreground/70 hover:text-rose-gold text-sm transition-colors"
+              >
+                {t("contact_us_title")}
+              </Link>
             </nav>
           </div>
 
