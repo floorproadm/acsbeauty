@@ -279,7 +279,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === "pt" || stored === "en") return stored;
     }
-    return "en";
+    return "pt";
   });
 
   useEffect(() => {
