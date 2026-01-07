@@ -25,8 +25,8 @@ export default function Contact() {
     {
       icon: MapPin,
       titleKey: "contact_address_title",
-      value: "123 Beauty Lane, Suite 100\nNew York, NY 10001",
-      href: null,
+      value: "375 Chestnut St, 3rd Floor\nSuite 3B, Newark, NJ",
+      href: "https://www.google.com/maps/search/?api=1&query=375+Chestnut+St+Newark+NJ",
     },
   ];
 

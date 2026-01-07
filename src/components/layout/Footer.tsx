@@ -109,10 +109,15 @@ export function Footer() {
                 <Mail className="w-4 h-4" />
                 hello@acsbeauty.com
               </a>
-              <div className="flex items-start gap-3 text-primary-foreground/70 text-sm">
+              <a 
+                href="https://www.google.com/maps/search/?api=1&query=375+Chestnut+St+Newark+NJ"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-start gap-3 text-primary-foreground/70 text-sm hover:text-primary-foreground transition-colors"
+              >
                 <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
-                <span>123 Beauty Lane<br />Suite 100<br />New York, NY 10001</span>
-              </div>
+                <span>375 Chestnut St<br />3rd Floor, Suite 3B<br />Newark, NJ</span>
+              </a>
             </div>
           </div>
         </div>

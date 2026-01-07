@@ -16,7 +16,7 @@ import {
 export default function About() {
   const { t } = useLanguage();
 
-  const address = "123 Beauty Lane, Suite 100, New York, NY 10001";
+  const address = "375 Chestnut St, 3rd Floor, Suite 3B, Newark, NJ";
   const encodedAddress = encodeURIComponent(address);
 
   const mapLinks = [
@@ -209,8 +209,8 @@ export default function About() {
                 >
                   <Navigation className="w-4 h-4 text-rose-gold group-hover:animate-pulse" />
                   <span className="border-b border-dashed border-rose-gold/50">
-                    123 Beauty Lane, Suite 100<br />
-                    New York, NY 10001
+                    375 Chestnut St, 3rd Floor<br />
+                    Suite 3B, Newark, NJ
                   </span>
                 </motion.button>
               </DropdownMenuTrigger>
