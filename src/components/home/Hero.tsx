@@ -2,8 +2,17 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Hero() {
+  const { t } = useLanguage();
+
+  const stats = [
+    { value: "10+", label: t("stat_years") },
+    { value: "5K+", label: t("stat_clients") },
+    { value: "50+", label: t("stat_treatments") },
+  ];
+
   return (
     <section className="relative min-h-screen flex items-center bg-gradient-hero overflow-hidden">
       {/* Decorative elements */}
@@ -23,7 +32,7 @@ export function Hero() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/50 text-accent-foreground text-sm font-medium mb-6"
             >
               <Sparkles className="w-4 h-4" />
-              Premium Beauty Studio
+              {t("hero_badge")}
             </motion.div>
 
             <motion.h1
@@ -32,8 +41,8 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="font-serif text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6"
             >
-              Elevate Your{" "}
-              <span className="text-gradient-rose">Natural Beauty</span>
+              {t("hero_title_1")}{" "}
+              <span className="text-gradient-rose">{t("hero_title_2")}</span>
             </motion.h1>
 
             <motion.p
@@ -42,9 +51,7 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-lg text-muted-foreground leading-relaxed mb-8"
             >
-              Experience transformative beauty treatments designed to enhance your 
-              unique features. Our expert aestheticians deliver personalized care 
-              in a luxurious, relaxing environment.
+              {t("hero_description")}
             </motion.p>
 
             <motion.div
@@ -55,13 +62,13 @@ export function Hero() {
             >
               <Link to="/services">
                 <Button variant="hero" size="xl" className="group">
-                  View Our Offers
+                  {t("hero_cta_offers")}
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
               <Link to="/services">
                 <Button variant="hero-outline" size="xl">
-                  Explore Services
+                  {t("hero_cta_services")}
                 </Button>
               </Link>
             </motion.div>
@@ -73,11 +80,7 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="grid grid-cols-3 gap-8 mt-12 pt-12 border-t border-border"
             >
-              {[
-                { value: "10+", label: "Years Experience" },
-                { value: "5K+", label: "Happy Clients" },
-                { value: "50+", label: "Treatments" },
-              ].map((stat) => (
+              {stats.map((stat) => (
                 <div key={stat.label}>
                   <div className="font-serif text-3xl font-bold text-foreground">
                     {stat.value}
@@ -115,8 +118,8 @@ export function Hero() {
                   <Sparkles className="w-6 h-6 text-accent-foreground" />
                 </div>
                 <div>
-                  <div className="font-medium text-foreground">Premium Care</div>
-                  <div className="text-sm text-muted-foreground">Personalized treatments</div>
+                  <div className="font-medium text-foreground">{t("premium_care")}</div>
+                  <div className="text-sm text-muted-foreground">{t("personalized_treatments")}</div>
                 </div>
               </div>
             </motion.div>

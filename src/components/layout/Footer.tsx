@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import { Instagram, Facebook, Mail, Phone, MapPin } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="container mx-auto px-6 py-16">
@@ -12,8 +15,7 @@ export function Footer() {
               ACS <span className="text-rose-gold">BEAUTY</span>
             </h3>
             <p className="text-primary-foreground/70 text-sm leading-relaxed">
-              Elevating beauty through exceptional service, expertise, and a 
-              commitment to helping you look and feel your absolute best.
+              {t("footer_description")}
             </p>
             <div className="flex gap-4 pt-2">
               <a
@@ -35,49 +37,57 @@ export function Footer() {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h4 className="font-medium text-lg">Quick Links</h4>
+            <h4 className="font-medium text-lg">{t("quick_links")}</h4>
             <nav className="flex flex-col gap-2">
-              {[
-                { label: "Services", href: "/services" },
-                { label: "Packages", href: "/packages" },
-                { label: "Book Appointment", href: "/booking" },
-                { label: "About Us", href: "/about" },
-              ].map((link) => (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  className="text-primary-foreground/70 hover:text-rose-gold text-sm transition-colors"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              <Link
+                to="/services"
+                className="text-primary-foreground/70 hover:text-rose-gold text-sm transition-colors"
+              >
+                {t("nav_services")}
+              </Link>
+              <Link
+                to="/packages"
+                className="text-primary-foreground/70 hover:text-rose-gold text-sm transition-colors"
+              >
+                {t("nav_packages")}
+              </Link>
+              <Link
+                to="/services"
+                className="text-primary-foreground/70 hover:text-rose-gold text-sm transition-colors"
+              >
+                {t("book_appointment")}
+              </Link>
+              <Link
+                to="/about"
+                className="text-primary-foreground/70 hover:text-rose-gold text-sm transition-colors"
+              >
+                {t("about_us")}
+              </Link>
             </nav>
           </div>
 
           {/* Services */}
           <div className="space-y-4">
-            <h4 className="font-medium text-lg">Our Services</h4>
+            <h4 className="font-medium text-lg">{t("our_services")}</h4>
             <nav className="flex flex-col gap-2">
-              {[
-                "Facial Treatments",
-                "Body Treatments",
-                "Hair Removal",
-                "Makeup Services",
-                "Bridal Packages",
-              ].map((service) => (
-                <span
-                  key={service}
-                  className="text-primary-foreground/70 text-sm"
-                >
-                  {service}
-                </span>
-              ))}
+              <span className="text-primary-foreground/70 text-sm">
+                {t("service_facial")}
+              </span>
+              <span className="text-primary-foreground/70 text-sm">
+                {t("service_body")}
+              </span>
+              <span className="text-primary-foreground/70 text-sm">
+                {t("service_advanced")}
+              </span>
+              <span className="text-primary-foreground/70 text-sm">
+                {t("service_makeup")}
+              </span>
             </nav>
           </div>
 
           {/* Contact */}
           <div className="space-y-4">
-            <h4 className="font-medium text-lg">Contact Us</h4>
+            <h4 className="font-medium text-lg">{t("contact_us_title")}</h4>
             <div className="space-y-3">
               <a
                 href="tel:+1234567890"
@@ -104,20 +114,20 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-primary-foreground/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-primary-foreground/50 text-sm">
-            © {new Date().getFullYear()} ACS Beauty. All rights reserved.
+            © {new Date().getFullYear()} ACS Beauty. {t("all_rights_reserved")}
           </p>
           <div className="flex gap-6">
             <Link
               to="/privacy"
               className="text-primary-foreground/50 hover:text-rose-gold text-sm transition-colors"
             >
-              Privacy Policy
+              {t("privacy_policy")}
             </Link>
             <Link
               to="/terms"
               className="text-primary-foreground/50 hover:text-rose-gold text-sm transition-colors"
             >
-              Terms of Service
+              {t("terms_of_service")}
             </Link>
           </div>
         </div>

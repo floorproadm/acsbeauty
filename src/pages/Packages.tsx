@@ -7,8 +7,11 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Packages() {
+  const { t } = useLanguage();
+
   const { data: packages, isLoading } = useQuery({
     queryKey: ["public-packages"],
     queryFn: async () => {
@@ -34,13 +37,13 @@ export default function Packages() {
           >
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/50 text-accent-foreground text-sm font-medium mb-4">
               <Package className="w-4 h-4" />
-              Save More
+              {t("packages_page_badge")}
             </span>
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
-              Treatment Packages
+              {t("packages_page_title")}
             </h1>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Commit to your skincare journey and save with our curated treatment packages.
+              {t("packages_page_description")}
             </p>
           </motion.div>
 
@@ -64,7 +67,7 @@ export default function Packages() {
                 >
                   {pkg.is_featured && (
                     <div className="inline-block px-3 py-1 rounded-full bg-rose-gold text-primary-foreground text-xs font-medium mb-4">
-                      Most Popular
+                      {t("most_popular")}
                     </div>
                   )}
                   <h2 className="font-serif text-2xl font-bold mb-2">{pkg.name}</h2>
@@ -79,12 +82,12 @@ export default function Packages() {
 
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
                     <Check className="w-4 h-4 text-rose-gold" />
-                    <span>{pkg.sessions_qty} sessions included</span>
+                    <span>{pkg.sessions_qty} {t("sessions_included")}</span>
                   </div>
 
                   <Link to={`/p/${pkg.id}`}>
                     <Button variant="hero" className="w-full group">
-                      View Package
+                      {t("view_package")}
                       <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                     </Button>
                   </Link>
@@ -101,7 +104,7 @@ export default function Packages() {
           >
             <Link to="/services">
               <Button variant="hero-outline" size="lg" className="group">
-                View Offers
+                {t("view_offers")}
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>

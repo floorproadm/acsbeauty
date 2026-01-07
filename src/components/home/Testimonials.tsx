@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const testimonials = [
   {
@@ -26,6 +27,8 @@ const testimonials = [
 ];
 
 export function Testimonials() {
+  const { t } = useLanguage();
+
   return (
     <section className="py-24 bg-accent/30">
       <div className="container mx-auto px-6">
@@ -38,14 +41,13 @@ export function Testimonials() {
           className="text-center max-w-2xl mx-auto mb-16"
         >
           <span className="inline-block text-sm font-medium tracking-wider text-rose-gold uppercase mb-4">
-            Testimonials
+            {t("testimonials_badge")}
           </span>
           <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
-            What Our Clients Say
+            {t("testimonials_title")}
           </h2>
           <p className="text-muted-foreground text-lg">
-            Real stories from real clients who have experienced the 
-            ACS Beauty difference.
+            {t("testimonials_description")}
           </p>
         </motion.div>
 

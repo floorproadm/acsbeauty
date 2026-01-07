@@ -7,8 +7,11 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Services() {
+  const { t } = useLanguage();
+
   const { data: offers, isLoading } = useQuery({
     queryKey: ["public-offers"],
     queryFn: async () => {
@@ -35,13 +38,13 @@ export default function Services() {
           >
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/50 text-accent-foreground text-sm font-medium mb-4">
               <Sparkles className="w-4 h-4" />
-              Start Your Journey
+              {t("services_page_badge")}
             </span>
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
-              Our Special Offers
+              {t("services_page_title")}
             </h1>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Begin your skincare journey with our introductory offers designed for new clients.
+              {t("services_page_description")}
             </p>
           </motion.div>
 
@@ -62,7 +65,7 @@ export default function Services() {
                   className="bg-card rounded-2xl p-6 shadow-soft hover:shadow-card transition-shadow"
                 >
                   <div className="inline-block px-3 py-1 rounded-full bg-rose-light text-rose-gold text-xs font-medium mb-4">
-                    {offer.type === "entry_offer" ? "New Client Special" : "Free Consultation"}
+                    {offer.type === "entry_offer" ? t("new_client_special") : t("free_consultation")}
                   </div>
                   <h2 className="font-serif text-2xl font-bold mb-2">{offer.headline || offer.name}</h2>
                   <p className="text-muted-foreground text-sm mb-4 line-clamp-3">{offer.body}</p>
@@ -70,7 +73,7 @@ export default function Services() {
                     <span className="text-2xl font-bold text-rose-gold">{offer.price_display}</span>
                     <Link to={`/o/${offer.id}`}>
                       <Button variant="hero" size="sm" className="group">
-                        Learn More
+                        {t("learn_more")}
                         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                       </Button>
                     </Link>
@@ -88,7 +91,7 @@ export default function Services() {
           >
             <Link to="/packages">
               <Button variant="hero-outline" size="lg" className="group">
-                View Our Packages
+                {t("view_our_packages")}
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>

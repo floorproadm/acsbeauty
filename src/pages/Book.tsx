@@ -13,20 +13,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-const bookingSchema = z.object({
-  name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
-  phone: z.string().trim().min(8, "Please enter a valid phone number").max(20),
-  instagram: z.string().trim().max(50).optional(),
-});
-
-type BookingFormData = z.infer<typeof bookingSchema>;
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Book() {
   const [searchParams] = useSearchParams();
   const offerId = searchParams.get("offer_id");
   const packageId = searchParams.get("package_id");
   const [isSuccess, setIsSuccess] = useState(false);
+  const { t } = useLanguage();
+
+  const bookingSchema = z.object({
+    name: z.string().trim().min(2, t("name_min_error")).max(100),
+    phone: z.string().trim().min(8, t("phone_error")).max(20),
+    instagram: z.string().trim().max(50).optional(),
+  });
+
+  type BookingFormData = z.infer<typeof bookingSchema>;
 
   const { data: offer } = useQuery({
     queryKey: ["offer", offerId],
@@ -102,7 +104,7 @@ export default function Book() {
     },
     onSuccess: () => {
       setIsSuccess(true);
-      toast.success("Booking confirmed!");
+      toast.success(t("booking_confirmed"));
     },
     onError: (error) => {
       console.error("Booking error:", error);
@@ -126,12 +128,12 @@ export default function Book() {
               <div className="w-16 h-16 bg-rose-light rounded-full flex items-center justify-center mx-auto mb-6">
                 <Check className="w-8 h-8 text-rose-gold" />
               </div>
-              <h1 className="font-serif text-3xl font-bold mb-4">Booking Confirmed!</h1>
+              <h1 className="font-serif text-3xl font-bold mb-4">{t("booking_confirmed")}</h1>
               <p className="text-muted-foreground mb-6">
-                Thank you for booking. We will contact you shortly to confirm your appointment time.
+                {t("booking_success_message")}
               </p>
               <Link to="/">
-                <Button variant="hero">Return Home</Button>
+                <Button variant="hero">{t("return_home")}</Button>
               </Link>
             </motion.div>
           </div>
@@ -148,7 +150,7 @@ export default function Book() {
         <div className="container mx-auto px-4 max-w-md">
           <Link to={offerId ? `/o/${offerId}` : packageId ? `/p/${packageId}` : "/services"} className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8">
             <ArrowLeft className="w-4 h-4" />
-            Back
+            {t("back")}
           </Link>
 
           <motion.div
@@ -158,20 +160,20 @@ export default function Book() {
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-light text-rose-gold text-sm font-medium mb-4">
                 <Calendar className="w-4 h-4" />
-                Book Appointment
+                {t("book_appointment_badge")}
               </div>
-              <h1 className="font-serif text-3xl font-bold mb-2">Complete Your Booking</h1>
+              <h1 className="font-serif text-3xl font-bold mb-2">{t("complete_booking")}</h1>
               <p className="text-muted-foreground">
-                Booking: <span className="font-medium text-foreground">{itemName}</span>
+                {t("booking")}: <span className="font-medium text-foreground">{itemName}</span>
               </p>
             </div>
 
             <form onSubmit={handleSubmit((data) => createBooking.mutate(data))} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name *</Label>
+                <Label htmlFor="name">{t("full_name")} *</Label>
                 <Input
                   id="name"
-                  placeholder="Your full name"
+                  placeholder={t("your_full_name")}
                   {...register("name")}
                   className={errors.name ? "border-destructive" : ""}
                 />
@@ -181,7 +183,7 @@ export default function Book() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number *</Label>
+                <Label htmlFor="phone">{t("phone_number")} *</Label>
                 <Input
                   id="phone"
                   type="tel"
@@ -195,7 +197,7 @@ export default function Book() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="instagram">Instagram Handle (optional)</Label>
+                <Label htmlFor="instagram">{t("instagram_handle")}</Label>
                 <Input
                   id="instagram"
                   placeholder="@yourusername"
@@ -213,18 +215,18 @@ export default function Book() {
                 {createBooking.isPending ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    Processing...
+                    {t("processing")}
                   </>
                 ) : (
                   <>
                     <Calendar className="w-5 h-5" />
-                    Confirm Booking
+                    {t("confirm_booking")}
                   </>
                 )}
               </Button>
 
               <p className="text-center text-sm text-muted-foreground">
-                We will contact you to schedule the exact appointment time.
+                {t("contact_to_schedule")}
               </p>
             </form>
           </motion.div>

@@ -7,9 +7,11 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function PackageLanding() {
   const { id } = useParams<{ id: string }>();
+  const { t } = useLanguage();
 
   const { data: pkg, isLoading, error } = useQuery({
     queryKey: ["package", id],
@@ -50,10 +52,10 @@ export default function PackageLanding() {
         <Header />
         <main className="pt-24 pb-16">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="font-serif text-3xl font-bold mb-4">Package Not Found</h1>
-            <p className="text-muted-foreground mb-8">This package may no longer be available.</p>
+            <h1 className="font-serif text-3xl font-bold mb-4">{t("package_not_found")}</h1>
+            <p className="text-muted-foreground mb-8">{t("package_not_found_desc")}</p>
             <Link to="/packages">
-              <Button variant="hero">View All Packages</Button>
+              <Button variant="hero">{t("view_all_packages")}</Button>
             </Link>
           </div>
         </main>
@@ -71,7 +73,7 @@ export default function PackageLanding() {
         <div className="container mx-auto px-4 max-w-2xl">
           <Link to="/packages" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8">
             <ArrowLeft className="w-4 h-4" />
-            Back to Packages
+            {t("back_to_packages")}
           </Link>
 
           <motion.div
@@ -80,7 +82,7 @@ export default function PackageLanding() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-light text-rose-gold text-sm font-medium mb-4">
               <Package className="w-4 h-4" />
-              {pkg.is_featured ? "Most Popular" : "Treatment Package"}
+              {pkg.is_featured ? t("most_popular") : t("treatment_package")}
             </div>
 
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
@@ -92,7 +94,7 @@ export default function PackageLanding() {
               {pkg.original_price && pkg.original_price > pkg.total_price && (
                 <>
                   <span className="text-xl text-muted-foreground line-through">${pkg.original_price}</span>
-                  <span className="text-sm text-rose-gold font-medium">Save ${savings}</span>
+                  <span className="text-sm text-rose-gold font-medium">{t("save")} ${savings}</span>
                 </>
               )}
             </div>
@@ -102,11 +104,11 @@ export default function PackageLanding() {
             </p>
 
             <div className="bg-card rounded-xl p-6 mb-8">
-              <h3 className="font-medium mb-4">Package Includes</h3>
+              <h3 className="font-medium mb-4">{t("package_includes")}</h3>
               <ul className="space-y-3">
                 <li className="flex items-center gap-3">
                   <Check className="w-5 h-5 text-rose-gold" />
-                  <span>{pkg.sessions_qty} treatment sessions</span>
+                  <span>{pkg.sessions_qty} {t("treatment_sessions")}</span>
                 </li>
                 {pkg.package_services?.map((ps: any) => (
                   <li key={ps.id} className="flex items-center gap-3">
@@ -117,7 +119,7 @@ export default function PackageLanding() {
                 {pkg.expires_days && (
                   <li className="flex items-center gap-3">
                     <Check className="w-5 h-5 text-rose-gold" />
-                    <span>Valid for {pkg.expires_days} days</span>
+                    <span>{t("valid_for_days")} {pkg.expires_days} {t("days")}</span>
                   </li>
                 )}
               </ul>
@@ -126,15 +128,15 @@ export default function PackageLanding() {
             <div className="space-y-3">
               <Button variant="hero" size="xl" className="w-full" disabled>
                 <CreditCard className="w-5 h-5" />
-                Buy Package (Coming Soon)
+                {t("buy_package")}
               </Button>
               <p className="text-center text-sm text-muted-foreground">
-                Stripe integration coming soon
+                {t("stripe_coming_soon")}
               </p>
               <Link to={`/book?package_id=${pkg.id}`}>
                 <Button variant="hero-outline" size="lg" className="w-full">
                   <Calendar className="w-5 h-5" />
-                  Book Using Existing Package
+                  {t("book_using_package")}
                 </Button>
               </Link>
             </div>
