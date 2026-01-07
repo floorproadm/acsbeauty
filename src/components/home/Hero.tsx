@@ -53,9 +53,9 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-col sm:flex-row gap-4"
             >
-              <Link to="/booking">
+              <Link to="/services">
                 <Button variant="hero" size="xl" className="group">
-                  Book Your Appointment
+                  View Our Offers
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
