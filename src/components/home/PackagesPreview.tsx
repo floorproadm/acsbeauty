@@ -2,11 +2,12 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Check, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const packages = [
   {
-    name: "Essential Glow",
-    description: "Perfect introduction to our signature treatments",
+    nameKey: "Essential Glow",
+    descriptionKey: "Perfect introduction to our signature treatments",
     price: 199,
     originalPrice: 250,
     sessions: 3,
@@ -18,8 +19,8 @@ const packages = [
     featured: false,
   },
   {
-    name: "Radiance Package",
-    description: "Our most popular choice for complete rejuvenation",
+    nameKey: "Radiance Package",
+    descriptionKey: "Our most popular choice for complete rejuvenation",
     price: 399,
     originalPrice: 520,
     sessions: 6,
@@ -33,8 +34,8 @@ const packages = [
     featured: true,
   },
   {
-    name: "Bridal Beauty",
-    description: "Complete pre-wedding preparation package",
+    nameKey: "Bridal Beauty",
+    descriptionKey: "Complete pre-wedding preparation package",
     price: 899,
     originalPrice: 1200,
     sessions: 12,
@@ -50,6 +51,8 @@ const packages = [
 ];
 
 export function PackagesPreview() {
+  const { t } = useLanguage();
+
   return (
     <section className="py-24 bg-background">
       <div className="container mx-auto px-6">
@@ -62,14 +65,13 @@ export function PackagesPreview() {
           className="text-center max-w-2xl mx-auto mb-16"
         >
           <span className="inline-block text-sm font-medium tracking-wider text-rose-gold uppercase mb-4">
-            Value Packages
+            {t("packages_badge")}
           </span>
           <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
-            Save More with Packages
+            {t("packages_title")}
           </h2>
           <p className="text-muted-foreground text-lg">
-            Our curated packages offer exceptional value with bundled treatments 
-            designed to achieve your beauty goals.
+            {t("packages_description")}
           </p>
         </motion.div>
 
@@ -77,7 +79,7 @@ export function PackagesPreview() {
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {packages.map((pkg, index) => (
             <motion.div
-              key={pkg.name}
+              key={pkg.nameKey}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -91,14 +93,14 @@ export function PackagesPreview() {
               {pkg.featured && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-1 px-4 py-1 rounded-full bg-rose-gold text-foreground text-sm font-medium">
                   <Star className="w-4 h-4" />
-                  Most Popular
+                  {t("most_popular")}
                 </div>
               )}
 
               <div className="mb-6">
-                <h3 className="font-serif text-2xl font-bold mb-2">{pkg.name}</h3>
+                <h3 className="font-serif text-2xl font-bold mb-2">{pkg.nameKey}</h3>
                 <p className={pkg.featured ? "text-primary-foreground/70" : "text-muted-foreground"}>
-                  {pkg.description}
+                  {pkg.descriptionKey}
                 </p>
               </div>
 
@@ -110,7 +112,7 @@ export function PackagesPreview() {
                   </span>
                 </div>
                 <span className={`text-sm ${pkg.featured ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-                  {pkg.sessions} sessions included
+                  {pkg.sessions} {t("sessions_included")}
                 </span>
               </div>
 
@@ -125,12 +127,12 @@ export function PackagesPreview() {
                 ))}
               </ul>
 
-              <Link to="/booking" className="block">
+              <Link to="/packages" className="block">
                 <Button
                   variant={pkg.featured ? "rose" : "hero"}
                   className="w-full"
                 >
-                  Book This Package
+                  {t("book_this_package")}
                 </Button>
               </Link>
             </motion.div>
@@ -147,7 +149,7 @@ export function PackagesPreview() {
         >
           <Link to="/packages">
             <Button variant="hero-outline" size="lg" className="group">
-              View All Packages
+              {t("view_all_packages")}
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>

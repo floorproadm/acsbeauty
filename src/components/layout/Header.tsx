@@ -3,18 +3,21 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Calendar, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { label: "Services", href: "/services" },
-  { label: "Packages", href: "/packages" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageToggle } from "@/components/LanguageToggle";
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { t } = useLanguage();
+
+  const navItems = [
+    { label: t("nav_services"), href: "/services" },
+    { label: t("nav_packages"), href: "/packages" },
+    { label: t("nav_about"), href: "/about" },
+    { label: t("nav_contact"), href: "/contact" },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -62,32 +65,36 @@ export function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4">
+            <LanguageToggle />
             <Link to="/auth">
               <Button variant="ghost" size="sm" className="gap-2">
                 <User className="w-4 h-4" />
-                Sign In
+                {t("sign_in")}
               </Button>
             </Link>
-            <Link to="/booking">
+            <Link to="/services">
               <Button variant="hero" size="default" className="gap-2">
                 <Calendar className="w-4 h-4" />
-                Book Now
+                {t("book_now")}
               </Button>
             </Link>
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </button>
+          <div className="flex md:hidden items-center gap-3">
+            <LanguageToggle />
+            <button
+              className="p-2"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
@@ -108,13 +115,13 @@ export function Header() {
                 <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button variant="outline" className="w-full gap-2">
                     <User className="w-4 h-4" />
-                    Sign In
+                    {t("sign_in")}
                   </Button>
                 </Link>
-                <Link to="/booking" onClick={() => setIsMobileMenuOpen(false)}>
+                <Link to="/services" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button variant="hero" className="w-full gap-2">
                     <Calendar className="w-4 h-4" />
-                    Book Now
+                    {t("book_now")}
                   </Button>
                 </Link>
               </div>

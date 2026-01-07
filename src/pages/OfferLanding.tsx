@@ -7,9 +7,11 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function OfferLanding() {
   const { id } = useParams<{ id: string }>();
+  const { t } = useLanguage();
 
   const { data: offer, isLoading, error } = useQuery({
     queryKey: ["offer", id],
@@ -50,10 +52,10 @@ export default function OfferLanding() {
         <Header />
         <main className="pt-24 pb-16">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="font-serif text-3xl font-bold mb-4">Offer Not Found</h1>
-            <p className="text-muted-foreground mb-8">This offer may have expired or is no longer available.</p>
+            <h1 className="font-serif text-3xl font-bold mb-4">{t("offer_not_found")}</h1>
+            <p className="text-muted-foreground mb-8">{t("offer_not_found_desc")}</p>
             <Link to="/services">
-              <Button variant="hero">View All Offers</Button>
+              <Button variant="hero">{t("view_all_offers")}</Button>
             </Link>
           </div>
         </main>
@@ -71,7 +73,7 @@ export default function OfferLanding() {
         <div className="container mx-auto px-4 max-w-2xl">
           <Link to="/services" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8">
             <ArrowLeft className="w-4 h-4" />
-            Back to Offers
+            {t("back_to_offers")}
           </Link>
 
           <motion.div
@@ -80,7 +82,7 @@ export default function OfferLanding() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-light text-rose-gold text-sm font-medium mb-4">
               <Sparkles className="w-4 h-4" />
-              {offer.type === "entry_offer" ? "New Client Special" : "Free Consultation"}
+              {offer.type === "entry_offer" ? t("new_client_special") : t("free_consultation")}
             </div>
 
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
@@ -97,15 +99,15 @@ export default function OfferLanding() {
 
             {service && (
               <div className="bg-card rounded-xl p-6 mb-8">
-                <h3 className="font-medium mb-3">Treatment Details</h3>
+                <h3 className="font-medium mb-3">{t("treatment_details")}</h3>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4" />
-                    {service.duration_minutes} minutes
+                    {service.duration_minutes} {t("minutes")}
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    Book anytime
+                    {t("book_anytime")}
                   </div>
                 </div>
               </div>
@@ -114,7 +116,7 @@ export default function OfferLanding() {
             <Link to={`/book?offer_id=${offer.id}`}>
               <Button variant="hero" size="xl" className="w-full">
                 <Calendar className="w-5 h-5" />
-                Book Now
+                {t("book_now")}
               </Button>
             </Link>
           </motion.div>
