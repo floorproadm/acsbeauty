@@ -29,30 +29,30 @@ export function PackagesPreview() {
   const { t, language } = useLanguage();
 
   return (
-    <section className="py-24 bg-background">
-      <div className="container mx-auto px-6">
+    <section className="py-20 md:py-24 bg-background">
+      <div className="container mx-auto px-4 md:px-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center max-w-2xl mx-auto mb-16"
+          className="text-center max-w-2xl mx-auto mb-12 md:mb-16"
         >
           <span className="inline-flex items-center gap-2 text-sm font-medium tracking-wider text-rose-gold uppercase mb-4">
             <Sparkles className="w-4 h-4" />
             {t("packages_badge")}
           </span>
-          <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6">
             {t("packages_title")}
           </h2>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-base md:text-lg">
             {t("packages_description")}
           </p>
         </motion.div>
 
-        {/* Offers Grid */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {/* Offers Grid - Mobile optimized */}
+        <div className="grid md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
           {offers.map((offer, index) => (
             <motion.div
               key={offer.name}
@@ -60,21 +60,21 @@ export function PackagesPreview() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={`relative rounded-2xl p-8 transition-all duration-500 ${
+              className={`relative rounded-2xl p-6 md:p-8 transition-all duration-500 ${
                 offer.featured
-                  ? "bg-primary text-primary-foreground shadow-elevated scale-105"
-                  : "bg-card shadow-card hover:shadow-elevated"
+                  ? "bg-primary text-primary-foreground shadow-elevated md:scale-105"
+                  : "bg-card shadow-card"
               }`}
             >
               {offer.featured && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-1 px-4 py-1 rounded-full bg-rose-gold text-foreground text-sm font-medium">
-                  <Star className="w-4 h-4" />
+                <div className="absolute -top-3 md:-top-4 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3 md:px-4 py-1 rounded-full bg-rose-gold text-foreground text-xs font-medium whitespace-nowrap">
+                  <Star className="w-3 h-3 md:w-4 md:h-4" />
                   {t("most_popular")}
                 </div>
               )}
 
-              <div className="mb-6">
-                <h3 className="font-serif text-2xl font-bold mb-3">{offer.name}</h3>
+              <div className="mb-5 md:mb-6">
+                <h3 className="font-serif text-xl md:text-2xl font-bold mb-2 md:mb-3">{offer.name}</h3>
                 <p className={`text-sm leading-relaxed ${offer.featured ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                   {language === "pt" ? offer.description : offer.descriptionEn}
                 </p>
@@ -84,6 +84,7 @@ export function PackagesPreview() {
                 <Button
                   variant={offer.featured ? "rose" : "hero"}
                   className="w-full"
+                  size="lg"
                 >
                   {t("book_this_offer")}
                   <ArrowRight className="w-4 h-4 ml-2" />
@@ -99,10 +100,10 @@ export function PackagesPreview() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-center mt-12"
+          className="text-center mt-10 md:mt-12"
         >
           <Link to="/packages">
-            <Button variant="hero-outline" size="lg" className="group">
+            <Button variant="hero-outline" size="lg" className="group w-full sm:w-auto">
               {t("view_all_offers")}
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Button>
