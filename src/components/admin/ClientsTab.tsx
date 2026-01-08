@@ -402,7 +402,7 @@ export function ClientsTab() {
                       <div className="flex items-center justify-center gap-1 text-rose-gold mb-1">
                         <DollarSign className="w-4 h-4" />
                       </div>
-                      <p className="text-lg font-bold">R$ {stats.totalSpent.toFixed(0)}</p>
+                      <p className="text-lg font-bold">${stats.totalSpent.toFixed(0)}</p>
                       <p className="text-xs text-muted-foreground">Total gasto</p>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-blue-50">
@@ -506,7 +506,7 @@ export function ClientsTab() {
                         <div className="flex items-center gap-3">
                           {booking.total_price && (
                             <span className="text-sm font-medium">
-                              R$ {booking.total_price.toFixed(0)}
+                              ${booking.total_price.toFixed(0)}
                             </span>
                           )}
                           <Badge className={`text-xs ${statusColors[booking.status] || "bg-gray-100"}`}>

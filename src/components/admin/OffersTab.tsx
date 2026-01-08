@@ -175,7 +175,7 @@ export function OffersTab() {
                 id="price_display"
                 value={formData.price_display}
                 onChange={(e) => setFormData({ ...formData, price_display: e.target.value })}
-                placeholder="Ex: R$89 ou Grátis"
+                placeholder="Ex: $89 or Free"
               />
             </div>
             <div className="flex justify-end gap-2 pt-4">
