@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, Check, Loader2 } from "lucide-react";
@@ -17,6 +17,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Book() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const offerId = searchParams.get("offer_id");
   const packageId = searchParams.get("package_id");
   const [isSuccess, setIsSuccess] = useState(false);
@@ -82,6 +83,7 @@ export default function Book() {
         client_id: client.id,
         client_name: formData.name,
         client_phone: formData.phone,
+        client_email: `${formData.phone.replace(/\D/g, '')}@placeholder.com`, // Placeholder email
         status: "confirmed",
         start_time: new Date().toISOString(), // Placeholder - will be selected in calendar later
         end_time: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
@@ -94,17 +96,20 @@ export default function Book() {
         bookingData.package_id = packageId;
       }
 
-      const { error: bookingError } = await supabase
+      const { data: newBooking, error: bookingError } = await supabase
         .from("bookings")
-        .insert(bookingData);
+        .insert(bookingData)
+        .select()
+        .single();
 
       if (bookingError) throw bookingError;
 
-      return { client, booking: bookingData };
+      return { client, booking: newBooking };
     },
-    onSuccess: () => {
-      setIsSuccess(true);
+    onSuccess: (data) => {
       toast.success(t("booking.success_title"));
+      // Navigate to confirmation page with booking ID
+      navigate(`/confirm/${data.booking.id}`);
     },
     onError: (error) => {
       console.error("Booking error:", error);
