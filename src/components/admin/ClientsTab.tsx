@@ -13,6 +13,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   Search,
   Users,
   Instagram,
@@ -27,6 +38,7 @@ import {
   Clock,
   ChevronRight,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -129,6 +141,40 @@ export function ClientsTab() {
   const handleRemoveTag = (clientId: string, currentTags: string[], tagToRemove: string) => {
     updateTags.mutate({ id: clientId, tags: currentTags.filter((t) => t !== tagToRemove) });
   };
+
+  const deleteClient = useMutation({
+    mutationFn: async (clientId: string) => {
+      // First delete associated bookings
+      const { error: bookingsError } = await supabase
+        .from("bookings")
+        .delete()
+        .eq("client_id", clientId);
+      
+      if (bookingsError) throw bookingsError;
+
+      // Then delete the client
+      const { error } = await supabase
+        .from("clients")
+        .delete()
+        .eq("id", clientId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-clients"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+      setSelectedClientId(null);
+      toast({ title: "Cliente excluído com sucesso!" });
+    },
+    onError: (error) => {
+      console.error("Delete error:", error);
+      toast({ 
+        title: "Erro ao excluir", 
+        description: "Apenas admins podem excluir clientes.",
+        variant: "destructive" 
+      });
+    },
+  });
 
   const filteredClients = clients?.filter(
     (c) =>
@@ -519,12 +565,45 @@ export function ClientsTab() {
                 )}
               </div>
 
-              {/* Footer Info */}
-              <div className="text-xs text-muted-foreground text-center pt-4 border-t">
-                Cliente desde {format(new Date(selectedClient.created_at), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                {selectedClient.last_visit_at && (
-                  <> • Última visita em {format(new Date(selectedClient.last_visit_at), "dd/MM/yyyy", { locale: ptBR })}</>
-                )}
+              {/* Footer Info + Delete */}
+              <div className="pt-4 border-t space-y-4">
+                <div className="text-xs text-muted-foreground text-center">
+                  Cliente desde {format(new Date(selectedClient.created_at), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                  {selectedClient.last_visit_at && (
+                    <> • Última visita em {format(new Date(selectedClient.last_visit_at), "dd/MM/yyyy", { locale: ptBR })}</>
+                  )}
+                </div>
+
+                {/* Delete Button - Admin Only */}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Excluir Cliente
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tem certeza que deseja excluir <strong>{selectedClient.name}</strong>? 
+                        Esta ação não pode ser desfeita e irá remover todos os agendamentos associados.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteClient.mutate(selectedClient.id)}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        {deleteClient.isPending ? "Excluindo..." : "Excluir"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </>
           ) : null}
