@@ -19,9 +19,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { format } from "date-fns";
 
-// Studio location - update with actual address
-const STUDIO_ADDRESS = "123 Beauty Lane, Suite 100, Miami, FL 33101";
-const STUDIO_COORDS = "25.7617,-80.1918"; // Miami coords as placeholder
+// Studio location - official address
+const STUDIO_ADDRESS = "375 Chestnut St, 3rd Floor, Suite 3B, Newark, NJ";
+const STUDIO_COORDS = "40.7357,-74.1724"; // Newark, NJ coords
 
 export default function Confirmation() {
   const { bookingId } = useParams<{ bookingId: string }>();
