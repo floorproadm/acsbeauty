@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -14,24 +14,24 @@ export function Hero() {
   ];
 
   return (
-    <section className="relative min-h-screen flex items-center bg-gradient-hero overflow-hidden">
+    <section className="relative min-h-[100svh] flex items-center bg-gradient-hero overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 right-0 w-96 h-96 bg-rose-light/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 left-0 w-80 h-80 bg-champagne/50 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 right-0 w-64 md:w-96 h-64 md:h-96 bg-rose-light/30 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 left-0 w-48 md:w-80 h-48 md:h-80 bg-champagne/50 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-6 pt-24 pb-12 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="container mx-auto px-4 md:px-6 pt-20 md:pt-24 pb-8 md:pb-12 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Content */}
           <div className="max-w-xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/50 text-accent-foreground text-sm font-medium mb-6"
+              className="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-accent/50 text-accent-foreground text-xs md:text-sm font-medium mb-4 md:mb-6"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-3 h-3 md:w-4 md:h-4" />
               {t("hero_badge")}
             </motion.div>
 
@@ -39,7 +39,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="font-serif text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6"
+              className="font-serif text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight mb-4 md:mb-6"
             >
               {t("hero_title_1")}{" "}
               <span className="text-gradient-rose">{t("hero_title_2")}</span>
@@ -49,7 +49,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg text-muted-foreground leading-relaxed mb-8"
+              className="text-base md:text-lg text-muted-foreground leading-relaxed mb-6 md:mb-8"
             >
               {t("hero_description")}
             </motion.p>
@@ -58,40 +58,43 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-4"
+              className="flex flex-col gap-3 md:gap-4"
             >
-              <Link to="/services">
-                <Button variant="hero" size="xl" className="group">
+              {/* Primary CTA - Full width on mobile for thumb reach */}
+              <Link to="/services" className="w-full sm:w-auto">
+                <Button variant="hero" size="xl" className="group w-full sm:w-auto">
                   {t("hero_cta_offers")}
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
-              <Link to="/services">
-                <Button variant="hero-outline" size="xl">
-                  {t("hero_cta_services")}
+              {/* Secondary CTA - Instagram friendly */}
+              <Link to="/contact" className="w-full sm:w-auto">
+                <Button variant="hero-outline" size="lg" className="w-full sm:w-auto">
+                  <Instagram className="w-4 h-4" />
+                  {t("contact_us")}
                 </Button>
               </Link>
             </motion.div>
 
-            {/* Stats */}
+            {/* Stats - Compact on mobile */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="grid grid-cols-3 gap-8 mt-12 pt-12 border-t border-border"
+              className="grid grid-cols-3 gap-4 md:gap-8 mt-8 md:mt-12 pt-6 md:pt-12 border-t border-border"
             >
               {stats.map((stat) => (
                 <div key={stat.label}>
-                  <div className="font-serif text-3xl font-bold text-foreground">
+                  <div className="font-serif text-2xl md:text-3xl font-bold text-foreground">
                     {stat.value}
                   </div>
-                  <div className="text-sm text-muted-foreground">{stat.label}</div>
+                  <div className="text-xs md:text-sm text-muted-foreground">{stat.label}</div>
                 </div>
               ))}
             </motion.div>
           </div>
 
-          {/* Image */}
+          {/* Image - Hidden on mobile, optimized for desktop */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -104,6 +107,8 @@ export function Hero() {
                 src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80"
                 alt="Beauty treatment"
                 className="w-full h-full object-cover"
+                loading="eager"
+                fetchPriority="high"
               />
             </div>
             {/* Floating card */}
@@ -111,15 +116,15 @@ export function Hero() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="absolute -left-8 bottom-12 bg-card p-6 rounded-xl shadow-card"
+              className="absolute -left-8 bottom-12 bg-card p-4 md:p-6 rounded-xl shadow-card"
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
-                  <Sparkles className="w-6 h-6 text-accent-foreground" />
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-accent flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-accent-foreground" />
                 </div>
                 <div>
-                  <div className="font-medium text-foreground">{t("premium_care")}</div>
-                  <div className="text-sm text-muted-foreground">{t("personalized_treatments")}</div>
+                  <div className="font-medium text-sm md:text-base text-foreground">{t("premium_care")}</div>
+                  <div className="text-xs md:text-sm text-muted-foreground">{t("personalized_treatments")}</div>
                 </div>
               </div>
             </motion.div>
