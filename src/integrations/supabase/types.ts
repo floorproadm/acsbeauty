@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       booking_holds: {
         Row: {
+          calendar_id: string | null
           created_at: string
           end_time: string
           expires_at: string
@@ -27,6 +28,7 @@ export type Database = {
           start_time: string
         }
         Insert: {
+          calendar_id?: string | null
           created_at?: string
           end_time: string
           expires_at: string
@@ -38,6 +40,7 @@ export type Database = {
           start_time: string
         }
         Update: {
+          calendar_id?: string | null
           created_at?: string
           end_time?: string
           expires_at?: string
@@ -88,6 +91,7 @@ export type Database = {
           staff_id: string | null
           start_time: string
           status: string
+          timezone: string | null
           total_price: number | null
           updated_at: string
         }
@@ -106,6 +110,7 @@ export type Database = {
           staff_id?: string | null
           start_time: string
           status?: string
+          timezone?: string | null
           total_price?: number | null
           updated_at?: string
         }
@@ -124,6 +129,7 @@ export type Database = {
           staff_id?: string | null
           start_time?: string
           status?: string
+          timezone?: string | null
           total_price?: number | null
           updated_at?: string
         }
@@ -207,6 +213,7 @@ export type Database = {
           is_active: boolean
           provider: string
           staff_id: string | null
+          sync_enabled: boolean | null
           timezone: string
           updated_at: string
         }
@@ -217,6 +224,7 @@ export type Database = {
           is_active?: boolean
           provider?: string
           staff_id?: string | null
+          sync_enabled?: boolean | null
           timezone?: string
           updated_at?: string
         }
@@ -227,6 +235,7 @@ export type Database = {
           is_active?: boolean
           provider?: string
           staff_id?: string | null
+          sync_enabled?: boolean | null
           timezone?: string
           updated_at?: string
         }
