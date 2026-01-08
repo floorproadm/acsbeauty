@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Instagram } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -70,7 +70,7 @@ export function Hero() {
               {/* Secondary CTA - Instagram friendly */}
               <Link to="/contact" className="w-full sm:w-auto">
                 <Button variant="hero-outline" size="lg" className="w-full sm:w-auto">
-                  <Instagram className="w-4 h-4" />
+                  <Sparkles className="w-4 h-4" />
                   {t("global.contact_us")}
                 </Button>
               </Link>
