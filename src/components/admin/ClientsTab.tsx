@@ -6,14 +6,55 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Users, Instagram, Phone, Mail, Tag, Plus, X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Search,
+  Users,
+  Instagram,
+  Phone,
+  Mail,
+  Tag,
+  Plus,
+  X,
+  Calendar,
+  Package,
+  DollarSign,
+  Clock,
+  ChevronRight,
+  Sparkles,
+} from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+
+interface ClientWithRelations {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  instagram: string | null;
+  tags: string[] | null;
+  created_at: string;
+  last_visit_at: string | null;
+  bookings?: {
+    id: string;
+    start_time: string;
+    status: string;
+    total_price: number | null;
+    services: { name: string } | null;
+    packages: { name: string } | null;
+  }[];
+}
 
 export function ClientsTab() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingTags, setEditingTags] = useState<string | null>(null);
   const [newTag, setNewTag] = useState("");
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -24,10 +65,39 @@ export function ClientsTab() {
         .from("clients")
         .select("*")
         .order("created_at", { ascending: false });
-      
+
       if (error) throw error;
       return data;
     },
+  });
+
+  // Fetch selected client with full relations
+  const { data: selectedClient, isLoading: isLoadingClient } = useQuery({
+    queryKey: ["admin-client-detail", selectedClientId],
+    queryFn: async () => {
+      const { data: clientData, error: clientError } = await supabase
+        .from("clients")
+        .select("*")
+        .eq("id", selectedClientId!)
+        .single();
+
+      if (clientError) throw clientError;
+
+      // Fetch bookings for this client
+      const { data: bookingsData, error: bookingsError } = await supabase
+        .from("bookings")
+        .select("id, start_time, status, total_price, services(name), packages(name)")
+        .eq("client_id", selectedClientId!)
+        .order("start_time", { ascending: false });
+
+      if (bookingsError) throw bookingsError;
+
+      return {
+        ...clientData,
+        bookings: bookingsData,
+      } as ClientWithRelations;
+    },
+    enabled: !!selectedClientId,
   });
 
   const updateTags = useMutation({
@@ -40,6 +110,7 @@ export function ClientsTab() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-clients"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-client-detail"] });
       toast({ title: "Tags atualizadas!" });
       setEditingTags(null);
     },
@@ -56,7 +127,7 @@ export function ClientsTab() {
   };
 
   const handleRemoveTag = (clientId: string, currentTags: string[], tagToRemove: string) => {
-    updateTags.mutate({ id: clientId, tags: currentTags.filter(t => t !== tagToRemove) });
+    updateTags.mutate({ id: clientId, tags: currentTags.filter((t) => t !== tagToRemove) });
   };
 
   const filteredClients = clients?.filter(
@@ -65,7 +136,7 @@ export function ClientsTab() {
       c.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.instagram?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+      c.tags?.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const tagColors: Record<string, string> = {
@@ -78,6 +149,35 @@ export function ClientsTab() {
   const getTagColor = (tag: string) => {
     const lowerTag = tag.toLowerCase();
     return tagColors[lowerTag] || "bg-gray-100 text-gray-800 border-gray-200";
+  };
+
+  const statusColors: Record<string, string> = {
+    confirmed: "bg-green-100 text-green-800",
+    completed: "bg-blue-100 text-blue-800",
+    cancelled: "bg-red-100 text-red-800",
+    no_show: "bg-orange-100 text-orange-800",
+    requested: "bg-yellow-100 text-yellow-800",
+  };
+
+  const statusLabels: Record<string, string> = {
+    confirmed: "Confirmado",
+    completed: "Concluído",
+    cancelled: "Cancelado",
+    no_show: "Não compareceu",
+    requested: "Solicitado",
+  };
+
+  // Calculate client stats
+  const getClientStats = (client: ClientWithRelations) => {
+    const bookings = client.bookings || [];
+    const completedBookings = bookings.filter((b) => b.status === "completed");
+    const totalSpent = completedBookings.reduce((sum, b) => sum + (b.total_price || 0), 0);
+    const totalBookings = bookings.length;
+    const upcomingBookings = bookings.filter(
+      (b) => new Date(b.start_time) > new Date() && b.status !== "cancelled"
+    ).length;
+
+    return { totalSpent, totalBookings, upcomingBookings, completedBookings: completedBookings.length };
   };
 
   return (
@@ -118,20 +218,23 @@ export function ClientsTab() {
           {filteredClients?.map((client) => (
             <div
               key={client.id}
-              className="bg-card rounded-xl border border-border p-4 shadow-soft"
+              onClick={() => setSelectedClientId(client.id)}
+              className="bg-card rounded-xl border border-border p-4 shadow-soft cursor-pointer hover:border-rose-gold/50 hover:shadow-md transition-all group"
             >
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 {/* Client Info */}
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-semibold">{client.name}</h3>
+                    <h3 className="font-semibold group-hover:text-rose-gold transition-colors">
+                      {client.name}
+                    </h3>
                     {client.last_visit_at && (
                       <span className="text-xs text-muted-foreground">
                         Última visita: {format(new Date(client.last_visit_at), "dd/MM/yy", { locale: ptBR })}
                       </span>
                     )}
                   </div>
-                  
+
                   <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3">
                     {client.phone && (
                       <span className="flex items-center gap-1">
@@ -160,12 +263,15 @@ export function ClientsTab() {
                       <Badge
                         key={tag}
                         variant="outline"
-                        className={`text-xs ${getTagColor(tag)} ${editingTags === client.id ? 'pr-1' : ''}`}
+                        className={`text-xs ${getTagColor(tag)} ${editingTags === client.id ? "pr-1" : ""}`}
                       >
                         {tag}
                         {editingTags === client.id && (
                           <button
-                            onClick={() => handleRemoveTag(client.id, client.tags || [], tag)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveTag(client.id, client.tags || [], tag);
+                            }}
                             className="ml-1 hover:text-red-600"
                           >
                             <X className="w-3 h-3" />
@@ -173,9 +279,9 @@ export function ClientsTab() {
                         )}
                       </Badge>
                     ))}
-                    
+
                     {editingTags === client.id ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <Input
                           value={newTag}
                           onChange={(e) => setNewTag(e.target.value)}
@@ -209,7 +315,10 @@ export function ClientsTab() {
                         size="sm"
                         variant="ghost"
                         className="h-6 px-2 text-xs text-muted-foreground"
-                        onClick={() => setEditingTags(client.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingTags(client.id);
+                        }}
                       >
                         <Plus className="w-3 h-3 mr-1" />
                         Adicionar
@@ -218,15 +327,209 @@ export function ClientsTab() {
                   </div>
                 </div>
 
-                {/* Created date */}
-                <div className="text-xs text-muted-foreground">
-                  Cliente desde {format(new Date(client.created_at), "MMM yyyy", { locale: ptBR })}
+                {/* Arrow indicator */}
+                <div className="flex items-center gap-3">
+                  <div className="text-xs text-muted-foreground">
+                    Cliente desde {format(new Date(client.created_at), "MMM yyyy", { locale: ptBR })}
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-rose-gold transition-colors" />
                 </div>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      {/* Client Detail Modal */}
+      <Dialog open={!!selectedClientId} onOpenChange={(open) => !open && setSelectedClientId(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          {isLoadingClient ? (
+            <div className="space-y-4 py-8">
+              <Skeleton className="h-8 w-48 mx-auto" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+          ) : selectedClient ? (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-serif text-2xl flex items-center gap-3">
+                  {selectedClient.name}
+                  {selectedClient.tags?.includes("vip") && (
+                    <Badge className="bg-amber-100 text-amber-800 border-amber-200">VIP</Badge>
+                  )}
+                </DialogTitle>
+              </DialogHeader>
+
+              {/* Contact Info */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 py-4 border-b">
+                {selectedClient.phone && (
+                  <a
+                    href={`tel:${selectedClient.phone}`}
+                    className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    <Phone className="w-4 h-4 text-rose-gold" />
+                    <span className="text-sm">{selectedClient.phone}</span>
+                  </a>
+                )}
+                {selectedClient.email && (
+                  <a
+                    href={`mailto:${selectedClient.email}`}
+                    className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    <Mail className="w-4 h-4 text-rose-gold" />
+                    <span className="text-sm truncate">{selectedClient.email}</span>
+                  </a>
+                )}
+                {selectedClient.instagram && (
+                  <a
+                    href={`https://instagram.com/${selectedClient.instagram.replace("@", "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    <Instagram className="w-4 h-4 text-rose-gold" />
+                    <span className="text-sm">@{selectedClient.instagram.replace("@", "")}</span>
+                  </a>
+                )}
+              </div>
+
+              {/* Stats */}
+              {(() => {
+                const stats = getClientStats(selectedClient);
+                return (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-4 border-b">
+                    <div className="text-center p-3 rounded-lg bg-rose-light/30">
+                      <div className="flex items-center justify-center gap-1 text-rose-gold mb-1">
+                        <DollarSign className="w-4 h-4" />
+                      </div>
+                      <p className="text-lg font-bold">R$ {stats.totalSpent.toFixed(0)}</p>
+                      <p className="text-xs text-muted-foreground">Total gasto</p>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-blue-50">
+                      <div className="flex items-center justify-center gap-1 text-blue-600 mb-1">
+                        <Calendar className="w-4 h-4" />
+                      </div>
+                      <p className="text-lg font-bold">{stats.totalBookings}</p>
+                      <p className="text-xs text-muted-foreground">Agendamentos</p>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-green-50">
+                      <div className="flex items-center justify-center gap-1 text-green-600 mb-1">
+                        <Sparkles className="w-4 h-4" />
+                      </div>
+                      <p className="text-lg font-bold">{stats.completedBookings}</p>
+                      <p className="text-xs text-muted-foreground">Concluídos</p>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-purple-50">
+                      <div className="flex items-center justify-center gap-1 text-purple-600 mb-1">
+                        <Clock className="w-4 h-4" />
+                      </div>
+                      <p className="text-lg font-bold">{stats.upcomingBookings}</p>
+                      <p className="text-xs text-muted-foreground">Próximos</p>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Tags Section */}
+              <div className="py-4 border-b">
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <Tag className="w-4 h-4" />
+                  Tags
+                </h4>
+                <div className="flex flex-wrap items-center gap-2">
+                  {selectedClient.tags?.map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="outline"
+                      className={`${getTagColor(tag)} pr-1`}
+                    >
+                      {tag}
+                      <button
+                        onClick={() => handleRemoveTag(selectedClient.id, selectedClient.tags || [], tag)}
+                        className="ml-1 hover:text-red-600"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                      placeholder="Nova tag"
+                      className="h-7 text-xs w-24"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleAddTag(selectedClient.id, selectedClient.tags || []);
+                        }
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2"
+                      onClick={() => handleAddTag(selectedClient.id, selectedClient.tags || [])}
+                    >
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Booking History */}
+              <div className="py-4">
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Histórico de Agendamentos
+                </h4>
+                {selectedClient.bookings?.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">
+                    Nenhum agendamento encontrado
+                  </p>
+                ) : (
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {selectedClient.bookings?.map((booking) => (
+                      <div
+                        key={booking.id}
+                        className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div>
+                            <p className="text-sm font-medium">
+                              {booking.services?.name || booking.packages?.name || "Serviço"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(booking.start_time), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {booking.total_price && (
+                            <span className="text-sm font-medium">
+                              R$ {booking.total_price.toFixed(0)}
+                            </span>
+                          )}
+                          <Badge className={`text-xs ${statusColors[booking.status] || "bg-gray-100"}`}>
+                            {statusLabels[booking.status] || booking.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer Info */}
+              <div className="text-xs text-muted-foreground text-center pt-4 border-t">
+                Cliente desde {format(new Date(selectedClient.created_at), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                {selectedClient.last_visit_at && (
+                  <> • Última visita em {format(new Date(selectedClient.last_visit_at), "dd/MM/yyyy", { locale: ptBR })}</>
+                )}
+              </div>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
