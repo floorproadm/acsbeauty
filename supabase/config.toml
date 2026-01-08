@@ -1,1 +1,16 @@
 project_id = "jendyjqowldjzkityjse"
+
+[functions.calendar-availability]
+verify_jwt = false
+
+[functions.calendar-hold]
+verify_jwt = false
+
+[functions.calendar-confirm-booking]
+verify_jwt = false
+
+[functions.calendar-cancel-booking]
+verify_jwt = false
+
+[functions.calendar-reschedule-booking]
+verify_jwt = false
