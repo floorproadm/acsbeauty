@@ -10,20 +10,20 @@ export function ServicesPreview() {
   const services = [
     {
       icon: Scissors,
-      titleKey: "service_hair",
-      descKey: "service_hair_desc",
+      titleKey: "home.services.hair",
+      descKey: "home.services.hair_desc",
       image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=600&q=80",
     },
     {
       icon: Eye,
-      titleKey: "service_brows",
-      descKey: "service_brows_desc",
+      titleKey: "home.services.brows",
+      descKey: "home.services.brows_desc",
       image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80",
     },
     {
       icon: Sparkles,
-      titleKey: "service_nails",
-      descKey: "service_nails_desc",
+      titleKey: "home.services.nails",
+      descKey: "home.services.nails_desc",
       image: "https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=600&q=80",
     },
   ];
@@ -40,13 +40,13 @@ export function ServicesPreview() {
           className="text-center max-w-2xl mx-auto mb-12 md:mb-16"
         >
           <span className="inline-block text-sm font-medium tracking-wider text-rose-gold uppercase mb-4">
-            {t("services_badge")}
+            {t("home.services.badge")}
           </span>
           <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6">
-            {t("services_title")}
+            {t("home.services.title")}
           </h2>
           <p className="text-muted-foreground text-base md:text-lg">
-            {t("services_description")}
+            {t("home.services.description")}
           </p>
         </motion.div>
 
@@ -93,7 +93,7 @@ export function ServicesPreview() {
         >
           <Link to="/services">
             <Button variant="hero" size="lg" className="group w-full sm:w-auto">
-              {t("view_our_offers")}
+              {t("home.services.view_offers")}
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>

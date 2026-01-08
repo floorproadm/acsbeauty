@@ -5,7 +5,7 @@ type Language = "en" | "pt";
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, vars?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -14,354 +14,320 @@ const STORAGE_KEY = "acs_lang";
 
 const translations: Record<Language, Record<string, string>> = {
   en: {
-    // Core UI Strings
-    book_now: "Book Now",
-    view_offers: "View Offers",
-    view_packages: "View Offers",
-    buy_package: "Buy Offer",
-    confirm_booking: "Confirm Booking",
-    booking_confirmed: "Booking Confirmed!",
-    select_date_time: "Select Date & Time",
-    full_name: "Full Name",
-    phone_number: "Phone Number",
-    instagram_optional: "Instagram (optional)",
-    back: "Back",
-    limited_spots: "Limited Spots",
-    save_more: "Save More",
-    
-    // Header & Navigation
-    nav_services: "Services",
-    nav_packages: "Packages",
-    nav_about: "About",
-    nav_contact: "Contact",
-    sign_in: "Sign In",
-    
-    // Hero Section
-    hero_badge: "Premium Beauty Studio",
-    hero_title_1: "Hair, Brows & Nails",
-    hero_title_2: "with Technique & Sophistication",
-    hero_description: "We enhance your natural beauty with specialized hair, brow, and nail services, offering personalized care in an elegant and welcoming environment.",
-    hero_cta_offers: "View Special Offers",
-    hero_cta_services: "Book Now",
-    stat_years: "Years Experience",
-    stat_clients: "Happy Clients",
-    stat_treatments: "Treatments",
-    premium_care: "Premium Care",
-    personalized_treatments: "Personalized treatments",
-    
-    // Services Preview - 3 Pillars
-    services_badge: "Our Expertise",
-    services_title: "Specialized Treatments for You",
-    services_description: "Premium services focused on results, aesthetics, and recurring care.",
-    service_hair: "Hair",
-    service_hair_desc: "Color, treatments, styling, and personalized care to enhance your identity.",
-    service_hair_cta: "View Hair Services",
-    service_brows: "Brows",
-    service_brows_desc: "Design, henna, and definition to enhance your look with balance and naturalness.",
-    service_brows_cta: "View Brow Services",
-    service_nails: "Nails",
-    service_nails_desc: "Manicure, gel, and complete care for flawless nails every day.",
-    service_nails_cta: "View Nail Services",
-    view_all_services: "View All Services",
-    
-    // Packages Preview (now "Special Offers")
-    packages_badge: "Special Offers",
-    packages_title: "Special Offers to Enhance Your Beauty",
-    packages_description: "Exclusive conditions for you to care for your hair, brows, and nails with quality and sophistication.",
-    most_popular: "Most Popular",
-    sessions_included: "sessions included",
-    book_this_package: "Book This Offer",
-    book_this_offer: "Book This Offer",
-    view_all_packages: "View All Offers",
-    
-    // Testimonials
-    testimonials_badge: "Testimonials",
-    testimonials_title: "What Our Clients Say",
-    testimonials_description: "Real stories from real clients who have experienced the ACS Beauty difference.",
-    
-    // CTA Section
-    cta_title_1: "Ready to Be Cared for by",
-    cta_title_2: "Specialist Professionals?",
-    cta_description: "Book your appointment and experience the ACS Beauty difference in hair, brows, and nails.",
-    view_our_offers: "View Special Offers",
-    contact_us: "Contact Us",
-    
-    // Footer
-    footer_description: "Elevating beauty through exceptional service, expertise, and a commitment to helping you look and feel your absolute best.",
-    quick_links: "Quick Links",
-    book_appointment: "Book Appointment",
-    about_us: "About Us",
-    our_services: "Our Services",
-    contact_us_title: "Contact Us",
-    privacy_policy: "Privacy Policy",
-    terms_of_service: "Terms of Service",
-    all_rights_reserved: "All rights reserved.",
-    
-    // Services Page
-    services_page_badge: "Start Your Journey",
-    services_page_title: "Our Special Offers",
-    services_page_description: "Begin your skincare journey with our introductory offers designed for new clients.",
-    new_client_special: "New Client Special",
-    free_consultation: "Free Consultation",
-    learn_more: "Learn More",
-    view_our_packages: "View Our Offers",
-    
-    // Packages Page (now "Special Offers")
-    packages_page_badge: "Special Offers",
-    packages_page_title: "Special Offers",
-    packages_page_description: "Commit to your beauty journey and save with our curated special offers.",
-    view_package: "View Offer",
-    
-    // Offer Landing
-    back_to_offers: "Back to Offers",
-    treatment_details: "Treatment Details",
-    minutes: "minutes",
-    book_anytime: "Book anytime",
-    offer_not_found: "Offer Not Found",
-    offer_not_found_desc: "This offer may have expired or is no longer available.",
-    view_all_offers: "View All Offers",
-    
-    // Package Landing (now "Special Offers")
-    back_to_packages: "Back to Offers",
-    treatment_package: "Special Offer",
-    save: "Save",
-    package_includes: "Package Includes",
-    treatment_sessions: "treatment sessions",
-    valid_for_days: "Valid for",
-    days: "days",
-    stripe_coming_soon: "Stripe integration coming soon",
-    book_using_package: "Book Using Existing Package",
-    package_not_found: "Package Not Found",
-    package_not_found_desc: "This package may no longer be available.",
-    
-    // Book Page
-    book_appointment_badge: "Book Appointment",
-    complete_booking: "Complete Your Booking",
-    booking: "Booking",
-    your_full_name: "Your full name",
-    instagram_handle: "Instagram Handle (optional)",
-    processing: "Processing...",
-    contact_to_schedule: "We will contact you to schedule the exact appointment time.",
-    
-    // Booking Success
-    booking_success_message: "Thank you for booking. We will contact you shortly to confirm your appointment time.",
-    return_home: "Return Home",
-    
-    // Validation
-    name_min_error: "Name must be at least 2 characters",
-    phone_error: "Please enter a valid phone number",
-    
-    // About Page
-    about_badge: "Our Story",
-    about_hero_title: "Where Beauty Meets Excellence",
-    about_hero_description: "For over a decade, ACS Beauty has been transforming lives through personalized skincare and aesthetic treatments.",
-    about_founder_badge: "Meet the Founder",
-    about_founder_title: "A Passion for Beauty",
-    about_founder_text_1: "With over 15 years of experience in the beauty industry, our founder built ACS Beauty on the belief that everyone deserves to feel confident in their own skin.",
-    about_founder_text_2: "What started as a small studio has grown into a trusted destination for clients seeking premium skincare treatments and personalized care.",
-    about_founder_image_placeholder: "Founder photo coming soon",
-    about_pillars_title: "Our Pillars",
-    about_pillars_description: "The values that guide everything we do.",
-    about_pillar_excellence_title: "Excellence",
-    about_pillar_excellence_desc: "We use only the finest products and cutting-edge techniques to deliver exceptional results.",
-    about_pillar_care_title: "Personal Care",
-    about_pillar_care_desc: "Every treatment is tailored to your unique needs, because your skin deserves individual attention.",
-    about_pillar_trust_title: "Trust",
-    about_pillar_trust_desc: "Building lasting relationships through transparency, honesty, and consistent results.",
-    about_location_title: "Visit Us",
-    about_location_description: "Located in the heart of the city, our studio offers a tranquil escape where you can relax and rejuvenate.",
-    about_cta_title: "Ready to Experience the Difference?",
-    about_cta_description: "Book your appointment today and discover why our clients trust us with their skincare journey.",
-    
-    // Contact Page
-    contact_badge: "Get in Touch",
-    contact_hero_title: "We'd Love to Hear from You",
-    contact_hero_description: "Have questions or ready to book? Reach out to us through any of the channels below.",
-    contact_phone_title: "Phone",
-    contact_email_title: "Email",
-    contact_address_title: "Address",
-    contact_hours_title: "Opening Hours",
-    contact_hours_mon_fri: "Monday - Friday",
-    contact_hours_saturday: "Saturday",
-    contact_hours_sunday: "Sunday",
-    contact_map_placeholder: "Map integration coming soon",
-    contact_cta_title: "Ready to Book Your Appointment?",
-    contact_cta_description: "Schedule your treatment today and take the first step towards radiant skin.",
+    // ========== GLOBAL ==========
+    "global.book_now": "Book Now",
+    "global.back": "Back",
+    "global.learn_more": "Learn More",
+    "global.view_offers": "View Offers",
+    "global.view_all_offers": "View All Offers",
+    "global.contact_us": "Contact Us",
+    "global.processing": "Processing...",
+    "global.minutes": "minutes",
+    "global.days": "days",
+    "global.save": "Save",
+    "global.most_popular": "Most Popular",
+    "global.all_rights_reserved": "All rights reserved.",
+    "global.copyright": "© {year} ACS Beauty. All rights reserved.",
+
+    // ========== NAV ==========
+    "nav.services": "Services",
+    "nav.packages": "Packages",
+    "nav.about": "About",
+    "nav.contact": "Contact",
+    "nav.sign_in": "Sign In",
+
+    // ========== FOOTER ==========
+    "footer.description": "Elevating beauty through exceptional service, expertise, and a commitment to helping you look and feel your absolute best.",
+    "footer.quick_links": "Quick Links",
+    "footer.book_appointment": "Book Appointment",
+    "footer.about_us": "About Us",
+    "footer.our_services": "Our Services",
+    "footer.contact_us": "Contact Us",
+    "footer.privacy_policy": "Privacy Policy",
+    "footer.terms_of_service": "Terms of Service",
+
+    // ========== HOME ==========
+    "home.hero.badge": "Premium Beauty Studio",
+    "home.hero.title_1": "Hair, Brows & Nails",
+    "home.hero.title_2": "with Technique & Sophistication",
+    "home.hero.description": "We enhance your natural beauty with specialized hair, brow, and nail services, offering personalized care in an elegant and welcoming environment.",
+    "home.hero.cta_offers": "View Special Offers",
+    "home.hero.cta_services": "Book Now",
+    "home.hero.stat_years": "Years Experience",
+    "home.hero.stat_clients": "Happy Clients",
+    "home.hero.stat_treatments": "Treatments",
+    "home.hero.premium_care": "Premium Care",
+    "home.hero.personalized_treatments": "Personalized treatments",
+
+    "home.services.badge": "Our Expertise",
+    "home.services.title": "Specialized Treatments for You",
+    "home.services.description": "Premium services focused on results, aesthetics, and recurring care.",
+    "home.services.hair": "Hair",
+    "home.services.hair_desc": "Color, treatments, styling, and personalized care to enhance your identity.",
+    "home.services.brows": "Brows",
+    "home.services.brows_desc": "Design, henna, and definition to enhance your look with balance and naturalness.",
+    "home.services.nails": "Nails",
+    "home.services.nails_desc": "Manicure, gel, and complete care for flawless nails every day.",
+    "home.services.view_offers": "View Our Offers",
+
+    "home.packages.badge": "Special Offers",
+    "home.packages.title": "Special Offers to Enhance Your Beauty",
+    "home.packages.description": "Exclusive conditions for you to care for your hair, brows, and nails with quality and sophistication.",
+    "home.packages.book_offer": "Book This Offer",
+    "home.packages.view_all": "View All Offers",
+
+    "home.testimonials.badge": "Testimonials",
+    "home.testimonials.title": "What Our Clients Say",
+    "home.testimonials.description": "Real stories from real clients who have experienced the ACS Beauty difference.",
+
+    "home.cta.title_1": "Ready to Be Cared for by",
+    "home.cta.title_2": "Specialist Professionals?",
+    "home.cta.description": "Book your appointment and experience the ACS Beauty difference in hair, brows, and nails.",
+    "home.cta.view_offers": "View Special Offers",
+
+    // ========== SERVICES PAGE ==========
+    "services.badge": "Start Your Journey",
+    "services.title": "Our Special Offers",
+    "services.description": "Begin your skincare journey with our introductory offers designed for new clients.",
+    "services.new_client_special": "New Client Special",
+    "services.free_consultation": "Free Consultation",
+    "services.view_packages": "View Our Offers",
+
+    // ========== OFFERS ==========
+    "offers.back": "Back to Offers",
+    "offers.treatment_details": "Treatment Details",
+    "offers.book_anytime": "Book anytime",
+    "offers.not_found": "Offer Not Found",
+    "offers.not_found_desc": "This offer may have expired or is no longer available.",
+
+    // ========== PACKAGES PAGE ==========
+    "packages.badge": "Special Offers",
+    "packages.title": "Special Offers",
+    "packages.description": "Commit to your beauty journey and save with our curated special offers.",
+    "packages.view_offer": "View Offer",
+    "packages.sessions_included": "{n} sessions included",
+
+    // ========== PACKAGE LANDING ==========
+    "packages.back": "Back to Offers",
+    "packages.treatment_package": "Special Offer",
+    "packages.includes": "Package Includes",
+    "packages.treatment_sessions": "{n} treatment sessions",
+    "packages.valid_for": "Valid for {n} days",
+    "packages.buy": "Buy Offer",
+    "packages.stripe_coming_soon": "Stripe integration coming soon",
+    "packages.book_using": "Book Using Existing Package",
+    "packages.not_found": "Package Not Found",
+    "packages.not_found_desc": "This package may no longer be available.",
+
+    // ========== BOOKING ==========
+    "booking.badge": "Book Appointment",
+    "booking.title": "Complete Your Booking",
+    "booking.for": "Booking",
+    "booking.full_name": "Full Name",
+    "booking.full_name_placeholder": "Your full name",
+    "booking.phone": "Phone Number",
+    "booking.instagram": "Instagram Handle (optional)",
+    "booking.confirm": "Confirm Booking",
+    "booking.contact_schedule": "We will contact you to schedule the exact appointment time.",
+    "booking.success_title": "Booking Confirmed!",
+    "booking.success_message": "Thank you for booking. We will contact you shortly to confirm your appointment time.",
+    "booking.return_home": "Return Home",
+    "booking.name_min_error": "Name must be at least 2 characters",
+    "booking.phone_error": "Please enter a valid phone number",
+
+    // ========== ABOUT PAGE ==========
+    "about.badge": "Our Story",
+    "about.hero_title": "Where Beauty Meets Excellence",
+    "about.hero_description": "For over a decade, ACS Beauty has been transforming lives through personalized skincare and aesthetic treatments.",
+    "about.founder_badge": "Meet the Founder",
+    "about.founder_title": "A Passion for Beauty",
+    "about.founder_text_1": "With over 15 years of experience in the beauty industry, our founder built ACS Beauty on the belief that everyone deserves to feel confident in their own skin.",
+    "about.founder_text_2": "What started as a small studio has grown into a trusted destination for clients seeking premium skincare treatments and personalized care.",
+    "about.pillars_title": "Our Pillars",
+    "about.pillars_description": "The values that guide everything we do.",
+    "about.pillar_excellence_title": "Excellence",
+    "about.pillar_excellence_desc": "We use only the finest products and cutting-edge techniques to deliver exceptional results.",
+    "about.pillar_care_title": "Personal Care",
+    "about.pillar_care_desc": "Every treatment is tailored to your unique needs, because your skin deserves individual attention.",
+    "about.pillar_trust_title": "Trust",
+    "about.pillar_trust_desc": "Building lasting relationships through transparency, honesty, and consistent results.",
+    "about.location_title": "Visit Us",
+    "about.location_description": "Located in the heart of the city, our studio offers a tranquil escape where you can relax and rejuvenate.",
+    "about.cta_title": "Ready to Experience the Difference?",
+    "about.cta_description": "Book your appointment today and discover why our clients trust us with their skincare journey.",
+
+    // ========== CONTACT PAGE ==========
+    "contact.badge": "Get in Touch",
+    "contact.hero_title": "We'd Love to Hear from You",
+    "contact.hero_description": "Have questions or ready to book? Reach out to us through any of the channels below.",
+    "contact.phone_title": "Phone",
+    "contact.email_title": "Email",
+    "contact.address_title": "Address",
+    "contact.hours_title": "Opening Hours",
+    "contact.hours_mon_fri": "Monday - Friday",
+    "contact.hours_saturday": "Saturday",
+    "contact.hours_sunday": "Sunday",
+    "contact.map_placeholder": "Map integration coming soon",
+    "contact.cta_title": "Ready to Book Your Appointment?",
+    "contact.cta_description": "Schedule your treatment today and take the first step towards radiant skin.",
   },
   pt: {
-    // Core UI Strings
-    book_now: "Agendar",
-    view_offers: "Ver Ofertas",
-    view_packages: "Ver Ofertas",
-    buy_package: "Comprar Oferta",
-    confirm_booking: "Confirmar Agendamento",
-    booking_confirmed: "Agendamento Confirmado!",
-    select_date_time: "Escolha Data e Horário",
-    full_name: "Nome Completo",
-    phone_number: "Telefone",
-    instagram_optional: "Instagram (opcional)",
-    back: "Voltar",
-    limited_spots: "Vagas Limitadas",
-    save_more: "Economize Mais",
-    
-    // Header & Navigation
-    nav_services: "Serviços",
-    nav_packages: "Pacotes",
-    nav_about: "Sobre",
-    nav_contact: "Contato",
-    sign_in: "Entrar",
-    
-    // Hero Section
-    hero_badge: "Estúdio de Beleza Premium",
-    hero_title_1: "Cabelo, Sobrancelhas e Unhas",
-    hero_title_2: "com Técnica e Sofisticação",
-    hero_description: "Realçamos sua beleza natural com serviços especializados em cabelo, sobrancelhas e unhas, oferecendo atendimento personalizado em um ambiente elegante e acolhedor.",
-    hero_cta_offers: "Ver Ofertas Especiais",
-    hero_cta_services: "Agendar Horário",
-    stat_years: "Anos de Experiência",
-    stat_clients: "Clientes Satisfeitas",
-    stat_treatments: "Tratamentos",
-    premium_care: "Cuidado Premium",
-    personalized_treatments: "Tratamentos personalizados",
-    
-    // Services Preview - 3 Pillars
-    services_badge: "Nossa Especialidade",
-    services_title: "Tratamentos Especializados para Você",
-    services_description: "Serviços premium focados em resultado, estética e recorrência.",
-    service_hair: "Cabelo",
-    service_hair_desc: "Coloração, tratamentos, finalização e cuidados personalizados para realçar sua identidade.",
-    service_hair_cta: "Ver Serviços de Cabelo",
-    service_brows: "Sobrancelhas",
-    service_brows_desc: "Design, henna e definição para valorizar seu olhar com equilíbrio e naturalidade.",
-    service_brows_cta: "Ver Serviços de Sobrancelhas",
-    service_nails: "Unhas",
-    service_nails_desc: "Manicure, gel e cuidados completos para unhas impecáveis no dia a dia.",
-    service_nails_cta: "Ver Serviços de Unhas",
-    view_all_services: "Ver Todos os Serviços",
-    
-    // Packages Preview (now "Ofertas Especiais")
-    packages_badge: "Ofertas Especiais",
-    packages_title: "Ofertas Especiais para Realçar Sua Beleza",
-    packages_description: "Condições exclusivas para você cuidar do cabelo, das sobrancelhas e das unhas com qualidade e sofisticação.",
-    most_popular: "Mais Popular",
-    sessions_included: "sessões incluídas",
-    book_this_package: "Agendar Esta Oferta",
-    book_this_offer: "Agendar Esta Oferta",
-    view_all_packages: "Ver Todas as Ofertas",
-    
-    // Testimonials
-    testimonials_badge: "Depoimentos",
-    testimonials_title: "O Que Nossas Clientes Dizem",
-    testimonials_description: "Histórias reais de clientes que vivenciaram a diferença ACS Beauty.",
-    
-    // CTA Section
-    cta_title_1: "Pronta para Cuidar de Você com",
-    cta_title_2: "Profissionais Especialistas?",
-    cta_description: "Agende seu horário e viva a experiência ACS Beauty em cabelo, sobrancelhas e unhas.",
-    view_our_offers: "Ver Ofertas Especiais",
-    contact_us: "Fale Conosco",
-    
-    // Footer
-    footer_description: "Elevando a beleza através de um serviço excepcional, expertise e compromisso em ajudá-la a se sentir incrível.",
-    quick_links: "Links Rápidos",
-    book_appointment: "Agendar Horário",
-    about_us: "Sobre Nós",
-    our_services: "Nossos Serviços",
-    contact_us_title: "Contato",
-    privacy_policy: "Política de Privacidade",
-    terms_of_service: "Termos de Uso",
-    all_rights_reserved: "Todos os direitos reservados.",
-    
-    // Services Page
-    services_page_badge: "Comece Sua Jornada",
-    services_page_title: "Nossas Ofertas Especiais",
-    services_page_description: "Comece sua jornada de cuidados com a pele com nossas ofertas introdutórias para novas clientes.",
-    new_client_special: "Especial Primeira Visita",
-    free_consultation: "Consulta Gratuita",
-    learn_more: "Saiba Mais",
-    view_our_packages: "Ver Nossas Ofertas",
-    
-    // Packages Page (now "Ofertas Especiais")
-    packages_page_badge: "Ofertas Especiais",
-    packages_page_title: "Ofertas Especiais",
-    packages_page_description: "Comprometa-se com sua jornada de beleza e economize com nossas ofertas especiais.",
-    view_package: "Ver Oferta",
-    
-    // Offer Landing
-    back_to_offers: "Voltar para Ofertas",
-    treatment_details: "Detalhes do Tratamento",
-    minutes: "minutos",
-    book_anytime: "Agende quando quiser",
-    offer_not_found: "Oferta Não Encontrada",
-    offer_not_found_desc: "Esta oferta pode ter expirado ou não está mais disponível.",
-    view_all_offers: "Ver Todas as Ofertas",
-    
-    // Package Landing (now "Ofertas Especiais")
-    back_to_packages: "Voltar para Ofertas",
-    treatment_package: "Oferta Especial",
-    save: "Economize",
-    package_includes: "O Pacote Inclui",
-    treatment_sessions: "sessões de tratamento",
-    valid_for_days: "Válido por",
-    days: "dias",
-    stripe_coming_soon: "Integração com pagamento em breve",
-    book_using_package: "Agendar com Pacote Existente",
-    package_not_found: "Pacote Não Encontrado",
-    package_not_found_desc: "Este pacote pode não estar mais disponível.",
-    
-    // Book Page
-    book_appointment_badge: "Agendar Horário",
-    complete_booking: "Complete Seu Agendamento",
-    booking: "Agendando",
-    your_full_name: "Seu nome completo",
-    instagram_handle: "Instagram (opcional)",
-    processing: "Processando...",
-    contact_to_schedule: "Entraremos em contato para confirmar o horário exato.",
-    
-    // Booking Success
-    booking_success_message: "Obrigada por agendar. Entraremos em contato em breve para confirmar o horário.",
-    return_home: "Voltar ao Início",
-    
-    // Validation
-    name_min_error: "Nome deve ter pelo menos 2 caracteres",
-    phone_error: "Por favor, insira um telefone válido",
-    
-    // About Page
-    about_badge: "Nossa História",
-    about_hero_title: "Onde Beleza Encontra Excelência",
-    about_hero_description: "Há mais de uma década, a ACS Beauty transforma vidas através de tratamentos estéticos e cuidados personalizados com a pele.",
-    about_founder_badge: "Conheça a Fundadora",
-    about_founder_title: "Uma Paixão pela Beleza",
-    about_founder_text_1: "Com mais de 15 anos de experiência no mercado de beleza, nossa fundadora criou a ACS Beauty com a crença de que todos merecem se sentir confiantes em sua própria pele.",
-    about_founder_text_2: "O que começou como um pequeno estúdio cresceu e se tornou um destino de confiança para clientes que buscam tratamentos premium e cuidado personalizado.",
-    about_founder_image_placeholder: "Foto da fundadora em breve",
-    about_pillars_title: "Nossos Pilares",
-    about_pillars_description: "Os valores que guiam tudo o que fazemos.",
-    about_pillar_excellence_title: "Excelência",
-    about_pillar_excellence_desc: "Utilizamos apenas os melhores produtos e técnicas avançadas para entregar resultados excepcionais.",
-    about_pillar_care_title: "Cuidado Pessoal",
-    about_pillar_care_desc: "Cada tratamento é personalizado para suas necessidades únicas, porque sua pele merece atenção individual.",
-    about_pillar_trust_title: "Confiança",
-    about_pillar_trust_desc: "Construímos relacionamentos duradouros através de transparência, honestidade e resultados consistentes.",
-    about_location_title: "Visite-nos",
-    about_location_description: "Localizado no coração da cidade, nosso estúdio oferece um refúgio tranquilo onde você pode relaxar e rejuvenescer.",
-    about_cta_title: "Pronta para Experimentar a Diferença?",
-    about_cta_description: "Agende seu horário hoje e descubra por que nossas clientes confiam em nós para sua jornada de cuidados.",
-    
-    // Contact Page
-    contact_badge: "Fale Conosco",
-    contact_hero_title: "Adoraríamos Ouvir Você",
-    contact_hero_description: "Tem dúvidas ou quer agendar? Entre em contato por qualquer um dos canais abaixo.",
-    contact_phone_title: "Telefone",
-    contact_email_title: "E-mail",
-    contact_address_title: "Endereço",
-    contact_hours_title: "Horário de Funcionamento",
-    contact_hours_mon_fri: "Segunda a Sexta",
-    contact_hours_saturday: "Sábado",
-    contact_hours_sunday: "Domingo",
-    contact_map_placeholder: "Integração com mapa em breve",
-    contact_cta_title: "Pronta para Agendar?",
-    contact_cta_description: "Marque seu tratamento hoje e dê o primeiro passo para uma pele radiante.",
+    // ========== GLOBAL ==========
+    "global.book_now": "Agendar",
+    "global.back": "Voltar",
+    "global.learn_more": "Saiba Mais",
+    "global.view_offers": "Ver Ofertas",
+    "global.view_all_offers": "Ver Todas as Ofertas",
+    "global.contact_us": "Fale Conosco",
+    "global.processing": "Processando...",
+    "global.minutes": "minutos",
+    "global.days": "dias",
+    "global.save": "Economize",
+    "global.most_popular": "Mais Popular",
+    "global.all_rights_reserved": "Todos os direitos reservados.",
+    "global.copyright": "© {year} ACS Beauty. Todos os direitos reservados.",
+
+    // ========== NAV ==========
+    "nav.services": "Serviços",
+    "nav.packages": "Pacotes",
+    "nav.about": "Sobre",
+    "nav.contact": "Contato",
+    "nav.sign_in": "Entrar",
+
+    // ========== FOOTER ==========
+    "footer.description": "Elevando a beleza através de um serviço excepcional, expertise e compromisso em ajudá-la a se sentir incrível.",
+    "footer.quick_links": "Links Rápidos",
+    "footer.book_appointment": "Agendar Horário",
+    "footer.about_us": "Sobre Nós",
+    "footer.our_services": "Nossos Serviços",
+    "footer.contact_us": "Contato",
+    "footer.privacy_policy": "Política de Privacidade",
+    "footer.terms_of_service": "Termos de Uso",
+
+    // ========== HOME ==========
+    "home.hero.badge": "Estúdio de Beleza Premium",
+    "home.hero.title_1": "Cabelo, Sobrancelhas e Unhas",
+    "home.hero.title_2": "com Técnica e Sofisticação",
+    "home.hero.description": "Realçamos sua beleza natural com serviços especializados em cabelo, sobrancelhas e unhas, oferecendo atendimento personalizado em um ambiente elegante e acolhedor.",
+    "home.hero.cta_offers": "Ver Ofertas Especiais",
+    "home.hero.cta_services": "Agendar Horário",
+    "home.hero.stat_years": "Anos de Experiência",
+    "home.hero.stat_clients": "Clientes Satisfeitas",
+    "home.hero.stat_treatments": "Tratamentos",
+    "home.hero.premium_care": "Cuidado Premium",
+    "home.hero.personalized_treatments": "Tratamentos personalizados",
+
+    "home.services.badge": "Nossa Especialidade",
+    "home.services.title": "Tratamentos Especializados para Você",
+    "home.services.description": "Serviços premium focados em resultado, estética e recorrência.",
+    "home.services.hair": "Cabelo",
+    "home.services.hair_desc": "Coloração, tratamentos, finalização e cuidados personalizados para realçar sua identidade.",
+    "home.services.brows": "Sobrancelhas",
+    "home.services.brows_desc": "Design, henna e definição para valorizar seu olhar com equilíbrio e naturalidade.",
+    "home.services.nails": "Unhas",
+    "home.services.nails_desc": "Manicure, gel e cuidados completos para unhas impecáveis no dia a dia.",
+    "home.services.view_offers": "Ver Nossas Ofertas",
+
+    "home.packages.badge": "Ofertas Especiais",
+    "home.packages.title": "Ofertas Especiais para Realçar Sua Beleza",
+    "home.packages.description": "Condições exclusivas para você cuidar do cabelo, das sobrancelhas e das unhas com qualidade e sofisticação.",
+    "home.packages.book_offer": "Agendar Esta Oferta",
+    "home.packages.view_all": "Ver Todas as Ofertas",
+
+    "home.testimonials.badge": "Depoimentos",
+    "home.testimonials.title": "O Que Nossas Clientes Dizem",
+    "home.testimonials.description": "Histórias reais de clientes que vivenciaram a diferença ACS Beauty.",
+
+    "home.cta.title_1": "Pronta para Cuidar de Você com",
+    "home.cta.title_2": "Profissionais Especialistas?",
+    "home.cta.description": "Agende seu horário e viva a experiência ACS Beauty em cabelo, sobrancelhas e unhas.",
+    "home.cta.view_offers": "Ver Ofertas Especiais",
+
+    // ========== SERVICES PAGE ==========
+    "services.badge": "Comece Sua Jornada",
+    "services.title": "Nossas Ofertas Especiais",
+    "services.description": "Comece sua jornada de cuidados com a pele com nossas ofertas introdutórias para novas clientes.",
+    "services.new_client_special": "Especial Primeira Visita",
+    "services.free_consultation": "Consulta Gratuita",
+    "services.view_packages": "Ver Nossas Ofertas",
+
+    // ========== OFFERS ==========
+    "offers.back": "Voltar para Ofertas",
+    "offers.treatment_details": "Detalhes do Tratamento",
+    "offers.book_anytime": "Agende quando quiser",
+    "offers.not_found": "Oferta Não Encontrada",
+    "offers.not_found_desc": "Esta oferta pode ter expirado ou não está mais disponível.",
+
+    // ========== PACKAGES PAGE ==========
+    "packages.badge": "Ofertas Especiais",
+    "packages.title": "Ofertas Especiais",
+    "packages.description": "Comprometa-se com sua jornada de beleza e economize com nossas ofertas especiais.",
+    "packages.view_offer": "Ver Oferta",
+    "packages.sessions_included": "{n} sessões incluídas",
+
+    // ========== PACKAGE LANDING ==========
+    "packages.back": "Voltar para Ofertas",
+    "packages.treatment_package": "Oferta Especial",
+    "packages.includes": "O Pacote Inclui",
+    "packages.treatment_sessions": "{n} sessões de tratamento",
+    "packages.valid_for": "Válido por {n} dias",
+    "packages.buy": "Comprar Oferta",
+    "packages.stripe_coming_soon": "Integração com pagamento em breve",
+    "packages.book_using": "Agendar com Pacote Existente",
+    "packages.not_found": "Pacote Não Encontrado",
+    "packages.not_found_desc": "Este pacote pode não estar mais disponível.",
+
+    // ========== BOOKING ==========
+    "booking.badge": "Agendar Horário",
+    "booking.title": "Complete Seu Agendamento",
+    "booking.for": "Agendando",
+    "booking.full_name": "Nome Completo",
+    "booking.full_name_placeholder": "Seu nome completo",
+    "booking.phone": "Telefone",
+    "booking.instagram": "Instagram (opcional)",
+    "booking.confirm": "Confirmar Agendamento",
+    "booking.contact_schedule": "Entraremos em contato para confirmar o horário exato.",
+    "booking.success_title": "Agendamento Confirmado!",
+    "booking.success_message": "Obrigada por agendar. Entraremos em contato em breve para confirmar o horário.",
+    "booking.return_home": "Voltar ao Início",
+    "booking.name_min_error": "Nome deve ter pelo menos 2 caracteres",
+    "booking.phone_error": "Por favor, insira um telefone válido",
+
+    // ========== ABOUT PAGE ==========
+    "about.badge": "Nossa História",
+    "about.hero_title": "Onde Beleza Encontra Excelência",
+    "about.hero_description": "Há mais de uma década, a ACS Beauty transforma vidas através de tratamentos estéticos e cuidados personalizados com a pele.",
+    "about.founder_badge": "Conheça a Fundadora",
+    "about.founder_title": "Uma Paixão pela Beleza",
+    "about.founder_text_1": "Com mais de 15 anos de experiência no mercado de beleza, nossa fundadora criou a ACS Beauty com a crença de que todos merecem se sentir confiantes em sua própria pele.",
+    "about.founder_text_2": "O que começou como um pequeno estúdio cresceu e se tornou um destino de confiança para clientes que buscam tratamentos premium e cuidado personalizado.",
+    "about.pillars_title": "Nossos Pilares",
+    "about.pillars_description": "Os valores que guiam tudo o que fazemos.",
+    "about.pillar_excellence_title": "Excelência",
+    "about.pillar_excellence_desc": "Utilizamos apenas os melhores produtos e técnicas avançadas para entregar resultados excepcionais.",
+    "about.pillar_care_title": "Cuidado Pessoal",
+    "about.pillar_care_desc": "Cada tratamento é personalizado para suas necessidades únicas, porque sua pele merece atenção individual.",
+    "about.pillar_trust_title": "Confiança",
+    "about.pillar_trust_desc": "Construímos relacionamentos duradouros através de transparência, honestidade e resultados consistentes.",
+    "about.location_title": "Visite-nos",
+    "about.location_description": "Localizado no coração da cidade, nosso estúdio oferece um refúgio tranquilo onde você pode relaxar e rejuvenescer.",
+    "about.cta_title": "Pronta para Experimentar a Diferença?",
+    "about.cta_description": "Agende seu horário hoje e descubra por que nossas clientes confiam em nós para sua jornada de cuidados.",
+
+    // ========== CONTACT PAGE ==========
+    "contact.badge": "Fale Conosco",
+    "contact.hero_title": "Adoraríamos Ouvir Você",
+    "contact.hero_description": "Tem dúvidas ou quer agendar? Entre em contato por qualquer um dos canais abaixo.",
+    "contact.phone_title": "Telefone",
+    "contact.email_title": "E-mail",
+    "contact.address_title": "Endereço",
+    "contact.hours_title": "Horário de Funcionamento",
+    "contact.hours_mon_fri": "Segunda a Sexta",
+    "contact.hours_saturday": "Sábado",
+    "contact.hours_sunday": "Domingo",
+    "contact.map_placeholder": "Integração com mapa em breve",
+    "contact.cta_title": "Pronta para Agendar?",
+    "contact.cta_description": "Marque seu tratamento hoje e dê o primeiro passo para uma pele radiante.",
   },
 };
 
@@ -371,7 +337,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === "pt" || stored === "en") return stored;
     }
-    return "pt";
+    return "en"; // Default is now EN
   });
 
   useEffect(() => {
@@ -382,8 +348,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setLanguageState(lang);
   };
 
-  const t = (key: string): string => {
-    return translations[language][key] || key;
+  const t = (key: string, vars?: Record<string, string | number>): string => {
+    let text = translations[language][key] || key;
+    
+    // Replace variables like {year}, {n}
+    if (vars) {
+      Object.entries(vars).forEach(([varKey, value]) => {
+        text = text.replace(new RegExp(`\\{${varKey}\\}`, "g"), String(value));
+      });
+    }
+    
+    return text;
   };
 
   return (

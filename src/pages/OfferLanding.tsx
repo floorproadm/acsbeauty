@@ -52,10 +52,10 @@ export default function OfferLanding() {
         <Header />
         <main className="pt-24 pb-16">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="font-serif text-3xl font-bold mb-4">{t("offer_not_found")}</h1>
-            <p className="text-muted-foreground mb-8">{t("offer_not_found_desc")}</p>
+            <h1 className="font-serif text-3xl font-bold mb-4">{t("offers.not_found")}</h1>
+            <p className="text-muted-foreground mb-8">{t("offers.not_found_desc")}</p>
             <Link to="/services">
-              <Button variant="hero">{t("view_all_offers")}</Button>
+              <Button variant="hero">{t("global.view_all_offers")}</Button>
             </Link>
           </div>
         </main>
@@ -73,7 +73,7 @@ export default function OfferLanding() {
         <div className="container mx-auto px-4 max-w-2xl">
           <Link to="/services" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8">
             <ArrowLeft className="w-4 h-4" />
-            {t("back_to_offers")}
+            {t("offers.back")}
           </Link>
 
           <motion.div
@@ -82,7 +82,7 @@ export default function OfferLanding() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-light text-rose-gold text-sm font-medium mb-4">
               <Sparkles className="w-4 h-4" />
-              {offer.type === "entry_offer" ? t("new_client_special") : t("free_consultation")}
+              {offer.type === "entry_offer" ? t("services.new_client_special") : t("services.free_consultation")}
             </div>
 
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
@@ -99,15 +99,15 @@ export default function OfferLanding() {
 
             {service && (
               <div className="bg-card rounded-xl p-6 mb-8">
-                <h3 className="font-medium mb-3">{t("treatment_details")}</h3>
+                <h3 className="font-medium mb-3">{t("offers.treatment_details")}</h3>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4" />
-                    {service.duration_minutes} {t("minutes")}
+                    {service.duration_minutes} {t("global.minutes")}
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    {t("book_anytime")}
+                    {t("offers.book_anytime")}
                   </div>
                 </div>
               </div>
@@ -116,7 +116,7 @@ export default function OfferLanding() {
             <Link to={`/book?offer_id=${offer.id}`}>
               <Button variant="hero" size="xl" className="w-full">
                 <Calendar className="w-5 h-5" />
-                {t("book_now")}
+                {t("global.book_now")}
               </Button>
             </Link>
           </motion.div>

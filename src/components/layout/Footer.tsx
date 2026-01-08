@@ -15,7 +15,7 @@ export function Footer() {
               ACS <span className="text-rose-gold">BEAUTY</span>
             </h3>
             <p className="text-primary-foreground/70 text-sm leading-relaxed">
-              {t("footer_description")}
+              {t("footer.description")}
             </p>
             <div className="flex gap-4 pt-2">
               <a
@@ -37,54 +37,54 @@ export function Footer() {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h4 className="font-medium text-lg">{t("quick_links")}</h4>
+            <h4 className="font-medium text-lg">{t("footer.quick_links")}</h4>
             <nav className="flex flex-col gap-2">
               <Link
                 to="/services"
                 className="text-primary-foreground/70 hover:text-rose-gold text-sm transition-colors"
               >
-                {t("nav_services")}
+                {t("nav.services")}
               </Link>
               <Link
                 to="/services"
                 className="text-primary-foreground/70 hover:text-rose-gold text-sm transition-colors"
               >
-                {t("book_appointment")}
+                {t("footer.book_appointment")}
               </Link>
               <Link
                 to="/about"
                 className="text-primary-foreground/70 hover:text-rose-gold text-sm transition-colors"
               >
-                {t("about_us")}
+                {t("footer.about_us")}
               </Link>
               <Link
                 to="/contact"
                 className="text-primary-foreground/70 hover:text-rose-gold text-sm transition-colors"
               >
-                {t("contact_us_title")}
+                {t("footer.contact_us")}
               </Link>
             </nav>
           </div>
 
           {/* Services - 3 Core Pillars */}
           <div className="space-y-4">
-            <h4 className="font-medium text-lg">{t("our_services")}</h4>
+            <h4 className="font-medium text-lg">{t("footer.our_services")}</h4>
             <nav className="flex flex-col gap-2">
               <span className="text-primary-foreground/70 text-sm">
-                {t("service_hair")}
+                {t("home.services.hair")}
               </span>
               <span className="text-primary-foreground/70 text-sm">
-                {t("service_brows")}
+                {t("home.services.brows")}
               </span>
               <span className="text-primary-foreground/70 text-sm">
-                {t("service_nails")}
+                {t("home.services.nails")}
               </span>
             </nav>
           </div>
 
           {/* Contact */}
           <div className="space-y-4">
-            <h4 className="font-medium text-lg">{t("contact_us_title")}</h4>
+            <h4 className="font-medium text-lg">{t("footer.contact_us")}</h4>
             <div className="space-y-3">
               <a
                 href="tel:+1234567890"
@@ -116,20 +116,20 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-primary-foreground/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-primary-foreground/50 text-sm">
-            © {new Date().getFullYear()} ACS Beauty. {t("all_rights_reserved")}
+            {t("global.copyright", { year: new Date().getFullYear() })}
           </p>
           <div className="flex gap-6">
             <Link
               to="/privacy"
               className="text-primary-foreground/50 hover:text-rose-gold text-sm transition-colors"
             >
-              {t("privacy_policy")}
+              {t("footer.privacy_policy")}
             </Link>
             <Link
               to="/terms"
               className="text-primary-foreground/50 hover:text-rose-gold text-sm transition-colors"
             >
-              {t("terms_of_service")}
+              {t("footer.terms_of_service")}
             </Link>
           </div>
         </div>

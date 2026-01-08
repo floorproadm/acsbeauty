@@ -7,19 +7,19 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const offers = [
   {
     name: "Beauty Start",
-    description: "Uma experiência inicial pensada para você conhecer o cuidado e a excelência da ACS.",
+    descriptionPt: "Uma experiência inicial pensada para você conhecer o cuidado e a excelência da ACS.",
     descriptionEn: "An introductory experience designed for you to discover the care and excellence of ACS.",
     featured: false,
   },
   {
     name: "Glow Signature",
-    description: "Nosso cuidado mais procurado para quem busca resultado, acabamento impecável e autoestima elevada.",
+    descriptionPt: "Nosso cuidado mais procurado para quem busca resultado, acabamento impecável e autoestima elevada.",
     descriptionEn: "Our most sought-after care for those seeking results, flawless finishing, and elevated self-esteem.",
     featured: true,
   },
   {
     name: "Beauty Event",
-    description: "Ideal para eventos, datas especiais ou momentos importantes. Beleza pensada nos mínimos detalhes.",
+    descriptionPt: "Ideal para eventos, datas especiais ou momentos importantes. Beleza pensada nos mínimos detalhes.",
     descriptionEn: "Perfect for events, special dates, or important moments. Beauty crafted in every detail.",
     featured: false,
   },
@@ -41,13 +41,13 @@ export function PackagesPreview() {
         >
           <span className="inline-flex items-center gap-2 text-sm font-medium tracking-wider text-rose-gold uppercase mb-4">
             <Sparkles className="w-4 h-4" />
-            {t("packages_badge")}
+            {t("home.packages.badge")}
           </span>
           <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6">
-            {t("packages_title")}
+            {t("home.packages.title")}
           </h2>
           <p className="text-muted-foreground text-base md:text-lg">
-            {t("packages_description")}
+            {t("home.packages.description")}
           </p>
         </motion.div>
 
@@ -69,14 +69,14 @@ export function PackagesPreview() {
               {offer.featured && (
                 <div className="absolute -top-3 md:-top-4 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3 md:px-4 py-1 rounded-full bg-rose-gold text-foreground text-xs font-medium whitespace-nowrap">
                   <Star className="w-3 h-3 md:w-4 md:h-4" />
-                  {t("most_popular")}
+                  {t("global.most_popular")}
                 </div>
               )}
 
               <div className="mb-5 md:mb-6">
                 <h3 className="font-serif text-xl md:text-2xl font-bold mb-2 md:mb-3">{offer.name}</h3>
                 <p className={`text-sm leading-relaxed ${offer.featured ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                  {language === "pt" ? offer.description : offer.descriptionEn}
+                  {language === "pt" ? offer.descriptionPt : offer.descriptionEn}
                 </p>
               </div>
 
@@ -86,7 +86,7 @@ export function PackagesPreview() {
                   className="w-full"
                   size="lg"
                 >
-                  {t("book_this_offer")}
+                  {t("home.packages.book_offer")}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
@@ -104,7 +104,7 @@ export function PackagesPreview() {
         >
           <Link to="/packages">
             <Button variant="hero-outline" size="lg" className="group w-full sm:w-auto">
-              {t("view_all_offers")}
+              {t("home.packages.view_all")}
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
