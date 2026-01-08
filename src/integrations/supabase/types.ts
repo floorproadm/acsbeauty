@@ -14,6 +14,64 @@ export type Database = {
   }
   public: {
     Tables: {
+      booking_holds: {
+        Row: {
+          created_at: string
+          end_time: string
+          expires_at: string
+          hold_key: string
+          id: string
+          package_id: string | null
+          service_id: string | null
+          staff_id: string | null
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          expires_at: string
+          hold_key: string
+          id?: string
+          package_id?: string | null
+          service_id?: string | null
+          staff_id?: string | null
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          expires_at?: string
+          hold_key?: string
+          id?: string
+          package_id?: string | null
+          service_id?: string | null
+          staff_id?: string | null
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_holds_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_holds_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_holds_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           client_email: string
@@ -93,6 +151,88 @@ export type Database = {
           },
           {
             foreignKeyName: "bookings_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      business_hours: {
+        Row: {
+          close_time: string
+          created_at: string
+          day_of_week: number
+          id: string
+          is_open: boolean
+          open_time: string
+          staff_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          close_time?: string
+          created_at?: string
+          day_of_week: number
+          id?: string
+          is_open?: boolean
+          open_time?: string
+          staff_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          close_time?: string
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          is_open?: boolean
+          open_time?: string
+          staff_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_hours_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      calendar_integrations: {
+        Row: {
+          calendar_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          provider: string
+          staff_id: string | null
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          calendar_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          provider?: string
+          staff_id?: string | null
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          calendar_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          provider?: string
+          staff_id?: string | null
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_integrations_staff_id_fkey"
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "staff_profiles"
@@ -316,6 +456,39 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduling_settings: {
+        Row: {
+          buffer_minutes: number
+          created_at: string
+          hold_duration_minutes: number
+          id: string
+          max_advance_days: number
+          slot_interval_minutes: number
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          buffer_minutes?: number
+          created_at?: string
+          hold_duration_minutes?: number
+          id?: string
+          max_advance_days?: number
+          slot_interval_minutes?: number
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          buffer_minutes?: number
+          created_at?: string
+          hold_duration_minutes?: number
+          id?: string
+          max_advance_days?: number
+          slot_interval_minutes?: number
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           base_price: number | null
@@ -417,6 +590,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_expired_holds: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
