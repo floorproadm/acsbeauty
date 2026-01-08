@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Search, Filter, CheckCircle, XCircle, Clock, UserX } from "lucide-react";
+import { Calendar, Search, Filter, CheckCircle, XCircle, Clock, UserX, Eye } from "lucide-react";
 import { format, startOfDay, endOfDay, subDays, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { BookingDetailModal } from "./BookingDetailModal";
 
 type BookingStatus = "requested" | "confirmed" | "completed" | "cancelled" | "no_show";
 
@@ -24,6 +25,8 @@ export function BookingsTab() {
   const [dateFilter, setDateFilter] = useState<string>("today");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -160,7 +163,11 @@ export function BookingsTab() {
             return (
               <div
                 key={booking.id}
-                className="bg-card rounded-xl border border-border p-4 shadow-soft"
+                onClick={() => {
+                  setSelectedBooking(booking);
+                  setIsModalOpen(true);
+                }}
+                className="bg-card rounded-xl border border-border p-4 shadow-soft cursor-pointer hover:border-primary/50 hover:shadow-md transition-all"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   {/* Booking Info */}
@@ -247,6 +254,12 @@ export function BookingsTab() {
           })}
         </div>
       )}
+
+      <BookingDetailModal 
+        booking={selectedBooking} 
+        open={isModalOpen} 
+        onOpenChange={setIsModalOpen} 
+      />
     </div>
   );
 }
