@@ -87,18 +87,18 @@ export function Footer() {
             <h4 className="font-medium text-lg">{t("footer.contact_us")}</h4>
             <div className="space-y-3">
               <a
-                href="tel:+1234567890"
+                href="tel:+17329153430"
                 className="flex items-center gap-3 text-primary-foreground/70 hover:text-rose-gold text-sm transition-colors"
               >
                 <Phone className="w-4 h-4" />
-                (123) 456-7890
+                (732) 915-3430
               </a>
               <a
-                href="mailto:hello@acsbeauty.com"
+                href="mailto:Acsbeautystudio@gmail.com"
                 className="flex items-center gap-3 text-primary-foreground/70 hover:text-rose-gold text-sm transition-colors"
               >
                 <Mail className="w-4 h-4" />
-                hello@acsbeauty.com
+                Acsbeautystudio@gmail.com
               </a>
               <a 
                 href="https://www.google.com/maps/search/?api=1&query=375+Chestnut+St+Newark+NJ"
