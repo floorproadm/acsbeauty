@@ -41,13 +41,13 @@ export function Testimonials() {
           className="text-center max-w-2xl mx-auto mb-16"
         >
           <span className="inline-block text-sm font-medium tracking-wider text-rose-gold uppercase mb-4">
-            {t("testimonials_badge")}
+            {t("home.testimonials.badge")}
           </span>
           <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
-            {t("testimonials_title")}
+            {t("home.testimonials.title")}
           </h2>
           <p className="text-muted-foreground text-lg">
-            {t("testimonials_description")}
+            {t("home.testimonials.description")}
           </p>
         </motion.div>
 

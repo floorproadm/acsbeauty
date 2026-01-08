@@ -37,13 +37,13 @@ export default function Packages() {
           >
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/50 text-accent-foreground text-sm font-medium mb-4">
               <Sparkles className="w-4 h-4" />
-              {t("packages_page_badge")}
+              {t("packages.badge")}
             </span>
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
-              {t("packages_page_title")}
+              {t("packages.title")}
             </h1>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              {t("packages_page_description")}
+              {t("packages.description")}
             </p>
           </motion.div>
 
@@ -67,7 +67,7 @@ export default function Packages() {
                 >
                   {pkg.is_featured && (
                     <div className="inline-block px-3 py-1 rounded-full bg-rose-gold text-primary-foreground text-xs font-medium mb-4">
-                      {t("most_popular")}
+                      {t("global.most_popular")}
                     </div>
                   )}
                   <h2 className="font-serif text-2xl font-bold mb-2">{pkg.name}</h2>
@@ -82,12 +82,12 @@ export default function Packages() {
 
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
                     <Check className="w-4 h-4 text-rose-gold" />
-                    <span>{pkg.sessions_qty} {t("sessions_included")}</span>
+                    <span>{t("packages.sessions_included", { n: pkg.sessions_qty })}</span>
                   </div>
 
                   <Link to={`/p/${pkg.id}`}>
                     <Button variant="hero" className="w-full group">
-                      {t("view_package")}
+                      {t("packages.view_offer")}
                       <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                     </Button>
                   </Link>
@@ -104,7 +104,7 @@ export default function Packages() {
           >
             <Link to="/services">
               <Button variant="hero-outline" size="lg" className="group">
-                {t("view_offers")}
+                {t("global.view_offers")}
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>

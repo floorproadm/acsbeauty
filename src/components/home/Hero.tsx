@@ -8,9 +8,9 @@ export function Hero() {
   const { t } = useLanguage();
 
   const stats = [
-    { value: "10+", label: t("stat_years") },
-    { value: "5K+", label: t("stat_clients") },
-    { value: "50+", label: t("stat_treatments") },
+    { value: "10+", label: t("home.hero.stat_years") },
+    { value: "5K+", label: t("home.hero.stat_clients") },
+    { value: "50+", label: t("home.hero.stat_treatments") },
   ];
 
   return (
@@ -32,7 +32,7 @@ export function Hero() {
               className="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-accent/50 text-accent-foreground text-xs md:text-sm font-medium mb-4 md:mb-6"
             >
               <Sparkles className="w-3 h-3 md:w-4 md:h-4" />
-              {t("hero_badge")}
+              {t("home.hero.badge")}
             </motion.div>
 
             <motion.h1
@@ -41,8 +41,8 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="font-serif text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight mb-4 md:mb-6"
             >
-              {t("hero_title_1")}{" "}
-              <span className="text-gradient-rose">{t("hero_title_2")}</span>
+              {t("home.hero.title_1")}{" "}
+              <span className="text-gradient-rose">{t("home.hero.title_2")}</span>
             </motion.h1>
 
             <motion.p
@@ -51,7 +51,7 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-base md:text-lg text-muted-foreground leading-relaxed mb-6 md:mb-8"
             >
-              {t("hero_description")}
+              {t("home.hero.description")}
             </motion.p>
 
             <motion.div
@@ -63,7 +63,7 @@ export function Hero() {
               {/* Primary CTA - Full width on mobile for thumb reach */}
               <Link to="/services" className="w-full sm:w-auto">
                 <Button variant="hero" size="xl" className="group w-full sm:w-auto">
-                  {t("hero_cta_offers")}
+                  {t("home.hero.cta_offers")}
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
@@ -71,7 +71,7 @@ export function Hero() {
               <Link to="/contact" className="w-full sm:w-auto">
                 <Button variant="hero-outline" size="lg" className="w-full sm:w-auto">
                   <Instagram className="w-4 h-4" />
-                  {t("contact_us")}
+                  {t("global.contact_us")}
                 </Button>
               </Link>
             </motion.div>
@@ -123,8 +123,8 @@ export function Hero() {
                   <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-accent-foreground" />
                 </div>
                 <div>
-                  <div className="font-medium text-sm md:text-base text-foreground">{t("premium_care")}</div>
-                  <div className="text-xs md:text-sm text-muted-foreground">{t("personalized_treatments")}</div>
+                  <div className="font-medium text-sm md:text-base text-foreground">{t("home.hero.premium_care")}</div>
+                  <div className="text-xs md:text-sm text-muted-foreground">{t("home.hero.personalized_treatments")}</div>
                 </div>
               </div>
             </motion.div>

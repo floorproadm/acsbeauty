@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Calendar, User } from "lucide-react";
+import { Menu, X, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -13,9 +13,9 @@ export function Header() {
   const { t } = useLanguage();
 
   const navItems = [
-    { label: t("nav_services"), href: "/services" },
-    { label: t("nav_about"), href: "/about" },
-    { label: t("nav_contact"), href: "/contact" },
+    { label: t("nav.services"), href: "/services" },
+    { label: t("nav.about"), href: "/about" },
+    { label: t("nav.contact"), href: "/contact" },
   ];
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export function Header() {
             <Link to="/services">
               <Button variant="hero" size="default" className="gap-2">
                 <Calendar className="w-4 h-4" />
-                {t("book_now")}
+                {t("global.book_now")}
               </Button>
             </Link>
           </div>
@@ -108,7 +108,7 @@ export function Header() {
                 <Link to="/services" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button variant="hero" className="w-full gap-2">
                     <Calendar className="w-4 h-4" />
-                    {t("book_now")}
+                    {t("global.book_now")}
                   </Button>
                 </Link>
               </div>

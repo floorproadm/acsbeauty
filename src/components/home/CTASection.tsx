@@ -24,17 +24,17 @@ export function CTASection() {
           className="text-center max-w-3xl mx-auto"
         >
           <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-primary-foreground mb-4 md:mb-6">
-            {t("cta_title_1")}{" "}
-            <span className="text-rose-gold">{t("cta_title_2")}</span>
+            {t("home.cta.title_1")}{" "}
+            <span className="text-rose-gold">{t("home.cta.title_2")}</span>
           </h2>
           <p className="text-primary-foreground/70 text-base md:text-lg lg:text-xl mb-8 md:mb-10 leading-relaxed">
-            {t("cta_description")}
+            {t("home.cta.description")}
           </p>
           <div className="flex flex-col gap-3 md:gap-4 sm:flex-row justify-center">
             <Link to="/services" className="w-full sm:w-auto">
               <Button variant="rose" size="xl" className="group w-full sm:w-auto">
                 <Calendar className="w-5 h-5" />
-                {t("view_our_offers")}
+                {t("home.cta.view_offers")}
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
@@ -45,7 +45,7 @@ export function CTASection() {
                 className="border-rose-gold/50 text-rose-gold hover:bg-rose-gold/10 w-full sm:w-auto"
               >
                 <Instagram className="w-4 h-4" />
-                {t("contact_us")}
+                {t("global.contact_us")}
               </Button>
             </Link>
           </div>
