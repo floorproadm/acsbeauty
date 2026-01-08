@@ -5,12 +5,38 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Tag, Copy, Sparkles, Calendar, Users } from "lucide-react";
+import { Tag, Copy, Sparkles, Calendar, Users, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 type OfferType = "entry_offer" | "package_offer" | "consultation_offer";
+
+interface Offer {
+  id: string;
+  name: string;
+  headline: string | null;
+  body: string | null;
+  price_display: string | null;
+  type: OfferType;
+  active: boolean | null;
+  start_at: string | null;
+  end_at: string | null;
+  limit_spots: number | null;
+  service_id: string | null;
+  package_id: string | null;
+  services?: { name: string } | null;
+  packages?: { name: string } | null;
+}
 
 const typeConfig: Record<OfferType, { label: string; color: string }> = {
   entry_offer: { label: "Entrada", color: "bg-green-100 text-green-700" },
@@ -21,6 +47,13 @@ const typeConfig: Record<OfferType, { label: string; color: string }> = {
 export function OffersTab() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    headline: "",
+    body: "",
+    price_display: "",
+  });
 
   const { data: offers, isLoading } = useQuery({
     queryKey: ["admin-offers"],
@@ -31,7 +64,7 @@ export function OffersTab() {
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as Offer[];
     },
   });
 
@@ -46,6 +79,7 @@ export function OffersTab() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-offers"] });
       toast({ title: "Oferta atualizada!" });
+      setEditingOffer(null);
     },
     onError: () => {
       toast({ title: "Erro ao atualizar", variant: "destructive" });
@@ -53,8 +87,8 @@ export function OffersTab() {
   });
 
   const cloneOffer = useMutation({
-    mutationFn: async (offer: typeof offers[0]) => {
-      const { id, created_at, updated_at, services, packages, ...rest } = offer;
+    mutationFn: async (offer: Offer) => {
+      const { id, services, packages, ...rest } = offer;
       const { error } = await supabase
         .from("offers")
         .insert({
@@ -73,6 +107,24 @@ export function OffersTab() {
     },
   });
 
+  const openEditModal = (offer: Offer) => {
+    setFormData({
+      name: offer.name || "",
+      headline: offer.headline || "",
+      body: offer.body || "",
+      price_display: offer.price_display || "",
+    });
+    setEditingOffer(offer);
+  };
+
+  const handleSave = () => {
+    if (!editingOffer) return;
+    updateOffer.mutate({
+      id: editingOffer.id,
+      updates: formData,
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -84,6 +136,59 @@ export function OffersTab() {
           </p>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      <Dialog open={!!editingOffer} onOpenChange={(open) => !open && setEditingOffer(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar Oferta</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nome</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="headline">Headline</Label>
+              <Input
+                id="headline"
+                value={formData.headline}
+                onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="body">Descrição</Label>
+              <Textarea
+                id="body"
+                value={formData.body}
+                onChange={(e) => setFormData({ ...formData, body: e.target.value })}
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="price_display">Preço (exibição)</Label>
+              <Input
+                id="price_display"
+                value={formData.price_display}
+                onChange={(e) => setFormData({ ...formData, price_display: e.target.value })}
+                placeholder="Ex: R$89 ou Grátis"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setEditingOffer(null)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSave} disabled={updateOffer.isPending}>
+                Salvar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Offers List */}
       {isLoading ? (
@@ -180,6 +285,14 @@ export function OffersTab() {
 
                   {/* Actions */}
                   <div className="flex flex-wrap items-center gap-3">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openEditModal(offer)}
+                    >
+                      <Pencil className="w-4 h-4 mr-1" />
+                      Editar
+                    </Button>
                     <Button
                       size="sm"
                       variant="outline"
