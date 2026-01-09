@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import browsImage from "@/assets/brows-service.jpg";
 import hairImage from "@/assets/hair-service.png";
+import nailsImage from "@/assets/nails-service.jpg";
 
 export function ServicesPreview() {
   const { t } = useLanguage();
@@ -26,7 +27,7 @@ export function ServicesPreview() {
       icon: Sparkles,
       titleKey: "home.services.nails",
       descKey: "home.services.nails_desc",
-      image: "https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=600&q=80",
+      image: nailsImage,
     },
   ];
 
