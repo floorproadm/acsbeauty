@@ -3,9 +3,6 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Scissors, Eye, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import browsImage from "@/assets/brows-service.jpg";
-import hairImage from "@/assets/hair-service.png";
-import nailsImage from "@/assets/nails-service.jpg";
 
 export function ServicesPreview() {
   const { t } = useLanguage();
@@ -15,22 +12,19 @@ export function ServicesPreview() {
       icon: Scissors,
       titleKey: "home.services.hair",
       descKey: "home.services.hair_desc",
-      image: hairImage,
-      imagePosition: "center",
+      image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=600&q=80",
     },
     {
       icon: Eye,
       titleKey: "home.services.brows",
       descKey: "home.services.brows_desc",
-      image: browsImage,
-      imagePosition: "center 30%",
+      image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80",
     },
     {
       icon: Sparkles,
       titleKey: "home.services.nails",
       descKey: "home.services.nails_desc",
-      image: nailsImage,
-      imagePosition: "center",
+      image: "https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=600&q=80",
     },
   ];
 
@@ -72,7 +66,6 @@ export function ServicesPreview() {
                   src={service.image}
                   alt={t(service.titleKey)}
                   className="w-full h-full object-cover"
-                  style={{ objectPosition: service.imagePosition }}
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
