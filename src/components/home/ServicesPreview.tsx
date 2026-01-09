@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Scissors, Eye, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import hairServiceImg from "@/assets/hair-service.png";
+import browsServiceImg from "@/assets/brows-service.jpg";
+import nailsServiceImg from "@/assets/nails-service.jpg";
 
 export function ServicesPreview() {
   const { t } = useLanguage();
@@ -12,19 +15,19 @@ export function ServicesPreview() {
       icon: Scissors,
       titleKey: "home.services.hair",
       descKey: "home.services.hair_desc",
-      image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=600&q=80",
+      image: hairServiceImg,
     },
     {
       icon: Eye,
       titleKey: "home.services.brows",
       descKey: "home.services.brows_desc",
-      image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80",
+      image: browsServiceImg,
     },
     {
       icon: Sparkles,
       titleKey: "home.services.nails",
       descKey: "home.services.nails_desc",
-      image: "https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=600&q=80",
+      image: nailsServiceImg,
     },
   ];
 
