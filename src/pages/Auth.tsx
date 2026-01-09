@@ -8,13 +8,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/layout/Header";
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 
-type AuthMode = "login" | "signup" | "forgot-password";
+type AuthMode = "login" | "forgot-password";
 
 export default function Auth() {
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -58,18 +58,6 @@ export default function Auth() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast({ title: "Bem-vindo de volta!", description: "Login realizado com sucesso." });
-      } else if (mode === "signup") {
-        const redirectUrl = `${window.location.origin}/`;
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: redirectUrl,
-            data: { full_name: fullName },
-          },
-        });
-        if (error) throw error;
-        toast({ title: "Conta criada!", description: "Bem-vindo à ACS Beauty." });
       } else if (mode === "forgot-password") {
         const redirectUrl = `${window.location.origin}/auth`;
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -96,7 +84,6 @@ export default function Auth() {
   const getTitle = () => {
     switch (mode) {
       case "login": return "Bem-vindo de Volta";
-      case "signup": return "Criar Conta";
       case "forgot-password": return "Recuperar Senha";
     }
   };
@@ -104,7 +91,6 @@ export default function Auth() {
   const getSubtitle = () => {
     switch (mode) {
       case "login": return "Entre para gerenciar seus agendamentos";
-      case "signup": return "Junte-se à ACS Beauty hoje";
       case "forgot-password": return "Digite seu email para receber o link de recuperação";
     }
   };
@@ -112,7 +98,6 @@ export default function Auth() {
   const getButtonText = () => {
     switch (mode) {
       case "login": return "Entrar";
-      case "signup": return "Criar Conta";
       case "forgot-password": return "Enviar Link";
     }
   };
@@ -144,19 +129,6 @@ export default function Auth() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {mode === "signup" && (
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Nome Completo</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Digite seu nome"
-                    required
-                  />
-                </div>
-              )}
               
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -212,17 +184,6 @@ export default function Auth() {
               </Button>
             </form>
 
-            {mode !== "forgot-password" && (
-              <div className="mt-6 text-center">
-                <button
-                  type="button"
-                  onClick={() => setMode(mode === "login" ? "signup" : "login")}
-                  className="text-sm text-muted-foreground hover:text-rose-gold transition-colors"
-                >
-                  {mode === "login" ? "Não tem conta? Cadastre-se" : "Já tem conta? Entre"}
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>
