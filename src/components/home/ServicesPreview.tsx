@@ -16,18 +16,21 @@ export function ServicesPreview() {
       titleKey: "home.services.hair",
       descKey: "home.services.hair_desc",
       image: hairImage,
+      imagePosition: "center",
     },
     {
       icon: Eye,
       titleKey: "home.services.brows",
       descKey: "home.services.brows_desc",
       image: browsImage,
+      imagePosition: "center 30%",
     },
     {
       icon: Sparkles,
       titleKey: "home.services.nails",
       descKey: "home.services.nails_desc",
       image: nailsImage,
+      imagePosition: "center",
     },
   ];
 
@@ -69,6 +72,7 @@ export function ServicesPreview() {
                   src={service.image}
                   alt={t(service.titleKey)}
                   className="w-full h-full object-cover"
+                  style={{ objectPosition: service.imagePosition }}
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
