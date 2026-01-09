@@ -6,10 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/layout/Header";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
+
+type AuthMode = "login" | "signup" | "forgot-password";
 
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -20,7 +22,6 @@ export default function Auth() {
 
   useEffect(() => {
     const checkAndRedirect = async (userId: string) => {
-      // Check if user has admin role
       const { data: isAdmin } = await supabase
         .rpc('has_role', { _user_id: userId, _role: 'admin_owner' });
       
@@ -53,11 +54,11 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      if (isLogin) {
+      if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast({ title: "Welcome back!", description: "You have successfully signed in." });
-      } else {
+        toast({ title: "Bem-vindo de volta!", description: "Login realizado com sucesso." });
+      } else if (mode === "signup") {
         const redirectUrl = `${window.location.origin}/`;
         const { error } = await supabase.auth.signUp({
           email,
@@ -68,16 +69,51 @@ export default function Auth() {
           },
         });
         if (error) throw error;
-        toast({ title: "Account created!", description: "Welcome to ACS Beauty." });
+        toast({ title: "Conta criada!", description: "Bem-vindo à ACS Beauty." });
+      } else if (mode === "forgot-password") {
+        const redirectUrl = `${window.location.origin}/auth`;
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: redirectUrl,
+        });
+        if (error) throw error;
+        toast({ 
+          title: "Email enviado!", 
+          description: "Verifique sua caixa de entrada para redefinir sua senha." 
+        });
+        setMode("login");
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "An error occurred",
+        title: "Erro",
+        description: error.message || "Ocorreu um erro",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getTitle = () => {
+    switch (mode) {
+      case "login": return "Bem-vindo de Volta";
+      case "signup": return "Criar Conta";
+      case "forgot-password": return "Recuperar Senha";
+    }
+  };
+
+  const getSubtitle = () => {
+    switch (mode) {
+      case "login": return "Entre para gerenciar seus agendamentos";
+      case "signup": return "Junte-se à ACS Beauty hoje";
+      case "forgot-password": return "Digite seu email para receber o link de recuperação";
+    }
+  };
+
+  const getButtonText = () => {
+    switch (mode) {
+      case "login": return "Entrar";
+      case "signup": return "Criar Conta";
+      case "forgot-password": return "Enviar Link";
     }
   };
 
@@ -87,26 +123,37 @@ export default function Auth() {
       <div className="flex items-center justify-center min-h-screen pt-24 px-6">
         <div className="w-full max-w-md">
           <div className="bg-card rounded-2xl shadow-elevated p-8">
+            {mode === "forgot-password" && (
+              <button
+                type="button"
+                onClick={() => setMode("login")}
+                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-rose-gold transition-colors mb-4"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Voltar ao login
+              </button>
+            )}
+
             <div className="text-center mb-8">
               <h1 className="font-serif text-3xl font-bold mb-2">
-                {isLogin ? "Welcome Back" : "Create Account"}
+                {getTitle()}
               </h1>
               <p className="text-muted-foreground">
-                {isLogin ? "Sign in to manage your appointments" : "Join ACS Beauty today"}
+                {getSubtitle()}
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {!isLogin && (
+              {mode === "signup" && (
                 <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
+                  <Label htmlFor="fullName">Nome Completo</Label>
                   <Input
                     id="fullName"
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Enter your name"
-                    required={!isLogin}
+                    placeholder="Digite seu nome"
+                    required
                   />
                 </div>
               )}
@@ -118,48 +165,64 @@ export default function Auth() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="hello@example.com"
+                  placeholder="seu@email.com"
                   required
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    minLength={6}
-                  />
+              {mode !== "forgot-password" && (
+                <div className="space-y-2">
+                  <Label htmlFor="password">Senha</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      minLength={6}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {mode === "login" && (
+                <div className="text-right">
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    onClick={() => setMode("forgot-password")}
+                    className="text-sm text-muted-foreground hover:text-rose-gold transition-colors"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    Esqueceu a senha?
                   </button>
                 </div>
-              </div>
+              )}
 
               <Button type="submit" variant="hero" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                {isLogin ? "Sign In" : "Create Account"}
+                {getButtonText()}
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-sm text-muted-foreground hover:text-rose-gold transition-colors"
-              >
-                {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-              </button>
-            </div>
+            {mode !== "forgot-password" && (
+              <div className="mt-6 text-center">
+                <button
+                  type="button"
+                  onClick={() => setMode(mode === "login" ? "signup" : "login")}
+                  className="text-sm text-muted-foreground hover:text-rose-gold transition-colors"
+                >
+                  {mode === "login" ? "Não tem conta? Cadastre-se" : "Já tem conta? Entre"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
