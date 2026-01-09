@@ -4,6 +4,7 @@ import { ArrowRight, Scissors, Eye, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import browsImage from "@/assets/brows-service.jpg";
+import hairImage from "@/assets/hair-service.png";
 
 export function ServicesPreview() {
   const { t } = useLanguage();
@@ -13,7 +14,7 @@ export function ServicesPreview() {
       icon: Scissors,
       titleKey: "home.services.hair",
       descKey: "home.services.hair_desc",
-      image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=600&q=80",
+      image: hairImage,
     },
     {
       icon: Eye,
