@@ -17,13 +17,28 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Plus, Trash2, Save, X, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  GripVertical,
+  Plus,
+  Trash2,
+  Save,
+  X,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Eye,
+  EyeOff,
+  Settings,
+  ListChecks,
+  CheckCircle2,
+  Image as ImageIcon,
+  MoreVertical,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -37,11 +52,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Separator } from "@/components/ui/separator";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Json } from "@/integrations/supabase/types";
+import { cn } from "@/lib/utils";
 
 interface Quiz {
   id: string;
@@ -67,19 +94,57 @@ interface QuizOption {
   question_id: string;
   option_text: string;
   emoji: string | null;
+  image_url: string | null;
   order_index: number;
   points: Json;
 }
 
-interface SortableQuestionProps {
-  question: QuizQuestion;
-  options: QuizOption[];
-  onUpdate: (question: QuizQuestion) => void;
-  onDelete: (questionId: string) => void;
-  onAddOption: (questionId: string) => void;
-  onUpdateOption: (option: QuizOption) => void;
-  onDeleteOption: (optionId: string) => void;
-  onReorderOptions: (questionId: string, options: QuizOption[]) => void;
+const EMOJI_LIST = [
+  "💇", "💇‍♀️", "💇‍♂️", "✂️", "💆", "💆‍♀️", "💆‍♂️", "💅", "🧴", "🪮",
+  "✨", "💫", "⭐", "🌟", "💖", "💕", "❤️", "🔥", "👍", "👎",
+  "😊", "😍", "🤩", "😎", "🥰", "😌", "😀", "🙂", "😐", "😢",
+  "👩", "👨", "👩‍🦱", "👨‍🦱", "👩‍🦰", "👨‍🦰", "👱‍♀️", "👱‍♂️", "🧑", "👧",
+  "✅", "❌", "⭕", "💯", "🎯", "🏆", "🎉", "🎁", "💎", "👑",
+];
+
+function EmojiPicker({ 
+  value, 
+  onChange 
+}: { 
+  value: string | null; 
+  onChange: (emoji: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="w-10 h-10 rounded-lg bg-muted hover:bg-muted/80 flex items-center justify-center text-lg transition-colors border-2 border-transparent hover:border-primary/20"
+        >
+          {value || "➕"}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 p-2" align="start">
+        <div className="grid grid-cols-10 gap-1">
+          {EMOJI_LIST.map((emoji) => (
+            <button
+              key={emoji}
+              type="button"
+              className="w-6 h-6 hover:bg-muted rounded flex items-center justify-center text-sm"
+              onClick={() => {
+                onChange(emoji);
+                setOpen(false);
+              }}
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 function SortableOption({
@@ -91,7 +156,7 @@ function SortableOption({
   onUpdate: (option: QuizOption) => void;
   onDelete: (optionId: string) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: option.id,
   });
 
@@ -104,60 +169,102 @@ function SortableOption({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 bg-muted/50 p-2 rounded-md"
+      className={cn(
+        "flex items-center gap-2 py-2 px-1 rounded-lg group transition-all",
+        isDragging && "opacity-50 bg-muted"
+      )}
     >
       <button
         {...attributes}
         {...listeners}
-        className="cursor-grab hover:bg-muted rounded p-1"
+        className="cursor-grab hover:bg-muted rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
         type="button"
       >
         <GripVertical className="h-4 w-4 text-muted-foreground" />
       </button>
-      <Input
-        value={option.emoji || ""}
-        onChange={(e) => onUpdate({ ...option, emoji: e.target.value })}
-        placeholder="😊"
-        className="w-14 text-center"
+      
+      <EmojiPicker
+        value={option.emoji}
+        onChange={(emoji) => onUpdate({ ...option, emoji })}
       />
+      
+      <button
+        type="button"
+        onClick={() => onDelete(option.id)}
+        className="text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <X className="h-4 w-4" />
+      </button>
+      
       <Input
         value={option.option_text}
         onChange={(e) => onUpdate({ ...option, option_text: e.target.value })}
         placeholder="Texto da opção..."
-        className="flex-1"
+        className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-2 h-8"
       />
-      <Input
-        type="number"
-        value={typeof option.points === "number" ? option.points : 0}
-        onChange={(e) => onUpdate({ ...option, points: parseInt(e.target.value) || 0 })}
-        placeholder="Pontos"
-        className="w-20"
-      />
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        onClick={() => onDelete(option.id)}
-        className="text-destructive hover:text-destructive"
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
+      
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Settings className="h-3.5 w-3.5 text-muted-foreground" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-48" align="end">
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Pontuação</Label>
+                <Input
+                  type="number"
+                  value={typeof option.points === "number" ? option.points : 0}
+                  onChange={(e) => onUpdate({ ...option, points: parseInt(e.target.value) || 0 })}
+                  className="h-8"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">URL da Imagem</Label>
+                <Input
+                  value={option.image_url || ""}
+                  onChange={(e) => onUpdate({ ...option, image_url: e.target.value || null })}
+                  placeholder="https://..."
+                  className="h-8"
+                />
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
     </div>
   );
 }
 
+interface SortableQuestionProps {
+  question: QuizQuestion;
+  questionNumber: number;
+  options: QuizOption[];
+  onUpdate: (question: QuizQuestion) => void;
+  onDelete: (questionId: string) => void;
+  onDuplicate: (question: QuizQuestion, options: QuizOption[]) => void;
+  onAddOption: (questionId: string) => void;
+  onUpdateOption: (option: QuizOption) => void;
+  onDeleteOption: (optionId: string) => void;
+  onReorderOptions: (questionId: string, options: QuizOption[]) => void;
+}
+
 function SortableQuestion({
   question,
+  questionNumber,
   options,
   onUpdate,
   onDelete,
+  onDuplicate,
   onAddOption,
   onUpdateOption,
   onDeleteOption,
   onReorderOptions,
 }: SortableQuestionProps) {
-  const [isOpen, setIsOpen] = useState(true);
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: question.id,
   });
 
@@ -186,146 +293,239 @@ function SortableQuestion({
     }
   }
 
+  const questionTypeIcon = question.question_type === "multiple_choice" 
+    ? <ListChecks className="h-4 w-4" /> 
+    : <CheckCircle2 className="h-4 w-4" />;
+
   return (
-    <Card ref={setNodeRef} style={style} className="border-2">
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <div className="p-4">
-          <div className="flex items-start gap-2">
-            <button
-              {...attributes}
-              {...listeners}
-              className="cursor-grab hover:bg-muted rounded p-1 mt-1"
-              type="button"
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "bg-card border rounded-xl shadow-sm overflow-hidden transition-all",
+        isDragging && "opacity-50 shadow-lg"
+      )}
+    >
+      {/* Question Header */}
+      <div className="flex items-start gap-2 p-4 bg-gradient-to-r from-muted/50 to-transparent">
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab hover:bg-muted rounded p-1 mt-0.5"
+          type="button"
+        >
+          <GripVertical className="h-5 w-5 text-muted-foreground" />
+        </button>
+        
+        <div className="flex items-center gap-2 text-muted-foreground">
+          {questionTypeIcon}
+        </div>
+        
+        <div className="flex-1">
+          <Input
+            value={question.question_text}
+            onChange={(e) => onUpdate({ ...question, question_text: e.target.value })}
+            placeholder="Digite sua pergunta aqui..."
+            className="text-base font-medium border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+          />
+        </div>
+        
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+          >
+            {isCollapsed ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronUp className="h-4 w-4" />
+            )}
+          </Button>
+          
+          <Badge variant="outline" className="text-xs">
+            {questionNumber}
+          </Badge>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onDuplicate(question, options)}>
+                <Copy className="h-4 w-4 mr-2" />
+                Duplicar
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => onDelete(question.id)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Excluir
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Question Content */}
+      {!isCollapsed && (
+        <div className="p-4 pt-0 space-y-3">
+          {/* Options */}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleOptionDragEnd}
+          >
+            <SortableContext
+              items={options.map((o) => o.id)}
+              strategy={verticalListSortingStrategy}
             >
-              <GripVertical className="h-5 w-5 text-muted-foreground" />
-            </button>
-            <div className="flex-1 space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium">
-                  {question.order_index + 1}
-                </span>
-                <Input
-                  value={question.question_text}
-                  onChange={(e) =>
-                    onUpdate({ ...question, question_text: e.target.value })
-                  }
-                  placeholder="Digite a pergunta..."
-                  className="flex-1 font-medium"
-                />
-                <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    {isOpen ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
+              <div className="space-y-1">
+                {options.map((option) => (
+                  <SortableOption
+                    key={option.id}
+                    option={option}
+                    onUpdate={onUpdateOption}
+                    onDelete={onDeleteOption}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+          
+          {/* Add Option Button */}
+          <button
+            type="button"
+            onClick={() => onAddOption(question.id)}
+            className="text-sm text-rose-500 hover:text-rose-600 font-medium transition-colors"
+          >
+            Adicione uma resposta ou pressione "Enter" ↵
+          </button>
+          
+          {/* Question Toolbar */}
+          <div className="flex items-center justify-between pt-2 border-t">
+            <div className="flex items-center gap-1">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Settings className="h-4 w-4 text-muted-foreground" />
                   </Button>
-                </CollapsibleTrigger>
+                </PopoverTrigger>
+                <PopoverContent className="w-64" align="start">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm">Tipo de Resposta</Label>
+                      <Select
+                        value={question.question_type}
+                        onValueChange={(value) =>
+                          onUpdate({ ...question, question_type: value })
+                        }
+                      >
+                        <SelectTrigger className="h-9">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="single_choice">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 className="h-4 w-4" />
+                              Escolha Única
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="multiple_choice">
+                            <div className="flex items-center gap-2">
+                              <ListChecks className="h-4 w-4" />
+                              Múltipla Escolha
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm">Obrigatória</Label>
+                      <Switch
+                        checked={question.is_required}
+                        onCheckedChange={(checked) =>
+                          onUpdate({ ...question, is_required: checked })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm">Imagem da Pergunta</Label>
+                      <Input
+                        value={question.image_url || ""}
+                        onChange={(e) =>
+                          onUpdate({ ...question, image_url: e.target.value || null })
+                        }
+                        placeholder="https://exemplo.com/imagem.jpg"
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+              
+              <div className="flex items-center gap-0.5 px-2 py-1 bg-muted rounded-md">
                 <Button
-                  type="button"
                   variant="ghost"
                   size="icon"
-                  onClick={() => onDelete(question.id)}
-                  className="text-destructive hover:text-destructive"
+                  className={cn(
+                    "h-6 w-6",
+                    question.question_type === "single_choice" && "bg-primary text-primary-foreground"
+                  )}
+                  onClick={() => onUpdate({ ...question, question_type: "single_choice" })}
+                  title="Escolha única"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "h-6 w-6",
+                    question.question_type === "multiple_choice" && "bg-primary text-primary-foreground"
+                  )}
+                  onClick={() => onUpdate({ ...question, question_type: "multiple_choice" })}
+                  title="Múltipla escolha"
+                >
+                  <ListChecks className="h-3.5 w-3.5" />
                 </Button>
               </div>
+              
+              {question.is_required && (
+                <Badge variant="secondary" className="text-xs">
+                  Obrigatória
+                </Badge>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => onDuplicate(question, options)}
+                title="Duplicar"
+              >
+                <Copy className="h-4 w-4 text-muted-foreground" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => onDelete(question.id)}
+                title="Excluir"
+              >
+                <Trash2 className="h-4 w-4 text-muted-foreground" />
+              </Button>
             </div>
           </div>
         </div>
-
-        <CollapsibleContent>
-          <div className="px-4 pb-4 space-y-4">
-            <Separator />
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Tipo de Resposta</Label>
-                <Select
-                  value={question.question_type}
-                  onValueChange={(value) =>
-                    onUpdate({ ...question, question_type: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="single_choice">Escolha Única</SelectItem>
-                    <SelectItem value="multiple_choice">
-                      Múltipla Escolha
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-2 pt-6">
-                <Switch
-                  checked={question.is_required}
-                  onCheckedChange={(checked) =>
-                    onUpdate({ ...question, is_required: checked })
-                  }
-                />
-                <Label>Obrigatória</Label>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>URL da Imagem (opcional)</Label>
-              <Input
-                value={question.image_url || ""}
-                onChange={(e) =>
-                  onUpdate({ ...question, image_url: e.target.value || null })
-                }
-                placeholder="https://exemplo.com/imagem.jpg"
-              />
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label>Opções de Resposta</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onAddOption(question.id)}
-                  className="gap-1"
-                >
-                  <Plus className="h-3 w-3" />
-                  Adicionar
-                </Button>
-              </div>
-
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleOptionDragEnd}
-              >
-                <SortableContext
-                  items={options.map((o) => o.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-2">
-                    {options.map((option) => (
-                      <SortableOption
-                        key={option.id}
-                        option={option}
-                        onUpdate={onUpdateOption}
-                        onDelete={onDeleteOption}
-                      />
-                    ))}
-                    {options.length === 0 && (
-                      <p className="text-sm text-muted-foreground text-center py-4">
-                        Nenhuma opção adicionada
-                      </p>
-                    )}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            </div>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    </Card>
+      )}
+    </div>
   );
 }
 
@@ -341,6 +541,7 @@ export function QuizEditorModal({ quiz, open, onOpenChange }: QuizEditorModalPro
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [options, setOptions] = useState<Record<string, QuizOption[]>>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState("questions");
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -444,6 +645,24 @@ export function QuizEditorModal({ quiz, open, onOpenChange }: QuizEditorModalPro
     });
   }
 
+  function duplicateQuestion(question: QuizQuestion, questionOptions: QuizOption[]) {
+    const newQuestionId = `new-${Date.now()}`;
+    const newQuestion: QuizQuestion = {
+      ...question,
+      id: newQuestionId,
+      question_text: `${question.question_text} (cópia)`,
+      order_index: questions.length,
+    };
+    const newOptions = questionOptions.map((opt, idx) => ({
+      ...opt,
+      id: `new-${Date.now()}-${idx}`,
+      question_id: newQuestionId,
+    }));
+    setQuestions((prev) => [...prev, newQuestion]);
+    setOptions((prev) => ({ ...prev, [newQuestionId]: newOptions }));
+    toast({ title: "Pergunta duplicada!" });
+  }
+
   function addOption(questionId: string) {
     const questionOptions = options[questionId] || [];
     const newOption: QuizOption = {
@@ -451,6 +670,7 @@ export function QuizEditorModal({ quiz, open, onOpenChange }: QuizEditorModalPro
       question_id: questionId,
       option_text: "",
       emoji: "",
+      image_url: null,
       order_index: questionOptions.length,
       points: 0,
     };
@@ -532,6 +752,7 @@ export function QuizEditorModal({ quiz, open, onOpenChange }: QuizEditorModalPro
               question_id: insertedQuestion.id,
               option_text: opt.option_text,
               emoji: opt.emoji || null,
+              image_url: opt.image_url || null,
               order_index: opt.order_index,
               points: opt.points,
             }));
@@ -586,6 +807,7 @@ export function QuizEditorModal({ quiz, open, onOpenChange }: QuizEditorModalPro
                   question_id: question.id,
                   option_text: option.option_text,
                   emoji: option.emoji || null,
+                  image_url: option.image_url || null,
                   order_index: option.order_index,
                   points: option.points,
                 });
@@ -596,6 +818,7 @@ export function QuizEditorModal({ quiz, open, onOpenChange }: QuizEditorModalPro
                 .update({
                   option_text: option.option_text,
                   emoji: option.emoji || null,
+                  image_url: option.image_url || null,
                   order_index: option.order_index,
                   points: option.points,
                 })
@@ -626,77 +849,164 @@ export function QuizEditorModal({ quiz, open, onOpenChange }: QuizEditorModalPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <span>Editar Quiz: {quiz.name}</span>
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-5xl max-h-[95vh] p-0 overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b bg-muted/30">
+          <div className="flex items-center gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">{quiz.name}</h2>
+              <p className="text-sm text-muted-foreground">/{quiz.slug}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => window.open(`/quiz/${quiz.slug}`, "_blank")}
+              className="gap-2"
+            >
+              <Eye className="h-4 w-4" />
+              Visualizar
+            </Button>
+            <Button onClick={saveChanges} disabled={isSaving} className="gap-2">
+              <Save className="h-4 w-4" />
+              {isSaving ? "Salvando..." : "Publicar"}
+            </Button>
+          </div>
+        </div>
 
-        <div className="flex-1 overflow-y-auto pr-2 space-y-4">
+        {/* Tabs Navigation */}
+        <div className="px-6 py-2 border-b bg-background">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="bg-transparent gap-2 p-0 h-auto">
+              <TabsTrigger 
+                value="questions" 
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2"
+              >
+                Questões
+              </TabsTrigger>
+              <TabsTrigger 
+                value="results"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2"
+              >
+                Resultados
+              </TabsTrigger>
+              <TabsTrigger 
+                value="settings"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2"
+              >
+                Configurações
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 bg-muted/20">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-muted-foreground">Carregando perguntas...</div>
             </div>
           ) : (
             <>
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleQuestionDragEnd}
-              >
-                <SortableContext
-                  items={questions.map((q) => q.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-4">
-                    {questions.map((question) => (
-                      <SortableQuestion
-                        key={question.id}
-                        question={question}
-                        options={options[question.id] || []}
-                        onUpdate={updateQuestion}
-                        onDelete={deleteQuestion}
-                        onAddOption={addOption}
-                        onUpdateOption={updateOption}
-                        onDeleteOption={deleteOption}
-                        onReorderOptions={reorderOptions}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-
-              {questions.length === 0 && (
-                <Card className="border-dashed">
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <p className="text-muted-foreground mb-4">
-                      Nenhuma pergunta adicionada
+              {activeTab === "questions" && (
+                <div className="max-w-3xl mx-auto space-y-4">
+                  <div className="flex items-center justify-between mb-6">
+                    <p className="text-sm text-muted-foreground">
+                      {questions.length} {questions.length === 1 ? "pergunta" : "perguntas"}
                     </p>
-                    <Button onClick={addQuestion} className="gap-2">
-                      <Plus className="h-4 w-4" />
-                      Adicionar Primeira Pergunta
+                    <Button variant="ghost" size="sm" className="text-muted-foreground">
+                      Recolher tudo
                     </Button>
-                  </CardContent>
-                </Card>
+                  </div>
+
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleQuestionDragEnd}
+                  >
+                    <SortableContext
+                      items={questions.map((q) => q.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-4">
+                        {questions.map((question, index) => (
+                          <SortableQuestion
+                            key={question.id}
+                            question={question}
+                            questionNumber={index + 1}
+                            options={options[question.id] || []}
+                            onUpdate={updateQuestion}
+                            onDelete={deleteQuestion}
+                            onDuplicate={duplicateQuestion}
+                            onAddOption={addOption}
+                            onUpdateOption={updateOption}
+                            onDeleteOption={deleteOption}
+                            onReorderOptions={reorderOptions}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+
+                  {questions.length === 0 && (
+                    <Card className="border-dashed border-2">
+                      <CardContent className="flex flex-col items-center justify-center py-16">
+                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                          <Plus className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                        <h3 className="font-medium mb-2">Nenhuma pergunta ainda</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Comece adicionando sua primeira pergunta
+                        </p>
+                        <Button onClick={addQuestion} className="gap-2">
+                          <Plus className="h-4 w-4" />
+                          Adicionar Pergunta
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "results" && (
+                <div className="max-w-3xl mx-auto">
+                  <Card className="border-dashed border-2">
+                    <CardContent className="flex flex-col items-center justify-center py-16">
+                      <p className="text-muted-foreground">
+                        Editor de resultados em breve...
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {activeTab === "settings" && (
+                <div className="max-w-3xl mx-auto">
+                  <Card className="border-dashed border-2">
+                    <CardContent className="flex flex-col items-center justify-center py-16">
+                      <p className="text-muted-foreground">
+                        Configurações em breve...
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
               )}
             </>
           )}
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t">
-          <Button variant="outline" onClick={addQuestion} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Nova Pergunta
+        {/* Footer */}
+        <div className="flex items-center justify-between px-6 py-4 border-t bg-background">
+          <Button onClick={addQuestion} className="gap-2 rounded-full" size="lg">
+            <Plus className="h-5 w-5" />
           </Button>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              <X className="h-4 w-4 mr-2" />
-              Cancelar
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" disabled>
+              <ChevronDown className="h-4 w-4 rotate-90" />
             </Button>
-            <Button onClick={saveChanges} disabled={isSaving} className="gap-2">
-              <Save className="h-4 w-4" />
-              {isSaving ? "Salvando..." : "Salvar Alterações"}
+            <Button className="gap-2">
+              Próximo passo
+              <ChevronDown className="h-4 w-4 -rotate-90" />
             </Button>
           </div>
         </div>
