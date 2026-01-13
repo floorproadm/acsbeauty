@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Edit, Trash2, Eye, ExternalLink, Copy, BarChart3 } from "lucide-react";
+import { Plus, Edit, Trash2, ExternalLink, Copy, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { QuizEditorModal } from "./QuizEditorModal";
 
 interface Quiz {
   id: string;
@@ -59,6 +60,7 @@ export function QuizzesTab() {
   const queryClient = useQueryClient();
   const [isCreating, setIsCreating] = useState(false);
   const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
+  const [editorQuiz, setEditorQuiz] = useState<Quiz | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
@@ -355,6 +357,14 @@ export function QuizzesTab() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => setEditorQuiz(quiz)}
+                        title="Editar perguntas"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => copyQuizLink(quiz.slug)}
                         title="Copiar link"
                       >
@@ -427,6 +437,15 @@ export function QuizzesTab() {
             </Table>
           </CardContent>
         </Card>
+      )}
+
+      {/* Quiz Editor Modal */}
+      {editorQuiz && (
+        <QuizEditorModal
+          quiz={editorQuiz}
+          open={!!editorQuiz}
+          onOpenChange={(open) => !open && setEditorQuiz(null)}
+        />
       )}
     </div>
   );
