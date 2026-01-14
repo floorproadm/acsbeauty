@@ -13,6 +13,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -80,6 +90,7 @@ export function LeadsTab() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [leadToDelete, setLeadToDelete] = useState<QuizResponse | null>(null);
   const queryClient = useQueryClient();
 
   // Check if current user is admin
@@ -208,20 +219,21 @@ export function LeadsTab() {
   };
 
   // Delete lead (admin only)
-  const handleDeleteLead = async (leadId: string) => {
-    if (!isAdmin) return;
+  const handleDeleteLead = async () => {
+    if (!isAdmin || !leadToDelete) return;
     
     setIsDeleting(true);
     try {
       const { error } = await supabase
         .from("quiz_responses")
         .delete()
-        .eq("id", leadId);
+        .eq("id", leadToDelete.id);
       
       if (error) throw error;
       
       toast.success("Lead excluído com sucesso");
       setSelectedLead(null);
+      setLeadToDelete(null);
       queryClient.invalidateQueries({ queryKey: ["admin-leads"] });
     } catch (error) {
       console.error("Error deleting lead:", error);
@@ -628,7 +640,7 @@ export function LeadsTab() {
                     variant="ghost"
                     size="sm"
                     className="h-7 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                    onClick={() => handleDeleteLead(selectedLead.id)}
+                    onClick={() => setLeadToDelete(selectedLead)}
                     disabled={isDeleting}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -639,6 +651,29 @@ export function LeadsTab() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!leadToDelete} onOpenChange={(open) => !open && setLeadToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir lead?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o lead {leadToDelete?.client_name || "Anônimo"}? 
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteLead}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
