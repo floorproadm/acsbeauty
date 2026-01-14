@@ -234,68 +234,36 @@ export default function QuizPage() {
     setRecommendedResult(bestResult);
 
     try {
-      // Create client (if phone provided, try to find existing first)
-      let clientId: string | null = null;
-      
-      if (leadData.phone) {
-        // Try to insert client, ignore conflict
-        const { data: newClient } = await supabase
-          .from("clients")
-          .insert({
-            name: leadData.name,
-            phone: leadData.phone,
-            email: leadData.email || null,
-            instagram: leadData.instagram || null,
-          })
-          .select("id")
-          .maybeSingle();
-        
-        clientId = newClient?.id || null;
-      } else {
-        // No phone, just create new client
-        const { data: newClient } = await supabase
-          .from("clients")
-          .insert({
-            name: leadData.name,
-            email: leadData.email || null,
-            instagram: leadData.instagram || null,
-          })
-          .select("id")
-          .maybeSingle();
-        
-        clientId = newClient?.id || null;
-      }
+      // IMPORTANT: this public quiz should not rely on reading back inserted rows,
+      // because RLS restricts SELECT for PII tables.
 
-      // Save quiz response
-      const { data: responseData, error: responseError } = await supabase
-        .from("quiz_responses")
-        .insert({
-          quiz_id: quiz.id,
-          client_id: clientId,
-          client_name: leadData.name,
-          client_phone: leadData.phone,
-          client_email: leadData.email || null,
-          client_instagram: leadData.instagram || null,
-          answers: Object.entries(answers).map(([questionId, optionIds]) => ({
-            question_id: questionId,
-            option_ids: optionIds,
-          })),
-          calculated_score: scores,
-          recommended_result_id: bestResult?.id || null,
-          utm_source: utmSource,
-          utm_campaign: utmCampaign,
-          completed_at: new Date().toISOString(),
-        })
-        .select()
-        .maybeSingle();
+      const { error: responseError } = await supabase.from("quiz_responses").insert({
+        quiz_id: quiz.id,
+        client_id: null,
+        client_name: leadData.name,
+        client_phone: leadData.phone,
+        client_email: leadData.email || null,
+        client_instagram: leadData.instagram || null,
+        answers: Object.entries(answers).map(([questionId, optionIds]) => ({
+          question_id: questionId,
+          option_ids: optionIds,
+        })),
+        calculated_score: scores,
+        recommended_result_id: bestResult?.id || null,
+        utm_source: utmSource,
+        utm_campaign: utmCampaign,
+        completed_at: new Date().toISOString(),
+      });
 
       if (responseError) throw responseError;
-      setResponseId(responseData?.id || null);
+
+      setResponseId(null);
       setStep("result");
     } catch (error) {
       console.error("Error saving quiz response:", error);
       toast({
         title: "Erro ao salvar respostas",
+        description: "Tente novamente em alguns segundos.",
         variant: "destructive",
       });
     }
