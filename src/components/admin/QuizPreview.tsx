@@ -140,9 +140,9 @@ export function QuizPreview({ quizName, questions, options }: QuizPreviewProps) 
 
         {/* Question Content */}
         <div className="p-6">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
-              key={currentQuestion?.id}
+              key={currentQuestion?.id || "empty"}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
