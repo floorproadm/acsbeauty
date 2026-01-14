@@ -3,10 +3,47 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, LogOut, LayoutDashboard, Calendar, Users, Sparkles, Tag, Megaphone, HelpCircle, UserCheck } from "lucide-react";
+import {
+  Loader2,
+  LogOut,
+  LayoutDashboard,
+  Calendar,
+  Users,
+  Sparkles,
+  Tag,
+  Megaphone,
+  HelpCircle,
+  UserCheck,
+  Menu,
+  ChevronLeft,
+} from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
-export type AdminTab = "dashboard" | "bookings" | "clients" | "leads" | "services" | "offers" | "campaigns" | "quizzes";
+export type AdminTab =
+  | "dashboard"
+  | "bookings"
+  | "clients"
+  | "leads"
+  | "services"
+  | "offers"
+  | "campaigns"
+  | "quizzes";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -25,6 +62,99 @@ const tabs: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: "quizzes", label: "Quizzes", icon: HelpCircle },
 ];
 
+function AdminSidebar({
+  activeTab,
+  onTabChange,
+  user,
+  onSignOut,
+}: {
+  activeTab: AdminTab;
+  onTabChange: (tab: AdminTab) => void;
+  user: User | null;
+  onSignOut: () => void;
+}) {
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
+
+  return (
+    <Sidebar collapsible="icon" className="border-r border-border">
+      <SidebarHeader className="p-4">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-gold to-rose-gold/70 flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
+          {!isCollapsed && (
+            <div className="flex flex-col">
+              <span className="font-serif text-lg font-bold tracking-tight">
+                ACS <span className="text-rose-gold">BEAUTY</span>
+              </span>
+              <span className="text-[10px] text-muted-foreground -mt-1">
+                Painel Administrativo
+              </span>
+            </div>
+          )}
+        </div>
+      </SidebarHeader>
+
+      <Separator />
+
+      <SidebarContent className="px-2 py-4">
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {tabs.map((tab) => (
+                <SidebarMenuItem key={tab.id}>
+                  <SidebarMenuButton
+                    onClick={() => onTabChange(tab.id)}
+                    isActive={activeTab === tab.id}
+                    tooltip={tab.label}
+                    className={cn(
+                      "transition-all",
+                      activeTab === tab.id &&
+                        "bg-rose-light text-rose-gold hover:bg-rose-light hover:text-rose-gold"
+                    )}
+                  >
+                    <tab.icon className="w-4 h-4" />
+                    <span>{tab.label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter className="p-4 mt-auto">
+        <Separator className="mb-4" />
+        {!isCollapsed && user && (
+          <div className="mb-3 px-2">
+            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+          </div>
+        )}
+        <Button
+          variant="outline"
+          size={isCollapsed ? "icon" : "default"}
+          onClick={onSignOut}
+          className="w-full justify-start"
+        >
+          <LogOut className="w-4 h-4" />
+          {!isCollapsed && <span className="ml-2">Sair</span>}
+        </Button>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
+
+function AdminHeader() {
+  return (
+    <header className="h-14 border-b border-border bg-card flex items-center px-4 gap-4 sticky top-0 z-40">
+      <SidebarTrigger />
+      <Separator orientation="vertical" className="h-6" />
+      <div className="flex-1" />
+    </header>
+  );
+}
+
 export function AdminLayout({ children, activeTab, onTabChange }: AdminLayoutProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,8 +164,10 @@ export function AdminLayout({ children, activeTab, onTabChange }: AdminLayoutPro
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (!session?.user) {
         navigate("/auth");
         return;
@@ -43,8 +175,10 @@ export function AdminLayout({ children, activeTab, onTabChange }: AdminLayoutPro
 
       setUser(session.user);
 
-      const { data: roleData, error } = await supabase
-        .rpc('has_role', { _user_id: session.user.id, _role: 'admin_owner' });
+      const { data: roleData, error } = await supabase.rpc("has_role", {
+        _user_id: session.user.id,
+        _role: "admin_owner",
+      });
 
       if (error || !roleData) {
         toast({
@@ -60,7 +194,9 @@ export function AdminLayout({ children, activeTab, onTabChange }: AdminLayoutPro
       setLoading(false);
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session) {
         navigate("/auth");
       }
@@ -89,58 +225,19 @@ export function AdminLayout({ children, activeTab, onTabChange }: AdminLayoutPro
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Admin Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="font-serif text-xl font-bold tracking-tight">
-                ACS <span className="text-rose-gold">BEAUTY</span>
-              </span>
-              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                Admin
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-muted-foreground hidden sm:block">
-                {user?.email}
-              </span>
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline ml-2">Sair</span>
-              </Button>
-            </div>
-          </div>
+    <SidebarProvider defaultOpen={true}>
+      <div className="min-h-screen flex w-full bg-background">
+        <AdminSidebar
+          activeTab={activeTab}
+          onTabChange={onTabChange}
+          user={user}
+          onSignOut={handleSignOut}
+        />
+        <div className="flex-1 flex flex-col min-w-0">
+          <AdminHeader />
+          <main className="flex-1 p-6 overflow-auto">{children}</main>
         </div>
-      </header>
-
-      {/* Tab Navigation */}
-      <nav className="bg-card border-b border-border sticky top-[57px] z-40 overflow-x-auto">
-        <div className="container mx-auto px-4">
-          <div className="flex gap-1 min-w-max">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => onTabChange(tab.id)}
-                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? "border-rose-gold text-foreground"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
-                }`}
-              >
-                <tab.icon className="w-4 h-4" />
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
-        {children}
-      </main>
-    </div>
+      </div>
+    </SidebarProvider>
   );
 }
