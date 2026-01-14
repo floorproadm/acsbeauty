@@ -41,7 +41,7 @@ export default function Cabelo() {
       <Header />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="relative min-h-[70vh] md:min-h-[80vh] flex items-center overflow-hidden">
+        <section className="relative pt-20 pb-12 md:pt-0 md:pb-0 md:min-h-[80vh] flex items-center overflow-hidden">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
             <img 
@@ -49,13 +49,13 @@ export default function Cabelo() {
               alt="Serviços de cabelo ACS Beauty"
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/40" />
+            <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-background/98 via-background/90 to-background/60 md:from-background/95 md:via-background/80 md:to-background/40" />
           </div>
           
-          <div className="container mx-auto px-4 md:px-6 relative z-10">
+          <div className="container mx-auto px-5 md:px-6 relative z-10 py-6 md:py-0">
             <Link 
               to="/" 
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 md:mb-8"
             >
               <ArrowLeft className="w-4 h-4" />
               {t("global.back")}
@@ -67,32 +67,32 @@ export default function Cabelo() {
               transition={{ duration: 0.6 }}
               className="max-w-2xl"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 rounded-full bg-rose-gold/20 backdrop-blur-sm">
-                  <Scissors className="w-6 h-6 text-rose-gold" />
+              <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+                <div className="p-2 md:p-3 rounded-full bg-rose-gold/20 backdrop-blur-sm">
+                  <Scissors className="w-5 h-5 md:w-6 md:h-6 text-rose-gold" />
                 </div>
-                <span className="text-sm font-medium tracking-wider text-rose-gold uppercase">
+                <span className="text-xs md:text-sm font-medium tracking-wider text-rose-gold uppercase">
                   {t("servicos.cabelo.badge")}
                 </span>
               </div>
               
-              <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-foreground">
+              <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 text-foreground leading-tight">
                 {t("servicos.cabelo.title")}
               </h1>
               
-              <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
+              <p className="text-base md:text-xl text-muted-foreground mb-6 md:mb-8 leading-relaxed">
                 {t("servicos.cabelo.subtitle")}
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/book">
-                  <Button variant="hero" size="lg" className="group w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+                <Link to="/book" className="w-full sm:w-auto">
+                  <Button variant="hero" size="lg" className="group w-full">
                     {t("global.book_now")}
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </Link>
-                <Link to="/services">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto backdrop-blur-sm bg-background/50">
+                <Link to="/services" className="w-full sm:w-auto">
+                  <Button variant="outline" size="lg" className="w-full backdrop-blur-sm bg-background/50">
                     {t("servicos.view_related_offers")}
                   </Button>
                 </Link>
