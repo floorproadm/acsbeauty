@@ -16,18 +16,21 @@ export function ServicesPreview() {
       titleKey: "home.services.hair",
       descKey: "home.services.hair_desc",
       image: hairServiceImg,
+      link: "/servicos/cabelo",
     },
     {
       icon: Eye,
       titleKey: "home.services.brows",
       descKey: "home.services.brows_desc",
       image: browsServiceImg,
+      link: "/servicos/sobrancelhas",
     },
     {
       icon: Sparkles,
       titleKey: "home.services.nails",
       descKey: "home.services.nails_desc",
       image: nailsServiceImg,
+      link: "/servicos/unhas",
     },
   ];
 
@@ -53,40 +56,45 @@ export function ServicesPreview() {
           </p>
         </motion.div>
 
-        {/* Services Grid - 3 Pillars (info only, no links to catalog) */}
+        {/* Services Grid - 3 Pillars with links to dedicated pages */}
         <div className="grid md:grid-cols-3 gap-6 md:gap-8">
           {services.map((service, index) => (
-            <motion.div
-              key={service.titleKey}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group relative bg-card rounded-2xl overflow-hidden shadow-soft"
-            >
-              <div className="aspect-[4/3] overflow-hidden">
-                <img
-                  src={service.image}
-                  alt={t(service.titleKey)}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 text-primary-foreground">
-                <div className="flex items-center gap-2 mb-2 md:mb-3">
-                  <service.icon className="w-5 h-5 text-rose-gold" />
-                  <h3 className="font-serif text-xl md:text-2xl font-semibold">{t(service.titleKey)}</h3>
+            <Link key={service.titleKey} to={service.link}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="group relative bg-card rounded-2xl overflow-hidden shadow-soft cursor-pointer"
+              >
+                <div className="aspect-[4/3] overflow-hidden">
+                  <img
+                    src={service.image}
+                    alt={t(service.titleKey)}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
                 </div>
-                <p className="text-primary-foreground/80 text-sm leading-relaxed">
-                  {t(service.descKey)}
-                </p>
-              </div>
-            </motion.div>
+                <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 text-primary-foreground">
+                  <div className="flex items-center gap-2 mb-2 md:mb-3">
+                    <service.icon className="w-5 h-5 text-rose-gold" />
+                    <h3 className="font-serif text-xl md:text-2xl font-semibold">{t(service.titleKey)}</h3>
+                  </div>
+                  <p className="text-primary-foreground/80 text-sm leading-relaxed">
+                    {t(service.descKey)}
+                  </p>
+                  <div className="mt-3 flex items-center gap-1 text-rose-gold text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    {t("home.services.explore")}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+              </motion.div>
+            </Link>
           ))}
         </div>
 
-        {/* CTA - Direct to offers only */}
+        {/* CTA - Explore services (education phase, not conversion) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -94,9 +102,9 @@ export function ServicesPreview() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="text-center mt-10 md:mt-12"
         >
-          <Link to="/services">
+          <Link to="/servicos/cabelo">
             <Button variant="hero" size="lg" className="group w-full sm:w-auto">
-              {t("home.services.view_offers")}
+              {t("home.services.explore_services")}
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
