@@ -4,6 +4,7 @@ import { ArrowRight, ArrowLeft, Eye, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { ServiceFAQ } from "@/components/services/ServiceFAQ";
 import { useLanguage } from "@/contexts/LanguageContext";
 import heroImage from "@/assets/brows-service.jpg";
 
@@ -22,6 +23,13 @@ export default function Sobrancelhas() {
     t("servicos.sobrancelhas.ideal_2"),
     t("servicos.sobrancelhas.ideal_3"),
     t("servicos.sobrancelhas.ideal_4"),
+  ];
+
+  const faqs = [
+    { question: t("servicos.sobrancelhas.faq_1_q"), answer: t("servicos.sobrancelhas.faq_1_a") },
+    { question: t("servicos.sobrancelhas.faq_2_q"), answer: t("servicos.sobrancelhas.faq_2_a") },
+    { question: t("servicos.sobrancelhas.faq_3_q"), answer: t("servicos.sobrancelhas.faq_3_a") },
+    { question: t("servicos.sobrancelhas.faq_4_q"), answer: t("servicos.sobrancelhas.faq_4_a") },
   ];
 
   return (
@@ -176,6 +184,9 @@ export default function Sobrancelhas() {
             </motion.div>
           </div>
         </section>
+
+        {/* FAQ Section */}
+        <ServiceFAQ faqs={faqs} />
 
         {/* Final CTA */}
         <section className="py-16 md:py-20 bg-gradient-warm">

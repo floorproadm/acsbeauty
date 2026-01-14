@@ -98,6 +98,7 @@ const translations: Record<Language, Record<string, string>> = {
     // ========== DEDICATED SERVICE PAGES ==========
     "servicos.what_we_offer": "What We Offer",
     "servicos.who_is_for": "Who Is This For",
+    "servicos.faq_title": "Frequently Asked Questions",
     "servicos.cta_title": "Ready to Get Started?",
     "servicos.cta_description": "Book your appointment and experience the ACS Beauty difference.",
     "servicos.view_related_offers": "View Related Offers",
@@ -120,6 +121,16 @@ const translations: Record<Language, Record<string, string>> = {
     "servicos.cabelo.ideal_2": "For those who want to maintain healthy, well-cared-for hair on a regular basis",
     "servicos.cabelo.ideal_3": "For those looking to align their look with their lifestyle and routine",
     "servicos.cabelo.ideal_4": "For those who value technique, quality, and personalized attention",
+    "servicos.cabelo.faq_1_q": "How long does a color service take?",
+    "servicos.cabelo.faq_1_a": "Color services typically take 2-4 hours depending on the technique. A full balayage or extensive highlights may take longer, while a simple root touch-up is usually completed in about 1.5 hours.",
+    "servicos.cabelo.faq_2_q": "How often should I get a haircut?",
+    "servicos.cabelo.faq_2_a": "We recommend a trim every 6-8 weeks to maintain healthy ends and keep your style looking fresh. For those growing out their hair, visits every 10-12 weeks work well.",
+    "servicos.cabelo.faq_3_q": "What products do you use?",
+    "servicos.cabelo.faq_3_a": "We exclusively use professional, high-quality products that are gentle on your hair while delivering exceptional results. We can recommend the best products for your hair type during your appointment.",
+    "servicos.cabelo.faq_4_q": "How long do keratin treatments last?",
+    "servicos.cabelo.faq_4_a": "Keratin treatments typically last 3-5 months depending on your hair type and care routine. We provide aftercare instructions to help maximize the longevity of your treatment.",
+    "servicos.cabelo.faq_5_q": "Can I color my hair on the same day as a treatment?",
+    "servicos.cabelo.faq_5_a": "We generally recommend doing color services before treatments like keratin or botox. During your consultation, we'll create a personalized plan that works best for your hair goals.",
     
     // Brows
     "servicos.sobrancelhas.badge": "Brow Services",
@@ -135,6 +146,14 @@ const translations: Record<Language, Record<string, string>> = {
     "servicos.sobrancelhas.ideal_2": "For those seeking to enhance their gaze with balance",
     "servicos.sobrancelhas.ideal_3": "For those who prefer subtle, elegant enhancement",
     "servicos.sobrancelhas.ideal_4": "For those who value precision and personalized care",
+    "servicos.sobrancelhas.faq_1_q": "How long does brow design take?",
+    "servicos.sobrancelhas.faq_1_a": "A complete brow design session takes approximately 30-45 minutes. This includes consultation, shaping, and finishing touches to ensure perfect symmetry.",
+    "servicos.sobrancelhas.faq_2_q": "How long does henna last?",
+    "servicos.sobrancelhas.faq_2_a": "Henna brows typically last 2-3 weeks on the skin and 4-6 weeks on the hair. Results vary based on skin type and aftercare routine.",
+    "servicos.sobrancelhas.faq_3_q": "Is the procedure painful?",
+    "servicos.sobrancelhas.faq_3_a": "Our brow services are gentle and non-invasive. You may feel slight discomfort during tweezing, but most clients find the experience quite relaxing.",
+    "servicos.sobrancelhas.faq_4_q": "How often should I get maintenance?",
+    "servicos.sobrancelhas.faq_4_a": "We recommend maintenance every 3-4 weeks to keep your brows looking their best. This helps maintain the shape and prevents overgrowth.",
     
     // Nails
     "servicos.unhas.badge": "Nail Services",
@@ -151,6 +170,14 @@ const translations: Record<Language, Record<string, string>> = {
     "servicos.unhas.ideal_2": "For those seeking practical elegance in their self-care routine",
     "servicos.unhas.ideal_3": "For those who value durability and quality in nail services",
     "servicos.unhas.ideal_4": "For those who appreciate attention to detail and hygiene",
+    "servicos.unhas.faq_1_q": "How long does a gel manicure last?",
+    "servicos.unhas.faq_1_a": "A gel manicure typically lasts 2-3 weeks with proper care. We recommend avoiding harsh chemicals and using cuticle oil daily to extend the life of your manicure.",
+    "servicos.unhas.faq_2_q": "Is gel harmful to my nails?",
+    "servicos.unhas.faq_2_a": "When applied and removed properly by professionals, gel is not harmful. We use quality products and proper removal techniques to maintain your nail health.",
+    "servicos.unhas.faq_3_q": "How long does a manicure session take?",
+    "servicos.unhas.faq_3_a": "A classic manicure takes about 45 minutes, while a gel manicure takes approximately 1 hour. Nail art designs may require additional time depending on complexity.",
+    "servicos.unhas.faq_4_q": "Do you offer nail strengthening treatments?",
+    "servicos.unhas.faq_4_a": "Yes! We offer various strengthening treatments for weak or damaged nails. During your consultation, we'll assess your nails and recommend the best treatment for your needs.",
 
     // ========== OFFERS ==========
     "offers.back": "Back to Offers",
@@ -337,6 +364,7 @@ const translations: Record<Language, Record<string, string>> = {
     // ========== DEDICATED SERVICE PAGES ==========
     "servicos.what_we_offer": "O Que Oferecemos",
     "servicos.who_is_for": "Para Quem É",
+    "servicos.faq_title": "Perguntas Frequentes",
     "servicos.cta_title": "Pronta para Começar?",
     "servicos.cta_description": "Agende seu horário e viva a experiência ACS Beauty.",
     "servicos.view_related_offers": "Ver Ofertas Relacionadas",
@@ -359,6 +387,16 @@ const translations: Record<Language, Record<string, string>> = {
     "servicos.cabelo.ideal_2": "Para quem deseja manter cabelos saudáveis e bem cuidados regularmente",
     "servicos.cabelo.ideal_3": "Para quem quer alinhar o visual ao estilo de vida e rotina",
     "servicos.cabelo.ideal_4": "Para quem valoriza técnica, qualidade e atenção personalizada",
+    "servicos.cabelo.faq_1_q": "Quanto tempo leva um serviço de coloração?",
+    "servicos.cabelo.faq_1_a": "Serviços de coloração geralmente levam de 2 a 4 horas dependendo da técnica. Um balayage completo ou mechas extensas podem levar mais tempo, enquanto um retoque de raiz simples é geralmente concluído em cerca de 1,5 hora.",
+    "servicos.cabelo.faq_2_q": "Com que frequência devo cortar o cabelo?",
+    "servicos.cabelo.faq_2_a": "Recomendamos um corte a cada 6-8 semanas para manter as pontas saudáveis e o estilo fresco. Para quem está deixando o cabelo crescer, visitas a cada 10-12 semanas funcionam bem.",
+    "servicos.cabelo.faq_3_q": "Quais produtos vocês usam?",
+    "servicos.cabelo.faq_3_a": "Usamos exclusivamente produtos profissionais de alta qualidade que são suaves para o cabelo enquanto entregam resultados excepcionais. Podemos recomendar os melhores produtos para seu tipo de cabelo durante o atendimento.",
+    "servicos.cabelo.faq_4_q": "Quanto tempo dura a progressiva?",
+    "servicos.cabelo.faq_4_a": "Tratamentos de progressiva tipicamente duram de 3 a 5 meses dependendo do seu tipo de cabelo e rotina de cuidados. Fornecemos instruções de cuidados para ajudar a maximizar a durabilidade do tratamento.",
+    "servicos.cabelo.faq_5_q": "Posso colorir o cabelo no mesmo dia de um tratamento?",
+    "servicos.cabelo.faq_5_a": "Geralmente recomendamos fazer serviços de coloração antes de tratamentos como progressiva ou botox. Durante sua consulta, criaremos um plano personalizado que funcione melhor para seus objetivos capilares.",
     
     // Sobrancelhas
     "servicos.sobrancelhas.badge": "Serviços de Sobrancelhas",
@@ -374,6 +412,14 @@ const translations: Record<Language, Record<string, string>> = {
     "servicos.sobrancelhas.ideal_2": "Para quem busca valorizar o olhar com equilíbrio",
     "servicos.sobrancelhas.ideal_3": "Para quem prefere realce sutil e elegante",
     "servicos.sobrancelhas.ideal_4": "Para quem valoriza precisão e cuidado personalizado",
+    "servicos.sobrancelhas.faq_1_q": "Quanto tempo leva o design de sobrancelhas?",
+    "servicos.sobrancelhas.faq_1_a": "Uma sessão completa de design de sobrancelhas leva aproximadamente 30-45 minutos. Isso inclui consulta, modelagem e acabamentos finais para garantir simetria perfeita.",
+    "servicos.sobrancelhas.faq_2_q": "Quanto tempo a henna dura?",
+    "servicos.sobrancelhas.faq_2_a": "A henna nas sobrancelhas tipicamente dura 2-3 semanas na pele e 4-6 semanas nos fios. Os resultados variam com base no tipo de pele e rotina de cuidados.",
+    "servicos.sobrancelhas.faq_3_q": "O procedimento dói?",
+    "servicos.sobrancelhas.faq_3_a": "Nossos serviços de sobrancelhas são suaves e não invasivos. Você pode sentir um leve desconforto durante a pinça, mas a maioria das clientes acha a experiência bastante relaxante.",
+    "servicos.sobrancelhas.faq_4_q": "Com que frequência devo fazer manutenção?",
+    "servicos.sobrancelhas.faq_4_a": "Recomendamos manutenção a cada 3-4 semanas para manter suas sobrancelhas com a melhor aparência. Isso ajuda a manter o formato e previne crescimento excessivo.",
     
     // Unhas
     "servicos.unhas.badge": "Serviços de Unhas",
@@ -390,6 +436,14 @@ const translations: Record<Language, Record<string, string>> = {
     "servicos.unhas.ideal_2": "Para quem busca elegância prática na rotina de autocuidado",
     "servicos.unhas.ideal_3": "Para quem valoriza durabilidade e qualidade nos serviços de unhas",
     "servicos.unhas.ideal_4": "Para quem aprecia atenção aos detalhes e higiene",
+    "servicos.unhas.faq_1_q": "Quanto tempo dura uma manicure em gel?",
+    "servicos.unhas.faq_1_a": "Uma manicure em gel tipicamente dura 2-3 semanas com os cuidados adequados. Recomendamos evitar produtos químicos agressivos e usar óleo de cutícula diariamente para prolongar a durabilidade.",
+    "servicos.unhas.faq_2_q": "O gel prejudica minhas unhas?",
+    "servicos.unhas.faq_2_a": "Quando aplicado e removido corretamente por profissionais, o gel não é prejudicial. Usamos produtos de qualidade e técnicas de remoção adequadas para manter a saúde das suas unhas.",
+    "servicos.unhas.faq_3_q": "Quanto tempo leva uma sessão de manicure?",
+    "servicos.unhas.faq_3_a": "Uma manicure clássica leva cerca de 45 minutos, enquanto uma manicure em gel leva aproximadamente 1 hora. Designs de nail art podem requerer tempo adicional dependendo da complexidade.",
+    "servicos.unhas.faq_4_q": "Vocês oferecem tratamentos de fortalecimento?",
+    "servicos.unhas.faq_4_a": "Sim! Oferecemos vários tratamentos de fortalecimento para unhas fracas ou danificadas. Durante sua consulta, avaliaremos suas unhas e recomendaremos o melhor tratamento para suas necessidades.",
 
     // ========== OFFERS ==========
     "offers.back": "Voltar para Ofertas",
