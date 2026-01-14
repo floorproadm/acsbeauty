@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, LogOut, LayoutDashboard, Calendar, Users, Sparkles, Tag, Megaphone, HelpCircle } from "lucide-react";
+import { Loader2, LogOut, LayoutDashboard, Calendar, Users, Sparkles, Tag, Megaphone, HelpCircle, UserCheck } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
-export type AdminTab = "dashboard" | "bookings" | "clients" | "services" | "offers" | "campaigns" | "quizzes";
+export type AdminTab = "dashboard" | "bookings" | "clients" | "leads" | "services" | "offers" | "campaigns" | "quizzes";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -18,6 +18,7 @@ const tabs: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "bookings", label: "Agendamentos", icon: Calendar },
   { id: "clients", label: "Clientes", icon: Users },
+  { id: "leads", label: "Leads", icon: UserCheck },
   { id: "services", label: "Serviços", icon: Sparkles },
   { id: "offers", label: "Ofertas", icon: Tag },
   { id: "campaigns", label: "Campanhas", icon: Megaphone },
