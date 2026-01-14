@@ -51,8 +51,16 @@ interface QuizResponse {
   client_name: string | null;
   client_phone: string | null;
   client_email: string | null;
+  client_instagram: string | null;
+  answers: unknown;
+  calculated_score: unknown;
+  utm_source: string | null;
+  utm_campaign: string | null;
   completed_at: string | null;
   created_at: string;
+  recommended_result_id: string | null;
+  quizzes?: { name: string } | null;
+  quiz_results?: { title: string } | null;
 }
 
 export function QuizzesTab() {
@@ -61,6 +69,7 @@ export function QuizzesTab() {
   const [isCreating, setIsCreating] = useState(false);
   const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
   const [editorQuiz, setEditorQuiz] = useState<Quiz | null>(null);
+  const [selectedResponse, setSelectedResponse] = useState<QuizResponse | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
@@ -85,7 +94,7 @@ export function QuizzesTab() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("quiz_responses")
-        .select("*")
+        .select("*, quizzes(name), quiz_results(title)")
         .order("created_at", { ascending: false })
         .limit(100);
       if (error) throw error;
@@ -419,7 +428,11 @@ export function QuizzesTab() {
               </TableHeader>
               <TableBody>
                 {responses.slice(0, 10).map((response) => (
-                  <TableRow key={response.id}>
+                  <TableRow 
+                    key={response.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => setSelectedResponse(response)}
+                  >
                     <TableCell className="font-medium">
                       {response.client_name || "Anônimo"}
                     </TableCell>
@@ -438,6 +451,97 @@ export function QuizzesTab() {
           </CardContent>
         </Card>
       )}
+
+      {/* Lead Detail Modal */}
+      <Dialog open={!!selectedResponse} onOpenChange={(open) => !open && setSelectedResponse(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-xl">
+              {selectedResponse?.client_name || "Lead Anônimo"}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedResponse && (
+            <div className="space-y-4">
+              {/* Contact Info */}
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-muted-foreground">Contato</h4>
+                <div className="grid gap-2">
+                  {selectedResponse.client_phone && (
+                    <a 
+                      href={`tel:${selectedResponse.client_phone}`}
+                      className="flex items-center gap-2 p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors text-sm"
+                    >
+                      📞 {selectedResponse.client_phone}
+                    </a>
+                  )}
+                  {selectedResponse.client_email && (
+                    <a 
+                      href={`mailto:${selectedResponse.client_email}`}
+                      className="flex items-center gap-2 p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors text-sm"
+                    >
+                      ✉️ {selectedResponse.client_email}
+                    </a>
+                  )}
+                  {selectedResponse.client_instagram && (
+                    <a 
+                      href={`https://instagram.com/${selectedResponse.client_instagram.replace("@", "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors text-sm"
+                    >
+                      📷 @{selectedResponse.client_instagram.replace("@", "")}
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              {/* Quiz Info */}
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-muted-foreground">Quiz</h4>
+                <div className="p-3 rounded-md bg-muted/50 space-y-1">
+                  {selectedResponse.quizzes?.name && (
+                    <p className="text-sm font-medium">{selectedResponse.quizzes.name}</p>
+                  )}
+                  {selectedResponse.quiz_results?.title && (
+                    <p className="text-sm text-muted-foreground">
+                      Resultado: <span className="text-foreground">{selectedResponse.quiz_results.title}</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* UTM Info */}
+              {(selectedResponse.utm_source || selectedResponse.utm_campaign) && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-muted-foreground">Origem</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedResponse.utm_source && (
+                      <Badge variant="outline" className="text-xs">
+                        Source: {selectedResponse.utm_source}
+                      </Badge>
+                    )}
+                    {selectedResponse.utm_campaign && (
+                      <Badge variant="outline" className="text-xs">
+                        Campaign: {selectedResponse.utm_campaign}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Timestamp */}
+              <div className="pt-2 border-t">
+                <p className="text-xs text-muted-foreground">
+                  Respondido em: {selectedResponse.completed_at 
+                    ? new Date(selectedResponse.completed_at).toLocaleString("pt-BR") 
+                    : new Date(selectedResponse.created_at).toLocaleString("pt-BR")}
+                </p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Quiz Editor Modal */}
       {editorQuiz && (
