@@ -10,7 +10,7 @@ export default function Contact() {
   const { t } = useLanguage();
 
   const contactCards = [
-    { icon: Phone, titleKey: "contact.phone_title", value: "(123) 456-7890", href: "tel:+1234567890" },
+    { icon: Phone, titleKey: "contact.phone_title", value: "(732) 915-3430", href: "tel:+17329153430" },
     { icon: Mail, titleKey: "contact.email_title", value: "hello@acsbeauty.com", href: "mailto:hello@acsbeauty.com" },
     { icon: MapPin, titleKey: "contact.address_title", value: "375 Chestnut St, 3rd Floor\nSuite 3B, Newark, NJ", href: "https://www.google.com/maps/search/?api=1&query=375+Chestnut+St+Newark+NJ" },
   ];
