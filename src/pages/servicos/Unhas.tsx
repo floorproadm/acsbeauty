@@ -46,8 +46,8 @@ export default function Unhas() {
               alt="Serviços de unhas ACS Beauty"
               className="w-full h-full object-cover"
             />
-            {/* Gradient overlay - same style for mobile and desktop */}
-            <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-background/90 via-background/70 to-background/40" />
+            {/* Gradient overlay - stronger on mobile for readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/85 to-background/60 md:bg-gradient-to-r md:from-background/90 md:via-background/70 md:to-background/40" />
           </div>
           
           <div className="container mx-auto px-5 md:px-6 relative z-10 py-6 md:py-0">
