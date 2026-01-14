@@ -7,7 +7,7 @@ import { format, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 interface DashboardTabProps {
-  onNavigate: (tab: "bookings" | "clients" | "campaigns") => void;
+  onNavigate: (tab: "bookings" | "clients" | "leads") => void;
 }
 
 export function DashboardTab({ onNavigate }: DashboardTabProps) {
@@ -44,19 +44,6 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
     },
   });
 
-  // Active campaigns
-  const { data: activeCampaigns, isLoading: loadingCampaigns } = useQuery({
-    queryKey: ["admin-active-campaigns"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("campaigns")
-        .select("*")
-        .eq("status", "active");
-      
-      if (error) throw error;
-      return data;
-    },
-  });
 
   // Pending bookings (requested status)
   const { data: pendingBookings, isLoading: loadingPending } = useQuery({
@@ -137,21 +124,6 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
           </div>
         </div>
 
-        <div className="bg-card rounded-xl p-4 border border-border shadow-soft">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-500/10 rounded-lg">
-              <TrendingUp className="w-5 h-5 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Campanhas Ativas</p>
-              {loadingCampaigns ? (
-                <Skeleton className="h-7 w-8" />
-              ) : (
-                <p className="text-2xl font-bold">{activeCampaigns?.length || 0}</p>
-              )}
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Two Column Layout */}
@@ -257,36 +229,6 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
         </div>
       </div>
 
-      {/* Active Campaigns */}
-      {activeCampaigns && activeCampaigns.length > 0 && (
-        <div className="bg-card rounded-xl border border-border shadow-soft">
-          <div className="p-4 border-b border-border flex items-center justify-between">
-            <h2 className="font-semibold flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-purple-500" />
-              Campanhas Ativas
-            </h2>
-            <Button variant="ghost" size="sm" onClick={() => onNavigate("campaigns")}>
-              Ver tudo
-            </Button>
-          </div>
-          <div className="p-4">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {activeCampaigns.map((campaign) => (
-                <div
-                  key={campaign.id}
-                  className="p-4 bg-gradient-to-br from-purple-50 to-rose-50 rounded-lg border border-purple-100"
-                >
-                  <p className="font-medium text-sm">{campaign.name}</p>
-                  <p className="text-xs text-muted-foreground capitalize">{campaign.channel}</p>
-                  {campaign.utm_campaign && (
-                    <p className="text-xs text-purple-600 mt-1">UTM: {campaign.utm_campaign}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
