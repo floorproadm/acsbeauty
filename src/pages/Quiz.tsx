@@ -234,27 +234,44 @@ export default function QuizPage() {
     setRecommendedResult(bestResult);
 
     try {
-      // Create or get client
-      const { data: clientData } = await supabase
-        .from("clients")
-        .upsert(
-          {
+      // Create client (if phone provided, try to find existing first)
+      let clientId: string | null = null;
+      
+      if (leadData.phone) {
+        // Try to insert client, ignore conflict
+        const { data: newClient } = await supabase
+          .from("clients")
+          .insert({
             name: leadData.name,
             phone: leadData.phone,
             email: leadData.email || null,
             instagram: leadData.instagram || null,
-          },
-          { onConflict: "phone" }
-        )
-        .select()
-        .single();
+          })
+          .select("id")
+          .maybeSingle();
+        
+        clientId = newClient?.id || null;
+      } else {
+        // No phone, just create new client
+        const { data: newClient } = await supabase
+          .from("clients")
+          .insert({
+            name: leadData.name,
+            email: leadData.email || null,
+            instagram: leadData.instagram || null,
+          })
+          .select("id")
+          .maybeSingle();
+        
+        clientId = newClient?.id || null;
+      }
 
       // Save quiz response
       const { data: responseData, error: responseError } = await supabase
         .from("quiz_responses")
         .insert({
           quiz_id: quiz.id,
-          client_id: clientData?.id || null,
+          client_id: clientId,
           client_name: leadData.name,
           client_phone: leadData.phone,
           client_email: leadData.email || null,
@@ -270,7 +287,7 @@ export default function QuizPage() {
           completed_at: new Date().toISOString(),
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (responseError) throw responseError;
       setResponseId(responseData?.id || null);
