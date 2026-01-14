@@ -45,7 +45,9 @@ export default function Sobrancelhas() {
               alt="Serviços de sobrancelhas ACS Beauty"
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-background/98 via-background/90 to-background/60 md:from-background/95 md:via-background/80 md:to-background/40" />
+            {/* Mobile: solid overlay for readability, Desktop: gradient */}
+            <div className="absolute inset-0 bg-background/95 md:bg-transparent" />
+            <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-background/95 via-background/80 to-background/40" />
           </div>
           
           <div className="container mx-auto px-5 md:px-6 relative z-10 py-6 md:py-0">
