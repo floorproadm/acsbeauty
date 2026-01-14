@@ -549,15 +549,23 @@ const translations: Record<Language, Record<string, string>> = {
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === "pt" || stored === "en") return stored;
+    try {
+      if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored === "pt" || stored === "en") return stored;
+      }
+    } catch {
+      // localStorage may not be available (e.g., private browsing)
     }
     return "en"; // Default is now EN
   });
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, language);
+    try {
+      localStorage.setItem(STORAGE_KEY, language);
+    } catch {
+      // Ignore localStorage errors
+    }
   }, [language]);
 
   const setLanguage = (lang: Language) => {
