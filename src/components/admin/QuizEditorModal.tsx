@@ -33,6 +33,7 @@ import {
   CheckCircle2,
   Image as ImageIcon,
   MoreVertical,
+  Upload,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -69,6 +70,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Json } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
+import { ImageUpload, CompactImageUpload } from "./ImageUpload";
 
 interface Quiz {
   id: string;
@@ -188,6 +190,12 @@ function SortableOption({
         onChange={(emoji) => onUpdate({ ...option, emoji })}
       />
       
+      <CompactImageUpload
+        value={option.image_url}
+        onChange={(url) => onUpdate({ ...option, image_url: url })}
+        folder="options"
+      />
+      
       <button
         type="button"
         onClick={() => onDelete(option.id)}
@@ -218,15 +226,6 @@ function SortableOption({
                   type="number"
                   value={typeof option.points === "number" ? option.points : 0}
                   onChange={(e) => onUpdate({ ...option, points: parseInt(e.target.value) || 0 })}
-                  className="h-8"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">URL da Imagem</Label>
-                <Input
-                  value={option.image_url || ""}
-                  onChange={(e) => onUpdate({ ...option, image_url: e.target.value || null })}
-                  placeholder="https://..."
                   className="h-8"
                 />
               </div>
@@ -455,13 +454,14 @@ function SortableQuestion({
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm">Imagem da Pergunta</Label>
-                      <Input
-                        value={question.image_url || ""}
-                        onChange={(e) =>
-                          onUpdate({ ...question, image_url: e.target.value || null })
+                      <ImageUpload
+                        value={question.image_url}
+                        onChange={(url) =>
+                          onUpdate({ ...question, image_url: url })
                         }
-                        placeholder="https://exemplo.com/imagem.jpg"
-                        className="h-9"
+                        folder="questions"
+                        aspectRatio="video"
+                        placeholder="Clique para adicionar"
                       />
                     </div>
                   </div>
