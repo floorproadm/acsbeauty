@@ -11,7 +11,7 @@ export default function Contact() {
 
   const contactCards = [
     { icon: Phone, titleKey: "contact.phone_title", value: "(732) 915-3430", href: "tel:+17329153430" },
-    { icon: Mail, titleKey: "contact.email_title", value: "hello@acsbeauty.com", href: "mailto:hello@acsbeauty.com" },
+    { icon: Mail, titleKey: "contact.email_title", value: "acsbeautystudio@gmail.com", href: "mailto:acsbeautystudio@gmail.com" },
     { icon: MapPin, titleKey: "contact.address_title", value: "375 Chestnut St, 3rd Floor\nSuite 3B, Newark, NJ", href: "https://www.google.com/maps/search/?api=1&query=375+Chestnut+St+Newark+NJ" },
   ];
 
