@@ -4,6 +4,7 @@ import { ArrowRight, ArrowLeft, Sparkles, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { ServiceFAQ } from "@/components/services/ServiceFAQ";
 import { useLanguage } from "@/contexts/LanguageContext";
 import heroImage from "@/assets/nails-service.jpg";
 
@@ -23,6 +24,13 @@ export default function Unhas() {
     t("servicos.unhas.ideal_2"),
     t("servicos.unhas.ideal_3"),
     t("servicos.unhas.ideal_4"),
+  ];
+
+  const faqs = [
+    { question: t("servicos.unhas.faq_1_q"), answer: t("servicos.unhas.faq_1_a") },
+    { question: t("servicos.unhas.faq_2_q"), answer: t("servicos.unhas.faq_2_a") },
+    { question: t("servicos.unhas.faq_3_q"), answer: t("servicos.unhas.faq_3_a") },
+    { question: t("servicos.unhas.faq_4_q"), answer: t("servicos.unhas.faq_4_a") },
   ];
 
   return (
@@ -177,6 +185,9 @@ export default function Unhas() {
             </motion.div>
           </div>
         </section>
+
+        {/* FAQ Section */}
+        <ServiceFAQ faqs={faqs} />
 
         {/* Final CTA */}
         <section className="py-16 md:py-20 bg-gradient-warm">
