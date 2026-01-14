@@ -21,10 +21,14 @@ export function Header() {
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
+      // Close mobile menu when user scrolls
+      if (isMobileMenuOpen && window.scrollY > 10) {
+        setIsMobileMenuOpen(false);
+      }
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isMobileMenuOpen]);
 
   return (
     <header
