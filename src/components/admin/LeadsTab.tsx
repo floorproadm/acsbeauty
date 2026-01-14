@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,7 +40,9 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
+  Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { format, subDays, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -76,6 +78,27 @@ export function LeadsTab() {
   const [selectedPeriod, setSelectedPeriod] = useState<string>("all");
   const [selectedLead, setSelectedLead] = useState<QuizResponse | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Check if current user is admin
+  useEffect(() => {
+    const checkAdminRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin_owner")
+        .maybeSingle();
+      
+      setIsAdmin(!!data);
+    };
+    checkAdminRole();
+  }, []);
 
   // Fetch all leads
   const { data: leads, isLoading } = useQuery({
@@ -182,6 +205,30 @@ export function LeadsTab() {
     link.href = URL.createObjectURL(blob);
     link.download = `leads-${format(new Date(), "yyyy-MM-dd")}.csv`;
     link.click();
+  };
+
+  // Delete lead (admin only)
+  const handleDeleteLead = async (leadId: string) => {
+    if (!isAdmin) return;
+    
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("quiz_responses")
+        .delete()
+        .eq("id", leadId);
+      
+      if (error) throw error;
+      
+      toast.success("Lead excluído com sucesso");
+      setSelectedLead(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-leads"] });
+    } catch (error) {
+      console.error("Error deleting lead:", error);
+      toast.error("Erro ao excluir lead");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // Stats
@@ -568,14 +615,25 @@ export function LeadsTab() {
                 </div>
               )}
 
-              {/* Timestamp */}
-              <div className="pt-2 border-t">
+              {/* Timestamp + Delete */}
+              <div className="pt-2 border-t flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">
                   Respondido em:{" "}
                   {selectedLead.completed_at
                     ? format(new Date(selectedLead.completed_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
                     : format(new Date(selectedLead.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                 </p>
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => handleDeleteLead(selectedLead.id)}
+                    disabled={isDeleting}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                )}
               </div>
             </div>
           )}
