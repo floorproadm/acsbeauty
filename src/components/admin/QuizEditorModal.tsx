@@ -72,6 +72,8 @@ import { Json } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 import { ImageUpload, CompactImageUpload } from "./ImageUpload";
 import { QuizPreview } from "./QuizPreview";
+import { QuizSettings, QuizSettingsData, DEFAULT_SETTINGS } from "./QuizSettings";
+
 interface Quiz {
   id: string;
   name: string;
@@ -79,6 +81,7 @@ interface Quiz {
   description: string | null;
   type: string;
   is_active: boolean;
+  settings?: Record<string, unknown> | null;
 }
 
 interface QuizQuestion {
@@ -543,6 +546,10 @@ export function QuizEditorModal({ quiz, open, onOpenChange }: QuizEditorModalPro
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("questions");
   const [isFullscreen, setIsFullscreen] = useState(true);
+  const [quizSettings, setQuizSettings] = useState<QuizSettingsData>(() => ({
+    ...DEFAULT_SETTINGS,
+    ...(quiz.settings as Partial<QuizSettingsData> || {}),
+  }));
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -710,6 +717,14 @@ export function QuizEditorModal({ quiz, open, onOpenChange }: QuizEditorModalPro
   async function saveChanges() {
     setIsSaving(true);
     try {
+      // Save quiz settings
+      const { error: settingsError } = await supabase
+        .from("quizzes")
+        .update({ settings: quizSettings as unknown as Json })
+        .eq("id", quiz.id);
+      
+      if (settingsError) throw settingsError;
+
       // Get existing question IDs
       const existingQuestionIds = fetchedQuestions?.map((q) => q.id) || [];
       const currentQuestionIds = questions
@@ -1029,15 +1044,10 @@ export function QuizEditorModal({ quiz, open, onOpenChange }: QuizEditorModalPro
               )}
 
               {activeTab === "settings" && (
-                <div>
-                  <Card className="border-dashed border-2">
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <p className="text-muted-foreground text-sm">
-                        Configurações em breve...
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
+                <QuizSettings 
+                  settings={quizSettings} 
+                  onChange={setQuizSettings} 
+                />
               )}
             </>
           )}
