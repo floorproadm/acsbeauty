@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
@@ -91,6 +92,8 @@ export function LeadsTab() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [leadToDelete, setLeadToDelete] = useState<QuizResponse | null>(null);
+  const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set());
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
   const queryClient = useQueryClient();
 
   // Check if current user is admin
@@ -243,6 +246,59 @@ export function LeadsTab() {
     }
   };
 
+  // Bulk delete leads (admin only)
+  const handleBulkDelete = async () => {
+    if (!isAdmin || selectedLeadIds.size === 0) return;
+    
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("quiz_responses")
+        .delete()
+        .in("id", Array.from(selectedLeadIds));
+      
+      if (error) throw error;
+      
+      toast.success(`${selectedLeadIds.size} leads excluídos com sucesso`);
+      setSelectedLeadIds(new Set());
+      setShowBulkDeleteDialog(false);
+      queryClient.invalidateQueries({ queryKey: ["admin-leads"] });
+    } catch (error) {
+      console.error("Error deleting leads:", error);
+      toast.error("Erro ao excluir leads");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Toggle lead selection
+  const toggleLeadSelection = (leadId: string) => {
+    const newSet = new Set(selectedLeadIds);
+    if (newSet.has(leadId)) {
+      newSet.delete(leadId);
+    } else {
+      newSet.add(leadId);
+    }
+    setSelectedLeadIds(newSet);
+  };
+
+  // Toggle all leads on current page
+  const toggleAllOnPage = () => {
+    const pageLeadIds = paginatedLeads?.map(l => l.id) || [];
+    const allSelected = pageLeadIds.every(id => selectedLeadIds.has(id));
+    
+    const newSet = new Set(selectedLeadIds);
+    if (allSelected) {
+      pageLeadIds.forEach(id => newSet.delete(id));
+    } else {
+      pageLeadIds.forEach(id => newSet.add(id));
+    }
+    setSelectedLeadIds(newSet);
+  };
+
+  const allOnPageSelected = paginatedLeads?.length ? paginatedLeads.every(l => selectedLeadIds.has(l.id)) : false;
+  const someOnPageSelected = paginatedLeads?.some(l => selectedLeadIds.has(l.id)) && !allOnPageSelected;
+
   // Stats
   const stats = {
     total: leads?.length || 0,
@@ -272,6 +328,16 @@ export function LeadsTab() {
           <Download className="w-4 h-4 mr-2" />
           Exportar CSV
         </Button>
+        {isAdmin && selectedLeadIds.size > 0 && (
+          <Button 
+            variant="destructive" 
+            size="sm"
+            onClick={() => setShowBulkDeleteDialog(true)}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Excluir ({selectedLeadIds.size})
+          </Button>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -397,6 +463,16 @@ export function LeadsTab() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  {isAdmin && (
+                    <TableHead className="w-[40px]">
+                      <Checkbox
+                        checked={allOnPageSelected}
+                        onCheckedChange={toggleAllOnPage}
+                        aria-label="Selecionar todos"
+                        className={someOnPageSelected ? "data-[state=checked]:bg-primary/50" : ""}
+                      />
+                    </TableHead>
+                  )}
                   <TableHead>Nome</TableHead>
                   <TableHead>Contato</TableHead>
                   <TableHead className="hidden md:table-cell">Quiz</TableHead>
@@ -410,9 +486,18 @@ export function LeadsTab() {
                 {paginatedLeads?.map((lead) => (
                   <TableRow
                     key={lead.id}
-                    className="cursor-pointer hover:bg-muted/50"
+                    className={`cursor-pointer hover:bg-muted/50 ${selectedLeadIds.has(lead.id) ? "bg-muted/30" : ""}`}
                     onClick={() => setSelectedLead(lead)}
                   >
+                    {isAdmin && (
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={selectedLeadIds.has(lead.id)}
+                          onCheckedChange={() => toggleLeadSelection(lead.id)}
+                          aria-label={`Selecionar ${lead.client_name || "lead"}`}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell className="font-medium">
                       {lead.client_name || "Anônimo"}
                     </TableCell>
@@ -670,6 +755,29 @@ export function LeadsTab() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isDeleting ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir {selectedLeadIds.size} leads?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir {selectedLeadIds.size} leads selecionados? 
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Excluindo..." : `Excluir ${selectedLeadIds.size} leads`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
