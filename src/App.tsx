@@ -16,6 +16,9 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Quiz from "./pages/Quiz";
 import NotFound from "./pages/NotFound";
+import Cabelo from "./pages/servicos/Cabelo";
+import Sobrancelhas from "./pages/servicos/Sobrancelhas";
+import Unhas from "./pages/servicos/Unhas";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +33,9 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/servicos/cabelo" element={<Cabelo />} />
+          <Route path="/servicos/sobrancelhas" element={<Sobrancelhas />} />
+          <Route path="/servicos/unhas" element={<Unhas />} />
           <Route path="/packages" element={<Packages />} />
           <Route path="/o/:id" element={<OfferLanding />} />
           <Route path="/p/:id" element={<PackageLanding />} />
