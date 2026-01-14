@@ -34,6 +34,7 @@ import {
   Image as ImageIcon,
   MoreVertical,
   Upload,
+  Smartphone,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -71,7 +72,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Json } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 import { ImageUpload, CompactImageUpload } from "./ImageUpload";
-
+import { QuizPreview } from "./QuizPreview";
 interface Quiz {
   id: string;
   name: string;
@@ -886,6 +887,13 @@ export function QuizEditorModal({ quiz, open, onOpenChange }: QuizEditorModalPro
                 Questões
               </TabsTrigger>
               <TabsTrigger 
+                value="preview"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-3 py-1.5 text-sm gap-1.5"
+              >
+                <Smartphone className="h-3.5 w-3.5" />
+                Preview
+              </TabsTrigger>
+              <TabsTrigger 
                 value="results"
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-3 py-1.5 text-sm"
               >
@@ -967,6 +975,14 @@ export function QuizEditorModal({ quiz, open, onOpenChange }: QuizEditorModalPro
                     </Card>
                   )}
                 </div>
+              )}
+
+              {activeTab === "preview" && (
+                <QuizPreview
+                  quizName={quiz.name}
+                  questions={questions}
+                  options={options}
+                />
               )}
 
               {activeTab === "results" && (
