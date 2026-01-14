@@ -3,6 +3,7 @@ import { AdminLayout, AdminTab } from "@/components/admin/AdminLayout";
 import { DashboardTab } from "@/components/admin/DashboardTab";
 import { BookingsTab } from "@/components/admin/BookingsTab";
 import { ClientsTab } from "@/components/admin/ClientsTab";
+import { LeadsTab } from "@/components/admin/LeadsTab";
 import { ServicesTab } from "@/components/admin/ServicesTab";
 import { OffersTab } from "@/components/admin/OffersTab";
 import { CampaignsTab } from "@/components/admin/CampaignsTab";
@@ -19,6 +20,8 @@ export default function Admin() {
         return <BookingsTab />;
       case "clients":
         return <ClientsTab />;
+      case "leads":
+        return <LeadsTab />;
       case "services":
         return <ServicesTab />;
       case "offers":
