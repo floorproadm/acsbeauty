@@ -77,7 +77,7 @@ function AdminSidebar({
   const isCollapsed = state === "collapsed";
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border">
+    <Sidebar collapsible="offcanvas" className="border-r border-border">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-gold to-rose-gold/70 flex items-center justify-center">
