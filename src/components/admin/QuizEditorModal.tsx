@@ -27,14 +27,14 @@ import {
   ChevronUp,
   Copy,
   Eye,
-  EyeOff,
   Settings,
   ListChecks,
   CheckCircle2,
-  Image as ImageIcon,
   MoreVertical,
-  Upload,
   Smartphone,
+  Maximize2,
+  Minimize2,
+  ArrowLeft,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -42,11 +42,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -543,6 +542,7 @@ export function QuizEditorModal({ quiz, open, onOpenChange }: QuizEditorModalPro
   const [options, setOptions] = useState<Record<string, QuizOption[]>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("questions");
+  const [isFullscreen, setIsFullscreen] = useState(true);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -849,32 +849,63 @@ export function QuizEditorModal({ quiz, open, onOpenChange }: QuizEditorModalPro
   const isLoading = loadingQuestions || loadingOptions;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-2xl lg:max-w-3xl p-0 overflow-hidden flex flex-col">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent 
+        className={cn(
+          "p-0 overflow-hidden flex flex-col gap-0 border-0",
+          isFullscreen 
+            ? "max-w-none w-screen h-screen rounded-none" 
+            : "max-w-4xl h-[90vh] rounded-2xl"
+        )}
+      >
+        <DialogTitle className="sr-only">{quiz.name}</DialogTitle>
+        
         {/* Header */}
-        <SheetHeader className="px-6 py-4 border-b bg-muted/30 space-y-0">
-          <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between px-4 py-3 border-b bg-background">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onOpenChange(false)}
+              className="h-8 w-8"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
             <div>
-              <SheetTitle className="text-lg font-semibold">{quiz.name}</SheetTitle>
-              <p className="text-sm text-muted-foreground">/{quiz.slug}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open(`/quiz/${quiz.slug}`, "_blank")}
-                className="gap-1.5"
-              >
-                <Eye className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Ver</span>
-              </Button>
-              <Button onClick={saveChanges} disabled={isSaving} size="sm" className="gap-1.5">
-                <Save className="h-3.5 w-3.5" />
-                {isSaving ? "Salvando..." : "Publicar"}
-              </Button>
+              <h2 className="font-semibold text-sm">{quiz.name}</h2>
+              <p className="text-xs text-muted-foreground">/{quiz.slug}</p>
             </div>
           </div>
-        </SheetHeader>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="h-8 w-8"
+              title={isFullscreen ? "Sair da tela cheia" : "Tela cheia"}
+            >
+              {isFullscreen ? (
+                <Minimize2 className="h-4 w-4" />
+              ) : (
+                <Maximize2 className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open(`/quiz/${quiz.slug}`, "_blank")}
+              className="gap-1.5 h-8"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Ver</span>
+            </Button>
+            <Button onClick={saveChanges} disabled={isSaving} size="sm" className="gap-1.5 h-8">
+              <Save className="h-3.5 w-3.5" />
+              {isSaving ? "Salvando..." : "Publicar"}
+            </Button>
+          </div>
+        </div>
 
         {/* Tabs Navigation */}
         <div className="px-4 py-2 border-b bg-background">
@@ -1014,20 +1045,15 @@ export function QuizEditorModal({ quiz, open, onOpenChange }: QuizEditorModalPro
 
         {/* Footer */}
         <div className="flex items-center justify-between px-4 py-3 border-t bg-background">
-          <Button onClick={addQuestion} className="gap-2 rounded-full" size="default">
+          <Button onClick={addQuestion} variant="outline" className="gap-2" size="sm">
             <Plus className="h-4 w-4" />
+            Adicionar Pergunta
           </Button>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" disabled>
-              <ChevronDown className="h-4 w-4 rotate-90" />
-            </Button>
-            <Button size="sm" className="gap-1.5">
-              Próximo
-              <ChevronDown className="h-4 w-4 -rotate-90" />
-            </Button>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            {questions.length} {questions.length === 1 ? "pergunta" : "perguntas"}
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
