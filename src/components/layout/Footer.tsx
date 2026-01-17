@@ -19,17 +19,10 @@ export function Footer() {
             </p>
             <div className="flex gap-3 md:gap-4 pt-1 md:pt-2">
               <a
-                href="https://www.instagram.com/acsbeautynj?igsh=c2hsdmg1bm9kOHNo"
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.open(
-                    "https://www.instagram.com/acsbeautynj?igsh=c2hsdmg1bm9kOHNo",
-                    "_blank",
-                    "noopener,noreferrer",
-                  );
-                }}
+                href="https://www.instagram.com/acsbeautynj"
                 target="_blank"
                 rel="noopener noreferrer"
+                referrerPolicy="no-referrer"
                 className="p-2 rounded-full bg-primary-foreground/10 hover:bg-rose-gold hover:text-foreground transition-all duration-300"
                 aria-label="Instagram"
               >
