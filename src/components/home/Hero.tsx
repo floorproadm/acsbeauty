@@ -58,18 +58,18 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-col gap-3 md:gap-4"
+              className="flex flex-col sm:flex-row gap-3 md:gap-4"
             >
-              {/* Primary CTA - Full width on mobile for thumb reach */}
+              {/* Primary CTA */}
               <Link to="/services" className="w-full sm:w-auto">
-                <Button variant="hero" size="xl" className="group w-full sm:w-auto">
+                <Button variant="hero" size="lg" className="group w-full sm:w-auto h-12">
                   {t("home.hero.cta_offers")}
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
-              {/* Secondary CTA - Instagram friendly */}
+              {/* Secondary CTA */}
               <Link to="/contact" className="w-full sm:w-auto">
-                <Button variant="hero-outline" size="lg" className="w-full sm:w-auto">
+                <Button variant="hero-outline" size="lg" className="w-full sm:w-auto h-12">
                   <Sparkles className="w-4 h-4" />
                   {t("global.contact_us")}
                 </Button>
