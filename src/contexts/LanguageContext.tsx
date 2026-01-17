@@ -179,6 +179,12 @@ const translations: Record<Language, Record<string, string>> = {
     "servicos.unhas.faq_4_q": "Do you offer nail strengthening treatments?",
     "servicos.unhas.faq_4_a": "Yes! We offer various strengthening treatments for weak or damaged nails. During your consultation, we'll assess your nails and recommend the best treatment for your needs.",
 
+    // Gallery
+    "servicos.gallery.title": "Before & After Results",
+    "servicos.gallery.subtitle": "See the transformations achieved by our specialists. Tap to toggle between before and after.",
+    "servicos.gallery.before": "Before",
+    "servicos.gallery.after": "After",
+
     // ========== OFFERS ==========
     "offers.back": "Back to Offers",
     "offers.treatment_details": "Treatment Details",
@@ -444,6 +450,12 @@ const translations: Record<Language, Record<string, string>> = {
     "servicos.unhas.faq_3_a": "Uma manicure clássica leva cerca de 45 minutos, enquanto uma manicure em gel leva aproximadamente 1 hora. Designs de nail art podem requerer tempo adicional dependendo da complexidade.",
     "servicos.unhas.faq_4_q": "Vocês oferecem tratamentos de fortalecimento?",
     "servicos.unhas.faq_4_a": "Sim! Oferecemos vários tratamentos de fortalecimento para unhas fracas ou danificadas. Durante sua consulta, avaliaremos suas unhas e recomendaremos o melhor tratamento para suas necessidades.",
+
+    // Gallery
+    "servicos.gallery.title": "Resultados Antes e Depois",
+    "servicos.gallery.subtitle": "Veja as transformações realizadas por nossas especialistas. Toque para alternar entre antes e depois.",
+    "servicos.gallery.before": "Antes",
+    "servicos.gallery.after": "Depois",
 
     // ========== OFFERS ==========
     "offers.back": "Voltar para Ofertas",
