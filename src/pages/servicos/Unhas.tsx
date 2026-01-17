@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ServiceFAQ } from "@/components/services/ServiceFAQ";
+import { BeforeAfterGallery, BeforeAfterImage } from "@/components/services/BeforeAfterGallery";
 import { useLanguage } from "@/contexts/LanguageContext";
 import heroImage from "@/assets/nails-service.jpg";
 
@@ -31,6 +32,25 @@ export default function Unhas() {
     { question: t("servicos.unhas.faq_2_q"), answer: t("servicos.unhas.faq_2_a") },
     { question: t("servicos.unhas.faq_3_q"), answer: t("servicos.unhas.faq_3_a") },
     { question: t("servicos.unhas.faq_4_q"), answer: t("servicos.unhas.faq_4_a") },
+  ];
+
+  // Placeholder images for before/after gallery
+  const galleryImages: BeforeAfterImage[] = [
+    {
+      before: "/placeholder.svg",
+      after: "/placeholder.svg",
+      label: "Manicure em Gel",
+    },
+    {
+      before: "/placeholder.svg",
+      after: "/placeholder.svg",
+      label: "Nail Art",
+    },
+    {
+      before: "/placeholder.svg",
+      after: "/placeholder.svg",
+      label: "Fortalecimento",
+    },
   ];
 
   return (
@@ -186,6 +206,9 @@ export default function Unhas() {
             </motion.div>
           </div>
         </section>
+
+        {/* Before & After Gallery */}
+        <BeforeAfterGallery images={galleryImages} />
 
         {/* FAQ Section */}
         <ServiceFAQ faqs={faqs} />

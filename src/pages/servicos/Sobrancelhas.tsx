@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ServiceFAQ } from "@/components/services/ServiceFAQ";
+import { BeforeAfterGallery, BeforeAfterImage } from "@/components/services/BeforeAfterGallery";
 import { useLanguage } from "@/contexts/LanguageContext";
 import heroImage from "@/assets/brows-service.jpg";
 
@@ -30,6 +31,25 @@ export default function Sobrancelhas() {
     { question: t("servicos.sobrancelhas.faq_2_q"), answer: t("servicos.sobrancelhas.faq_2_a") },
     { question: t("servicos.sobrancelhas.faq_3_q"), answer: t("servicos.sobrancelhas.faq_3_a") },
     { question: t("servicos.sobrancelhas.faq_4_q"), answer: t("servicos.sobrancelhas.faq_4_a") },
+  ];
+
+  // Placeholder images for before/after gallery
+  const galleryImages: BeforeAfterImage[] = [
+    {
+      before: "/placeholder.svg",
+      after: "/placeholder.svg",
+      label: "Design de Sobrancelhas",
+    },
+    {
+      before: "/placeholder.svg",
+      after: "/placeholder.svg",
+      label: "Henna",
+    },
+    {
+      before: "/placeholder.svg",
+      after: "/placeholder.svg",
+      label: "Definição",
+    },
   ];
 
   return (
@@ -185,6 +205,9 @@ export default function Sobrancelhas() {
             </motion.div>
           </div>
         </section>
+
+        {/* Before & After Gallery */}
+        <BeforeAfterGallery images={galleryImages} />
 
         {/* FAQ Section */}
         <ServiceFAQ faqs={faqs} />

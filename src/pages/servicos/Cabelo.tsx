@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ServiceFAQ } from "@/components/services/ServiceFAQ";
+import { BeforeAfterGallery, BeforeAfterImage } from "@/components/services/BeforeAfterGallery";
 import { useLanguage } from "@/contexts/LanguageContext";
 import heroImage from "@/assets/hair-service.png";
 export default function Cabelo() {
@@ -34,6 +35,26 @@ export default function Cabelo() {
     { question: t("servicos.cabelo.faq_3_q"), answer: t("servicos.cabelo.faq_3_a") },
     { question: t("servicos.cabelo.faq_4_q"), answer: t("servicos.cabelo.faq_4_a") },
     { question: t("servicos.cabelo.faq_5_q"), answer: t("servicos.cabelo.faq_5_a") },
+  ];
+
+  // Placeholder images for before/after gallery
+  // Replace these with actual before/after images
+  const galleryImages: BeforeAfterImage[] = [
+    {
+      before: "/placeholder.svg",
+      after: "/placeholder.svg",
+      label: "Balayage",
+    },
+    {
+      before: "/placeholder.svg",
+      after: "/placeholder.svg",
+      label: "Extensões",
+    },
+    {
+      before: "/placeholder.svg",
+      after: "/placeholder.svg",
+      label: "Botox Capilar",
+    },
   ];
 
   return (
@@ -189,6 +210,9 @@ export default function Cabelo() {
             </motion.div>
           </div>
         </section>
+
+        {/* Before & After Gallery */}
+        <BeforeAfterGallery images={galleryImages} />
 
         {/* FAQ Section */}
         <ServiceFAQ faqs={faqs} />
