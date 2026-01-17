@@ -62,15 +62,15 @@ export function Hero() {
             >
               {/* Primary CTA */}
               <Link to="/services" className="w-full sm:w-auto">
-                <Button variant="hero" size="lg" className="group w-full sm:w-auto h-12">
+                <Button variant="hero" size="lg" className="group w-full sm:w-auto h-12 px-6">
                   {t("home.hero.cta_offers")}
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
               {/* Secondary CTA */}
               <Link to="/contact" className="w-full sm:w-auto">
-                <Button variant="hero-outline" size="lg" className="w-full sm:w-auto h-12">
-                  <Sparkles className="w-4 h-4" />
+                <Button variant="hero-outline" size="lg" className="w-full sm:w-auto h-12 px-6">
+                  <Sparkles className="w-5 h-5" />
                   {t("global.contact_us")}
                 </Button>
               </Link>
