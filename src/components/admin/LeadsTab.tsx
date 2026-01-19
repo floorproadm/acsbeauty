@@ -52,10 +52,16 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
+  UserPlus,
+  Clock,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, subDays, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
+
+type LeadStatus = "novo" | "em_contato" | "convertido" | "perdido";
 
 interface QuizResponse {
   id: string;
@@ -71,6 +77,7 @@ interface QuizResponse {
   completed_at: string | null;
   created_at: string;
   recommended_result_id: string | null;
+  status: LeadStatus;
   quizzes?: { name: string } | null;
   quiz_results?: { title: string } | null;
 }
@@ -80,6 +87,33 @@ interface Quiz {
   name: string;
 }
 
+const STATUS_CONFIG: Record<LeadStatus, { label: string; color: string; icon: React.ElementType; bgColor: string }> = {
+  novo: { 
+    label: "Novo", 
+    color: "text-blue-600", 
+    icon: UserPlus,
+    bgColor: "bg-blue-500/10 border-blue-200"
+  },
+  em_contato: { 
+    label: "Em Contato", 
+    color: "text-amber-600", 
+    icon: Clock,
+    bgColor: "bg-amber-500/10 border-amber-200"
+  },
+  convertido: { 
+    label: "Convertido", 
+    color: "text-green-600", 
+    icon: CheckCircle2,
+    bgColor: "bg-green-500/10 border-green-200"
+  },
+  perdido: { 
+    label: "Perdido", 
+    color: "text-red-600", 
+    icon: XCircle,
+    bgColor: "bg-red-500/10 border-red-200"
+  },
+};
+
 const ITEMS_PER_PAGE = 20;
 
 export function LeadsTab() {
@@ -87,6 +121,7 @@ export function LeadsTab() {
   const [selectedQuiz, setSelectedQuiz] = useState<string>("all");
   const [selectedSource, setSelectedSource] = useState<string>("all");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedLead, setSelectedLead] = useState<QuizResponse | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -159,6 +194,9 @@ export function LeadsTab() {
     // Source filter
     const sourceMatch = selectedSource === "all" || lead.utm_source === selectedSource;
 
+    // Status filter
+    const statusMatch = selectedStatus === "all" || lead.status === selectedStatus;
+
     // Period filter
     let periodMatch = true;
     if (selectedPeriod !== "all" && lead.created_at) {
@@ -184,7 +222,7 @@ export function LeadsTab() {
       }
     }
 
-    return searchMatch && quizMatch && sourceMatch && periodMatch;
+    return searchMatch && quizMatch && sourceMatch && periodMatch && statusMatch;
   });
 
   // Pagination
@@ -198,7 +236,7 @@ export function LeadsTab() {
   const handleExport = () => {
     if (!filteredLeads) return;
 
-    const headers = ["Nome", "Telefone", "Email", "Instagram", "Quiz", "Resultado", "Origem", "Data"];
+    const headers = ["Nome", "Telefone", "Email", "Instagram", "Quiz", "Resultado", "Status", "Origem", "Data"];
     const rows = filteredLeads.map((lead) => [
       lead.client_name || "",
       lead.client_phone || "",
@@ -206,6 +244,7 @@ export function LeadsTab() {
       lead.client_instagram || "",
       lead.quizzes?.name || "",
       lead.quiz_results?.title || "",
+      STATUS_CONFIG[lead.status]?.label || lead.status,
       lead.utm_source || "",
       lead.completed_at ? format(new Date(lead.completed_at), "dd/MM/yyyy HH:mm") : "",
     ]);
@@ -219,6 +258,29 @@ export function LeadsTab() {
     link.href = URL.createObjectURL(blob);
     link.download = `leads-${format(new Date(), "yyyy-MM-dd")}.csv`;
     link.click();
+  };
+
+  // Update lead status
+  const handleUpdateStatus = async (leadId: string, newStatus: LeadStatus) => {
+    try {
+      const { error } = await supabase
+        .from("quiz_responses")
+        .update({ status: newStatus })
+        .eq("id", leadId);
+      
+      if (error) throw error;
+      
+      toast.success(`Status atualizado para "${STATUS_CONFIG[newStatus].label}"`);
+      queryClient.invalidateQueries({ queryKey: ["admin-leads"] });
+      
+      // Update selected lead if open
+      if (selectedLead?.id === leadId) {
+        setSelectedLead({ ...selectedLead, status: newStatus });
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error("Erro ao atualizar status");
+    }
   };
 
   // Delete lead (admin only)
@@ -299,19 +361,28 @@ export function LeadsTab() {
   const allOnPageSelected = paginatedLeads?.length ? paginatedLeads.every(l => selectedLeadIds.has(l.id)) : false;
   const someOnPageSelected = paginatedLeads?.some(l => selectedLeadIds.has(l.id)) && !allOnPageSelected;
 
-  // Stats
-  const stats = {
-    total: leads?.length || 0,
-    today: leads?.filter((l) => {
-      if (!l.created_at) return false;
-      const leadDate = new Date(l.created_at);
-      return isWithinInterval(leadDate, {
-        start: startOfDay(new Date()),
-        end: endOfDay(new Date()),
-      });
-    }).length || 0,
-    withPhone: leads?.filter((l) => l.client_phone).length || 0,
-    withEmail: leads?.filter((l) => l.client_email).length || 0,
+  // Stats by status
+  const statusStats = {
+    novo: leads?.filter((l) => l.status === "novo").length || 0,
+    em_contato: leads?.filter((l) => l.status === "em_contato").length || 0,
+    convertido: leads?.filter((l) => l.status === "convertido").length || 0,
+    perdido: leads?.filter((l) => l.status === "perdido").length || 0,
+  };
+
+  const conversionRate = leads?.length 
+    ? Math.round((statusStats.convertido / leads.length) * 100) 
+    : 0;
+
+  // Get status badge component
+  const StatusBadge = ({ status }: { status: LeadStatus }) => {
+    const config = STATUS_CONFIG[status];
+    const Icon = config.icon;
+    return (
+      <Badge variant="outline" className={`${config.color} ${config.bgColor} text-xs gap-1`}>
+        <Icon className="w-3 h-3" />
+        {config.label}
+      </Badge>
+    );
   };
 
   return (
@@ -324,46 +395,70 @@ export function LeadsTab() {
             {filteredLeads?.length || 0} leads encontrados
           </p>
         </div>
-        <Button onClick={handleExport} variant="outline" size="sm">
-          <Download className="w-4 h-4 mr-2" />
-          Exportar CSV
-        </Button>
-        {isAdmin && selectedLeadIds.size > 0 && (
-          <Button 
-            variant="destructive" 
-            size="sm"
-            onClick={() => setShowBulkDeleteDialog(true)}
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
-            Excluir ({selectedLeadIds.size})
+        <div className="flex items-center gap-2">
+          <Button onClick={handleExport} variant="outline" size="sm">
+            <Download className="w-4 h-4 mr-2" />
+            Exportar CSV
           </Button>
-        )}
+          {isAdmin && selectedLeadIds.size > 0 && (
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={() => setShowBulkDeleteDialog(true)}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Excluir ({selectedLeadIds.size})
+            </Button>
+          )}
+        </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-foreground">{stats.total}</div>
-            <div className="text-xs text-muted-foreground">Total de Leads</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{stats.today}</div>
-            <div className="text-xs text-muted-foreground">Hoje</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{stats.withPhone}</div>
-            <div className="text-xs text-muted-foreground">Com Telefone</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600">{stats.withEmail}</div>
-            <div className="text-xs text-muted-foreground">Com Email</div>
+      {/* Pipeline Stats Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+        {(Object.keys(STATUS_CONFIG) as LeadStatus[]).map((status) => {
+          const config = STATUS_CONFIG[status];
+          const Icon = config.icon;
+          const count = statusStats[status];
+          const isActive = selectedStatus === status;
+          
+          return (
+            <Card 
+              key={status}
+              className={`cursor-pointer transition-all hover:shadow-md ${
+                isActive ? "ring-2 ring-primary" : ""
+              } ${config.bgColor}`}
+              onClick={() => {
+                setSelectedStatus(isActive ? "all" : status);
+                setCurrentPage(1);
+              }}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg bg-background/50`}>
+                    <Icon className={`w-5 h-5 ${config.color}`} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{count}</p>
+                    <p className="text-xs text-muted-foreground">{config.label}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+        
+        {/* Conversion Rate Card */}
+        <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/20">
+                <CheckCircle2 className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{conversionRate}%</p>
+                <p className="text-xs text-muted-foreground">Taxa Conversão</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -474,9 +569,9 @@ export function LeadsTab() {
                     </TableHead>
                   )}
                   <TableHead>Nome</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Contato</TableHead>
                   <TableHead className="hidden md:table-cell">Quiz</TableHead>
-                  <TableHead className="hidden lg:table-cell">Resultado</TableHead>
                   <TableHead className="hidden sm:table-cell">Origem</TableHead>
                   <TableHead>Data</TableHead>
                   <TableHead className="w-[100px]">Ações</TableHead>
@@ -501,6 +596,30 @@ export function LeadsTab() {
                     <TableCell className="font-medium">
                       {lead.client_name || "Anônimo"}
                     </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <Select
+                        value={lead.status}
+                        onValueChange={(value) => handleUpdateStatus(lead.id, value as LeadStatus)}
+                      >
+                        <SelectTrigger className="h-8 w-[130px] border-0 bg-transparent p-0 hover:bg-muted/50">
+                          <StatusBadge status={lead.status} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(Object.keys(STATUS_CONFIG) as LeadStatus[]).map((status) => {
+                            const config = STATUS_CONFIG[status];
+                            const Icon = config.icon;
+                            return (
+                              <SelectItem key={status} value={status}>
+                                <span className={`flex items-center gap-2 ${config.color}`}>
+                                  <Icon className="w-4 h-4" />
+                                  {config.label}
+                                </span>
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-0.5">
                         {lead.client_phone && (
@@ -521,15 +640,6 @@ export function LeadsTab() {
                       <span className="text-sm text-muted-foreground">
                         {lead.quizzes?.name || "-"}
                       </span>
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      {lead.quiz_results?.title ? (
-                        <Badge variant="outline" className="text-xs">
-                          {lead.quiz_results.title}
-                        </Badge>
-                      ) : (
-                        "-"
-                      )}
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
                       {lead.utm_source ? (
@@ -629,6 +739,31 @@ export function LeadsTab() {
 
           {selectedLead && (
             <div className="space-y-4">
+              {/* Status Selector */}
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-muted-foreground">Status</h4>
+                <div className="flex flex-wrap gap-2">
+                  {(Object.keys(STATUS_CONFIG) as LeadStatus[]).map((status) => {
+                    const config = STATUS_CONFIG[status];
+                    const Icon = config.icon;
+                    const isActive = selectedLead.status === status;
+                    
+                    return (
+                      <Button
+                        key={status}
+                        variant={isActive ? "default" : "outline"}
+                        size="sm"
+                        className={`gap-1.5 ${isActive ? "" : config.color}`}
+                        onClick={() => handleUpdateStatus(selectedLead.id, status)}
+                      >
+                        <Icon className="w-4 h-4" />
+                        {config.label}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Contact Info */}
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-muted-foreground">Contato</h4>
