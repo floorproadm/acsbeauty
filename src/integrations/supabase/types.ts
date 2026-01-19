@@ -564,6 +564,7 @@ export type Database = {
           id: string
           quiz_id: string
           recommended_result_id: string | null
+          status: Database["public"]["Enums"]["lead_status"]
           utm_campaign: string | null
           utm_source: string | null
         }
@@ -580,6 +581,7 @@ export type Database = {
           id?: string
           quiz_id: string
           recommended_result_id?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
           utm_campaign?: string | null
           utm_source?: string | null
         }
@@ -596,6 +598,7 @@ export type Database = {
           id?: string
           quiz_id?: string
           recommended_result_id?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
           utm_campaign?: string | null
           utm_source?: string | null
         }
@@ -935,6 +938,7 @@ export type Database = {
         | "cancelled"
         | "no_show"
       campaign_status: "draft" | "active" | "paused" | "completed"
+      lead_status: "novo" | "em_contato" | "convertido" | "perdido"
       offer_type: "entry_offer" | "package_offer" | "consultation_offer"
       payment_status: "unpaid" | "paid"
       service_status: "entry" | "upsell" | "premium" | "inactive"
@@ -1074,6 +1078,7 @@ export const Constants = {
         "no_show",
       ],
       campaign_status: ["draft", "active", "paused", "completed"],
+      lead_status: ["novo", "em_contato", "convertido", "perdido"],
       offer_type: ["entry_offer", "package_offer", "consultation_offer"],
       payment_status: ["unpaid", "paid"],
       service_status: ["entry", "upsell", "premium", "inactive"],
