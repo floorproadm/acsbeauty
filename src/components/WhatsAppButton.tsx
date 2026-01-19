@@ -5,16 +5,42 @@ import { supabase } from "@/integrations/supabase/client";
 const WHATSAPP_NUMBER = "17329153430"; // (732) 915-3430
 const DEFAULT_MESSAGE = "Olá! Gostaria de agendar um horário no ACS Beauty Studio.";
 
+// Generate or retrieve session ID for anonymous tracking
+const getSessionId = () => {
+  let sessionId = sessionStorage.getItem("wa_session_id");
+  if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    sessionStorage.setItem("wa_session_id", sessionId);
+  }
+  return sessionId;
+};
+
+// Extract UTM params from URL
+const getUtmParams = () => {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    utm_source: params.get("utm_source"),
+    utm_campaign: params.get("utm_campaign"),
+    utm_medium: params.get("utm_medium"),
+  };
+};
+
 export const WhatsAppButton = () => {
   const handleClick = async () => {
-    // Track click
+    const utmParams = getUtmParams();
+    
+    // Track click in database
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log("[WhatsApp] Button clicked", {
-        timestamp: new Date().toISOString(),
-        userId: session?.user?.id || "anonymous",
-        page: window.location.pathname,
+      await supabase.from("whatsapp_clicks").insert({
+        page_path: window.location.pathname,
+        user_agent: navigator.userAgent,
+        referrer: document.referrer || null,
+        utm_source: utmParams.utm_source,
+        utm_campaign: utmParams.utm_campaign,
+        utm_medium: utmParams.utm_medium,
+        session_id: getSessionId(),
       });
+      console.log("[WhatsApp] Click tracked successfully");
     } catch (error) {
       console.error("[WhatsApp] Tracking error:", error);
     }
