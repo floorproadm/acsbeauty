@@ -42,7 +42,8 @@ export type AdminTab =
   | "leads"
   | "services"
   | "offers"
-  | "quizzes";
+  | "quizzes"
+  | "whatsapp";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -58,6 +59,7 @@ const tabs: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: "services", label: "Serviços", icon: Sparkles },
   { id: "offers", label: "Ofertas", icon: Tag },
   { id: "quizzes", label: "Quizzes", icon: HelpCircle },
+  { id: "whatsapp", label: "WhatsApp", icon: Megaphone },
 ];
 
 function AdminSidebar({
