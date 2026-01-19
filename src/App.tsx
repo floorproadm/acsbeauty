@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import Cabelo from "./pages/servicos/Cabelo";
 import Sobrancelhas from "./pages/servicos/Sobrancelhas";
 import Unhas from "./pages/servicos/Unhas";
+import { WhatsAppButton } from "./components/WhatsAppButton";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <WhatsAppButton />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
