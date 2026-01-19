@@ -871,11 +871,15 @@ export type Database = {
       whatsapp_clicks: {
         Row: {
           client_id: string | null
+          client_name: string | null
           created_at: string
           id: string
           page_path: string
           referrer: string | null
+          service_interest: string | null
           session_id: string | null
+          status: Database["public"]["Enums"]["lead_status"] | null
+          urgency: string | null
           user_agent: string | null
           utm_campaign: string | null
           utm_medium: string | null
@@ -883,11 +887,15 @@ export type Database = {
         }
         Insert: {
           client_id?: string | null
+          client_name?: string | null
           created_at?: string
           id?: string
           page_path: string
           referrer?: string | null
+          service_interest?: string | null
           session_id?: string | null
+          status?: Database["public"]["Enums"]["lead_status"] | null
+          urgency?: string | null
           user_agent?: string | null
           utm_campaign?: string | null
           utm_medium?: string | null
@@ -895,11 +903,15 @@ export type Database = {
         }
         Update: {
           client_id?: string | null
+          client_name?: string | null
           created_at?: string
           id?: string
           page_path?: string
           referrer?: string | null
+          service_interest?: string | null
           session_id?: string | null
+          status?: Database["public"]["Enums"]["lead_status"] | null
+          urgency?: string | null
           user_agent?: string | null
           utm_campaign?: string | null
           utm_medium?: string | null
