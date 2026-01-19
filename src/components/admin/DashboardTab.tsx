@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Users, Clock, TrendingUp, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Calendar, Users, Clock, AlertCircle, CheckCircle2, MessageCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { format, startOfDay, endOfDay } from "date-fns";
+import { format, startOfDay, endOfDay, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { AdminTab } from "./AdminLayout";
 
 interface DashboardTabProps {
-  onNavigate: (tab: "bookings" | "clients" | "leads") => void;
+  onNavigate: (tab: AdminTab) => void;
 }
 
 export function DashboardTab({ onNavigate }: DashboardTabProps) {
@@ -58,6 +59,36 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
       
       if (error) throw error;
       return data;
+    },
+  });
+
+  // WhatsApp clicks - today
+  const { data: whatsappToday, isLoading: loadingWhatsappToday } = useQuery({
+    queryKey: ["admin-whatsapp-today"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("whatsapp_clicks")
+        .select("*", { count: "exact", head: true })
+        .gte("created_at", todayStart)
+        .lte("created_at", todayEnd);
+      
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
+  // WhatsApp clicks - last 7 days
+  const sevenDaysAgo = subDays(today, 7).toISOString();
+  const { data: whatsapp7Days, isLoading: loadingWhatsapp7Days } = useQuery({
+    queryKey: ["admin-whatsapp-7days"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("whatsapp_clicks")
+        .select("*", { count: "exact", head: true })
+        .gte("created_at", sevenDaysAgo);
+      
+      if (error) throw error;
+      return count || 0;
     },
   });
 
@@ -121,6 +152,35 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
                 <p className="text-2xl font-bold">{clientsCount}</p>
               )}
             </div>
+          </div>
+        </div>
+
+        <div 
+          className="bg-card rounded-xl p-4 border border-border shadow-soft cursor-pointer hover:border-green-300 transition-colors"
+          onClick={() => onNavigate("whatsapp")}
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-500/10 rounded-lg">
+              <MessageCircle className="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">WhatsApp Hoje</p>
+              {loadingWhatsappToday ? (
+                <Skeleton className="h-7 w-8" />
+              ) : (
+                <p className="text-2xl font-bold">{whatsappToday}</p>
+              )}
+            </div>
+          </div>
+          <div className="mt-2 pt-2 border-t border-border">
+            <p className="text-xs text-muted-foreground">
+              Últimos 7 dias:{" "}
+              {loadingWhatsapp7Days ? (
+                <Skeleton className="inline-block h-4 w-6" />
+              ) : (
+                <span className="font-semibold text-foreground">{whatsapp7Days}</span>
+              )}
+            </p>
           </div>
         </div>
 
