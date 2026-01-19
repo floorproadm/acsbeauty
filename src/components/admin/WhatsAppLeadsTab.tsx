@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -31,22 +30,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Search,
-  Phone,
-  Filter,
   Download,
   MessageCircle,
-  ExternalLink,
-  ChevronLeft,
-  ChevronRight,
   Trash2,
   UserPlus,
   Clock,
@@ -55,10 +41,30 @@ import {
   Sparkles,
   Calendar,
   Globe,
+  GripVertical,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, subDays, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragStartEvent,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type LeadStatus = "novo" | "em_contato" | "convertido" | "perdido";
 
@@ -78,56 +84,189 @@ interface WhatsAppLead {
   services?: { name: string } | null;
 }
 
-const STATUS_CONFIG: Record<LeadStatus, { label: string; color: string; icon: React.ElementType; bgColor: string }> = {
+const STATUS_CONFIG: Record<LeadStatus, { label: string; color: string; icon: React.ElementType; bgColor: string; columnColor: string }> = {
   novo: { 
     label: "Novo", 
     color: "text-blue-600", 
     icon: UserPlus,
-    bgColor: "bg-blue-500/10 border-blue-200"
+    bgColor: "bg-blue-500/10 border-blue-200",
+    columnColor: "border-t-blue-500"
   },
   em_contato: { 
     label: "Em Contato", 
     color: "text-amber-600", 
     icon: Clock,
-    bgColor: "bg-amber-500/10 border-amber-200"
+    bgColor: "bg-amber-500/10 border-amber-200",
+    columnColor: "border-t-amber-500"
   },
   convertido: { 
     label: "Convertido", 
     color: "text-green-600", 
     icon: CheckCircle2,
-    bgColor: "bg-green-500/10 border-green-200"
+    bgColor: "bg-green-500/10 border-green-200",
+    columnColor: "border-t-green-500"
   },
   perdido: { 
     label: "Perdido", 
     color: "text-red-600", 
     icon: XCircle,
-    bgColor: "bg-red-500/10 border-red-200"
+    bgColor: "bg-red-500/10 border-red-200",
+    columnColor: "border-t-red-500"
   },
 };
 
 const URGENCY_LABELS: Record<string, string> = {
-  urgente: "🔥 Urgente (próximos dias)",
+  urgente: "🔥 Urgente",
   proxima_semana: "📅 Próxima semana",
   proximo_mes: "🗓️ Próximo mês",
-  apenas_informacao: "💬 Só quer informações",
+  apenas_informacao: "💬 Só informações",
 };
 
-const ITEMS_PER_PAGE = 20;
+// Draggable Lead Card Component
+function LeadCard({ 
+  lead, 
+  onClick,
+  getServiceName,
+}: { 
+  lead: WhatsAppLead; 
+  onClick: () => void;
+  getServiceName: (id: string | null) => string;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: lead.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <Card
+      ref={setNodeRef}
+      style={style}
+      className={`cursor-pointer transition-all hover:shadow-md group ${
+        isDragging ? "opacity-50 shadow-lg ring-2 ring-primary" : ""
+      }`}
+      onClick={onClick}
+    >
+      <CardContent className="p-3">
+        <div className="flex items-start gap-2">
+          <div
+            {...attributes}
+            {...listeners}
+            className="mt-1 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GripVertical className="w-4 h-4 text-muted-foreground" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-sm truncate">{lead.client_name}</p>
+            <div className="flex items-center gap-1 mt-1">
+              <Sparkles className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+              <span className="text-xs text-muted-foreground truncate">
+                {getServiceName(lead.service_interest)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-[10px] text-muted-foreground">
+                {URGENCY_LABELS[lead.urgency || ""] || "—"}
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                {format(new Date(lead.created_at), "dd/MM")}
+              </span>
+            </div>
+            {lead.utm_source && (
+              <Badge variant="secondary" className="text-[10px] mt-2 h-5">
+                {lead.utm_source}
+              </Badge>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Kanban Column Component
+function KanbanColumn({
+  status,
+  leads,
+  getServiceName,
+  onLeadClick,
+}: {
+  status: LeadStatus;
+  leads: WhatsAppLead[];
+  getServiceName: (id: string | null) => string;
+  onLeadClick: (lead: WhatsAppLead) => void;
+}) {
+  const config = STATUS_CONFIG[status];
+  const Icon = config.icon;
+
+  return (
+    <div className={`flex flex-col bg-muted/30 rounded-lg border border-t-4 ${config.columnColor} min-w-[280px] max-w-[320px] flex-1`}>
+      <div className="p-3 border-b bg-background/50 rounded-t-lg">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Icon className={`w-4 h-4 ${config.color}`} />
+            <span className="font-medium text-sm">{config.label}</span>
+          </div>
+          <Badge variant="secondary" className="text-xs">
+            {leads.length}
+          </Badge>
+        </div>
+      </div>
+      <ScrollArea className="flex-1 p-2">
+        <SortableContext items={leads.map(l => l.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-2 min-h-[200px]">
+            {leads.length === 0 ? (
+              <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
+                Nenhum lead
+              </div>
+            ) : (
+              leads.map((lead) => (
+                <LeadCard
+                  key={lead.id}
+                  lead={lead}
+                  onClick={() => onLeadClick(lead)}
+                  getServiceName={getServiceName}
+                />
+              ))
+            )}
+          </div>
+        </SortableContext>
+      </ScrollArea>
+    </div>
+  );
+}
 
 export function WhatsAppLeadsTab() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUrgency, setSelectedUrgency] = useState<string>("all");
   const [selectedSource, setSelectedSource] = useState<string>("all");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("all");
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedLead, setSelectedLead] = useState<WhatsAppLead | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [leadToDelete, setLeadToDelete] = useState<WhatsAppLead | null>(null);
-  const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set());
-  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const queryClient = useQueryClient();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Check if current user is admin
   useEffect(() => {
@@ -183,22 +322,14 @@ export function WhatsAppLeadsTab() {
 
   // Filter leads
   const filteredLeads = leads?.filter((lead) => {
-    // Search filter
     const searchMatch =
       !searchQuery ||
       lead.client_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       getServiceName(lead.service_interest).toLowerCase().includes(searchQuery.toLowerCase());
 
-    // Urgency filter
     const urgencyMatch = selectedUrgency === "all" || lead.urgency === selectedUrgency;
-
-    // Source filter
     const sourceMatch = selectedSource === "all" || lead.utm_source === selectedSource;
 
-    // Status filter
-    const statusMatch = selectedStatus === "all" || lead.status === selectedStatus;
-
-    // Period filter
     let periodMatch = true;
     if (selectedPeriod !== "all" && lead.created_at) {
       const leadDate = new Date(lead.created_at);
@@ -223,15 +354,16 @@ export function WhatsAppLeadsTab() {
       }
     }
 
-    return searchMatch && urgencyMatch && sourceMatch && periodMatch && statusMatch;
+    return searchMatch && urgencyMatch && sourceMatch && periodMatch;
   });
 
-  // Pagination
-  const totalPages = Math.ceil((filteredLeads?.length || 0) / ITEMS_PER_PAGE);
-  const paginatedLeads = filteredLeads?.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  // Group leads by status
+  const leadsByStatus: Record<LeadStatus, WhatsAppLead[]> = {
+    novo: filteredLeads?.filter(l => (l.status || "novo") === "novo") || [],
+    em_contato: filteredLeads?.filter(l => l.status === "em_contato") || [],
+    convertido: filteredLeads?.filter(l => l.status === "convertido") || [],
+    perdido: filteredLeads?.filter(l => l.status === "perdido") || [],
+  };
 
   // Export to CSV
   const handleExport = () => {
@@ -272,7 +404,6 @@ export function WhatsAppLeadsTab() {
       toast.success(`Status atualizado para "${STATUS_CONFIG[newStatus].label}"`);
       queryClient.invalidateQueries({ queryKey: ["admin-whatsapp-leads"] });
       
-      // Update selected lead if open
       if (selectedLead?.id === leadId) {
         setSelectedLead({ ...selectedLead, status: newStatus });
       }
@@ -307,72 +438,62 @@ export function WhatsAppLeadsTab() {
     }
   };
 
-  // Bulk delete leads (admin only)
-  const handleBulkDelete = async () => {
-    if (!isAdmin || selectedLeadIds.size === 0) return;
+  // Drag handlers
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+
+    if (!over) return;
+
+    const activeLeadId = active.id as string;
+    const overId = over.id as string;
+
+    // Find what column we're dropping into
+    let newStatus: LeadStatus | null = null;
     
-    setIsDeleting(true);
-    try {
-      const { error } = await supabase
-        .from("whatsapp_clicks")
-        .delete()
-        .in("id", Array.from(selectedLeadIds));
-      
-      if (error) throw error;
-      
-      toast.success(`${selectedLeadIds.size} leads excluídos com sucesso`);
-      setSelectedLeadIds(new Set());
-      setShowBulkDeleteDialog(false);
-      queryClient.invalidateQueries({ queryKey: ["admin-whatsapp-leads"] });
-    } catch (error) {
-      console.error("Error deleting leads:", error);
-      toast.error("Erro ao excluir leads");
-    } finally {
-      setIsDeleting(false);
+    // Check if dropped on a lead in a column
+    for (const [status, statusLeads] of Object.entries(leadsByStatus)) {
+      if (statusLeads.some(l => l.id === overId)) {
+        newStatus = status as LeadStatus;
+        break;
+      }
     }
+
+    // If not dropped on a lead, check if dropped in empty column area
+    if (!newStatus && (["novo", "em_contato", "convertido", "perdido"] as LeadStatus[]).includes(overId as LeadStatus)) {
+      newStatus = overId as LeadStatus;
+    }
+
+    if (!newStatus) return;
+
+    // Find active lead's current status
+    const activeLead = leads?.find(l => l.id === activeLeadId);
+    if (!activeLead || activeLead.status === newStatus) return;
+
+    // Update the lead status
+    handleUpdateStatus(activeLeadId, newStatus);
   };
 
-  // Toggle lead selection
-  const toggleLeadSelection = (leadId: string) => {
-    const newSet = new Set(selectedLeadIds);
-    if (newSet.has(leadId)) {
-      newSet.delete(leadId);
-    } else {
-      newSet.add(leadId);
-    }
-    setSelectedLeadIds(newSet);
-  };
-
-  // Toggle all leads on current page
-  const toggleAllOnPage = () => {
-    const pageLeadIds = paginatedLeads?.map(l => l.id) || [];
-    const allSelected = pageLeadIds.every(id => selectedLeadIds.has(id));
-    
-    const newSet = new Set(selectedLeadIds);
-    if (allSelected) {
-      pageLeadIds.forEach(id => newSet.delete(id));
-    } else {
-      pageLeadIds.forEach(id => newSet.add(id));
-    }
-    setSelectedLeadIds(newSet);
-  };
-
-  const allOnPageSelected = paginatedLeads?.length ? paginatedLeads.every(l => selectedLeadIds.has(l.id)) : false;
-  const someOnPageSelected = paginatedLeads?.some(l => selectedLeadIds.has(l.id)) && !allOnPageSelected;
-
-  // Stats by status
+  // Stats
   const statusStats = {
-    novo: leads?.filter((l) => l.status === "novo").length || 0,
-    em_contato: leads?.filter((l) => l.status === "em_contato").length || 0,
-    convertido: leads?.filter((l) => l.status === "convertido").length || 0,
-    perdido: leads?.filter((l) => l.status === "perdido").length || 0,
+    novo: leadsByStatus.novo.length,
+    em_contato: leadsByStatus.em_contato.length,
+    convertido: leadsByStatus.convertido.length,
+    perdido: leadsByStatus.perdido.length,
   };
 
-  const conversionRate = leads?.length 
-    ? Math.round((statusStats.convertido / leads.length) * 100) 
+  const totalLeads = leads?.length || 0;
+  const conversionRate = totalLeads 
+    ? Math.round((statusStats.convertido / totalLeads) * 100) 
     : 0;
 
-  // Get status badge component
+  const activeLead = leads?.find(l => l.id === activeId);
+
+  // Status badge component
   const StatusBadge = ({ status }: { status: LeadStatus | null }) => {
     const config = STATUS_CONFIG[status || "novo"];
     const Icon = config.icon;
@@ -394,75 +515,19 @@ export function WhatsAppLeadsTab() {
             WhatsApp Leads
           </h1>
           <p className="text-sm text-muted-foreground">
-            {filteredLeads?.length || 0} leads capturados pelo drawer do WhatsApp
+            Arraste os cards entre colunas para atualizar o status
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="gap-1">
+            <CheckCircle2 className="w-3 h-3" />
+            {conversionRate}% conversão
+          </Badge>
           <Button onClick={handleExport} variant="outline" size="sm">
             <Download className="w-4 h-4 mr-2" />
-            Exportar CSV
+            Exportar
           </Button>
-          {isAdmin && selectedLeadIds.size > 0 && (
-            <Button 
-              variant="destructive" 
-              size="sm"
-              onClick={() => setShowBulkDeleteDialog(true)}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Excluir ({selectedLeadIds.size})
-            </Button>
-          )}
         </div>
-      </div>
-
-      {/* Pipeline Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-        {(Object.keys(STATUS_CONFIG) as LeadStatus[]).map((status) => {
-          const config = STATUS_CONFIG[status];
-          const Icon = config.icon;
-          const count = statusStats[status];
-          const isActive = selectedStatus === status;
-          
-          return (
-            <Card 
-              key={status}
-              className={`cursor-pointer transition-all hover:shadow-md ${
-                isActive ? "ring-2 ring-[#25D366]" : ""
-              } ${config.bgColor}`}
-              onClick={() => {
-                setSelectedStatus(isActive ? "all" : status);
-                setCurrentPage(1);
-              }}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg bg-background/50`}>
-                    <Icon className={`w-5 h-5 ${config.color}`} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{count}</p>
-                    <p className="text-xs text-muted-foreground">{config.label}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-        
-        {/* Conversion Rate Card */}
-        <Card className="bg-gradient-to-br from-[#25D366]/10 to-[#25D366]/5 border-[#25D366]/20">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-[#25D366]/20">
-                <CheckCircle2 className="w-5 h-5 text-[#25D366]" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{conversionRate}%</p>
-                <p className="text-xs text-muted-foreground">Taxa Conversão</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Filters */}
@@ -472,27 +537,18 @@ export function WhatsAppLeadsTab() {
           <Input
             placeholder="Buscar por nome ou serviço..."
             value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
           />
         </div>
 
-        <Select
-          value={selectedUrgency}
-          onValueChange={(v) => {
-            setSelectedUrgency(v);
-            setCurrentPage(1);
-          }}
-        >
-          <SelectTrigger className="w-full sm:w-[180px]">
+        <Select value={selectedUrgency} onValueChange={setSelectedUrgency}>
+          <SelectTrigger className="w-full sm:w-[160px]">
             <Clock className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Urgência" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todas as Urgências</SelectItem>
+            <SelectItem value="all">Todas</SelectItem>
             <SelectItem value="urgente">🔥 Urgente</SelectItem>
             <SelectItem value="proxima_semana">📅 Próxima semana</SelectItem>
             <SelectItem value="proximo_mes">🗓️ Próximo mês</SelectItem>
@@ -500,19 +556,13 @@ export function WhatsAppLeadsTab() {
           </SelectContent>
         </Select>
 
-        <Select
-          value={selectedSource}
-          onValueChange={(v) => {
-            setSelectedSource(v);
-            setCurrentPage(1);
-          }}
-        >
-          <SelectTrigger className="w-full sm:w-[160px]">
+        <Select value={selectedSource} onValueChange={setSelectedSource}>
+          <SelectTrigger className="w-full sm:w-[140px]">
             <Globe className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Origem" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todas as Origens</SelectItem>
+            <SelectItem value="all">Todas</SelectItem>
             {uniqueSources.map((source) => (
               <SelectItem key={source} value={source!}>
                 {source}
@@ -521,173 +571,70 @@ export function WhatsAppLeadsTab() {
           </SelectContent>
         </Select>
 
-        <Select
-          value={selectedPeriod}
-          onValueChange={(v) => {
-            setSelectedPeriod(v);
-            setCurrentPage(1);
-          }}
-        >
+        <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
           <SelectTrigger className="w-full sm:w-[140px]">
             <Calendar className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Período" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todo o período</SelectItem>
+            <SelectItem value="all">Todo período</SelectItem>
             <SelectItem value="today">Hoje</SelectItem>
-            <SelectItem value="7days">Últimos 7 dias</SelectItem>
-            <SelectItem value="30days">Últimos 30 dias</SelectItem>
-            <SelectItem value="90days">Últimos 90 dias</SelectItem>
+            <SelectItem value="7days">7 dias</SelectItem>
+            <SelectItem value="30days">30 dias</SelectItem>
+            <SelectItem value="90days">90 dias</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* Table */}
-      <div className="border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50">
-              {isAdmin && (
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={allOnPageSelected}
-                    onCheckedChange={toggleAllOnPage}
-                    aria-label="Selecionar todos"
-                    className={someOnPageSelected ? "data-[state=checked]:bg-primary/50" : ""}
-                  />
-                </TableHead>
-              )}
-              <TableHead>Nome</TableHead>
-              <TableHead>Serviço</TableHead>
-              <TableHead>Urgência</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Origem</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i}>
-                  {isAdmin && <TableCell><Skeleton className="h-4 w-4" /></TableCell>}
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                </TableRow>
-              ))
-            ) : paginatedLeads?.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={isAdmin ? 8 : 7} className="text-center py-12 text-muted-foreground">
-                  Nenhum lead encontrado
-                </TableCell>
-              </TableRow>
-            ) : (
-              paginatedLeads?.map((lead) => (
-                <TableRow 
-                  key={lead.id} 
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => setSelectedLead(lead)}
-                >
-                  {isAdmin && (
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Checkbox
-                        checked={selectedLeadIds.has(lead.id)}
-                        onCheckedChange={() => toggleLeadSelection(lead.id)}
-                        aria-label={`Selecionar ${lead.client_name}`}
-                      />
-                    </TableCell>
-                  )}
-                  <TableCell className="font-medium">
-                    {lead.client_name || "—"}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-muted-foreground" />
-                      <span className="text-sm">{getServiceName(lead.service_interest)}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-sm">
-                      {URGENCY_LABELS[lead.urgency || ""] || lead.urgency || "—"}
-                    </span>
-                  </TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <Select
-                      value={lead.status || "novo"}
-                      onValueChange={(v) => handleUpdateStatus(lead.id, v as LeadStatus)}
-                    >
-                      <SelectTrigger className="h-8 w-[130px] text-xs">
-                        <StatusBadge status={lead.status} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(Object.keys(STATUS_CONFIG) as LeadStatus[]).map((status) => (
-                          <SelectItem key={status} value={status}>
-                            <div className="flex items-center gap-2">
-                              <StatusBadge status={status} />
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className="text-xs">
-                      {lead.utm_source || "Direto"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {format(new Date(lead.created_at), "dd/MM/yy HH:mm")}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedLead(lead);
-                      }}
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Página {currentPage} de {totalPages}
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
+      {/* Kanban Board */}
+      {isLoading ? (
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="min-w-[280px] flex-1">
+              <Skeleton className="h-[400px] rounded-lg" />
+            </div>
+          ))}
         </div>
+      ) : (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="flex gap-4 overflow-x-auto pb-4">
+            {(Object.keys(STATUS_CONFIG) as LeadStatus[]).map((status) => (
+              <KanbanColumn
+                key={status}
+                status={status}
+                leads={leadsByStatus[status]}
+                getServiceName={getServiceName}
+                onLeadClick={setSelectedLead}
+              />
+            ))}
+          </div>
+
+          <DragOverlay>
+            {activeLead ? (
+              <Card className="shadow-xl ring-2 ring-primary cursor-grabbing w-[280px]">
+                <CardContent className="p-3">
+                  <div className="flex items-start gap-2">
+                    <GripVertical className="w-4 h-4 text-muted-foreground mt-1" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{activeLead.client_name}</p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Sparkles className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground truncate">
+                          {getServiceName(activeLead.service_interest)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
 
       {/* Lead Detail Modal */}
@@ -702,13 +649,11 @@ export function WhatsAppLeadsTab() {
 
           {selectedLead && (
             <div className="space-y-4">
-              {/* Name */}
               <div className="p-3 rounded-lg bg-muted/50">
                 <p className="text-xs text-muted-foreground mb-1">Nome</p>
                 <p className="font-medium">{selectedLead.client_name}</p>
               </div>
 
-              {/* Service */}
               <div className="p-3 rounded-lg bg-muted/50">
                 <p className="text-xs text-muted-foreground mb-1">Serviço de Interesse</p>
                 <div className="flex items-center gap-2">
@@ -717,7 +662,6 @@ export function WhatsAppLeadsTab() {
                 </div>
               </div>
 
-              {/* Urgency */}
               <div className="p-3 rounded-lg bg-muted/50">
                 <p className="text-xs text-muted-foreground mb-1">Urgência</p>
                 <p className="font-medium">
@@ -725,7 +669,6 @@ export function WhatsAppLeadsTab() {
                 </p>
               </div>
 
-              {/* Status */}
               <div className="p-3 rounded-lg bg-muted/50">
                 <p className="text-xs text-muted-foreground mb-1">Status</p>
                 <Select
@@ -738,16 +681,13 @@ export function WhatsAppLeadsTab() {
                   <SelectContent>
                     {(Object.keys(STATUS_CONFIG) as LeadStatus[]).map((status) => (
                       <SelectItem key={status} value={status}>
-                        <div className="flex items-center gap-2">
-                          <StatusBadge status={status} />
-                        </div>
+                        <StatusBadge status={status} />
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Meta info */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 rounded-lg bg-muted/50">
                   <p className="text-xs text-muted-foreground mb-1">Origem</p>
@@ -759,7 +699,6 @@ export function WhatsAppLeadsTab() {
                 </div>
               </div>
 
-              {/* UTM Campaign if exists */}
               {selectedLead.utm_campaign && (
                 <div className="p-3 rounded-lg bg-muted/50">
                   <p className="text-xs text-muted-foreground mb-1">Campanha</p>
@@ -767,7 +706,6 @@ export function WhatsAppLeadsTab() {
                 </div>
               )}
 
-              {/* Date */}
               <div className="p-3 rounded-lg bg-muted/50">
                 <p className="text-xs text-muted-foreground mb-1">Capturado em</p>
                 <p className="font-medium">
@@ -775,7 +713,6 @@ export function WhatsAppLeadsTab() {
                 </p>
               </div>
 
-              {/* Delete button (admin only) */}
               {isAdmin && (
                 <Button
                   variant="destructive"
@@ -809,29 +746,6 @@ export function WhatsAppLeadsTab() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isDeleting ? "Excluindo..." : "Excluir"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Bulk Delete Confirmation Dialog */}
-      <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão em massa</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir {selectedLeadIds.size} leads selecionados? 
-              Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleBulkDelete}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isDeleting ? "Excluindo..." : `Excluir ${selectedLeadIds.size} leads`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
