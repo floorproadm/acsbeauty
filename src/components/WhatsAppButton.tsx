@@ -1,9 +1,19 @@
 import { MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 const WHATSAPP_NUMBER = "17329153430"; // (732) 915-3430
 const DEFAULT_MESSAGE = "Olá! Gostaria de agendar um horário no ACS Beauty Studio.";
+
+// Pages where the WhatsApp button should appear
+const ALLOWED_PATHS = [
+  "/contact",
+  "/services",
+  "/servicos/cabelo",
+  "/servicos/sobrancelhas",
+  "/servicos/unhas",
+];
 
 // Generate or retrieve session ID for anonymous tracking
 const getSessionId = () => {
@@ -26,6 +36,13 @@ const getUtmParams = () => {
 };
 
 export const WhatsAppButton = () => {
+  const location = useLocation();
+  
+  // Only show on allowed pages
+  const shouldShow = ALLOWED_PATHS.includes(location.pathname);
+  
+  if (!shouldShow) return null;
+
   const handleClick = async () => {
     const utmParams = getUtmParams();
     
