@@ -18,7 +18,6 @@ const ComingSoon = () => {
 
     setIsSubmitting(true);
     try {
-      // Store email in clients table for notification
       const { error } = await supabase.from("clients").insert({
         email: email.trim(),
         name: "Coming Soon Subscriber",
@@ -41,24 +40,53 @@ const ComingSoon = () => {
 
   return (
     <div className="min-h-screen relative flex flex-col items-center justify-center overflow-hidden">
-      {/* Elegant gradient background mimicking silk fabric */}
+      {/* Silk fabric background effect */}
       <div 
         className="absolute inset-0 z-0"
         style={{
           background: `
-            radial-gradient(ellipse at 30% 20%, hsl(var(--champagne)) 0%, transparent 50%),
-            radial-gradient(ellipse at 70% 80%, hsl(var(--rose-gold) / 0.3) 0%, transparent 50%),
-            radial-gradient(ellipse at 50% 50%, hsl(var(--ivory)) 0%, hsl(var(--cream)) 100%)
+            linear-gradient(145deg, 
+              hsl(35, 35%, 88%) 0%,
+              hsl(38, 40%, 92%) 15%,
+              hsl(32, 30%, 85%) 30%,
+              hsl(40, 45%, 94%) 45%,
+              hsl(35, 38%, 90%) 60%,
+              hsl(30, 32%, 82%) 75%,
+              hsl(38, 42%, 91%) 90%,
+              hsl(35, 35%, 88%) 100%
+            )
           `,
         }}
       />
       
-      {/* Subtle overlay for depth */}
+      {/* Silk wave overlay - creates the flowing fabric effect */}
       <div 
-        className="absolute inset-0 z-0 opacity-30"
+        className="absolute inset-0 z-0 opacity-60"
         style={{
           background: `
-            linear-gradient(135deg, transparent 0%, hsl(var(--champagne) / 0.4) 50%, transparent 100%)
+            radial-gradient(ellipse 120% 80% at 20% 30%, hsl(38, 50%, 95%) 0%, transparent 50%),
+            radial-gradient(ellipse 100% 60% at 80% 70%, hsl(32, 35%, 80%) 0%, transparent 45%),
+            radial-gradient(ellipse 80% 100% at 50% 100%, hsl(35, 40%, 85%) 0%, transparent 50%)
+          `,
+        }}
+      />
+
+      {/* Subtle shine lines for silk texture */}
+      <div 
+        className="absolute inset-0 z-0 opacity-40"
+        style={{
+          background: `
+            linear-gradient(135deg, 
+              transparent 0%, 
+              hsl(40, 50%, 96%) 10%, 
+              transparent 20%,
+              transparent 40%,
+              hsl(38, 45%, 94%) 50%,
+              transparent 60%,
+              transparent 80%,
+              hsl(35, 40%, 92%) 90%,
+              transparent 100%
+            )
           `,
         }}
       />
@@ -66,68 +94,105 @@ const ComingSoon = () => {
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center justify-center px-6 text-center max-w-2xl mx-auto">
         {/* Logo */}
-        <div className="mb-12">
-          <h2 className="font-serif text-xl md:text-2xl tracking-[0.3em] text-espresso font-medium">
+        <div className="mb-16">
+          <h2 
+            className="text-2xl md:text-3xl tracking-[0.4em] font-light mb-1"
+            style={{ 
+              fontFamily: "'Playfair Display', serif",
+              color: 'hsl(25, 25%, 25%)',
+              letterSpacing: '0.35em'
+            }}
+          >
             ACS
           </h2>
-          <h2 className="font-serif text-xl md:text-2xl tracking-[0.3em] text-espresso font-medium">
+          <h2 
+            className="text-2xl md:text-3xl tracking-[0.4em] font-light"
+            style={{ 
+              fontFamily: "'Playfair Display', serif",
+              color: 'hsl(25, 25%, 25%)',
+              letterSpacing: '0.35em'
+            }}
+          >
             BEAUTY
           </h2>
         </div>
 
         {/* Main Heading */}
-        <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-espresso mb-6 leading-tight">
+        <h1 
+          className="text-6xl md:text-7xl lg:text-8xl mb-8 leading-tight font-light"
+          style={{ 
+            fontFamily: "'Playfair Display', serif",
+            color: 'hsl(25, 25%, 25%)'
+          }}
+        >
           Launching
           <br />
           soon!
         </h1>
 
         {/* Subtitle */}
-        <p className="text-muted-foreground text-lg md:text-xl mb-10 max-w-md">
+        <p 
+          className="text-lg md:text-xl mb-12 max-w-md font-light"
+          style={{ color: 'hsl(25, 20%, 40%)' }}
+        >
           We are currently making some improvements to our website!
         </p>
 
         {/* Notify Form */}
-        <form onSubmit={handleNotify} className="w-full max-w-sm mb-12">
-          <div className="flex flex-col gap-3">
+        <form onSubmit={handleNotify} className="w-full max-w-xs mb-16">
+          <div className="flex flex-col gap-4">
             <Input
               type="email"
-              placeholder="Seu email"
+              placeholder="Your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-background/80 border-espresso/20 text-center h-12"
+              className="bg-white/50 border-[hsl(25,20%,70%)] text-center h-12 placeholder:text-[hsl(25,20%,55%)] focus:border-[hsl(25,25%,45%)] rounded-none"
+              style={{ color: 'hsl(25, 25%, 25%)' }}
             />
             <Button
               type="submit"
-              variant="elegant"
-              size="lg"
               disabled={isSubmitting}
-              className="w-full h-12 border-espresso/30 hover:bg-espresso hover:text-background tracking-widest text-sm font-medium"
+              className="w-full h-12 rounded-none tracking-[0.25em] text-sm font-normal border-2 transition-all duration-300"
+              style={{ 
+                backgroundColor: 'transparent',
+                borderColor: 'hsl(25, 20%, 35%)',
+                color: 'hsl(25, 25%, 25%)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'hsl(25, 20%, 35%)';
+                e.currentTarget.style.color = 'white';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'hsl(25, 25%, 25%)';
+              }}
             >
-              {isSubmitting ? "ENVIANDO..." : "NOTIFY ME"}
+              {isSubmitting ? "SENDING..." : "NOTIFY ME"}
             </Button>
           </div>
         </form>
 
         {/* Social Icons */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-8">
           <a
             href="https://facebook.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-espresso/70 hover:text-espresso transition-colors"
+            className="transition-opacity hover:opacity-60"
             aria-label="Facebook"
+            style={{ color: 'hsl(25, 25%, 30%)' }}
           >
-            <Facebook className="w-7 h-7" />
+            <Facebook className="w-7 h-7" strokeWidth={1.5} />
           </a>
           <a
             href="https://www.instagram.com/acsbeautynj?igsh=c2hsdmg1bm9kOHNo"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-espresso/70 hover:text-espresso transition-colors"
+            className="transition-opacity hover:opacity-60"
             aria-label="Instagram"
+            style={{ color: 'hsl(25, 25%, 30%)' }}
           >
-            <Instagram className="w-7 h-7" />
+            <Instagram className="w-7 h-7" strokeWidth={1.5} />
           </a>
         </div>
       </div>
