@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Instagram, Facebook, Twitter } from "lucide-react";
+import { Instagram, Facebook } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -128,15 +128,6 @@ const ComingSoon = () => {
             aria-label="Instagram"
           >
             <Instagram className="w-7 h-7" />
-          </a>
-          <a
-            href="https://twitter.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-espresso/70 hover:text-espresso transition-colors"
-            aria-label="Twitter"
-          >
-            <Twitter className="w-7 h-7" />
           </a>
         </div>
       </div>
