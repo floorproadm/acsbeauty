@@ -1,5 +1,4 @@
-import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
   Check, 
@@ -15,60 +14,55 @@ import {
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { format } from "date-fns";
 
+// Booking data interface matching edge function response
+interface BookingData {
+  id: string;
+  client_name: string;
+  start_time: string;
+  end_time: string;
+  timezone: string;
+  status: string;
+  services?: {
+    id: string;
+    name: string;
+    duration_minutes: number;
+    price: number;
+    promo_price?: number;
+  } | null;
+  packages?: {
+    id: string;
+    name: string;
+    total_price: number;
+    sessions_qty: number;
+  } | null;
+}
+
 // Studio location - official address
 const STUDIO_ADDRESS = "375 Chestnut St, 3rd Floor, Suite 3B, Newark, NJ";
-const STUDIO_COORDS = "40.7357,-74.1724"; // Newark, NJ coords
 
 export default function Confirmation() {
   const { bookingId } = useParams<{ bookingId: string }>();
+  const location = useLocation();
   const { t } = useLanguage();
-
-  const { data: booking, isLoading } = useQuery({
-    queryKey: ["booking-confirmation", bookingId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("bookings")
-        .select("*, services(*), packages(*)")
-        .eq("id", bookingId)
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!bookingId,
-  });
-
-  // Fetch one upsell suggestion (a different active service)
-  const { data: upsellService } = useQuery({
-    queryKey: ["upsell-suggestion", booking?.service_id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("services")
-        .select("*")
-        .eq("is_active", true)
-        .neq("id", booking?.service_id || "")
-        .limit(1)
-        .single();
-      if (error) return null;
-      return data;
-    },
-    enabled: !!booking,
-  });
+  
+  // Get booking data from navigation state (passed from Book.tsx)
+  // This eliminates the need to query the database with RLS restrictions
+  const bookingData = location.state?.bookingData as BookingData | undefined;
 
   const generateGoogleCalendarUrl = () => {
-    if (!booking) return "#";
+    if (!bookingData) return "#";
     
-    const startDate = new Date(booking.start_time);
-    const endDate = new Date(booking.end_time);
+    const startDate = new Date(bookingData.start_time);
+    const endDate = new Date(bookingData.end_time);
     
     const formatDateForGoogle = (date: Date) => {
       return date.toISOString().replace(/-|:|\.\d\d\d/g, "");
     };
     
-    const serviceName = booking.services?.name || booking.packages?.name || "Beauty Appointment";
+    const serviceName = bookingData.services?.name || bookingData.packages?.name || "Beauty Appointment";
     
     const params = new URLSearchParams({
       action: "TEMPLATE",
@@ -85,26 +79,20 @@ export default function Confirmation() {
     return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(STUDIO_ADDRESS)}`;
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="pt-24 pb-16 flex items-center justify-center">
-          <div className="animate-pulse text-muted-foreground">{t("global.processing")}</div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (!booking) {
+  // If no booking data available (e.g., direct URL access without state)
+  if (!bookingData) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <main className="pt-24 pb-16">
           <div className="container mx-auto px-4 max-w-md text-center">
-            <h1 className="font-serif text-2xl font-bold mb-4">{t("confirm.not_found")}</h1>
-            <p className="text-muted-foreground mb-6">{t("confirm.not_found_desc")}</p>
+            <div className="w-16 h-16 bg-rose-light rounded-full flex items-center justify-center mx-auto mb-4">
+              <Check className="w-8 h-8 text-rose-gold" />
+            </div>
+            <h1 className="font-serif text-2xl font-bold mb-4">{t("confirm.title")}</h1>
+            <p className="text-muted-foreground mb-6">
+              {t("confirm.check_email") || "Your booking has been confirmed. Please check your email for details."}
+            </p>
             <Link to="/">
               <Button variant="hero">{t("booking.return_home")}</Button>
             </Link>
@@ -115,8 +103,8 @@ export default function Confirmation() {
     );
   }
 
-  const serviceName = booking.services?.name || booking.packages?.name || "Appointment";
-  const appointmentDate = new Date(booking.start_time);
+  const serviceName = bookingData.services?.name || bookingData.packages?.name || "Appointment";
+  const appointmentDate = new Date(bookingData.start_time);
 
   return (
     <div className="min-h-screen bg-background">
@@ -226,42 +214,21 @@ export default function Confirmation() {
               </ul>
             </div>
 
-            {/* Upsell Suggestion */}
-            {upsellService && (
-              <div className="border-t border-border pt-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="w-4 h-4 text-rose-gold" />
-                  <h3 className="font-semibold">{t("confirm.addon_title")}</h3>
-                </div>
-                <div className="p-4 bg-rose-light/30 rounded-xl">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <p className="font-medium">{upsellService.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {upsellService.duration_minutes} {t("global.minutes")}
-                      </p>
-                    </div>
-                    <p className="font-semibold text-rose-gold">
-                      ${upsellService.promo_price || upsellService.price}
-                    </p>
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    {t("confirm.addon_note")}
-                  </p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full"
-                    onClick={() => {
-                      // Future: send request to add service
-                      alert(t("confirm.addon_requested"));
-                    }}
-                  >
-                    {t("confirm.addon_request")}
-                  </Button>
-                </div>
+            {/* Contact for add-ons */}
+            <div className="border-t border-border pt-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-4 h-4 text-rose-gold" />
+                <h3 className="font-semibold">{t("confirm.addon_title")}</h3>
               </div>
-            )}
+              <p className="text-sm text-muted-foreground mb-3">
+                {t("confirm.addon_note")}
+              </p>
+              <Link to="/services">
+                <Button variant="outline" size="sm" className="w-full">
+                  {t("confirm.view_services") || "View Our Services"}
+                </Button>
+              </Link>
+            </div>
           </motion.div>
         </div>
       </main>

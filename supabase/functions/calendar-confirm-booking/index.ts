@@ -284,15 +284,45 @@ serve(async (req) => {
     // Delete the hold
     await supabase.from('booking_holds').delete().eq('id', hold_id);
 
+    // Fetch service/package details for confirmation response
+    let serviceData = null;
+    let packageData = null;
+    
+    if (service_id) {
+      const { data } = await supabase
+        .from('services')
+        .select('id, name, duration_minutes, price, promo_price')
+        .eq('id', service_id)
+        .single();
+      serviceData = data;
+    }
+    
+    if (package_id) {
+      const { data } = await supabase
+        .from('packages')
+        .select('id, name, total_price, sessions_qty')
+        .eq('id', package_id)
+        .single();
+      packageData = data;
+    }
+
     console.log('Booking confirmed successfully:', booking.id);
 
+    // Return complete booking data for confirmation page
+    // This eliminates the need for client-side SELECT on bookings table
     return new Response(JSON.stringify({
       success: true,
-      booking_id: booking.id,
+      booking: {
+        id: booking.id,
+        client_name,
+        start_time,
+        end_time,
+        timezone,
+        status: 'confirmed',
+        services: serviceData,
+        packages: packageData,
+      },
       google_event_id: createdEvent.id,
-      start_time,
-      end_time,
-      timezone
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
