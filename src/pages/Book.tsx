@@ -44,7 +44,27 @@ interface HoldResponse {
 
 interface ConfirmResponse {
   success: boolean;
-  booking_id?: string;
+  booking?: {
+    id: string;
+    client_name: string;
+    start_time: string;
+    end_time: string;
+    timezone: string;
+    status: string;
+    services?: {
+      id: string;
+      name: string;
+      duration_minutes: number;
+      price: number;
+      promo_price?: number;
+    } | null;
+    packages?: {
+      id: string;
+      name: string;
+      total_price: number;
+      sessions_qty: number;
+    } | null;
+  };
   google_event_id?: string;
   error?: string;
   code?: string;
@@ -211,9 +231,12 @@ export default function Book() {
       return response.data;
     },
     onSuccess: (data) => {
-      if (data.success && data.booking_id) {
+      if (data.success && data.booking) {
         toast.success(t("booking.success_title"));
-        navigate(`/confirm/${data.booking_id}`);
+        // Pass booking data through navigation state to avoid RLS issues
+        navigate(`/confirm/${data.booking.id}`, { 
+          state: { bookingData: data.booking }
+        });
       } else {
         toast.error(data.error || "Failed to confirm booking");
         // Reset to time selection
