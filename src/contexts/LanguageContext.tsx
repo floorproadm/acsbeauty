@@ -85,7 +85,7 @@ const translations: Record<Language, Record<string, string>> = {
     "home.cta.title_1": "Ready to Be Cared for by",
     "home.cta.title_2": "Specialist Professionals?",
     "home.cta.description": "Book your appointment and experience the ACS Beauty difference in hair, brows, and nails.",
-    "home.cta.view_offers": "View Special Offers",
+    "home.cta.view_services": "View Our Services",
     "home.cta.book_now": "Book Now",
 
     // ========== SERVICES PAGE ==========
@@ -358,7 +358,7 @@ const translations: Record<Language, Record<string, string>> = {
     "home.cta.title_1": "Pronta para Cuidar de Você com",
     "home.cta.title_2": "Profissionais Especialistas?",
     "home.cta.description": "Agende seu horário e viva a experiência ACS Beauty em cabelo, sobrancelhas e unhas.",
-    "home.cta.view_offers": "Ver Ofertas Especiais",
+    "home.cta.view_services": "Ver Nossos Serviços",
     "home.cta.book_now": "Agendar Agora",
 
     // ========== SERVICES PAGE ==========
