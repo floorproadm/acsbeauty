@@ -13,10 +13,10 @@ import nailsServiceImg from "@/assets/nails-service.jpg";
 const services = [
   {
     id: "cabelo",
-    namePt: "Cabelo & Cílios",
-    nameEn: "Hair & Lashes",
-    descriptionPt: "Transforme seu visual com nossos tratamentos capilares e extensões de cílios.",
-    descriptionEn: "Transform your look with our hair treatments and lash extensions.",
+    namePt: "Cabelo",
+    nameEn: "Hair",
+    descriptionPt: "Extensões de cabelos, highlights, progressiva, botox capilar, selagem, tratamentos capilares, corte, tintura e escova.",
+    descriptionEn: "Hair extensions, highlights, keratin treatment, hair botox, sealing, hair treatments, cut, color, and blowout.",
     icon: Scissors,
     image: hairServiceImg,
     href: "/servicos/cabelo",
