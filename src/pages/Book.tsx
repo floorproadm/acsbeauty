@@ -95,6 +95,9 @@ export default function Book() {
   
   // Selected service from picker (when user chooses from service step)
   const [pickedServiceId, setPickedServiceId] = useState<string | null>(null);
+  
+  // Category filter for service selection
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const bookingSchema = z.object({
     name: z.string().trim().min(2, t("booking.name_min_error")).max(100),
@@ -430,86 +433,137 @@ export default function Book() {
                       </p>
                     </div>
                   ) : (
-                    <div className="space-y-3">
-                      {/* Default consultation option */}
-                      <button
-                        onClick={() => {
-                          setPickedServiceId(null);
-                          setStep("date");
-                        }}
-                        className={`w-full p-4 rounded-xl border-2 text-left transition-all hover:border-rose-gold/50 ${
-                          !pickedServiceId ? "border-rose-gold bg-rose-light/30" : "border-muted"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">
-                              {language === "pt" ? "Consulta" : "Consultation"}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {DEFAULT_CONSULTATION_DURATION} min
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm text-muted-foreground">
-                              {language === "pt" ? "Grátis" : "Free"}
-                            </p>
-                          </div>
+                    <div className="space-y-4">
+                      {/* Category filter tabs */}
+                      {allServices && allServices.length > 0 && (
+                        <div className="flex flex-wrap gap-2 justify-center mb-4">
+                          <button
+                            onClick={() => setSelectedCategory(null)}
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                              selectedCategory === null
+                                ? "bg-rose-gold text-white"
+                                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                            }`}
+                          >
+                            {language === "pt" ? "Todos" : "All"}
+                          </button>
+                          {["Cabelo", "Sobrancelhas", "Unhas"].map((cat) => {
+                            const hasServices = allServices.some(s => s.category === cat);
+                            if (!hasServices) return null;
+                            
+                            const categoryLabel = language === "pt" ? cat : 
+                              cat === "Cabelo" ? "Hair" : 
+                              cat === "Sobrancelhas" ? "Brows" : "Nails";
+                            
+                            return (
+                              <button
+                                key={cat}
+                                onClick={() => setSelectedCategory(cat)}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                                  selectedCategory === cat
+                                    ? "bg-rose-gold text-white"
+                                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                                }`}
+                              >
+                                {categoryLabel}
+                              </button>
+                            );
+                          })}
                         </div>
-                      </button>
+                      )}
 
-                      {/* Group services by category */}
-                      {allServices && Object.entries(
-                        allServices.reduce((acc, svc) => {
+                      {/* Default consultation option - only show when no category filter */}
+                      {!selectedCategory && (
+                        <button
+                          onClick={() => {
+                            setPickedServiceId(null);
+                            setStep("date");
+                          }}
+                          className={`w-full p-4 rounded-xl border-2 text-left transition-all hover:border-rose-gold/50 ${
+                            !pickedServiceId ? "border-rose-gold bg-rose-light/30" : "border-muted"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">
+                                {language === "pt" ? "Consulta" : "Consultation"}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {DEFAULT_CONSULTATION_DURATION} min
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-muted-foreground">
+                                {language === "pt" ? "Grátis" : "Free"}
+                              </p>
+                            </div>
+                          </div>
+                        </button>
+                      )}
+
+                      {/* Filtered services list */}
+                      {allServices && (() => {
+                        const filteredServices = selectedCategory
+                          ? allServices.filter(s => s.category === selectedCategory)
+                          : allServices;
+                        
+                        const groupedServices = filteredServices.reduce((acc, svc) => {
                           const cat = svc.category || (language === "pt" ? "Outros" : "Other");
                           if (!acc[cat]) acc[cat] = [];
                           acc[cat].push(svc);
                           return acc;
-                        }, {} as Record<string, typeof allServices>)
-                      ).map(([category, services]) => (
-                        <div key={category} className="pt-4">
-                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                            {category}
-                          </p>
-                          <div className="space-y-2">
-                            {services.map((svc) => (
-                              <button
-                                key={svc.id}
-                                onClick={() => {
-                                  setPickedServiceId(svc.id);
-                                  setStep("date");
-                                }}
-                                className={`w-full p-4 rounded-xl border-2 text-left transition-all hover:border-rose-gold/50 ${
-                                  pickedServiceId === svc.id ? "border-rose-gold bg-rose-light/30" : "border-muted"
-                                }`}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <p className="font-medium">{svc.name}</p>
-                                    <p className="text-sm text-muted-foreground">
-                                      {svc.duration_minutes} min
-                                    </p>
+                        }, {} as Record<string, typeof allServices>);
+
+                        return Object.entries(groupedServices).map(([category, services]) => (
+                          <div key={category} className="pt-2">
+                            {!selectedCategory && (
+                              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                                {language === "pt" ? category : 
+                                  category === "Cabelo" ? "Hair" : 
+                                  category === "Sobrancelhas" ? "Brows" : 
+                                  category === "Unhas" ? "Nails" : category}
+                              </p>
+                            )}
+                            <div className="space-y-2">
+                              {services.map((svc) => (
+                                <button
+                                  key={svc.id}
+                                  onClick={() => {
+                                    setPickedServiceId(svc.id);
+                                    setStep("date");
+                                  }}
+                                  className={`w-full p-4 rounded-xl border-2 text-left transition-all hover:border-rose-gold/50 ${
+                                    pickedServiceId === svc.id ? "border-rose-gold bg-rose-light/30" : "border-muted"
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="font-medium">{svc.name}</p>
+                                      <p className="text-sm text-muted-foreground">
+                                        {svc.duration_minutes} min
+                                      </p>
+                                    </div>
+                                    <div className="text-right">
+                                      {svc.promo_price ? (
+                                        <>
+                                          <p className="text-sm line-through text-muted-foreground">
+                                            ${svc.price}
+                                          </p>
+                                          <p className="font-semibold text-rose-gold">
+                                            ${svc.promo_price}
+                                          </p>
+                                        </>
+                                      ) : (
+                                        <p className="font-semibold">${svc.price}</p>
+                                      )}
+                                    </div>
                                   </div>
-                                  <div className="text-right">
-                                    {svc.promo_price ? (
-                                      <>
-                                        <p className="text-sm line-through text-muted-foreground">
-                                          ${svc.price}
-                                        </p>
-                                        <p className="font-semibold text-rose-gold">
-                                          ${svc.promo_price}
-                                        </p>
-                                      </>
-                                    ) : (
-                                      <p className="font-semibold">${svc.price}</p>
-                                    )}
-                                  </div>
-                                </div>
-                              </button>
-                            ))}
+                                </button>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ));
+                      })()}
                     </div>
                   )}
                 </motion.div>
