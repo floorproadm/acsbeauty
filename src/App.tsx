@@ -39,9 +39,10 @@ const App = () => (
           <Route path="/servicos/cabelo" element={<Cabelo />} />
           <Route path="/servicos/sobrancelhas" element={<Sobrancelhas />} />
           <Route path="/servicos/unhas" element={<Unhas />} />
-          <Route path="/packages" element={<Packages />} />
-          <Route path="/o/:id" element={<OfferLanding />} />
-          <Route path="/p/:id" element={<PackageLanding />} />
+          {/* ARCHIVED: Offers routes hidden temporarily - uncomment to restore */}
+          {/* <Route path="/packages" element={<Packages />} /> */}
+          {/* <Route path="/o/:id" element={<OfferLanding />} /> */}
+          {/* <Route path="/p/:id" element={<PackageLanding />} /> */}
           <Route path="/book" element={<Book />} />
           <Route path="/confirm/:bookingId" element={<Confirmation />} />
           <Route path="/about" element={<About />} />
