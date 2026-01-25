@@ -21,7 +21,7 @@ export function Hero() {
         <div className="absolute bottom-1/4 left-0 w-48 md:w-80 h-48 md:h-80 bg-nude-dark/30 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 md:px-6 pt-20 md:pt-24 pb-8 md:pb-12 relative z-10">
+      <div className="container mx-auto px-4 md:px-6 pt-28 md:pt-24 pb-8 md:pb-12 relative z-10">
         <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Content */}
           <div className="max-w-xl">
