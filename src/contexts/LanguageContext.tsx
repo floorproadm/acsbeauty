@@ -89,9 +89,9 @@ const translations: Record<Language, Record<string, string>> = {
     "home.cta.book_now": "Book Now",
 
     // ========== SERVICES PAGE ==========
-    "services.badge": "Start Your Journey",
-    "services.title": "Our Special Offers",
-    "services.description": "Begin your skincare journey with our introductory offers designed for new clients.",
+    "services.badge": "Our Expertise",
+    "services.title": "Our Services",
+    "services.description": "Specialized in Hair, Brows, and Nails — discover treatments crafted for you.",
     "services.new_client_special": "New Client Special",
     "services.free_consultation": "Free Consultation",
     "services.view_packages": "View Our Offers",
@@ -362,9 +362,9 @@ const translations: Record<Language, Record<string, string>> = {
     "home.cta.book_now": "Agendar Agora",
 
     // ========== SERVICES PAGE ==========
-    "services.badge": "Comece Sua Jornada",
-    "services.title": "Nossas Ofertas Especiais",
-    "services.description": "Comece sua jornada de cuidados com a pele com nossas ofertas introdutórias para novas clientes.",
+    "services.badge": "Nossa Especialidade",
+    "services.title": "Nossos Serviços",
+    "services.description": "Especialistas em Cabelo, Sobrancelhas e Unhas — descubra tratamentos feitos para você.",
     "services.new_client_special": "Especial Primeira Visita",
     "services.free_consultation": "Consulta Gratuita",
     "services.view_packages": "Ver Nossas Ofertas",
