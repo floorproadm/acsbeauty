@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import acsLogo from "@/assets/acs-logo.png";
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -42,10 +43,12 @@ export function Header() {
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between">
           {/* Logo - Brand Manual Style */}
-          <Link to="/" className="flex items-center gap-2">
-            <span className="font-sans text-2xl md:text-3xl font-light tracking-[0.15em] text-foreground uppercase">
-              ACS <span className="text-gold">beauty</span>
-            </span>
+          <Link to="/" className="flex items-center">
+            <img 
+              src={acsLogo} 
+              alt="ACS Beauty" 
+              className="h-10 md:h-12 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop Navigation */}
