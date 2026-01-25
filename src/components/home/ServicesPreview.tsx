@@ -102,7 +102,7 @@ export function ServicesPreview() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="text-center mt-10 md:mt-12"
         >
-          <Link to="/servicos/cabelo">
+          <Link to="/services">
             <Button variant="hero" size="lg" className="group w-full sm:w-auto">
               {t("home.services.explore_services")}
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
