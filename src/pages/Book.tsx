@@ -70,13 +70,20 @@ interface ConfirmResponse {
   code?: string;
 }
 
+// Default consultation duration when no service is selected (in minutes)
+const DEFAULT_CONSULTATION_DURATION = 30;
+
 export default function Book() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const offerId = searchParams.get("offer_id");
   const packageId = searchParams.get("package_id");
   const serviceId = searchParams.get("service_id");
+  const flowMode = searchParams.get("flow"); // "calendar" mode skips to date picker
   const { t, language } = useLanguage();
+
+  // Determine if we're in direct calendar flow (no service pre-selected)
+  const isCalendarFlow = flowMode === "calendar" && !offerId && !packageId && !serviceId;
 
   // Booking flow state
   const [step, setStep] = useState<"date" | "time" | "form">("date");
@@ -139,10 +146,10 @@ export default function Book() {
     enabled: !!serviceId,
   });
 
-  // Determine service duration
+  // Determine service duration - use default for calendar flow
   const serviceDuration = offer?.services?.duration_minutes || 
                           service?.duration_minutes || 
-                          60; // Default 60 minutes
+                          DEFAULT_CONSULTATION_DURATION; // Default for consultation/calendar flow
 
   // Fetch available slots for selected date
   const { data: availability, isLoading: isLoadingSlots, refetch: refetchSlots } = useQuery({
@@ -299,7 +306,9 @@ export default function Book() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const itemName = offer?.headline || offer?.name || pkg?.name || service?.name || "Consultation";
+  // Display name for what's being booked
+  const itemName = offer?.headline || offer?.name || pkg?.name || service?.name || 
+    (isCalendarFlow ? (language === "pt" ? "Consulta" : "Consultation") : "Consultation");
 
   // Generate available dates (next 30 days, excluding past dates)
   const today = new Date();

@@ -60,8 +60,8 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-col sm:flex-row gap-3 md:gap-4"
             >
-              {/* Primary CTA */}
-              <Link to="/book" className="w-full sm:w-auto">
+              {/* Primary CTA - Direct to calendar */}
+              <Link to="/book?flow=calendar" className="w-full sm:w-auto">
                 <Button
                   variant="hero"
                   size="lg"

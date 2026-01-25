@@ -571,7 +571,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     } catch {
       // localStorage may not be available (e.g., private browsing)
     }
-    return "en"; // Default is now EN
+    return "pt"; // Default is PT (Portuguese)
   });
 
   useEffect(() => {
