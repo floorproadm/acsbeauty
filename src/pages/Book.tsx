@@ -85,13 +85,16 @@ export default function Book() {
   // Determine if we're in direct calendar flow (no service pre-selected)
   const isCalendarFlow = flowMode === "calendar" && !offerId && !packageId && !serviceId;
 
-  // Booking flow state
-  const [step, setStep] = useState<"date" | "time" | "form">("date");
+  // Booking flow state - include "service" step for optional service selection
+  const [step, setStep] = useState<"service" | "date" | "time" | "form">(isCalendarFlow ? "date" : "date");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [holdId, setHoldId] = useState<string | null>(null);
   const [holdExpiresAt, setHoldExpiresAt] = useState<Date | null>(null);
   const [countdown, setCountdown] = useState<number>(0);
+  
+  // Selected service from picker (when user chooses from service step)
+  const [pickedServiceId, setPickedServiceId] = useState<string | null>(null);
 
   const bookingSchema = z.object({
     name: z.string().trim().min(2, t("booking.name_min_error")).max(100),
@@ -131,25 +134,43 @@ export default function Book() {
     enabled: !!packageId,
   });
 
-  // Fetch service details
+  // Fetch service details (from URL param OR picked from service step)
+  const activeServiceId = pickedServiceId || serviceId;
+  
   const { data: service } = useQuery({
-    queryKey: ["service", serviceId],
+    queryKey: ["service", activeServiceId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("services")
         .select("*")
-        .eq("id", serviceId)
+        .eq("id", activeServiceId)
         .single();
       if (error) throw error;
       return data;
     },
-    enabled: !!serviceId,
+    enabled: !!activeServiceId,
   });
 
-  // Determine service duration - use default for calendar flow
+  // Fetch all active services for service selection step
+  const { data: allServices, isLoading: isLoadingServices } = useQuery({
+    queryKey: ["active-services"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("services")
+        .select("*")
+        .eq("is_active", true)
+        .order("category", { ascending: true })
+        .order("name", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: step === "service", // Only fetch when on service step
+  });
+
+  // Determine service duration - use default for calendar flow without service
   const serviceDuration = offer?.services?.duration_minutes || 
                           service?.duration_minutes || 
-                          DEFAULT_CONSULTATION_DURATION; // Default for consultation/calendar flow
+                          DEFAULT_CONSULTATION_DURATION;
 
   // Fetch available slots for selected date
   const { data: availability, isLoading: isLoadingSlots, refetch: refetchSlots } = useQuery({
@@ -177,11 +198,14 @@ export default function Book() {
   // Create hold mutation
   const createHold = useMutation({
     mutationFn: async (slot: TimeSlot): Promise<HoldResponse> => {
+      // Use activeServiceId which includes picked service
+      const finalServiceId = offer?.service_id || activeServiceId || null;
+      
       const response = await supabase.functions.invoke("calendar-hold", {
         body: {
           start_time: slot.start,
           end_time: slot.end,
-          service_id: offer?.service_id || serviceId || null,
+          service_id: finalServiceId,
           package_id: packageId || null,
         },
       });
@@ -217,13 +241,16 @@ export default function Book() {
         throw new Error("Missing booking information");
       }
 
+      // Use activeServiceId which includes picked service
+      const finalServiceId = offer?.service_id || activeServiceId || null;
+
       const response = await supabase.functions.invoke("calendar-confirm-booking", {
         body: {
           hold_id: holdId,
           client_name: formData.name,
           client_phone: formData.phone,
           client_instagram: formData.instagram || null,
-          service_id: offer?.service_id || serviceId || null,
+          service_id: finalServiceId,
           package_id: packageId || null,
           offer_id: offerId || null,
           start_time: selectedSlot.start,
@@ -306,9 +333,9 @@ export default function Book() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Display name for what's being booked
+  // Display name for what's being booked (includes picked service)
   const itemName = offer?.headline || offer?.name || pkg?.name || service?.name || 
-    (isCalendarFlow ? (language === "pt" ? "Consulta" : "Consultation") : "Consultation");
+    ((isCalendarFlow || step === "service") ? (language === "pt" ? "Consulta" : "Consultation") : "Consultation");
 
   // Generate available dates (next 30 days, excluding past dates)
   const today = new Date();
@@ -329,6 +356,11 @@ export default function Book() {
               } else if (step === "time") {
                 setStep("date");
                 setSelectedDate(undefined);
+              } else if (step === "date" && isCalendarFlow) {
+                // In calendar flow, allow going back to service selection
+                setStep("service");
+              } else if (step === "service") {
+                navigate(-1);
               } else {
                 navigate(-1);
               }
@@ -357,13 +389,13 @@ export default function Book() {
 
             {/* Step indicator */}
             <div className="flex items-center justify-center gap-2 mb-8">
-              {["date", "time", "form"].map((s, i) => (
+              {(step === "service" ? ["service", "date", "time", "form"] : ["date", "time", "form"]).map((s, i, arr) => (
                 <div
                   key={s}
                   className={`h-2 rounded-full transition-all ${
                     step === s
                       ? "w-8 bg-rose-gold"
-                      : i < ["date", "time", "form"].indexOf(step)
+                      : arr.indexOf(step) > i
                       ? "w-2 bg-rose-gold"
                       : "w-2 bg-muted"
                   }`}
@@ -372,6 +404,117 @@ export default function Book() {
             </div>
 
             <AnimatePresence mode="wait">
+              {/* Step 0: Service Selection (optional, shown when going back from calendar flow) */}
+              {step === "service" && (
+                <motion.div
+                  key="service"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="bg-card rounded-2xl p-6 shadow-soft"
+                >
+                  <h2 className="font-serif text-xl font-semibold mb-2 text-center">
+                    {language === "pt" ? "Escolha o serviço" : "Choose a service"}
+                  </h2>
+                  <p className="text-center text-sm text-muted-foreground mb-6">
+                    {language === "pt" 
+                      ? "Selecione o serviço desejado ou continue com consulta" 
+                      : "Select your desired service or continue with consultation"}
+                  </p>
+
+                  {isLoadingServices ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-rose-gold mb-4" />
+                      <p className="text-muted-foreground">
+                        {language === "pt" ? "Carregando serviços..." : "Loading services..."}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {/* Default consultation option */}
+                      <button
+                        onClick={() => {
+                          setPickedServiceId(null);
+                          setStep("date");
+                        }}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all hover:border-rose-gold/50 ${
+                          !pickedServiceId ? "border-rose-gold bg-rose-light/30" : "border-muted"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">
+                              {language === "pt" ? "Consulta" : "Consultation"}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {DEFAULT_CONSULTATION_DURATION} min
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm text-muted-foreground">
+                              {language === "pt" ? "Grátis" : "Free"}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* Group services by category */}
+                      {allServices && Object.entries(
+                        allServices.reduce((acc, svc) => {
+                          const cat = svc.category || (language === "pt" ? "Outros" : "Other");
+                          if (!acc[cat]) acc[cat] = [];
+                          acc[cat].push(svc);
+                          return acc;
+                        }, {} as Record<string, typeof allServices>)
+                      ).map(([category, services]) => (
+                        <div key={category} className="pt-4">
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                            {category}
+                          </p>
+                          <div className="space-y-2">
+                            {services.map((svc) => (
+                              <button
+                                key={svc.id}
+                                onClick={() => {
+                                  setPickedServiceId(svc.id);
+                                  setStep("date");
+                                }}
+                                className={`w-full p-4 rounded-xl border-2 text-left transition-all hover:border-rose-gold/50 ${
+                                  pickedServiceId === svc.id ? "border-rose-gold bg-rose-light/30" : "border-muted"
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="font-medium">{svc.name}</p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {svc.duration_minutes} min
+                                    </p>
+                                  </div>
+                                  <div className="text-right">
+                                    {svc.promo_price ? (
+                                      <>
+                                        <p className="text-sm line-through text-muted-foreground">
+                                          ${svc.price}
+                                        </p>
+                                        <p className="font-semibold text-rose-gold">
+                                          ${svc.promo_price}
+                                        </p>
+                                      </>
+                                    ) : (
+                                      <p className="font-semibold">${svc.price}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
               {/* Step 1: Date Selection */}
               {step === "date" && (
                 <motion.div
