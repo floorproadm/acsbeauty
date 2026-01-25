@@ -61,7 +61,7 @@ export function Hero() {
               className="flex flex-col sm:flex-row gap-3 md:gap-4"
             >
               {/* Primary CTA */}
-              <Link to="/services" className="w-full sm:w-auto">
+              <Link to="/book" className="w-full sm:w-auto">
                 <Button
                   variant="hero"
                   size="lg"
