@@ -24,8 +24,8 @@
     --popover: 30 38% 99%;
     --popover-foreground: 0 0% 0%;
 
-    /* Primary - Gold/Dourado */
-    --primary: 35 55% 48%;
+    /* Primary - Gold/Dourado (mais suave e elegante) */
+    --primary: 28 35% 45%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary - Nude base */
@@ -36,8 +36,8 @@
     --muted: 30 30% 94%;
     --muted-foreground: 0 0% 35%;
 
-    /* Accent - Golden accent */
-    --accent: 35 55% 48%;
+    /* Accent - Golden accent (mais suave) */
+    --accent: 28 35% 45%;
     --accent-foreground: 0 0% 100%;
 
     /* Destructive */
@@ -55,15 +55,15 @@
     --nude: 30 38% 91%;
     --nude-light: 30 38% 96%;
     --nude-dark: 30 30% 82%;
-    --gold: 35 55% 48%;
-    --gold-light: 40 50% 65%;
-    --gold-dark: 35 60% 35%;
+    --gold: 28 35% 45%;
+    --gold-light: 30 30% 58%;
+    --gold-dark: 25 40% 32%;
     --black: 0 0% 0%;
     --white: 0 0% 100%;
     
     /* Legacy compatibility tokens */
-    --rose-gold: 35 55% 48%;
-    --rose-gold-light: 40 50% 65%;
+    --rose-gold: 28 35% 45%;
+    --rose-gold-light: 30 30% 58%;
     --champagne: 30 38% 91%;
     --ivory: 30 38% 97%;
     --espresso: 0 0% 0%;
