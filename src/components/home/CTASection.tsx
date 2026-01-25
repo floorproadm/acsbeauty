@@ -31,10 +31,10 @@ export function CTASection() {
             {t("home.cta.description")}
           </p>
           <div className="flex flex-col gap-3 md:gap-4 sm:flex-row justify-center">
-            <Link to="/contact" className="w-full sm:w-auto">
+            <Link to="/services" className="w-full sm:w-auto">
               <Button variant="rose" size="xl" className="group w-full sm:w-auto">
                 <Calendar className="w-5 h-5" />
-                {t("home.cta.book_now")}
+                {t("home.cta.view_services")}
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
