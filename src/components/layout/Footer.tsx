@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Instagram, Facebook, Mail, Phone, MapPin } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import acsLogo from "@/assets/acs-logo.png";
 
 export function Footer() {
   const { t } = useLanguage();
@@ -11,9 +12,13 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1 space-y-3 md:space-y-4">
-            <h3 className="font-sans text-xl md:text-2xl font-light tracking-[0.15em] uppercase">
-              ACS <span className="text-gold">beauty</span>
-            </h3>
+            <Link to="/">
+              <img 
+                src={acsLogo} 
+                alt="ACS Beauty" 
+                className="h-12 md:h-14 w-auto object-contain brightness-0 invert"
+              />
+            </Link>
             <p className="text-background/70 text-xs md:text-sm leading-relaxed font-light">
               {t("footer.description")}
             </p>
