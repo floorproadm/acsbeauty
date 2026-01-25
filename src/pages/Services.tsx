@@ -1,30 +1,50 @@
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight, Scissors, Eye, Palette } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-export default function Services() {
-  const { t } = useLanguage();
+import hairServiceImg from "@/assets/hair-service.png";
+import browsServiceImg from "@/assets/brows-service.jpg";
+import nailsServiceImg from "@/assets/nails-service.jpg";
 
-  const { data: offers, isLoading } = useQuery({
-    queryKey: ["public-offers"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("offers")
-        .select("*")
-        .eq("active", true)
-        .in("type", ["entry_offer", "consultation_offer"]);
-      
-      if (error) throw error;
-      return data;
-    },
-  });
+const services = [
+  {
+    id: "cabelo",
+    namePt: "Cabelo & Cílios",
+    nameEn: "Hair & Lashes",
+    descriptionPt: "Transforme seu visual com nossos tratamentos capilares e extensões de cílios.",
+    descriptionEn: "Transform your look with our hair treatments and lash extensions.",
+    icon: Scissors,
+    image: hairServiceImg,
+    href: "/servicos/cabelo",
+  },
+  {
+    id: "sobrancelhas",
+    namePt: "Sobrancelhas",
+    nameEn: "Brows",
+    descriptionPt: "Design perfeito e técnicas avançadas para realçar seu olhar.",
+    descriptionEn: "Perfect design and advanced techniques to enhance your look.",
+    icon: Eye,
+    image: browsServiceImg,
+    href: "/servicos/sobrancelhas",
+  },
+  {
+    id: "unhas",
+    namePt: "Unhas",
+    nameEn: "Nails",
+    descriptionPt: "Nail art, alongamento e esmaltação em gel para mãos impecáveis.",
+    descriptionEn: "Nail art, extensions and gel polish for flawless hands.",
+    icon: Palette,
+    image: nailsServiceImg,
+    href: "/servicos/unhas",
+  },
+];
+
+export default function Services() {
+  const { t, language } = useLanguage();
 
   return (
     <div className="min-h-[100svh] bg-background">
@@ -48,54 +68,47 @@ export default function Services() {
             </p>
           </motion.div>
 
-          {isLoading ? (
-            <div className="grid md:grid-cols-2 gap-4 md:gap-6 max-w-3xl mx-auto">
-              {[1, 2].map((i) => (
-                <Skeleton key={i} className="h-56 md:h-64 rounded-2xl" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 gap-4 md:gap-6 max-w-3xl mx-auto">
-              {offers?.map((offer, index) => (
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
+            {services.map((service, index) => {
+              const Icon = service.icon;
+              return (
                 <motion.div
-                  key={offer.id}
+                  key={service.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-card rounded-2xl p-5 md:p-6 shadow-soft hover:shadow-card transition-shadow"
+                  className="group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-card transition-all duration-300"
                 >
-                  <div className="inline-block px-3 py-1 rounded-full bg-rose-light text-rose-gold text-xs font-medium mb-3 md:mb-4">
-                    {offer.type === "entry_offer" ? t("services.new_client_special") : t("services.free_consultation")}
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img
+                      src={service.image}
+                      alt={language === "pt" ? service.namePt : service.nameEn}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
                   </div>
-                  <h2 className="font-serif text-xl md:text-2xl font-bold mb-2">{offer.headline || offer.name}</h2>
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-3">{offer.body}</p>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-xl md:text-2xl font-bold text-rose-gold">{offer.price_display}</span>
-                    <Link to={`/o/${offer.id}`}>
-                      <Button variant="hero" size="default" className="group">
+                  <div className="p-5 md:p-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 rounded-full bg-rose-light flex items-center justify-center">
+                        <Icon className="w-4 h-4 text-rose-gold" />
+                      </div>
+                      <h2 className="font-serif text-xl md:text-2xl font-bold">
+                        {language === "pt" ? service.namePt : service.nameEn}
+                      </h2>
+                    </div>
+                    <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                      {language === "pt" ? service.descriptionPt : service.descriptionEn}
+                    </p>
+                    <Link to={service.href}>
+                      <Button variant="hero" size="default" className="w-full group/btn">
                         {t("global.learn_more")}
-                        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                        <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
                       </Button>
                     </Link>
                   </div>
                 </motion.div>
-              ))}
-            </div>
-          )}
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-center mt-10 md:mt-12"
-          >
-            <Link to="/packages">
-              <Button variant="hero-outline" size="lg" className="group w-full sm:w-auto">
-                {t("services.view_packages")}
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </Link>
-          </motion.div>
+              );
+            })}
+          </div>
         </div>
       </main>
       <Footer />
