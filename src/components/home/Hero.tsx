@@ -67,7 +67,7 @@ export function Hero() {
                   size="lg"
                   className="group w-full sm:w-72 min-h-[52px] px-8 text-base justify-center"
                 >
-                  {t("home.hero.cta_offers")}
+                  {t("home.hero.cta_services")}
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
