@@ -41,10 +41,10 @@ export function Header() {
     >
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between">
-          {/* Logo */}
+          {/* Logo - Brand Manual Style */}
           <Link to="/" className="flex items-center gap-2">
-            <span className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-              ACS <span className="text-rose-gold">BEAUTY</span>
+            <span className="font-sans text-2xl md:text-3xl font-light tracking-[0.15em] text-foreground uppercase">
+              ACS <span className="text-gold">beauty</span>
             </span>
           </Link>
 
@@ -55,7 +55,7 @@ export function Header() {
                 key={item.href}
                 to={item.href}
                 className={cn(
-                  "text-sm font-medium tracking-wide transition-colors duration-300 hover:text-rose-gold",
+                  "text-sm font-light tracking-[0.1em] uppercase transition-colors duration-300 hover:text-gold",
                   location.pathname === item.href
                     ? "text-foreground"
                     : "text-muted-foreground"
@@ -102,7 +102,7 @@ export function Header() {
                 <Link
                   key={item.href}
                   to={item.href}
-                  className="text-base font-medium py-2 hover:text-rose-gold transition-colors"
+                  className="text-base font-light tracking-[0.1em] uppercase py-2 hover:text-gold transition-colors"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.label}

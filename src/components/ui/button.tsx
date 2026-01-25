@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-light tracking-[0.05em] ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -15,10 +15,12 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        hero: "btn-shine btn-glow bg-primary text-primary-foreground text-base font-medium tracking-wide hover:bg-espresso-light shadow-elevated hover:shadow-card transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02]",
-        "hero-outline": "btn-outline-shine border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02]",
-        rose: "bg-rose-gold text-foreground hover:bg-rose-light shadow-soft hover:shadow-card",
-        elegant: "bg-champagne text-foreground border border-border hover:bg-accent hover:border-rose-gold transition-all duration-300",
+        // Brand Manual - Gold gradient button
+        hero: "btn-shine btn-glow bg-gradient-to-r from-gold-light via-gold to-gold-dark text-white text-base font-light tracking-[0.1em] uppercase hover:opacity-90 shadow-gold hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02]",
+        "hero-outline": "btn-outline-shine border-2 border-gold bg-transparent text-gold hover:bg-gold hover:text-white transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02]",
+        gold: "bg-gradient-to-r from-gold-light via-gold to-gold-dark text-white hover:opacity-90 shadow-gold",
+        rose: "bg-gold text-white hover:bg-gold-dark shadow-soft hover:shadow-card",
+        elegant: "bg-nude text-foreground border border-border hover:bg-nude-dark hover:border-gold transition-all duration-300",
       },
       size: {
         default: "h-10 px-4 py-2",
