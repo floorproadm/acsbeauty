@@ -49,7 +49,7 @@ export default function Services() {
   return (
     <div className="min-h-[100svh] bg-background">
       <Header />
-      <main className="pt-20 md:pt-24 pb-12 md:pb-16">
+      <main className="pt-28 md:pt-32 pb-12 md:pb-16">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
