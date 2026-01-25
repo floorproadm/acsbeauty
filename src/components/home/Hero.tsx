@@ -14,7 +14,7 @@ export function Hero() {
   ];
 
   return (
-    <section className="relative min-h-[100svh] flex items-center bg-gradient-nude overflow-hidden">
+    <section className="relative min-h-[85svh] flex items-center bg-gradient-nude overflow-hidden">
       {/* Decorative elements - Gold accents */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 right-0 w-64 md:w-96 h-64 md:h-96 bg-gold/10 rounded-full blur-3xl" />
