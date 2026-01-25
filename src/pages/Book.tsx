@@ -578,9 +578,37 @@ export default function Book() {
                   exit={{ opacity: 0, x: 20 }}
                   className="bg-card rounded-2xl p-6 shadow-soft"
                 >
-                  <h2 className="font-serif text-xl font-semibold mb-4 text-center">
+                  <h2 className="font-serif text-xl font-semibold mb-2 text-center">
                     {language === "pt" ? "Escolha a data" : "Choose a date"}
                   </h2>
+                  
+                  {/* Service selection shortcut - only in calendar flow */}
+                  {isCalendarFlow && (
+                    <div className="mb-4">
+                      <button
+                        onClick={() => setStep("service")}
+                        className="w-full flex items-center justify-between p-3 rounded-xl border-2 border-dashed border-muted hover:border-gold/50 transition-all group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
+                            <Calendar className="w-5 h-5 text-gold" />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-medium text-sm">
+                              {pickedServiceId && service ? service.name : (language === "pt" ? "Consulta" : "Consultation")}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {serviceDuration} min
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-xs text-gold font-medium group-hover:underline">
+                          {language === "pt" ? "Alterar serviço" : "Change service"}
+                        </span>
+                      </button>
+                    </div>
+                  )}
+                  
                   <div className="flex justify-center">
                     <CalendarComponent
                       mode="single"
