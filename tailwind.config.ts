@@ -14,7 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ['Playfair Display', 'Georgia', 'serif'],
+        // Brand Manual: Adam font (using Inter as web equivalent for elegant sans-serif)
+        serif: ['Inter', 'system-ui', 'sans-serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
@@ -51,10 +52,21 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // ACS Beauty custom colors
+        // ACS Beauty Brand Manual colors
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          light: "hsl(var(--gold-light))",
+          dark: "hsl(var(--gold-dark))",
+        },
+        nude: {
+          DEFAULT: "hsl(var(--nude))",
+          light: "hsl(var(--nude-light))",
+          dark: "hsl(var(--nude-dark))",
+        },
+        // Legacy compatibility
         rose: {
-          gold: "hsl(var(--rose-gold))",
-          light: "hsl(var(--rose-gold-light))",
+          gold: "hsl(var(--gold))",
+          light: "hsl(var(--gold-light))",
         },
         champagne: "hsl(var(--champagne))",
         ivory: "hsl(var(--ivory))",

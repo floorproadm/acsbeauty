@@ -14,11 +14,11 @@ export function Hero() {
   ];
 
   return (
-    <section className="relative min-h-[100svh] flex items-center bg-gradient-hero overflow-hidden">
-      {/* Decorative elements */}
+    <section className="relative min-h-[100svh] flex items-center bg-gradient-nude overflow-hidden">
+      {/* Decorative elements - Gold accents */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 right-0 w-64 md:w-96 h-64 md:h-96 bg-rose-light/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 left-0 w-48 md:w-80 h-48 md:h-80 bg-champagne/50 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 right-0 w-64 md:w-96 h-64 md:h-96 bg-gold/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 left-0 w-48 md:w-80 h-48 md:h-80 bg-nude-dark/30 rounded-full blur-3xl" />
       </div>
 
       <div className="container mx-auto px-4 md:px-6 pt-20 md:pt-24 pb-8 md:pb-12 relative z-10">
@@ -39,10 +39,10 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="font-serif text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight mb-4 md:mb-6"
+              className="font-sans text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light tracking-[0.02em] leading-tight mb-4 md:mb-6"
             >
               {t("home.hero.title_1")}{" "}
-              <span className="text-gradient-rose">{t("home.hero.title_2")}</span>
+              <span className="text-gradient-gold">{t("home.hero.title_2")}</span>
             </motion.h1>
 
             <motion.p
@@ -93,10 +93,10 @@ export function Hero() {
             >
               {stats.map((stat) => (
                 <div key={stat.label}>
-                  <div className="font-serif text-2xl md:text-3xl font-bold text-foreground">
+                  <div className="font-sans text-2xl md:text-3xl font-light tracking-wide text-gold">
                     {stat.value}
                   </div>
-                  <div className="text-xs md:text-sm text-muted-foreground">{stat.label}</div>
+                  <div className="text-xs md:text-sm text-muted-foreground font-light tracking-wide">{stat.label}</div>
                 </div>
               ))}
             </motion.div>
@@ -110,7 +110,7 @@ export function Hero() {
             className="relative hidden lg:block"
           >
             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-elevated">
-              <div className="absolute inset-0 bg-gradient-rose opacity-20" />
+              <div className="absolute inset-0 bg-gradient-to-br from-gold/20 via-transparent to-gold-dark/20" />
               <img
                 src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80"
                 alt="Beauty treatment"
