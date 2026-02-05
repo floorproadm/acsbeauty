@@ -25,16 +25,6 @@ export function Hero() {
         <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Content */}
           <div className="max-w-xl">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-accent/50 text-accent-foreground text-xs md:text-sm font-medium mb-4 md:mb-6"
-            >
-              <Sparkles className="w-3 h-3 md:w-4 md:h-4" />
-              {t("home.hero.badge")}
-            </motion.div>
-
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
