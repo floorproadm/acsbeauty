@@ -221,50 +221,40 @@ serve(async (req) => {
 });
 
 // Helper function to parse local time in a timezone
+// Convert "09:00:00" in America/New_York to the correct UTC timestamp
 function parseLocalTime(dateStr: string, timeStr: string, timezone: string): Date {
-  // Create a date string and use timezone offset calculation
-  // For EST (America/New_York), offset is -05:00 in winter, -04:00 in summer
-  const dateTime = new Date(`${dateStr}T${timeStr}`);
+  // Parse the time components
+  const [hours, minutes, seconds] = timeStr.split(':').map(Number);
   
-  // Get the timezone offset for this specific date
+  // Create a date in UTC with the given local time
+  const year = parseInt(dateStr.split('-')[0]);
+  const month = parseInt(dateStr.split('-')[1]) - 1;
+  const day = parseInt(dateStr.split('-')[2]);
+  
+  // Create a temporary date to find the timezone offset
+  // We use noon to avoid DST edge cases
+  const tempDate = new Date(Date.UTC(year, month, day, 12, 0, 0));
+  
+  // Get what time it is in the target timezone when it's noon UTC
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone: timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+    hour: 'numeric',
     hour12: false,
   });
   
-  // Create a reference date to calculate offset
-  const refDate = new Date(`${dateStr}T12:00:00Z`);
-  const parts = formatter.formatToParts(refDate);
+  // Parse the hour in the target timezone
+  const localHourAtNoonUTC = parseInt(formatter.format(tempDate));
   
-  const getPart = (type: string) => parts.find(p => p.type === type)?.value || '0';
-  const tzYear = parseInt(getPart('year'));
-  const tzMonth = parseInt(getPart('month')) - 1;
-  const tzDay = parseInt(getPart('day'));
-  const tzHour = parseInt(getPart('hour'));
+  // Calculate the offset: if noon UTC = 7:00 local, offset is -5 hours
+  // offset in hours from UTC (negative means behind UTC)
+  const offsetHours = localHourAtNoonUTC - 12;
   
-  // Calculate offset: difference between UTC and local time
-  const utcDate = new Date(Date.UTC(tzYear, tzMonth, tzDay, tzHour, 0, 0));
-  const offsetMs = utcDate.getTime() - refDate.getTime();
+  // Now create the correct UTC time
+  // If we want 09:00 EST (UTC-5), we need 14:00 UTC
+  // Formula: UTC = local - offset
+  const utcHours = hours - offsetHours;
   
-  // Parse the target time
-  const [hours, minutes, seconds] = timeStr.split(':').map(Number);
-  const targetUtc = new Date(Date.UTC(
-    parseInt(dateStr.split('-')[0]),
-    parseInt(dateStr.split('-')[1]) - 1,
-    parseInt(dateStr.split('-')[2]),
-    hours,
-    minutes,
-    seconds || 0
-  ));
-  
-  // Adjust for timezone offset
-  return new Date(targetUtc.getTime() - offsetMs);
+  return new Date(Date.UTC(year, month, day, utcHours, minutes, seconds || 0));
 }
 
 // Helper function to get Google access token using service account
