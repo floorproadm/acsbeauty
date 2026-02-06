@@ -237,7 +237,7 @@ export default function Book() {
     },
   });
 
-  // Confirm booking mutation
+  // Confirm booking mutation with retry logic
   const confirmBooking = useMutation({
     mutationFn: async (formData: BookingFormData): Promise<ConfirmResponse> => {
       if (!holdId || !selectedSlot) {
@@ -247,25 +247,52 @@ export default function Book() {
       // Use activeServiceId which includes picked service
       const finalServiceId = offer?.service_id || activeServiceId || null;
 
-      const response = await supabase.functions.invoke("calendar-confirm-booking", {
-        body: {
-          hold_id: holdId,
-          client_name: formData.name,
-          client_phone: formData.phone,
-          client_instagram: formData.instagram || null,
-          service_id: finalServiceId,
-          package_id: packageId || null,
-          offer_id: offerId || null,
-          start_time: selectedSlot.start,
-          end_time: selectedSlot.end,
-        },
-      });
+      const requestBody = {
+        hold_id: holdId,
+        client_name: formData.name,
+        client_phone: formData.phone,
+        client_instagram: formData.instagram || null,
+        service_id: finalServiceId,
+        package_id: packageId || null,
+        offer_id: offerId || null,
+        start_time: selectedSlot.start,
+        end_time: selectedSlot.end,
+      };
 
-      if (response.error) {
-        throw new Error(response.error.message);
+      // Try with direct fetch for better timeout control
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+      try {
+        const response = await fetch(`${supabaseUrl}/functions/v1/calendar-confirm-booking`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseKey}`,
+            'apikey': supabaseKey,
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `HTTP ${response.status}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        clearTimeout(timeoutId);
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error(language === "pt" ? "Tempo limite excedido. Tente novamente." : "Request timeout. Please try again.");
+        }
+        throw error;
       }
-
-      return response.data;
     },
     onSuccess: (data) => {
       if (data.success && data.booking) {
@@ -285,8 +312,10 @@ export default function Book() {
     },
     onError: (error) => {
       console.error("Confirm error:", error);
-      toast.error(language === "pt" ? "Erro ao confirmar agendamento" : "Failed to confirm booking");
+      toast.error(error instanceof Error ? error.message : (language === "pt" ? "Erro ao confirmar agendamento" : "Failed to confirm booking"));
     },
+    retry: 1, // Retry once on failure
+    retryDelay: 1000,
   });
 
   const { register, handleSubmit, formState: { errors } } = useForm<BookingFormData>({
