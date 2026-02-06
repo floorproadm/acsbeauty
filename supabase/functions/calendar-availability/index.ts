@@ -91,12 +91,14 @@ serve(async (req) => {
       });
     }
 
-    const openTime = businessHours.open_time; // e.g., "10:00:00"
-    const closeTime = businessHours.close_time; // e.g., "19:00:00"
+    const openTime = businessHours.open_time; // e.g., "09:00:00"
+    const closeTime = businessHours.close_time; // e.g., "18:00:00"
 
     // Build start and end times for the day in the correct timezone
-    const dayStart = new Date(`${date}T${openTime}`);
-    const dayEnd = new Date(`${date}T${closeTime}`);
+    // We need to create dates that represent the local time in the business timezone
+    // For America/New_York, we calculate the offset and create proper ISO strings
+    const dayStart = parseLocalTime(date, openTime, timezone);
+    const dayEnd = parseLocalTime(date, closeTime, timezone);
 
     // Get existing holds
     const { data: holds } = await supabase
@@ -217,6 +219,53 @@ serve(async (req) => {
     });
   }
 });
+
+// Helper function to parse local time in a timezone
+function parseLocalTime(dateStr: string, timeStr: string, timezone: string): Date {
+  // Create a date string and use timezone offset calculation
+  // For EST (America/New_York), offset is -05:00 in winter, -04:00 in summer
+  const dateTime = new Date(`${dateStr}T${timeStr}`);
+  
+  // Get the timezone offset for this specific date
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+  
+  // Create a reference date to calculate offset
+  const refDate = new Date(`${dateStr}T12:00:00Z`);
+  const parts = formatter.formatToParts(refDate);
+  
+  const getPart = (type: string) => parts.find(p => p.type === type)?.value || '0';
+  const tzYear = parseInt(getPart('year'));
+  const tzMonth = parseInt(getPart('month')) - 1;
+  const tzDay = parseInt(getPart('day'));
+  const tzHour = parseInt(getPart('hour'));
+  
+  // Calculate offset: difference between UTC and local time
+  const utcDate = new Date(Date.UTC(tzYear, tzMonth, tzDay, tzHour, 0, 0));
+  const offsetMs = utcDate.getTime() - refDate.getTime();
+  
+  // Parse the target time
+  const [hours, minutes, seconds] = timeStr.split(':').map(Number);
+  const targetUtc = new Date(Date.UTC(
+    parseInt(dateStr.split('-')[0]),
+    parseInt(dateStr.split('-')[1]) - 1,
+    parseInt(dateStr.split('-')[2]),
+    hours,
+    minutes,
+    seconds || 0
+  ));
+  
+  // Adjust for timezone offset
+  return new Date(targetUtc.getTime() - offsetMs);
+}
 
 // Helper function to get Google access token using service account
 async function getGoogleAccessToken(serviceAccount: any): Promise<string> {
