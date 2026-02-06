@@ -626,8 +626,8 @@ export default function Book() {
                   </div>
                   <p className="text-center text-sm text-muted-foreground mt-4">
                     {language === "pt" 
-                      ? "Atendemos de terça a sábado, 10h às 19h" 
-                      : "We're open Tuesday to Saturday, 10am to 7pm"}
+                      ? "Atendemos de terça a sábado, 9h às 18h" 
+                      : "We're open Tuesday to Saturday, 9am to 6pm"}
                   </p>
                 </motion.div>
               )}
@@ -689,6 +689,14 @@ export default function Book() {
                         const slotTime = parseISO(slot.start);
                         const isSelected = selectedSlot?.start === slot.start;
                         
+                        // Format time in business timezone (America/New_York)
+                        const displayTime = new Intl.DateTimeFormat('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false,
+                          timeZone: availability.timezone || 'America/New_York',
+                        }).format(slotTime);
+                        
                         return (
                           <Button
                             key={slot.start}
@@ -700,7 +708,7 @@ export default function Book() {
                             {createHold.isPending && selectedSlot?.start === slot.start ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
                             ) : (
-                              format(slotTime, "HH:mm")
+                              displayTime
                             )}
                           </Button>
                         );
@@ -743,7 +751,12 @@ export default function Book() {
                         <p className="font-medium">
                           {selectedDate && format(selectedDate, "dd/MM/yyyy", { locale: language === "pt" ? ptBR : undefined })}
                           {" "}{language === "pt" ? "às" : "at"}{" "}
-                          {selectedSlot && format(parseISO(selectedSlot.start), "HH:mm")}
+                          {selectedSlot && new Intl.DateTimeFormat('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false,
+                            timeZone: 'America/New_York',
+                          }).format(parseISO(selectedSlot.start))}
                         </p>
                       </div>
                       <Button
