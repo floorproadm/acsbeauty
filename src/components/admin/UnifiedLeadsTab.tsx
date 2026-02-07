@@ -86,7 +86,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 type LeadStatus = "novo" | "em_contato" | "convertido" | "perdido";
-type LeadSource = "quiz" | "whatsapp" | "contact";
+type LeadSource = "quiz" | "contact";
 type ViewMode = "table" | "board";
 
 interface UnifiedLead {
@@ -158,8 +158,7 @@ const ITEMS_PER_PAGE = 20;
 function SourceBadge({ source }: { source: LeadSource }) {
   const config = {
     quiz: { className: "bg-purple-50 text-purple-700 border-purple-200 text-xs", label: "📝 Quiz" },
-    whatsapp: { className: "bg-green-50 text-green-700 border-green-200 text-xs", label: "💬 WhatsApp" },
-    contact: { className: "bg-blue-50 text-blue-700 border-blue-200 text-xs", label: "📧 Formulário" },
+    contact: { className: "bg-green-50 text-green-700 border-green-200 text-xs", label: "💬 Contato" },
   };
   
   const { className, label } = config[source];
@@ -367,20 +366,6 @@ export function UnifiedLeadsTab() {
     },
   });
 
-  // Fetch WhatsApp leads
-  const { data: whatsappLeads, isLoading: whatsappLoading } = useQuery({
-    queryKey: ["unified-whatsapp-leads"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("whatsapp_clicks")
-        .select("*")
-        .not("client_name", "is", null)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-  });
-
   // Fetch Contact form leads
   const { data: contactLeads, isLoading: contactLoading } = useQuery({
     queryKey: ["unified-contact-leads"],
@@ -394,7 +379,7 @@ export function UnifiedLeadsTab() {
     },
   });
 
-  // Fetch services for WhatsApp leads
+  // Fetch services for contact leads
   const { data: services } = useQuery({
     queryKey: ["services-lookup"],
     queryFn: async () => {
@@ -431,23 +416,6 @@ export function UnifiedLeadsTab() {
       answers: l.answers,
       completed_at: l.completed_at,
     }));
-    
-    whatsappLeads?.forEach(l => normalized.push({
-      id: l.id,
-      source: "whatsapp" as LeadSource,
-      client_name: l.client_name,
-      client_phone: null,
-      client_email: null,
-      client_instagram: null,
-      status: (l.status || "novo") as LeadStatus,
-      utm_source: l.utm_source,
-      utm_campaign: l.utm_campaign,
-      created_at: l.created_at,
-      service_interest: l.service_interest,
-      service_name: getServiceName(l.service_interest),
-      urgency: l.urgency,
-      page_path: l.page_path,
-    }));
 
     contactLeads?.forEach(l => normalized.push({
       id: l.id,
@@ -468,7 +436,7 @@ export function UnifiedLeadsTab() {
     return normalized.sort((a, b) => 
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
-  }, [quizLeads, whatsappLeads, contactLeads, services]);
+  }, [quizLeads, contactLeads, services]);
 
   // Get unique UTM sources
   const uniqueUtmSources = [...new Set(allLeads.map(l => l.utm_source).filter(Boolean))];
@@ -550,7 +518,7 @@ export function UnifiedLeadsTab() {
       lead.client_phone || "",
       lead.client_email || "",
       lead.client_instagram || "",
-      lead.source === "quiz" ? "Quiz" : lead.source === "whatsapp" ? "WhatsApp" : "Formulário",
+      lead.source === "quiz" ? "Quiz" : "Contato",
       lead.source === "quiz" ? (lead.quiz_name || "") : (lead.service_name || lead.message?.substring(0, 50) || ""),
       STATUS_CONFIG[lead.status]?.label || lead.status,
       lead.utm_source || "",
@@ -579,12 +547,6 @@ export function UnifiedLeadsTab() {
           .update({ status: newStatus })
           .eq("id", lead.id);
         error = result.error;
-      } else if (lead.source === "whatsapp") {
-        const result = await supabase
-          .from("whatsapp_clicks")
-          .update({ status: newStatus })
-          .eq("id", lead.id);
-        error = result.error;
       } else {
         const result = await supabase
           .from("contact_submissions")
@@ -597,7 +559,6 @@ export function UnifiedLeadsTab() {
       
       toast.success(`Status atualizado para "${STATUS_CONFIG[newStatus].label}"`);
       queryClient.invalidateQueries({ queryKey: ["unified-quiz-leads"] });
-      queryClient.invalidateQueries({ queryKey: ["unified-whatsapp-leads"] });
       queryClient.invalidateQueries({ queryKey: ["unified-contact-leads"] });
       
       if (selectedLead?.id === lead.id) {
@@ -620,9 +581,6 @@ export function UnifiedLeadsTab() {
       if (leadToDelete.source === "quiz") {
         const result = await supabase.from("quiz_responses").delete().eq("id", leadToDelete.id);
         error = result.error;
-      } else if (leadToDelete.source === "whatsapp") {
-        const result = await supabase.from("whatsapp_clicks").delete().eq("id", leadToDelete.id);
-        error = result.error;
       } else {
         const result = await supabase.from("contact_submissions").delete().eq("id", leadToDelete.id);
         error = result.error;
@@ -634,7 +592,6 @@ export function UnifiedLeadsTab() {
       setSelectedLead(null);
       setLeadToDelete(null);
       queryClient.invalidateQueries({ queryKey: ["unified-quiz-leads"] });
-      queryClient.invalidateQueries({ queryKey: ["unified-whatsapp-leads"] });
       queryClient.invalidateQueries({ queryKey: ["unified-contact-leads"] });
     } catch (error) {
       console.error("Error deleting lead:", error);
@@ -652,16 +609,10 @@ export function UnifiedLeadsTab() {
     try {
       const selectedLeads = allLeads.filter(l => selectedLeadIds.has(l.id));
       const quizIds = selectedLeads.filter(l => l.source === "quiz").map(l => l.id);
-      const waIds = selectedLeads.filter(l => l.source === "whatsapp").map(l => l.id);
       const contactIds = selectedLeads.filter(l => l.source === "contact").map(l => l.id);
 
       if (quizIds.length > 0) {
         const { error } = await supabase.from("quiz_responses").delete().in("id", quizIds);
-        if (error) throw error;
-      }
-      
-      if (waIds.length > 0) {
-        const { error } = await supabase.from("whatsapp_clicks").delete().in("id", waIds);
         if (error) throw error;
       }
 
@@ -674,7 +625,6 @@ export function UnifiedLeadsTab() {
       setSelectedLeadIds(new Set());
       setShowBulkDeleteDialog(false);
       queryClient.invalidateQueries({ queryKey: ["unified-quiz-leads"] });
-      queryClient.invalidateQueries({ queryKey: ["unified-whatsapp-leads"] });
       queryClient.invalidateQueries({ queryKey: ["unified-contact-leads"] });
     } catch (error) {
       console.error("Error deleting leads:", error);
@@ -747,7 +697,7 @@ export function UnifiedLeadsTab() {
     handleUpdateStatus(activeLead, newStatus);
   };
 
-  const isLoading = quizLoading || whatsappLoading;
+  const isLoading = quizLoading || contactLoading;
   const activeLead = allLeads.find(l => l.id === activeId);
 
   return (
@@ -873,8 +823,7 @@ export function UnifiedLeadsTab() {
           <SelectContent>
             <SelectItem value="all">Todas Origens</SelectItem>
             <SelectItem value="quiz">📝 Quiz</SelectItem>
-            <SelectItem value="whatsapp">💬 WhatsApp</SelectItem>
-            <SelectItem value="contact">📧 Formulário</SelectItem>
+            <SelectItem value="contact">💬 Contato</SelectItem>
           </SelectContent>
         </Select>
 
@@ -1256,34 +1205,6 @@ export function UnifiedLeadsTab() {
                 </div>
               )}
 
-              {/* WhatsApp Info */}
-              {selectedLead.source === "whatsapp" && (
-                <>
-                  <div className="p-3 rounded-lg bg-muted/50">
-                    <p className="text-xs text-muted-foreground mb-1">Serviço de Interesse</p>
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      <p className="font-medium">{selectedLead.service_name || "—"}</p>
-                    </div>
-                  </div>
-
-                  {selectedLead.urgency && (
-                    <div className="p-3 rounded-lg bg-muted/50">
-                      <p className="text-xs text-muted-foreground mb-1">Urgência</p>
-                      <p className="font-medium">
-                        {URGENCY_LABELS[selectedLead.urgency] || selectedLead.urgency}
-                      </p>
-                    </div>
-                  )}
-
-                  {selectedLead.page_path && (
-                    <div className="p-3 rounded-lg bg-muted/50">
-                      <p className="text-xs text-muted-foreground mb-1">Página</p>
-                      <p className="text-sm truncate">{selectedLead.page_path}</p>
-                    </div>
-                  )}
-                </>
-              )}
 
               {/* Contact Form Info */}
               {selectedLead.source === "contact" && (
