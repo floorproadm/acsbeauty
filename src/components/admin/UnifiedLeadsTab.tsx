@@ -322,7 +322,7 @@ export function UnifiedLeadsTab() {
   const [leadToDelete, setLeadToDelete] = useState<UnifiedLead | null>(null);
   const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set());
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const [viewMode, setViewMode] = useState<ViewMode>("board");
   const [activeId, setActiveId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
