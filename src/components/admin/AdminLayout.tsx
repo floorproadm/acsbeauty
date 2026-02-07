@@ -16,6 +16,7 @@ import {
   UserCheck,
   Menu,
   ChevronLeft,
+  ClipboardList,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import {
@@ -43,7 +44,8 @@ export type AdminTab =
   | "services"
   | "offers"
   | "quizzes"
-  | "whatsapp";
+  | "whatsapp"
+  | "tasks";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -56,6 +58,7 @@ const tabs: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: "bookings", label: "Agendamentos", icon: Calendar },
   { id: "clients", label: "Clientes", icon: Users },
   { id: "leads", label: "Leads", icon: UserCheck },
+  { id: "tasks", label: "Tarefas", icon: ClipboardList },
   { id: "services", label: "Serviços", icon: Sparkles },
   // ARCHIVED: Offers tab hidden temporarily - uncomment to restore
   // { id: "offers", label: "Ofertas", icon: Tag },
