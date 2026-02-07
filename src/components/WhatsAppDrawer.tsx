@@ -12,17 +12,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
 
 const WHATSAPP_NUMBER = "17329153430";
+
+const SERVICE_CATEGORIES = [
+  { value: "cabelo", label: "Cabelo", emoji: "✂️" },
+  { value: "sobrancelha", label: "Sobrancelha", emoji: "👁️" },
+  { value: "unhas", label: "Unhas", emoji: "💅" },
+];
 
 const URGENCY_OPTIONS = [
   { value: "urgente", label: "Urgente (próximos dias)", emoji: "🔥" },
@@ -56,40 +54,25 @@ export function WhatsAppDrawer({
   const [urgency, setUrgency] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch services for the dropdown
-  const { data: services = [] } = useQuery({
-    queryKey: ["services-active"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("services")
-        .select("id, name, category")
-        .eq("is_active", true)
-        .order("category", { ascending: true })
-        .order("name", { ascending: true });
-      if (error) throw error;
-      return data;
-    },
-  });
-
   const handleSubmit = async () => {
     if (!name.trim() || !selectedService || !urgency) return;
 
     setIsSubmitting(true);
 
     try {
-      const serviceName = services.find((s) => s.id === selectedService)?.name || selectedService;
+      const serviceLabel = SERVICE_CATEGORIES.find((s) => s.value === selectedService)?.label || selectedService;
       const urgencyLabel = URGENCY_OPTIONS.find((u) => u.value === urgency)?.label || urgency;
       
       // Build formatted message for database
       const dbMessage = `Contato via WhatsApp
-Serviço: ${serviceName}
+Serviço: ${serviceLabel}
 Urgência: ${urgencyLabel}
 Página: ${pagePath}`;
 
       // Save lead to contact_submissions
       await supabase.from("contact_submissions").insert({
         name: name.trim(),
-        email: "whatsapp@lead.local", // Required field - placeholder for WhatsApp leads
+        email: "whatsapp@lead.local",
         service_interest: selectedService,
         message: dbMessage,
         utm_source: utmParams.utm_source,
@@ -103,7 +86,7 @@ Página: ${pagePath}`;
       // Build WhatsApp message
       const whatsappMessage = `Olá! Meu nome é ${name.trim()}.
 
-Tenho interesse no serviço: ${serviceName}
+Tenho interesse no serviço: ${serviceLabel}
 Urgência: ${urgencyLabel}
 
 Gostaria de mais informações e agendar um horário.`;
@@ -144,14 +127,6 @@ Gostaria de mais informações e agendar um horário.`;
   const handleBack = () => {
     if (step > 1) setStep(step - 1);
   };
-
-  // Group services by category
-  const servicesByCategory = services.reduce((acc, service) => {
-    const category = service.category || "Outros";
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(service);
-    return acc;
-  }, {} as Record<string, typeof services>);
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -206,36 +181,39 @@ Gostaria de mais informações e agendar um horário.`;
             </div>
           )}
 
-          {/* Step 2: Service */}
+          {/* Step 2: Service Category */}
           {step === 2 && (
             <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Sparkles className="w-4 h-4" />
                 <span>Passo 2 de 3</span>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label className="text-base font-medium">
                   Qual serviço você procura?
                 </Label>
-                <Select value={selectedService} onValueChange={setSelectedService}>
-                  <SelectTrigger className="h-12 text-base">
-                    <SelectValue placeholder="Selecione um serviço" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(servicesByCategory).map(([category, categoryServices]) => (
-                      <div key={category}>
-                        <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
-                          {category}
-                        </div>
-                        {categoryServices.map((service) => (
-                          <SelectItem key={service.id} value={service.id}>
-                            {service.name}
-                          </SelectItem>
-                        ))}
-                      </div>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <RadioGroup value={selectedService} onValueChange={setSelectedService} className="space-y-2">
+                  {SERVICE_CATEGORIES.map((category) => (
+                    <div
+                      key={category.value}
+                      className={`flex items-center space-x-3 rounded-lg border p-4 cursor-pointer transition-all ${
+                        selectedService === category.value
+                          ? "border-[#25D366] bg-[#25D366]/5"
+                          : "border-border hover:border-[#25D366]/50"
+                      }`}
+                      onClick={() => setSelectedService(category.value)}
+                    >
+                      <RadioGroupItem value={category.value} id={category.value} />
+                      <Label
+                        htmlFor={category.value}
+                        className="flex-1 cursor-pointer flex items-center gap-2 text-base"
+                      >
+                        <span>{category.emoji}</span>
+                        <span>{category.label}</span>
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
               </div>
             </div>
           )}
