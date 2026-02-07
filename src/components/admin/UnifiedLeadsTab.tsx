@@ -86,7 +86,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 type LeadStatus = "novo" | "em_contato" | "convertido" | "perdido";
-type LeadSource = "quiz" | "whatsapp";
+type LeadSource = "quiz" | "whatsapp" | "contact";
 type ViewMode = "table" | "board";
 
 interface UnifiedLead {
@@ -110,6 +110,8 @@ interface UnifiedLead {
   service_name?: string;
   urgency?: string | null;
   page_path?: string;
+  // Contact form specific
+  message?: string | null;
 }
 
 const STATUS_CONFIG: Record<LeadStatus, { label: string; color: string; icon: React.ElementType; bgColor: string; columnColor: string }> = {
@@ -154,13 +156,17 @@ const ITEMS_PER_PAGE = 20;
 
 // Source Badge Component
 function SourceBadge({ source }: { source: LeadSource }) {
+  const config = {
+    quiz: { className: "bg-purple-50 text-purple-700 border-purple-200 text-xs", label: "📝 Quiz" },
+    whatsapp: { className: "bg-green-50 text-green-700 border-green-200 text-xs", label: "💬 WhatsApp" },
+    contact: { className: "bg-blue-50 text-blue-700 border-blue-200 text-xs", label: "📧 Formulário" },
+  };
+  
+  const { className, label } = config[source];
+  
   return (
-    <Badge variant="outline" className={
-      source === "quiz" 
-        ? "bg-purple-50 text-purple-700 border-purple-200 text-xs" 
-        : "bg-green-50 text-green-700 border-green-200 text-xs"
-    }>
-      {source === "quiz" ? "📝 Quiz" : "💬 WhatsApp"}
+    <Badge variant="outline" className={className}>
+      {label}
     </Badge>
   );
 }
@@ -375,6 +381,19 @@ export function UnifiedLeadsTab() {
     },
   });
 
+  // Fetch Contact form leads
+  const { data: contactLeads, isLoading: contactLoading } = useQuery({
+    queryKey: ["unified-contact-leads"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contact_submissions")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
   // Fetch services for WhatsApp leads
   const { data: services } = useQuery({
     queryKey: ["services-lookup"],
@@ -429,11 +448,27 @@ export function UnifiedLeadsTab() {
       urgency: l.urgency,
       page_path: l.page_path,
     }));
+
+    contactLeads?.forEach(l => normalized.push({
+      id: l.id,
+      source: "contact" as LeadSource,
+      client_name: l.name,
+      client_phone: l.phone,
+      client_email: l.email,
+      client_instagram: null,
+      status: (l.status || "novo") as LeadStatus,
+      utm_source: l.utm_source,
+      utm_campaign: l.utm_campaign,
+      created_at: l.created_at,
+      service_interest: l.service_interest,
+      service_name: getServiceName(l.service_interest),
+      message: l.message,
+    }));
     
     return normalized.sort((a, b) => 
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
-  }, [quizLeads, whatsappLeads, services]);
+  }, [quizLeads, whatsappLeads, contactLeads, services]);
 
   // Get unique UTM sources
   const uniqueUtmSources = [...new Set(allLeads.map(l => l.utm_source).filter(Boolean))];
@@ -515,8 +550,8 @@ export function UnifiedLeadsTab() {
       lead.client_phone || "",
       lead.client_email || "",
       lead.client_instagram || "",
-      lead.source === "quiz" ? "Quiz" : "WhatsApp",
-      lead.source === "quiz" ? (lead.quiz_name || "") : (lead.service_name || ""),
+      lead.source === "quiz" ? "Quiz" : lead.source === "whatsapp" ? "WhatsApp" : "Formulário",
+      lead.source === "quiz" ? (lead.quiz_name || "") : (lead.service_name || lead.message?.substring(0, 50) || ""),
       STATUS_CONFIG[lead.status]?.label || lead.status,
       lead.utm_source || "",
       format(new Date(lead.created_at), "dd/MM/yyyy HH:mm"),
@@ -536,17 +571,34 @@ export function UnifiedLeadsTab() {
   // Update lead status
   const handleUpdateStatus = async (lead: UnifiedLead, newStatus: LeadStatus) => {
     try {
-      const table = lead.source === "quiz" ? "quiz_responses" : "whatsapp_clicks";
-      const { error } = await supabase
-        .from(table)
-        .update({ status: newStatus })
-        .eq("id", lead.id);
+      let error;
+      
+      if (lead.source === "quiz") {
+        const result = await supabase
+          .from("quiz_responses")
+          .update({ status: newStatus })
+          .eq("id", lead.id);
+        error = result.error;
+      } else if (lead.source === "whatsapp") {
+        const result = await supabase
+          .from("whatsapp_clicks")
+          .update({ status: newStatus })
+          .eq("id", lead.id);
+        error = result.error;
+      } else {
+        const result = await supabase
+          .from("contact_submissions")
+          .update({ status: newStatus })
+          .eq("id", lead.id);
+        error = result.error;
+      }
       
       if (error) throw error;
       
       toast.success(`Status atualizado para "${STATUS_CONFIG[newStatus].label}"`);
       queryClient.invalidateQueries({ queryKey: ["unified-quiz-leads"] });
       queryClient.invalidateQueries({ queryKey: ["unified-whatsapp-leads"] });
+      queryClient.invalidateQueries({ queryKey: ["unified-contact-leads"] });
       
       if (selectedLead?.id === lead.id) {
         setSelectedLead({ ...selectedLead, status: newStatus });
@@ -563,11 +615,18 @@ export function UnifiedLeadsTab() {
     
     setIsDeleting(true);
     try {
-      const table = leadToDelete.source === "quiz" ? "quiz_responses" : "whatsapp_clicks";
-      const { error } = await supabase
-        .from(table)
-        .delete()
-        .eq("id", leadToDelete.id);
+      let error;
+      
+      if (leadToDelete.source === "quiz") {
+        const result = await supabase.from("quiz_responses").delete().eq("id", leadToDelete.id);
+        error = result.error;
+      } else if (leadToDelete.source === "whatsapp") {
+        const result = await supabase.from("whatsapp_clicks").delete().eq("id", leadToDelete.id);
+        error = result.error;
+      } else {
+        const result = await supabase.from("contact_submissions").delete().eq("id", leadToDelete.id);
+        error = result.error;
+      }
       
       if (error) throw error;
       
@@ -576,6 +635,7 @@ export function UnifiedLeadsTab() {
       setLeadToDelete(null);
       queryClient.invalidateQueries({ queryKey: ["unified-quiz-leads"] });
       queryClient.invalidateQueries({ queryKey: ["unified-whatsapp-leads"] });
+      queryClient.invalidateQueries({ queryKey: ["unified-contact-leads"] });
     } catch (error) {
       console.error("Error deleting lead:", error);
       toast.error("Erro ao excluir lead");
@@ -593,6 +653,7 @@ export function UnifiedLeadsTab() {
       const selectedLeads = allLeads.filter(l => selectedLeadIds.has(l.id));
       const quizIds = selectedLeads.filter(l => l.source === "quiz").map(l => l.id);
       const waIds = selectedLeads.filter(l => l.source === "whatsapp").map(l => l.id);
+      const contactIds = selectedLeads.filter(l => l.source === "contact").map(l => l.id);
 
       if (quizIds.length > 0) {
         const { error } = await supabase.from("quiz_responses").delete().in("id", quizIds);
@@ -603,12 +664,18 @@ export function UnifiedLeadsTab() {
         const { error } = await supabase.from("whatsapp_clicks").delete().in("id", waIds);
         if (error) throw error;
       }
+
+      if (contactIds.length > 0) {
+        const { error } = await supabase.from("contact_submissions").delete().in("id", contactIds);
+        if (error) throw error;
+      }
       
       toast.success(`${selectedLeadIds.size} leads excluídos com sucesso`);
       setSelectedLeadIds(new Set());
       setShowBulkDeleteDialog(false);
       queryClient.invalidateQueries({ queryKey: ["unified-quiz-leads"] });
       queryClient.invalidateQueries({ queryKey: ["unified-whatsapp-leads"] });
+      queryClient.invalidateQueries({ queryKey: ["unified-contact-leads"] });
     } catch (error) {
       console.error("Error deleting leads:", error);
       toast.error("Erro ao excluir leads");
@@ -807,6 +874,7 @@ export function UnifiedLeadsTab() {
             <SelectItem value="all">Todas Origens</SelectItem>
             <SelectItem value="quiz">📝 Quiz</SelectItem>
             <SelectItem value="whatsapp">💬 WhatsApp</SelectItem>
+            <SelectItem value="contact">📧 Formulário</SelectItem>
           </SelectContent>
         </Select>
 
@@ -1217,7 +1285,52 @@ export function UnifiedLeadsTab() {
                 </>
               )}
 
-              {/* UTM Info */}
+              {/* Contact Form Info */}
+              {selectedLead.source === "contact" && (
+                <>
+                  {/* Contact Info */}
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-muted-foreground">Contato</h4>
+                    <div className="grid gap-2">
+                      {selectedLead.client_phone && (
+                        <a
+                          href={`tel:${selectedLead.client_phone}`}
+                          className="flex items-center gap-2 p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors text-sm"
+                        >
+                          <Phone className="w-4 h-4 text-muted-foreground" />
+                          {selectedLead.client_phone}
+                        </a>
+                      )}
+                      {selectedLead.client_email && (
+                        <a
+                          href={`mailto:${selectedLead.client_email}`}
+                          className="flex items-center gap-2 p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors text-sm"
+                        >
+                          <Mail className="w-4 h-4 text-muted-foreground" />
+                          {selectedLead.client_email}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  {selectedLead.service_name && (
+                    <div className="p-3 rounded-lg bg-muted/50">
+                      <p className="text-xs text-muted-foreground mb-1">Serviço de Interesse</p>
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-primary" />
+                        <p className="font-medium">{selectedLead.service_name}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedLead.message && (
+                    <div className="p-3 rounded-lg bg-muted/50">
+                      <p className="text-xs text-muted-foreground mb-1">Mensagem</p>
+                      <p className="text-sm whitespace-pre-wrap">{selectedLead.message}</p>
+                    </div>
+                  )}
+                </>
+              )}
               {(selectedLead.utm_source || selectedLead.utm_campaign) && (
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium text-muted-foreground">Origem</h4>
