@@ -188,10 +188,7 @@ export function ClientsTab() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-2xl font-bold">Clientes</h1>
-          <p className="text-sm text-muted-foreground">{clients?.length || 0} clientes cadastrados</p>
-        </div>
+        <p className="text-sm text-muted-foreground">{clients?.length || 0} clientes cadastrados</p>
       </div>
 
       {/* Search */}
