@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LeadsTab } from "./LeadsTab";
+import { UnifiedLeadsTab } from "./UnifiedLeadsTab";
 import { ClientsTab } from "./ClientsTab";
-import { WhatsAppLeadsTab } from "./WhatsAppLeadsTab";
-import { Users, MessageCircle, UserCheck } from "lucide-react";
+import { Users, UserPlus } from "lucide-react";
 
 export function CRMTab() {
-  const [activeSubTab, setActiveSubTab] = useState("leads");
+  const [activeSubTab, setActiveSubTab] = useState("captacao");
 
   return (
     <div className="space-y-6">
@@ -18,14 +17,10 @@ export function CRMTab() {
       </div>
 
       <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
-        <TabsList className="grid w-full max-w-md grid-cols-3">
-          <TabsTrigger value="leads" className="gap-2">
-            <UserCheck className="w-4 h-4" />
-            Leads Quiz
-          </TabsTrigger>
-          <TabsTrigger value="whatsapp" className="gap-2">
-            <MessageCircle className="w-4 h-4" />
-            WhatsApp
+        <TabsList className="grid w-full max-w-xs grid-cols-2">
+          <TabsTrigger value="captacao" className="gap-2">
+            <UserPlus className="w-4 h-4" />
+            Captação
           </TabsTrigger>
           <TabsTrigger value="clients" className="gap-2">
             <Users className="w-4 h-4" />
@@ -33,11 +28,8 @@ export function CRMTab() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="leads" className="mt-6">
-          <LeadsTab />
-        </TabsContent>
-        <TabsContent value="whatsapp" className="mt-6">
-          <WhatsAppLeadsTab />
+        <TabsContent value="captacao" className="mt-6">
+          <UnifiedLeadsTab />
         </TabsContent>
         <TabsContent value="clients" className="mt-6">
           <ClientsTab />
