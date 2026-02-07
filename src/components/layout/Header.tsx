@@ -97,30 +97,56 @@ export function Header() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu Overlay */}
         {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-background/98 backdrop-blur-lg border-b border-border animate-fade-in">
-            <nav className="flex flex-col py-6 px-6 gap-4">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className="text-base font-light tracking-[0.1em] uppercase py-2 hover:text-gold transition-colors"
+          <>
+            {/* Backdrop */}
+            <div 
+              className="md:hidden fixed inset-0 bg-black/20 z-40"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            {/* Menu Panel */}
+            <div className="md:hidden fixed top-0 left-0 right-0 bg-background z-50 border-b border-border shadow-lg animate-fade-in">
+              {/* Header with logo and close button */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
+                <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>
+                  <img 
+                    src={acsLogo} 
+                    alt="ACS Beauty" 
+                    className="h-12 w-auto object-contain"
+                  />
+                </Link>
+                <button
+                  className="p-2"
                   onClick={() => setIsMobileMenuOpen(false)}
+                  aria-label="Close menu"
                 >
-                  {item.label}
-                </Link>
-              ))}
-              <div className="flex flex-col gap-3 pt-4 border-t border-border">
-                <Link to="/services" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="hero" className="w-full gap-2">
-                    <Calendar className="w-4 h-4" />
-                    {t("global.book_now")}
-                  </Button>
-                </Link>
+                  <X className="w-6 h-6" />
+                </button>
               </div>
-            </nav>
-          </div>
+              {/* Navigation */}
+              <nav className="flex flex-col py-6 px-6 gap-4">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className="text-base font-light tracking-[0.1em] uppercase py-2 hover:text-gold transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                <div className="flex flex-col gap-3 pt-4 border-t border-border">
+                  <Link to="/services" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="hero" className="w-full gap-2">
+                      <Calendar className="w-4 h-4" />
+                      {t("global.book_now")}
+                    </Button>
+                  </Link>
+                </div>
+              </nav>
+            </div>
+          </>
         )}
       </div>
     </header>
