@@ -509,15 +509,9 @@ export function WhatsAppLeadsTab() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-2xl font-bold flex items-center gap-2">
-            <MessageCircle className="w-6 h-6 text-[#25D366]" />
-            WhatsApp Leads
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Arraste os cards entre colunas para atualizar o status
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          Arraste os cards entre colunas para atualizar o status
+        </p>
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="gap-1">
             <CheckCircle2 className="w-3 h-3" />

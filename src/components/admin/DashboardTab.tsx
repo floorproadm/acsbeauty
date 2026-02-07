@@ -158,7 +158,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
 
         <div 
           className="bg-card rounded-xl p-4 border border-border shadow-soft cursor-pointer hover:border-green-300 transition-colors"
-          onClick={() => onNavigate("whatsapp")}
+          onClick={() => onNavigate("crm")}
         >
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-500/10 rounded-lg">
@@ -291,7 +291,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
       </div>
 
       {/* Birthday Widget */}
-      <BirthdayWidget onNavigateToClients={() => onNavigate("clients")} />
+      <BirthdayWidget onNavigateToClients={() => onNavigate("crm")} />
 
     </div>
   );

@@ -40,13 +40,11 @@ import { cn } from "@/lib/utils";
 export type AdminTab =
   | "dashboard"
   | "bookings"
-  | "clients"
-  | "leads"
+  | "crm"
   | "services"
   | "skus"
   | "offers"
   | "quizzes"
-  | "whatsapp"
   | "tasks";
 
 interface AdminLayoutProps {
@@ -58,15 +56,13 @@ interface AdminLayoutProps {
 const tabs: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "bookings", label: "Agendamentos", icon: Calendar },
-  { id: "clients", label: "Clientes", icon: Users },
-  { id: "leads", label: "Leads", icon: UserCheck },
+  { id: "crm", label: "CRM", icon: Users },
   { id: "tasks", label: "Tarefas", icon: ClipboardList },
   { id: "services", label: "Serviços", icon: Sparkles },
   { id: "skus", label: "Opções", icon: Layers },
   // ARCHIVED: Offers tab hidden temporarily - uncomment to restore
   // { id: "offers", label: "Ofertas", icon: Tag },
   { id: "quizzes", label: "Quizzes", icon: HelpCircle },
-  { id: "whatsapp", label: "WhatsApp", icon: Megaphone },
 ];
 
 function AdminSidebar({

@@ -389,12 +389,9 @@ export function LeadsTab() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-2xl font-bold">Leads</h1>
-          <p className="text-sm text-muted-foreground">
-            {filteredLeads?.length || 0} leads encontrados
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          {filteredLeads?.length || 0} leads encontrados
+        </p>
         <div className="flex items-center gap-2">
           <Button onClick={handleExport} variant="outline" size="sm">
             <Download className="w-4 h-4 mr-2" />
