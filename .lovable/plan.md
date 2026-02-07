@@ -1,62 +1,170 @@
 
-# Renomear "SKUs" para "Opções" na UI do Admin
+# Consolidar Leads e Clientes em uma Única Aba CRM
 
-## Objetivo
-Substituir todas as ocorrências do termo "SKU" por "Opção" na interface administrativa, mantendo os nomes das tabelas no banco de dados (`service_skus`) inalterados.
+## Visão Geral
+Unificar as abas **Leads**, **Clientes** e **WhatsApp** em uma única aba chamada **"Contatos"** ou **"CRM"** com navegação interna por sub-abas. Isso cria um funil visual completo desde o primeiro contato até a conversão em cliente fidelizado.
+
+## Arquitetura Proposta
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│  Sidebar                                                    │
+│  ┌───────────────┐                                          │
+│  │ Dashboard     │                                          │
+│  │ Agendamentos  │                                          │
+│  │ ─────────────  │                                          │
+│  │ 👥 CRM        │  ← Nova aba unificada (ícone Users)      │
+│  │ ─────────────  │                                          │
+│  │ Tarefas       │                                          │
+│  │ Serviços      │                                          │
+│  │ Opções        │                                          │
+│  │ Quizzes       │                                          │
+│  └───────────────┘                                          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Nova Aba CRM - Layout Interno
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│  CRM                                                        │
+│  Gerencie todo o ciclo de vida dos seus contatos            │
+│                                                             │
+│  ┌──────────────┬──────────────┬──────────────┐            │
+│  │ Leads Quiz   │ WhatsApp     │ Clientes     │  ← Sub-tabs│
+│  └──────────────┴──────────────┴──────────────┘            │
+│                                                             │
+│  [ Conteúdo da sub-aba selecionada ]                       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Sub-abas:
+1. **Leads Quiz** - Leads vindos de respostas de quiz (atual `LeadsTab`)
+2. **WhatsApp** - Leads vindos do drawer WhatsApp (atual `WhatsAppLeadsTab`)
+3. **Clientes** - Clientes convertidos/cadastrados (atual `ClientsTab`)
 
 ## Arquivos a Modificar
 
-### 1. AdminLayout.tsx (menu lateral)
-- Linha 65: `{ id: "skus", label: "SKUs", icon: Layers }` -> `"Opções"`
+### 1. Novo Componente: `CRMTab.tsx`
+- Container que agrupa as 3 sub-abas
+- Usa componente `Tabs` do Radix UI para navegação interna
+- Mantém estado da sub-aba ativa
+- Renderiza condicionalmente o conteúdo existente
 
-### 2. SkusTab.tsx (aba principal)
-- Linha 93: Título "Variações & SKUs" -> "Técnicas & Opções"  
-- Linha 96: Contador "SKUs cadastrados" -> "Opções cadastradas"
-- Linha 104-105: Texto explicativo sobre gestão
-- Linha 121: Empty state "SKUs"
-- Linha 139: Header da tabela "SKUs" -> "Opções"
-- Linha 186-187: Botão "SKUs" -> "Opções"
+### 2. AdminLayout.tsx
+**Remover do sidebar:**
+- `leads` (Leads)
+- `clients` (Clientes)  
+- `whatsapp` (WhatsApp)
 
-### 3. SkusModal.tsx (modal de CRUD)
-- Linha 277: Título "SKUs: {serviceName}" -> "Opções: {serviceName}"
-- Linha 287: Form header "Editar SKU" / "Novo SKU" -> "Editar Opção" / "Nova Opção"
-- Linha 296: Label "Nome do SKU" -> "Nome da Opção"
-- Linha 317: Label "Variação" -> "Técnica"
-- Linha 328: Placeholder "Sem variação" -> "Sem técnica"
-- Linha 386-387: Botão "Novo SKU" -> "Nova Opção"
-- Linha 400-401: Empty state "Nenhum SKU cadastrado" -> "Nenhuma opção cadastrada"
-- Linha 162: Toast "SKU criado" -> "Opção criada"
-- Linha 188: Toast "SKU atualizado" -> "Opção atualizada"
-- Linha 205: Toast "SKU excluído" -> "Opção excluída"
-- Linha 494: Alert title "Excluir SKU?" -> "Excluir Opção?"
+**Adicionar:**
+- `crm` (CRM) com ícone `Users` ou `UserCheck`
 
-### 4. VariationsModal.tsx (renomear "Variação" -> "Técnica")
-- Linha 100: Toast "Variação criada" -> "Técnica criada"
-- Linha 121: Toast "Variação atualizada" -> "Técnica atualizada"
-- Linha 138: Toast "Variação excluída" -> "Técnica excluída"
-- Linha 201: Título "Variações: {serviceName}" -> "Técnicas: {serviceName}"
-- Linha 215: Botão "Nova Variação" -> "Nova Técnica"
-- Linha 222: Label "Nome da Variação" -> "Nome da Técnica"
-- Linha 261: Empty state "Nenhuma variação cadastrada" -> "Nenhuma técnica cadastrada"
-- Linha 263: Descrição exemplos
-- Linha 359: Alert title "Excluir Variação?" -> "Excluir Técnica?"
-- Linha 361: Alert description sobre SKUs -> "Opções vinculadas a esta técnica..."
+### 3. Admin.tsx
+**Remover cases:**
+- `leads` → `LeadsTab`
+- `clients` → `ClientsTab`
+- `whatsapp` → `WhatsAppLeadsTab`
 
-## Resumo das Mudanças de Terminologia
+**Adicionar case:**
+- `crm` → `CRMTab`
 
-| Termo Técnico (DB)       | Termo na UI (Novo)  |
-|--------------------------|---------------------|
-| `service_variations`     | **Técnicas**        |
-| `service_skus`           | **Opções**          |
-| Variação                 | Técnica             |
-| SKU                      | Opção               |
+### 4. Ajustes nos componentes filhos
+- `LeadsTab`, `ClientsTab`, `WhatsAppLeadsTab` continuam existindo
+- Remover o cabeçalho `<h1>` de cada um (ficará no CRMTab)
+- Manter toda a lógica e UI interna intacta
 
-## O que NÃO muda
-- Nomes das tabelas no banco: `service_variations`, `service_skus`
-- Query keys do React Query
-- Nomes de variáveis e interfaces no código TypeScript
-- IDs dos tabs (mantém `skus` internamente)
-- Nenhum impacto no fluxo de booking ou em páginas públicas
+## Fluxo de Conversão Visual
+
+A ordem das sub-abas representa o funil de vendas:
+```text
+Lead Quiz → Lead WhatsApp → Cliente
+   (Frio)      (Morno)       (Quente/Convertido)
+```
+
+## Benefícios
+- **Menos itens no sidebar** - Interface mais limpa
+- **Funil visual** - Mostra progressão natural do contato
+- **Navegação contextual** - Tudo relacionado a contatos em um lugar
+- **Sem perda de funcionalidade** - Todas as features atuais preservadas
+
+## Código Proposto
+
+### CRMTab.tsx (Novo)
+```tsx
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LeadsTab } from "./LeadsTab";
+import { ClientsTab } from "./ClientsTab";
+import { WhatsAppLeadsTab } from "./WhatsAppLeadsTab";
+import { Users, MessageCircle, UserCheck } from "lucide-react";
+
+export function CRMTab() {
+  const [activeSubTab, setActiveSubTab] = useState("leads");
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-serif text-2xl font-bold">CRM</h1>
+        <p className="text-sm text-muted-foreground">
+          Gerencie leads e clientes em um só lugar
+        </p>
+      </div>
+
+      <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
+        <TabsList className="grid w-full max-w-md grid-cols-3">
+          <TabsTrigger value="leads" className="gap-2">
+            <UserCheck className="w-4 h-4" />
+            Leads Quiz
+          </TabsTrigger>
+          <TabsTrigger value="whatsapp" className="gap-2">
+            <MessageCircle className="w-4 h-4" />
+            WhatsApp
+          </TabsTrigger>
+          <TabsTrigger value="clients" className="gap-2">
+            <Users className="w-4 h-4" />
+            Clientes
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="leads" className="mt-6">
+          <LeadsTab />
+        </TabsContent>
+        <TabsContent value="whatsapp" className="mt-6">
+          <WhatsAppLeadsTab />
+        </TabsContent>
+        <TabsContent value="clients" className="mt-6">
+          <ClientsTab />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+```
+
+### AdminLayout.tsx (Alterações)
+```tsx
+// Antes:
+{ id: "clients", label: "Clientes", icon: Users },
+{ id: "leads", label: "Leads", icon: UserCheck },
+{ id: "whatsapp", label: "WhatsApp", icon: Megaphone },
+
+// Depois:
+{ id: "crm", label: "CRM", icon: Users },
+```
+
+## Escopo Técnico
+
+| Item | Ação |
+|------|------|
+| `CRMTab.tsx` | Criar novo componente |
+| `AdminLayout.tsx` | Substituir 3 itens por 1 |
+| `Admin.tsx` | Substituir 3 cases por 1 |
+| `LeadsTab.tsx` | Remover header (h1) redundante |
+| `ClientsTab.tsx` | Remover header (h1) redundante |
+| `WhatsAppLeadsTab.tsx` | Remover header (h1) redundante |
+| `AdminTab` type | Remover `leads`, `clients`, `whatsapp`; adicionar `crm` |
 
 ## Risco
-**Zero** - Mudança puramente cosmética, sem alteração de lógica ou banco de dados.
+**Baixo** - Mudança puramente organizacional na UI. Não afeta lógica de negócio, banco de dados ou fluxo de booking.
