@@ -8,6 +8,7 @@ import { ServicesTab } from "@/components/admin/ServicesTab";
 import { OffersTab } from "@/components/admin/OffersTab";
 import { QuizzesTab } from "@/components/admin/QuizzesTab";
 import { WhatsAppLeadsTab } from "@/components/admin/WhatsAppLeadsTab";
+import { TasksTab } from "@/components/admin/TasksTab";
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
@@ -30,6 +31,8 @@ export default function Admin() {
         return <QuizzesTab />;
       case "whatsapp":
         return <WhatsAppLeadsTab />;
+      case "tasks":
+        return <TasksTab />;
       default:
         return <DashboardTab onNavigate={setActiveTab} />;
     }

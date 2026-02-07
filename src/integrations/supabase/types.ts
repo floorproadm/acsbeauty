@@ -287,6 +287,7 @@ export type Database = {
       }
       clients: {
         Row: {
+          birthday: string | null
           created_at: string
           email: string | null
           id: string
@@ -298,6 +299,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          birthday?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -309,6 +311,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          birthday?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -847,6 +850,56 @@ export type Database = {
         }
         Relationships: []
       }
+      tasks: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          due_date: string | null
+          google_task_id: string | null
+          id: string
+          priority: Database["public"]["Enums"]["task_priority"]
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          due_date?: string | null
+          google_task_id?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["task_priority"]
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_date?: string | null
+          google_task_id?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["task_priority"]
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -954,6 +1007,8 @@ export type Database = {
       offer_type: "entry_offer" | "package_offer" | "consultation_offer"
       payment_status: "unpaid" | "paid"
       service_status: "entry" | "upsell" | "premium" | "inactive"
+      task_priority: "low" | "medium" | "high"
+      task_status: "todo" | "in_progress" | "done"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1094,6 +1149,8 @@ export const Constants = {
       offer_type: ["entry_offer", "package_offer", "consultation_offer"],
       payment_status: ["unpaid", "paid"],
       service_status: ["entry", "upsell", "premium", "inactive"],
+      task_priority: ["low", "medium", "high"],
+      task_status: ["todo", "in_progress", "done"],
     },
   },
 } as const

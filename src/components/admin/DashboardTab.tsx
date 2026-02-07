@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { format, startOfDay, endOfDay, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AdminTab } from "./AdminLayout";
+import { BirthdayWidget } from "./BirthdayWidget";
 
 interface DashboardTabProps {
   onNavigate: (tab: AdminTab) => void;
@@ -288,6 +289,9 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
           </div>
         </div>
       </div>
+
+      {/* Birthday Widget */}
+      <BirthdayWidget onNavigateToClients={() => onNavigate("clients")} />
 
     </div>
   );

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Save, Loader2 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Trash2, Save, Loader2, CalendarIcon } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface ClientEditModalProps {
   client: {
@@ -31,6 +40,7 @@ interface ClientEditModalProps {
     email: string | null;
     phone: string | null;
     instagram: string | null;
+    birthday?: string | null;
   } | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -43,6 +53,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
     email: "",
     phone: "",
     instagram: "",
+    birthday: null as Date | null,
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -54,6 +65,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
         email: client.email || "",
         phone: client.phone || "",
         instagram: client.instagram || "",
+        birthday: client.birthday ? parseISO(client.birthday) : null,
       });
     }
   }, [client]);
@@ -68,6 +80,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
           email: data.email || null,
           phone: data.phone || null,
           instagram: data.instagram || null,
+          birthday: data.birthday ? format(data.birthday, "yyyy-MM-dd") : null,
         })
         .eq("id", client.id);
       
@@ -179,6 +192,41 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
               onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
               placeholder="@usuario"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Aniversário</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.birthday && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.birthday
+                    ? format(formData.birthday, "dd/MM/yyyy", { locale: ptBR })
+                    : "Selecionar data"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={formData.birthday || undefined}
+                  onSelect={(date) =>
+                    setFormData({ ...formData, birthday: date || null })
+                  }
+                  locale={ptBR}
+                  className="pointer-events-auto"
+                  captionLayout="dropdown-buttons"
+                  fromYear={1940}
+                  toYear={new Date().getFullYear()}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="flex gap-2 pt-4">
