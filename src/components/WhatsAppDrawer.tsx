@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageCircle, User, Sparkles, Clock, ArrowRight, Loader2 } from "lucide-react";
+import { MessageCircle, User, Sparkles, Clock, ArrowRight, Loader2, Check } from "lucide-react";
 import {
   Drawer,
   DrawerContent,
@@ -50,22 +50,30 @@ export function WhatsAppDrawer({
 }: WhatsAppDrawerProps) {
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
-  const [selectedService, setSelectedService] = useState("");
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [urgency, setUrgency] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const toggleService = (value: string) => {
+    setSelectedServices((prev) =>
+      prev.includes(value) ? prev.filter((s) => s !== value) : [...prev, value]
+    );
+  };
+
   const handleSubmit = async () => {
-    if (!name.trim() || !selectedService || !urgency) return;
+    if (!name.trim() || selectedServices.length === 0 || !urgency) return;
 
     setIsSubmitting(true);
 
     try {
-      const serviceLabel = SERVICE_CATEGORIES.find((s) => s.value === selectedService)?.label || selectedService;
+      const serviceLabels = selectedServices
+        .map((s) => SERVICE_CATEGORIES.find((c) => c.value === s)?.label || s)
+        .join(", ");
       const urgencyLabel = URGENCY_OPTIONS.find((u) => u.value === urgency)?.label || urgency;
       
       // Build formatted message for database
       const dbMessage = `Contato via WhatsApp
-Serviço: ${serviceLabel}
+Serviço: ${serviceLabels}
 Urgência: ${urgencyLabel}
 Página: ${pagePath}`;
 
@@ -73,7 +81,7 @@ Página: ${pagePath}`;
       await supabase.from("contact_submissions").insert({
         name: name.trim(),
         email: "whatsapp@lead.local",
-        service_interest: selectedService,
+        service_interest: selectedServices.join(", "),
         message: dbMessage,
         utm_source: utmParams.utm_source,
         utm_campaign: utmParams.utm_campaign,
@@ -86,7 +94,7 @@ Página: ${pagePath}`;
       // Build WhatsApp message
       const whatsappMessage = `Olá! Meu nome é ${name.trim()}.
 
-Tenho interesse no serviço: ${serviceLabel}
+Tenho interesse em: ${serviceLabels}
 Urgência: ${urgencyLabel}
 
 Gostaria de mais informações e agendar um horário.`;
@@ -99,7 +107,7 @@ Gostaria de mais informações e agendar um horário.`;
       // Reset and close
       setStep(1);
       setName("");
-      setSelectedService("");
+      setSelectedServices([]);
       setUrgency("");
       onOpenChange(false);
     } catch (error) {
@@ -111,7 +119,7 @@ Gostaria de mais informações e agendar um horário.`;
 
   const canProceed = () => {
     if (step === 1) return name.trim().length >= 2;
-    if (step === 2) return !!selectedService;
+    if (step === 2) return selectedServices.length > 0;
     if (step === 3) return !!urgency;
     return false;
   };
@@ -181,7 +189,7 @@ Gostaria de mais informações e agendar um horário.`;
             </div>
           )}
 
-          {/* Step 2: Service Category */}
+          {/* Step 2: Service Category (multi-select) */}
           {step === 2 && (
             <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -190,30 +198,39 @@ Gostaria de mais informações e agendar um horário.`;
               </div>
               <div className="space-y-3">
                 <Label className="text-base font-medium">
-                  Qual serviço você procura?
+                  Quais serviços você procura?
                 </Label>
-                <RadioGroup value={selectedService} onValueChange={setSelectedService} className="space-y-2">
-                  {SERVICE_CATEGORIES.map((category) => (
-                    <div
-                      key={category.value}
-                      className={`flex items-center space-x-3 rounded-lg border p-4 cursor-pointer transition-all ${
-                        selectedService === category.value
-                          ? "border-[#25D366] bg-[#25D366]/5"
-                          : "border-border hover:border-[#25D366]/50"
-                      }`}
-                      onClick={() => setSelectedService(category.value)}
-                    >
-                      <RadioGroupItem value={category.value} id={category.value} />
-                      <Label
-                        htmlFor={category.value}
-                        className="flex-1 cursor-pointer flex items-center gap-2 text-base"
+                <p className="text-sm text-muted-foreground">Selecione um ou mais</p>
+                <div className="space-y-2">
+                  {SERVICE_CATEGORIES.map((category) => {
+                    const isSelected = selectedServices.includes(category.value);
+                    return (
+                      <div
+                        key={category.value}
+                        className={`flex items-center space-x-3 rounded-lg border p-4 cursor-pointer transition-all ${
+                          isSelected
+                            ? "border-[#25D366] bg-[#25D366]/5"
+                            : "border-border hover:border-[#25D366]/50"
+                        }`}
+                        onClick={() => toggleService(category.value)}
                       >
-                        <span>{category.emoji}</span>
-                        <span>{category.label}</span>
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
+                        <div
+                          className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                            isSelected
+                              ? "bg-[#25D366] border-[#25D366]"
+                              : "border-muted-foreground/30"
+                          }`}
+                        >
+                          {isSelected && <Check className="w-3 h-3 text-white" />}
+                        </div>
+                        <Label className="flex-1 cursor-pointer flex items-center gap-2 text-base">
+                          <span>{category.emoji}</span>
+                          <span>{category.label}</span>
+                        </Label>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}
