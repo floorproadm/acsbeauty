@@ -1,58 +1,24 @@
 
-# Simplificar Seleção de Serviço no WhatsApp Drawer
+# Kanban como View Principal no CRM Captação
 
 ## Objetivo
-Substituir o dropdown de serviços específicos por cards visuais com apenas as 3 categorias principais: Cabelo, Sobrancelha e Unhas.
+Definir a visualização Kanban (board) como padrão ao abrir a aba de Captação no CRM, em vez da visualização de tabela.
 
-## Mudanças
+## Mudança
 
-### WhatsAppDrawer.tsx
+### UnifiedLeadsTab.tsx (linha 325)
 
-**Remover**:
-- Query ao banco de dados (`useQuery` para services)
-- Lógica de agrupamento por categoria (`servicesByCategory`)
-- Componente `Select` com todas as opções
-
-**Adicionar**:
-- Constante com as 3 categorias:
+**Antes:**
 ```typescript
-const SERVICE_CATEGORIES = [
-  { value: "cabelo", label: "Cabelo", emoji: "✂️" },
-  { value: "sobrancelha", label: "Sobrancelha", emoji: "👁️" },
-  { value: "unhas", label: "Unhas", emoji: "💅" },
-];
+const [viewMode, setViewMode] = useState<ViewMode>("table");
 ```
 
-**Substituir Step 2**:
-- Usar cards clicáveis (mesmo estilo do passo 3 de urgência)
-- Visual consistente com o restante do drawer
-
-### Layout do Passo 2 (novo)
-
-```text
-┌──────────────────────────────────────┐
-│  Qual serviço você procura?          │
-├──────────────────────────────────────┤
-│  ┌────────────────────────────────┐  │
-│  │ ✂️  Cabelo                     │  │
-│  └────────────────────────────────┘  │
-│  ┌────────────────────────────────┐  │
-│  │ 👁️  Sobrancelha                │  │
-│  └────────────────────────────────┘  │
-│  ┌────────────────────────────────┐  │
-│  │ 💅  Unhas                      │  │
-│  └────────────────────────────────┘  │
-└──────────────────────────────────────┘
+**Depois:**
+```typescript
+const [viewMode, setViewMode] = useState<ViewMode>("board");
 ```
 
-### Impacto nos Dados
-
-- `service_interest` salvará a categoria (`cabelo`, `sobrancelha`, `unhas`) em vez do ID do serviço específico
-- Mensagem do WhatsApp e `message` no banco usarão o label amigável ("Cabelo", "Sobrancelha", "Unhas")
-
-### Benefícios
-
-- Remove dependência do banco de dados (query desnecessária)
-- Drawer abre mais rápido (sem loading de serviços)
-- UX mais limpa e consistente
-- Menos decisões para o usuário neste momento (detalhes ficam para /book)
+## Resultado
+- Ao acessar CRM → Captação, o usuário verá imediatamente o Kanban com as 4 colunas de status
+- O botão de toggle continua disponível para alternar para visualização em tabela quando necessário
+- Nenhuma outra mudança de lógica é necessária
