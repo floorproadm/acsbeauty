@@ -77,28 +77,31 @@ export function WhatsAppDrawer({
     setIsSubmitting(true);
 
     try {
-      // Save lead to database
-      await supabase.from("whatsapp_clicks").insert({
-        page_path: pagePath,
-        user_agent: navigator.userAgent,
-        referrer: document.referrer || null,
-        utm_source: utmParams.utm_source,
-        utm_campaign: utmParams.utm_campaign,
-        utm_medium: utmParams.utm_medium,
-        session_id: sessionId,
-        client_name: name.trim(),
-        service_interest: selectedService,
-        urgency: urgency,
-        status: "novo",
-      });
-
-      console.log("[WhatsApp] Lead saved successfully");
-
-      // Build WhatsApp message
       const serviceName = services.find((s) => s.id === selectedService)?.name || selectedService;
       const urgencyLabel = URGENCY_OPTIONS.find((u) => u.value === urgency)?.label || urgency;
       
-      const message = `Olá! Meu nome é ${name.trim()}.
+      // Build formatted message for database
+      const dbMessage = `Contato via WhatsApp
+Serviço: ${serviceName}
+Urgência: ${urgencyLabel}
+Página: ${pagePath}`;
+
+      // Save lead to contact_submissions
+      await supabase.from("contact_submissions").insert({
+        name: name.trim(),
+        email: "whatsapp@lead.local", // Required field - placeholder for WhatsApp leads
+        service_interest: selectedService,
+        message: dbMessage,
+        utm_source: utmParams.utm_source,
+        utm_campaign: utmParams.utm_campaign,
+        utm_medium: utmParams.utm_medium,
+        status: "novo",
+      });
+
+      console.log("[WhatsApp] Lead saved to contact_submissions");
+
+      // Build WhatsApp message
+      const whatsappMessage = `Olá! Meu nome é ${name.trim()}.
 
 Tenho interesse no serviço: ${serviceName}
 Urgência: ${urgencyLabel}
@@ -106,7 +109,7 @@ Urgência: ${urgencyLabel}
 Gostaria de mais informações e agendar um horário.`;
 
       // Redirect to WhatsApp
-      const encodedMessage = encodeURIComponent(message);
+      const encodedMessage = encodeURIComponent(whatsappMessage);
       const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
       window.open(whatsappUrl, "_blank", "noopener,noreferrer");
 

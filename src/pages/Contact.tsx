@@ -5,7 +5,6 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ContactForm } from "@/components/contact/ContactForm";
 
 export default function Contact() {
   const { t } = useLanguage();
@@ -37,52 +36,44 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* Contact Form & Info Grid */}
+      {/* Contact Info Section */}
       <section className="py-12 md:py-20 px-5 md:px-6">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid lg:grid-cols-2 gap-8 md:gap-12">
-            {/* Contact Form */}
-            <div>
-              <ContactForm />
+        <div className="container mx-auto max-w-4xl">
+          <div className="space-y-6">
+            {/* Contact Cards */}
+            <div className="grid sm:grid-cols-3 gap-4">
+              {contactCards.map((card, index) => (
+                <motion.div key={card.titleKey} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.1 }}>
+                  <a href={card.href} className="flex flex-col items-center text-center gap-3 bg-champagne/20 rounded-xl p-6 hover:shadow-soft transition-shadow duration-300 h-full">
+                    <div className="w-14 h-14 rounded-full bg-rose-gold/10 flex items-center justify-center flex-shrink-0">
+                      <card.icon className="w-6 h-6 text-rose-gold" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-foreground mb-1">{t(card.titleKey)}</h3>
+                      <p className="text-muted-foreground text-sm whitespace-pre-line">{card.value}</p>
+                    </div>
+                  </a>
+                </motion.div>
+              ))}
             </div>
 
-            {/* Contact Info */}
-            <div className="space-y-6">
-              {/* Contact Cards */}
-              <div className="grid gap-4">
-                {contactCards.map((card, index) => (
-                  <motion.div key={card.titleKey} initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.1 }}>
-                    <a href={card.href} className="flex items-center gap-4 bg-champagne/20 rounded-xl p-5 hover:shadow-soft transition-shadow duration-300">
-                      <div className="w-12 h-12 rounded-full bg-rose-gold/10 flex items-center justify-center flex-shrink-0">
-                        <card.icon className="w-5 h-5 text-rose-gold" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-foreground mb-0.5 text-sm">{t(card.titleKey)}</h3>
-                        <p className="text-muted-foreground text-sm whitespace-pre-line">{card.value}</p>
-                      </div>
-                    </a>
-                  </motion.div>
+            {/* Hours */}
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.3 }} className="bg-champagne/20 rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-rose-gold/10 flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-rose-gold" />
+                </div>
+                <h3 className="font-serif text-lg font-bold text-foreground">{t("contact.hours_title")}</h3>
+              </div>
+              <div className="space-y-2">
+                {hours.map((item) => (
+                  <div key={item.dayKey} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
+                    <span className="text-foreground text-sm">{t(item.dayKey)}</span>
+                    <span className="text-muted-foreground text-sm">{item.time}</span>
+                  </div>
                 ))}
               </div>
-
-              {/* Hours */}
-              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.3 }} className="bg-champagne/20 rounded-xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-rose-gold/10 flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-rose-gold" />
-                  </div>
-                  <h3 className="font-serif text-lg font-bold text-foreground">{t("contact.hours_title")}</h3>
-                </div>
-                <div className="space-y-2">
-                  {hours.map((item) => (
-                    <div key={item.dayKey} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
-                      <span className="text-foreground text-sm">{t(item.dayKey)}</span>
-                      <span className="text-muted-foreground text-sm">{item.time}</span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
