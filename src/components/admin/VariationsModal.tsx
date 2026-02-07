@@ -97,7 +97,7 @@ export function VariationsModal({
       queryClient.invalidateQueries({ queryKey: ["admin-services-with-sku-counts"] });
       setNewName("");
       setShowNewForm(false);
-      toast.success("Variação criada com sucesso!");
+      toast.success("Técnica criada com sucesso!");
     },
     onError: (error: Error) => {
       toast.error(`Erro ao criar: ${error.message}`);
@@ -118,7 +118,7 @@ export function VariationsModal({
       queryClient.invalidateQueries({ queryKey: ["service-variations-crud", serviceId] });
       queryClient.invalidateQueries({ queryKey: ["admin-services-with-sku-counts"] });
       setEditingId(null);
-      toast.success("Variação atualizada!");
+      toast.success("Técnica atualizada!");
     },
     onError: (error: Error) => {
       toast.error(`Erro ao atualizar: ${error.message}`);
@@ -135,7 +135,7 @@ export function VariationsModal({
       queryClient.invalidateQueries({ queryKey: ["service-variations-crud", serviceId] });
       queryClient.invalidateQueries({ queryKey: ["admin-services-with-sku-counts"] });
       setDeleteId(null);
-      toast.success("Variação excluída!");
+      toast.success("Técnica excluída!");
     },
     onError: (error: Error) => {
       toast.error(`Erro ao excluir: ${error.message}`);
@@ -198,7 +198,7 @@ export function VariationsModal({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Layers className="w-5 h-5 text-rose-gold" />
-              Variações: {serviceName}
+              Técnicas: {serviceName}
             </DialogTitle>
           </DialogHeader>
 
@@ -212,14 +212,14 @@ export function VariationsModal({
                 className="w-full"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Nova Variação
+                Nova Técnica
               </Button>
             )}
 
             {/* New Form */}
             {showNewForm && (
               <div className="p-3 border rounded-lg bg-muted/30 space-y-3">
-                <Label>Nome da Variação</Label>
+                <Label>Nome da Técnica</Label>
                 <div className="flex gap-2">
                   <Input
                     placeholder="Ex: Com Henna, Sem Linha..."
@@ -258,9 +258,9 @@ export function VariationsModal({
             ) : !variations?.length ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Layers className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                <p>Nenhuma variação cadastrada</p>
+                <p>Nenhuma técnica cadastrada</p>
                 <p className="text-sm">
-                  Crie variações como "Com Henna", "Design Simples", etc.
+                  Crie técnicas como "Com Henna", "Design Simples", etc.
                 </p>
               </div>
             ) : (
@@ -356,9 +356,9 @@ export function VariationsModal({
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir Variação?</AlertDialogTitle>
+            <AlertDialogTitle>Excluir Técnica?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. SKUs vinculados a esta variação terão o vínculo removido.
+              Esta ação não pode ser desfeita. Opções vinculadas a esta técnica terão o vínculo removido.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

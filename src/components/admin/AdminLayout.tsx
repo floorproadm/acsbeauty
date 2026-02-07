@@ -62,7 +62,7 @@ const tabs: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: "leads", label: "Leads", icon: UserCheck },
   { id: "tasks", label: "Tarefas", icon: ClipboardList },
   { id: "services", label: "Serviços", icon: Sparkles },
-  { id: "skus", label: "SKUs", icon: Layers },
+  { id: "skus", label: "Opções", icon: Layers },
   // ARCHIVED: Offers tab hidden temporarily - uncomment to restore
   // { id: "offers", label: "Ofertas", icon: Tag },
   { id: "quizzes", label: "Quizzes", icon: HelpCircle },

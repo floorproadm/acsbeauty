@@ -90,10 +90,10 @@ export function SkusTab() {
         <div>
           <h1 className="font-serif text-2xl font-bold flex items-center gap-2">
             <Layers className="w-6 h-6 text-rose-gold" />
-            Variações & SKUs
+            Técnicas & Opções
           </h1>
           <p className="text-sm text-muted-foreground">
-            {totalVariations} variações • {totalSkus} SKUs cadastrados
+            {totalVariations} técnicas • {totalSkus} opções cadastradas
           </p>
         </div>
       </div>
@@ -101,8 +101,8 @@ export function SkusTab() {
       {/* Info Banner */}
       <div className="bg-muted/50 border border-border rounded-lg p-4">
         <p className="text-sm text-muted-foreground">
-          <strong>Gestão de Variações e SKUs:</strong> Use os botões de edição para gerenciar 
-          variações (técnicas) e SKUs (opções com duração/preço específicos) de cada serviço.
+          <strong>Gestão de Técnicas e Opções:</strong> Use os botões de edição para gerenciar 
+          técnicas (ex: Com Henna, Sem Linha) e opções (duração/preço específicos) de cada serviço.
         </p>
       </div>
 
@@ -118,7 +118,7 @@ export function SkusTab() {
           <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground mb-2">Nenhum serviço cadastrado</p>
           <p className="text-sm text-muted-foreground">
-            Crie serviços na aba "Serviços" para começar a mapear variações e SKUs.
+            Crie serviços na aba "Serviços" para começar a mapear técnicas e opções.
           </p>
         </div>
       ) : (
@@ -135,8 +135,8 @@ export function SkusTab() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Serviço</TableHead>
-                      <TableHead className="text-center">Variações</TableHead>
-                      <TableHead className="text-center">SKUs</TableHead>
+                      <TableHead className="text-center">Técnicas</TableHead>
+                      <TableHead className="text-center">Opções</TableHead>
                       <TableHead className="text-center">Status</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
@@ -172,19 +172,19 @@ export function SkusTab() {
                               variant="ghost"
                               size="sm"
                               onClick={() => setVariationsService(service)}
-                              title="Gerenciar Variações"
+                              title="Gerenciar Técnicas"
                             >
                               <Layers className="w-4 h-4 mr-1" />
-                              Variações
+                              Técnicas
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => setSkusService(service)}
-                              title="Gerenciar SKUs"
+                              title="Gerenciar Opções"
                             >
                               <Package className="w-4 h-4 mr-1" />
-                              SKUs
+                              Opções
                             </Button>
                           </div>
                         </TableCell>
