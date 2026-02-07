@@ -15,9 +15,9 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        // Brand Manual - Gold gradient button
-        hero: "btn-shine btn-glow bg-gradient-to-r from-gold-light via-gold to-gold-dark text-white text-base font-light tracking-[0.1em] uppercase hover:opacity-90 shadow-gold hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02]",
-        "hero-outline": "btn-outline-shine border-2 border-gold bg-transparent text-gold hover:bg-gold hover:text-white transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02]",
+        // Brand Manual - Premium CTA button with high contrast
+        hero: "btn-shine btn-glow bg-white text-foreground text-base font-medium tracking-[0.08em] uppercase hover:bg-white/95 shadow-elevated hover:shadow-card transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] border border-border/20",
+        "hero-outline": "btn-outline-shine border-2 border-white/80 bg-white/10 backdrop-blur-sm text-foreground hover:bg-white hover:text-foreground transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02]",
         gold: "bg-gradient-to-r from-gold-light via-gold to-gold-dark text-white hover:opacity-90 shadow-gold",
         rose: "bg-gold text-white hover:bg-gold-dark shadow-soft hover:shadow-card",
         elegant: "bg-nude text-foreground border border-border hover:bg-nude-dark hover:border-gold transition-all duration-300",
