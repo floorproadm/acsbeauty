@@ -775,6 +775,107 @@ export type Database = {
         }
         Relationships: []
       }
+      service_skus: {
+        Row: {
+          created_at: string
+          duration_minutes: number
+          id: string
+          is_active: boolean
+          name: string
+          price: number | null
+          promo_price: number | null
+          service_id: string
+          sku_code: string | null
+          sort_order: number
+          updated_at: string
+          variation_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes: number
+          id?: string
+          is_active?: boolean
+          name: string
+          price?: number | null
+          promo_price?: number | null
+          service_id: string
+          sku_code?: string | null
+          sort_order?: number
+          updated_at?: string
+          variation_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number | null
+          promo_price?: number | null
+          service_id?: string
+          sku_code?: string | null
+          sort_order?: number
+          updated_at?: string
+          variation_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_skus_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_skus_variation_id_fkey"
+            columns: ["variation_id"]
+            isOneToOne: false
+            referencedRelation: "service_variations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_variations: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          service_id: string
+          slug: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          service_id: string
+          slug?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          service_id?: string
+          slug?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_variations_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           base_price: number | null
