@@ -159,7 +159,7 @@ export function SkusModal({
       queryClient.invalidateQueries({ queryKey: ["service-skus-crud", serviceId] });
       queryClient.invalidateQueries({ queryKey: ["admin-services-with-sku-counts"] });
       resetForm();
-      toast.success("SKU criado com sucesso!");
+      toast.success("Opção criada com sucesso!");
     },
     onError: (error: Error) => {
       toast.error(`Erro ao criar: ${error.message}`);
@@ -185,7 +185,7 @@ export function SkusModal({
       queryClient.invalidateQueries({ queryKey: ["service-skus-crud", serviceId] });
       queryClient.invalidateQueries({ queryKey: ["admin-services-with-sku-counts"] });
       resetForm();
-      toast.success("SKU atualizado!");
+      toast.success("Opção atualizada!");
     },
     onError: (error: Error) => {
       toast.error(`Erro ao atualizar: ${error.message}`);
@@ -202,7 +202,7 @@ export function SkusModal({
       queryClient.invalidateQueries({ queryKey: ["service-skus-crud", serviceId] });
       queryClient.invalidateQueries({ queryKey: ["admin-services-with-sku-counts"] });
       setDeleteId(null);
-      toast.success("SKU excluído!");
+      toast.success("Opção excluída!");
     },
     onError: (error: Error) => {
       toast.error(`Erro ao excluir: ${error.message}`);
@@ -274,7 +274,7 @@ export function SkusModal({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Package className="w-5 h-5 text-rose-gold" />
-              SKUs: {serviceName}
+              Opções: {serviceName}
             </DialogTitle>
           </DialogHeader>
 
@@ -284,7 +284,7 @@ export function SkusModal({
               <div className="p-4 border rounded-lg bg-muted/30 space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium">
-                    {editingId ? "Editar SKU" : "Novo SKU"}
+                    {editingId ? "Editar Opção" : "Nova Opção"}
                   </h4>
                   <Button variant="ghost" size="sm" onClick={resetForm}>
                     <X className="w-4 h-4" />
@@ -293,7 +293,7 @@ export function SkusModal({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
-                    <Label>Nome do SKU *</Label>
+                    <Label>Nome da Opção *</Label>
                     <Input
                       placeholder="Ex: 30 min, Cabelo Curto..."
                       value={formData.name}
@@ -314,7 +314,7 @@ export function SkusModal({
                   </div>
 
                   <div>
-                    <Label>Variação (opcional)</Label>
+                    <Label>Técnica (opcional)</Label>
                     <Select
                       value={formData.variation_id || "none"}
                       onValueChange={(v) =>
@@ -322,10 +322,10 @@ export function SkusModal({
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Sem variação" />
+                        <SelectValue placeholder="Sem técnica" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">Sem variação</SelectItem>
+                        <SelectItem value="none">Sem técnica</SelectItem>
                         {variations?.map((v) => (
                           <SelectItem key={v.id} value={v.id}>
                             {v.name}
@@ -383,7 +383,7 @@ export function SkusModal({
             ) : (
               <Button variant="outline" size="sm" onClick={() => setShowForm(true)} className="w-full">
                 <Plus className="w-4 h-4 mr-2" />
-                Novo SKU
+                Nova Opção
               </Button>
             )}
 
@@ -397,8 +397,8 @@ export function SkusModal({
             ) : !skus?.length ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Package className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                <p>Nenhum SKU cadastrado</p>
-                <p className="text-sm">SKUs definem durações e preços específicos.</p>
+                <p>Nenhuma opção cadastrada</p>
+                <p className="text-sm">Opções definem durações e preços específicos.</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -491,7 +491,7 @@ export function SkusModal({
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir SKU?</AlertDialogTitle>
+            <AlertDialogTitle>Excluir Opção?</AlertDialogTitle>
             <AlertDialogDescription>
               Esta ação não pode ser desfeita.
             </AlertDialogDescription>
