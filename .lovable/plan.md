@@ -1,67 +1,58 @@
 
+# Simplificar Seleção de Serviço no WhatsApp Drawer
 
-# Plano: Unificar WhatsApp Drawer com Contact Submissions
-
-## Resumo
-Remover o formulário de contato da página `/contact`, manter apenas o botão WhatsApp flutuante, e fazer o drawer salvar os dados na tabela `contact_submissions` em vez de `whatsapp_clicks`.
+## Objetivo
+Substituir o dropdown de serviços específicos por cards visuais com apenas as 3 categorias principais: Cabelo, Sobrancelha e Unhas.
 
 ## Mudanças
 
-### 1. Página /contact (Contact.tsx)
-- Remover a importação e uso do componente `ContactForm`
-- Manter o layout da página com informações de contato (telefone, email, endereço, horários)
-- Ajustar o grid para ocupar espaço total sem o formulário
-- O botão WhatsApp flutuante já aparece nesta página
+### WhatsAppDrawer.tsx
 
-### 2. WhatsApp Drawer (WhatsAppDrawer.tsx)
-- Mudar a inserção de `whatsapp_clicks` para `contact_submissions`
-- Mapear os campos:
-  - `client_name` → `name`
-  - `service_interest` → `service_interest`
-  - `urgency` → incluir na `message` (mensagem formatada)
-  - `page_path` + `utm_*` → manter
-- Adicionar campo `message` com texto formatado incluindo urgência
-- Status padrão: `'novo'`
+**Remover**:
+- Query ao banco de dados (`useQuery` para services)
+- Lógica de agrupamento por categoria (`servicesByCategory`)
+- Componente `Select` com todas as opções
 
-### 3. CRM UnifiedLeadsTab (UnifiedLeadsTab.tsx)
-- Remover referências à tabela `whatsapp_clicks`
-- Manter apenas `quiz_responses` e `contact_submissions` como fontes
-- Atualizar filtros e lógica de status/delete
+**Adicionar**:
+- Constante com as 3 categorias:
+```typescript
+const SERVICE_CATEGORIES = [
+  { value: "cabelo", label: "Cabelo", emoji: "✂️" },
+  { value: "sobrancelha", label: "Sobrancelha", emoji: "👁️" },
+  { value: "unhas", label: "Unhas", emoji: "💅" },
+];
+```
 
-### 4. Arquivos para remover
-- `src/components/contact/ContactForm.tsx` (não mais necessário)
+**Substituir Step 2**:
+- Usar cards clicáveis (mesmo estilo do passo 3 de urgência)
+- Visual consistente com o restante do drawer
 
-## Detalhes Técnicos
-
-### Mapeamento de dados (WhatsApp → contact_submissions)
+### Layout do Passo 2 (novo)
 
 ```text
-┌─────────────────────┬────────────────────────────┐
-│ Campo antigo        │ Campo novo                 │
-├─────────────────────┼────────────────────────────┤
-│ client_name         │ name                       │
-│ service_interest    │ service_interest           │
-│ urgency             │ (incluído em message)      │
-│ page_path           │ (não existe, usar UTM)     │
-│ utm_source          │ utm_source                 │
-│ utm_campaign        │ utm_campaign               │
-│ utm_medium          │ utm_medium                 │
-│ -                   │ message (texto formatado)  │
-│ -                   │ email (null)               │
-│ -                   │ phone (null)               │
-└─────────────────────┴────────────────────────────┘
+┌──────────────────────────────────────┐
+│  Qual serviço você procura?          │
+├──────────────────────────────────────┤
+│  ┌────────────────────────────────┐  │
+│  │ ✂️  Cabelo                     │  │
+│  └────────────────────────────────┘  │
+│  ┌────────────────────────────────┐  │
+│  │ 👁️  Sobrancelha                │  │
+│  └────────────────────────────────┘  │
+│  ┌────────────────────────────────┐  │
+│  │ 💅  Unhas                      │  │
+│  └────────────────────────────────┘  │
+└──────────────────────────────────────┘
 ```
 
-### Formato da mensagem salva
-```
-Contato via WhatsApp
-Serviço: [nome do serviço]
-Urgência: [urgência selecionada]
-Página: [path da página]
-```
+### Impacto nos Dados
 
-## Resultado
-- Uma única tabela `contact_submissions` para todos os leads de contato
-- Pipeline unificado no CRM
-- Página `/contact` mais limpa com apenas informações e botão WhatsApp
+- `service_interest` salvará a categoria (`cabelo`, `sobrancelha`, `unhas`) em vez do ID do serviço específico
+- Mensagem do WhatsApp e `message` no banco usarão o label amigável ("Cabelo", "Sobrancelha", "Unhas")
 
+### Benefícios
+
+- Remove dependência do banco de dados (query desnecessária)
+- Drawer abre mais rápido (sem loading de serviços)
+- UX mais limpa e consistente
+- Menos decisões para o usuário neste momento (detalhes ficam para /book)
