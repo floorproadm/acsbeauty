@@ -225,6 +225,12 @@ export default function Book() {
         setHoldExpiresAt(new Date(data.expires_at!));
         setStep("form");
         toast.success(language === "pt" ? "Horário reservado por 5 minutos" : "Time slot reserved for 5 minutes");
+      } else if (data.code === 'RATE_LIMITED') {
+        toast.error(language === "pt" 
+          ? "Muitas tentativas. Aguarde um momento ou fale conosco pelo WhatsApp." 
+          : "Too many attempts. Please wait or contact us via WhatsApp.", 
+          { duration: 8000, action: { label: "WhatsApp", onClick: () => window.open("https://wa.me/19739004498", "_blank") } }
+        );
       } else {
         toast.error(data.error || "Failed to reserve time slot");
         refetchSlots();
@@ -232,7 +238,16 @@ export default function Book() {
     },
     onError: (error) => {
       console.error("Hold error:", error);
-      toast.error(language === "pt" ? "Erro ao reservar horário" : "Failed to reserve time slot");
+      const msg = error instanceof Error ? error.message : "";
+      if (msg.includes("429") || msg.toLowerCase().includes("too many")) {
+        toast.error(language === "pt" 
+          ? "Muitas tentativas. Aguarde um momento ou fale conosco pelo WhatsApp." 
+          : "Too many attempts. Please wait or contact us via WhatsApp.",
+          { duration: 8000, action: { label: "WhatsApp", onClick: () => window.open("https://wa.me/19739004498", "_blank") } }
+        );
+      } else {
+        toast.error(language === "pt" ? "Erro ao reservar horário" : "Failed to reserve time slot");
+      }
       refetchSlots();
     },
   });
@@ -282,6 +297,9 @@ export default function Book() {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
+          if (response.status === 429 || errorData.code === 'RATE_LIMITED') {
+            throw new Error('RATE_LIMITED');
+          }
           throw new Error(errorData.error || `HTTP ${response.status}`);
         }
 
@@ -312,7 +330,16 @@ export default function Book() {
     },
     onError: (error) => {
       console.error("Confirm error:", error);
-      toast.error(error instanceof Error ? error.message : (language === "pt" ? "Erro ao confirmar agendamento" : "Failed to confirm booking"));
+      const msg = error instanceof Error ? error.message : "";
+      if (msg === 'RATE_LIMITED' || msg.includes("429")) {
+        toast.error(language === "pt" 
+          ? "Muitas tentativas. Aguarde um momento ou fale conosco pelo WhatsApp." 
+          : "Too many attempts. Please wait or contact us via WhatsApp.",
+          { duration: 8000, action: { label: "WhatsApp", onClick: () => window.open("https://wa.me/19739004498", "_blank") } }
+        );
+      } else {
+        toast.error(msg || (language === "pt" ? "Erro ao confirmar agendamento" : "Failed to confirm booking"));
+      }
     },
     retry: 1, // Retry once on failure
     retryDelay: 1000,

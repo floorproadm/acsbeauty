@@ -798,6 +798,30 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          request_count: number
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          request_count?: number
+          window_start?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          request_count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       scheduling_settings: {
         Row: {
           buffer_minutes: number
@@ -1142,7 +1166,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_rate_limit: {
+        Args: { _key: string; _max_requests?: number; _window_seconds?: number }
+        Returns: boolean
+      }
       cleanup_expired_holds: { Args: never; Returns: undefined }
+      cleanup_old_rate_limits: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
