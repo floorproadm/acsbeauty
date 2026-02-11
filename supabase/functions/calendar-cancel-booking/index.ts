@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 interface CancelBookingRequest {
@@ -16,18 +16,53 @@ serve(async (req) => {
   }
 
   try {
+    // ── AUTH CHECK ──
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    // Verify JWT and get user claims
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ success: false, error: 'Invalid token' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const userId = claimsData.claims.sub;
+
+    // Check role using service role client
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const { data: hasAdminRole } = await supabase.rpc('has_role', { _user_id: userId, _role: 'admin_owner' });
+    const { data: hasStaffRole } = await supabase.rpc('has_role', { _user_id: userId, _role: 'staff' });
+
+    if (!hasAdminRole && !hasStaffRole) {
+      return new Response(JSON.stringify({ success: false, error: 'Forbidden: insufficient role' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ── BUSINESS LOGIC ──
     const { booking_id } = await req.json() as CancelBookingRequest;
 
     if (!booking_id) {
       throw new Error('Missing required parameter: booking_id');
     }
 
-    console.log(`Canceling booking ${booking_id}`);
-
-    // Initialize Supabase
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    console.log(`Canceling booking ${booking_id} by user ${userId}`);
 
     // Get the booking
     const { data: booking, error: bookingError } = await supabase
@@ -49,7 +84,6 @@ serve(async (req) => {
           const serviceAccount = JSON.parse(serviceAccountJson);
           const accessToken = await getGoogleAccessToken(serviceAccount);
 
-          // Get calendar configuration
           const { data: calendarConfig } = await supabase
             .from('calendar_integrations')
             .select('calendar_id')
@@ -59,15 +93,9 @@ serve(async (req) => {
 
           const calendarId = calendarConfig?.calendar_id || 'primary';
 
-          // Delete the event from Google Calendar
           const deleteResponse = await fetch(
             `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${booking.google_calendar_event_id}`,
-            {
-              method: 'DELETE',
-              headers: {
-                'Authorization': `Bearer ${accessToken}`,
-              },
-            }
+            { method: 'DELETE', headers: { 'Authorization': `Bearer ${accessToken}` } }
           );
 
           if (deleteResponse.ok || deleteResponse.status === 404) {
@@ -77,7 +105,6 @@ serve(async (req) => {
           }
         } catch (e) {
           console.error('Error deleting Google Calendar event:', e);
-          // Continue with cancellation even if calendar delete fails
         }
       }
     }
@@ -85,39 +112,26 @@ serve(async (req) => {
     // Update booking status to cancelled
     const { error: updateError } = await supabase
       .from('bookings')
-      .update({ 
-        status: 'cancelled',
-        updated_at: new Date().toISOString()
-      })
+      .update({ status: 'cancelled', updated_at: new Date().toISOString() })
       .eq('id', booking_id);
 
-    if (updateError) {
-      throw updateError;
-    }
+    if (updateError) throw updateError;
 
     console.log('Booking cancelled successfully');
 
-    return new Response(JSON.stringify({
-      success: true,
-      message: 'Booking cancelled successfully'
-    }), {
+    return new Response(JSON.stringify({ success: true, message: 'Booking cancelled successfully' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error in calendar-cancel-booking:', error);
-    return new Response(JSON.stringify({ 
-      success: false,
-      error: errorMessage 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    return new Response(JSON.stringify({ success: false, error: errorMessage }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
 
-// Helper function to get Google access token using service account
 async function getGoogleAccessToken(serviceAccount: any): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const exp = now + 3600;
@@ -127,40 +141,33 @@ async function getGoogleAccessToken(serviceAccount: any): Promise<string> {
     iss: serviceAccount.client_email,
     scope: 'https://www.googleapis.com/auth/calendar',
     aud: 'https://oauth2.googleapis.com/token',
-    exp,
-    iat: now,
+    exp, iat: now,
   };
 
   const headerB64 = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
   const claimB64 = btoa(JSON.stringify(claim)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
   const signatureInput = `${headerB64}.${claimB64}`;
 
-  const privateKeyPem = serviceAccount.private_key;
-  const pemContents = privateKeyPem
+  const pemContents = serviceAccount.private_key
     .replace('-----BEGIN PRIVATE KEY-----', '')
     .replace('-----END PRIVATE KEY-----', '')
     .replace(/\n/g, '');
-  
+
   const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
-  
+
   const cryptoKey = await crypto.subtle.importKey(
-    'pkcs8',
-    binaryKey,
+    'pkcs8', binaryKey,
     { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false,
-    ['sign']
+    false, ['sign']
   );
 
   const signature = await crypto.subtle.sign(
-    'RSASSA-PKCS1-v1_5',
-    cryptoKey,
+    'RSASSA-PKCS1-v1_5', cryptoKey,
     new TextEncoder().encode(signatureInput)
   );
 
   const signatureB64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
+    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 
   const jwt = `${signatureInput}.${signatureB64}`;
 
@@ -173,10 +180,7 @@ async function getGoogleAccessToken(serviceAccount: any): Promise<string> {
     }),
   });
 
-  if (!tokenResponse.ok) {
-    throw new Error('Failed to get Google access token');
-  }
-
+  if (!tokenResponse.ok) throw new Error('Failed to get Google access token');
   const tokenData = await tokenResponse.json();
   return tokenData.access_token;
 }
