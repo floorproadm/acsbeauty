@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 interface HoldRequest {
@@ -19,6 +19,41 @@ serve(async (req) => {
   }
 
   try {
+    // Initialize Supabase with service role
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // ── RATE LIMITING ──
+    const forwarded = req.headers.get('x-forwarded-for');
+    const clientIp = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+    const rateLimitKey = `${clientIp}:calendar-hold`;
+
+    // Cleanup old entries periodically (fire-and-forget)
+    supabase.rpc('cleanup_old_rate_limits').then(() => {}).catch(() => {});
+
+    const { data: allowed, error: rlError } = await supabase.rpc('check_rate_limit', {
+      _key: rateLimitKey,
+      _max_requests: 10,
+      _window_seconds: 60,
+    });
+
+    if (rlError) {
+      console.error('Rate limit check error:', rlError);
+      // Don't block on rate limit errors - fail open
+    } else if (allowed === false) {
+      console.log(`Rate limited: ${rateLimitKey}`);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Too many requests. Please wait a moment and try again.',
+        code: 'RATE_LIMITED',
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' },
+      });
+    }
+
+    // ── BUSINESS LOGIC (unchanged) ──
     const { start_time, end_time, service_id, package_id } = await req.json() as HoldRequest;
 
     if (!start_time || !end_time) {
@@ -26,11 +61,6 @@ serve(async (req) => {
     }
 
     console.log(`Creating hold for ${start_time} to ${end_time}`);
-
-    // Initialize Supabase
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Get calendar configuration
     const { data: calendarConfig } = await supabase
@@ -73,7 +103,6 @@ serve(async (req) => {
       .single();
 
     if (holdError) {
-      // Check if it's a unique constraint violation
       if (holdError.code === '23505') {
         console.log('Slot already held by another user');
         return new Response(JSON.stringify({

@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 interface ConfirmBookingRequest {
@@ -26,19 +26,43 @@ serve(async (req) => {
   }
 
   try {
+    // Initialize Supabase
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // ── RATE LIMITING ──
+    const forwarded = req.headers.get('x-forwarded-for');
+    const clientIp = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+    const rateLimitKey = `${clientIp}:calendar-confirm`;
+
+    supabase.rpc('cleanup_old_rate_limits').then(() => {}).catch(() => {});
+
+    const { data: allowed, error: rlError } = await supabase.rpc('check_rate_limit', {
+      _key: rateLimitKey,
+      _max_requests: 5,
+      _window_seconds: 60,
+    });
+
+    if (rlError) {
+      console.error('Rate limit check error:', rlError);
+    } else if (allowed === false) {
+      console.log(`Rate limited: ${rateLimitKey}`);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Too many requests. Please wait a moment and try again.',
+        code: 'RATE_LIMITED',
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' },
+      });
+    }
+
+    // ── BUSINESS LOGIC ──
     const body = await req.json() as ConfirmBookingRequest;
     const { 
-      hold_id, 
-      client_name, 
-      client_phone, 
-      client_email,
-      client_instagram,
-      service_id, 
-      package_id,
-      offer_id,
-      start_time, 
-      end_time,
-      notes 
+      hold_id, client_name, client_phone, client_email, client_instagram,
+      service_id, package_id, offer_id, start_time, end_time, notes 
     } = body;
 
     if (!hold_id || !client_name || !client_phone || !start_time || !end_time) {
@@ -55,11 +79,6 @@ serve(async (req) => {
 
     const serviceAccount = JSON.parse(serviceAccountJson);
     const accessToken = await getGoogleAccessToken(serviceAccount);
-
-    // Initialize Supabase
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Validate hold exists and is not expired
     const { data: hold, error: holdError } = await supabase
@@ -81,9 +100,7 @@ serve(async (req) => {
     }
 
     if (new Date(hold.expires_at) < new Date()) {
-      // Delete expired hold
       await supabase.from('booking_holds').delete().eq('id', hold_id);
-      
       return new Response(JSON.stringify({
         success: false,
         error: 'Your reservation has expired. Please select a new time slot.',
@@ -131,9 +148,7 @@ serve(async (req) => {
     const busyBlocks = freeBusyData.calendars?.[calendarId]?.busy || [];
 
     if (busyBlocks.length > 0) {
-      // Delete the hold since slot is no longer available
       await supabase.from('booking_holds').delete().eq('id', hold_id);
-      
       return new Response(JSON.stringify({
         success: false,
         error: 'This time slot is no longer available. Please select a different time.',
@@ -147,18 +162,10 @@ serve(async (req) => {
     // Get service name for calendar event
     let eventTitle = 'Booking';
     if (service_id) {
-      const { data: service } = await supabase
-        .from('services')
-        .select('name')
-        .eq('id', service_id)
-        .single();
+      const { data: service } = await supabase.from('services').select('name').eq('id', service_id).single();
       if (service) eventTitle = service.name;
     } else if (package_id) {
-      const { data: pkg } = await supabase
-        .from('packages')
-        .select('name')
-        .eq('id', package_id)
-        .single();
+      const { data: pkg } = await supabase.from('packages').select('name').eq('id', package_id).single();
       if (pkg) eventTitle = pkg.name;
     }
 
@@ -166,14 +173,8 @@ serve(async (req) => {
     const calendarEvent = {
       summary: `${eventTitle} - ${client_name}`,
       description: `Cliente: ${client_name}\nTelefone: ${client_phone}${client_instagram ? `\nInstagram: ${client_instagram}` : ''}${notes ? `\nNotas: ${notes}` : ''}`,
-      start: {
-        dateTime: start_time,
-        timeZone: timezone,
-      },
-      end: {
-        dateTime: end_time,
-        timeZone: timezone,
-      },
+      start: { dateTime: start_time, timeZone: timezone },
+      end: { dateTime: end_time, timeZone: timezone },
       reminders: {
         useDefault: false,
         overrides: [
@@ -187,10 +188,7 @@ serve(async (req) => {
       `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
       {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(calendarEvent),
       }
     );
@@ -206,38 +204,26 @@ serve(async (req) => {
 
     // Upsert client by phone
     const { data: existingClient } = await supabase
-      .from('clients')
-      .select('id')
-      .eq('phone', client_phone)
-      .single();
+      .from('clients').select('id').eq('phone', client_phone).single();
 
     let clientId: string;
     
     if (existingClient) {
       clientId = existingClient.id;
-      // Update client info
-      await supabase
-        .from('clients')
-        .update({
-          name: client_name,
-          email: client_email || null,
-          instagram: client_instagram || null,
-          last_visit_at: new Date().toISOString(),
-        })
-        .eq('id', clientId);
+      await supabase.from('clients').update({
+        name: client_name,
+        email: client_email || null,
+        instagram: client_instagram || null,
+        last_visit_at: new Date().toISOString(),
+      }).eq('id', clientId);
     } else {
-      // Create new client
       const { data: newClient, error: clientError } = await supabase
-        .from('clients')
-        .insert({
+        .from('clients').insert({
           name: client_name,
           phone: client_phone,
           email: client_email || null,
           instagram: client_instagram || null,
-        })
-        .select()
-        .single();
-
+        }).select().single();
       if (clientError) throw clientError;
       clientId = newClient.id;
     }
@@ -264,16 +250,10 @@ serve(async (req) => {
 
     if (bookingError) {
       console.error('Booking creation error:', bookingError);
-      // Try to delete the calendar event if booking fails
       try {
         await fetch(
           `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${createdEvent.id}`,
-          {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-            },
-          }
+          { method: 'DELETE', headers: { 'Authorization': `Bearer ${accessToken}` } }
         );
       } catch (e) {
         console.error('Failed to cleanup calendar event:', e);
@@ -284,32 +264,21 @@ serve(async (req) => {
     // Delete the hold
     await supabase.from('booking_holds').delete().eq('id', hold_id);
 
-    // Fetch service/package details for confirmation response
+    // Fetch service/package details for confirmation
     let serviceData = null;
     let packageData = null;
     
     if (service_id) {
-      const { data } = await supabase
-        .from('services')
-        .select('id, name, duration_minutes, price, promo_price')
-        .eq('id', service_id)
-        .single();
+      const { data } = await supabase.from('services').select('id, name, duration_minutes, price, promo_price').eq('id', service_id).single();
       serviceData = data;
     }
-    
     if (package_id) {
-      const { data } = await supabase
-        .from('packages')
-        .select('id, name, total_price, sessions_qty')
-        .eq('id', package_id)
-        .single();
+      const { data } = await supabase.from('packages').select('id, name, total_price, sessions_qty').eq('id', package_id).single();
       packageData = data;
     }
 
     console.log('Booking confirmed successfully:', booking.id);
 
-    // Return complete booking data for confirmation page
-    // This eliminates the need for client-side SELECT on bookings table
     return new Response(JSON.stringify({
       success: true,
       booking: {
@@ -330,17 +299,13 @@ serve(async (req) => {
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error in calendar-confirm-booking:', error);
-    return new Response(JSON.stringify({ 
-      success: false,
-      error: errorMessage 
-    }), {
+    return new Response(JSON.stringify({ success: false, error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
 
-// Helper function to get Google access token using service account
 async function getGoogleAccessToken(serviceAccount: any): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const exp = now + 3600;
@@ -350,40 +315,33 @@ async function getGoogleAccessToken(serviceAccount: any): Promise<string> {
     iss: serviceAccount.client_email,
     scope: 'https://www.googleapis.com/auth/calendar',
     aud: 'https://oauth2.googleapis.com/token',
-    exp,
-    iat: now,
+    exp, iat: now,
   };
 
   const headerB64 = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
   const claimB64 = btoa(JSON.stringify(claim)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
   const signatureInput = `${headerB64}.${claimB64}`;
 
-  const privateKeyPem = serviceAccount.private_key;
-  const pemContents = privateKeyPem
+  const pemContents = serviceAccount.private_key
     .replace('-----BEGIN PRIVATE KEY-----', '')
     .replace('-----END PRIVATE KEY-----', '')
     .replace(/\n/g, '');
-  
+
   const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
-  
+
   const cryptoKey = await crypto.subtle.importKey(
-    'pkcs8',
-    binaryKey,
+    'pkcs8', binaryKey,
     { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false,
-    ['sign']
+    false, ['sign']
   );
 
   const signature = await crypto.subtle.sign(
-    'RSASSA-PKCS1-v1_5',
-    cryptoKey,
+    'RSASSA-PKCS1-v1_5', cryptoKey,
     new TextEncoder().encode(signatureInput)
   );
 
   const signatureB64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
+    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 
   const jwt = `${signatureInput}.${signatureB64}`;
 
@@ -396,10 +354,7 @@ async function getGoogleAccessToken(serviceAccount: any): Promise<string> {
     }),
   });
 
-  if (!tokenResponse.ok) {
-    throw new Error('Failed to get Google access token');
-  }
-
+  if (!tokenResponse.ok) throw new Error('Failed to get Google access token');
   const tokenData = await tokenResponse.json();
   return tokenData.access_token;
 }
