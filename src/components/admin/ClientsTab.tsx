@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import {
   Package,
   DollarSign,
   Clock,
+  ChevronLeft,
   ChevronRight,
   Sparkles,
   Pencil,
@@ -52,8 +53,12 @@ interface ClientWithRelations {
   }[];
 }
 
+const PAGE_SIZE = 25;
+
 export function ClientsTab() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(0);
   const [editingTags, setEditingTags] = useState<string | null>(null);
   const [newTag, setNewTag] = useState("");
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
@@ -61,18 +66,41 @@ export function ClientsTab() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: clients, isLoading } = useQuery({
-    queryKey: ["admin-clients"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("clients")
-        .select("*")
-        .order("created_at", { ascending: false });
+  // Debounce search
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setPage(0);
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedSearch(value), 300);
+  };
 
+  const from = page * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
+  const { data: clientsResult, isLoading } = useQuery({
+    queryKey: ["admin-clients", page, debouncedSearch],
+    queryFn: async () => {
+      let query = supabase
+        .from("clients")
+        .select("*", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(from, to);
+
+      if (debouncedSearch.trim()) {
+        const s = `%${debouncedSearch.trim()}%`;
+        query = query.or(`name.ilike.${s},email.ilike.${s},phone.ilike.${s},instagram.ilike.${s}`);
+      }
+
+      const { data, error, count } = await query;
       if (error) throw error;
-      return data;
+      return { data, count: count ?? 0 };
     },
   });
+
+  const clients = clientsResult?.data;
+  const totalCount = clientsResult?.count ?? 0;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   // Fetch selected client with full relations
   const { data: selectedClient, isLoading: isLoadingClient } = useQuery({
@@ -134,14 +162,7 @@ export function ClientsTab() {
   };
 
 
-  const filteredClients = clients?.filter(
-    (c) =>
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.instagram?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.tags?.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredClients = clients;
 
   const tagColors: Record<string, string> = {
     vip: "bg-amber-100 text-amber-800 border-amber-200",
@@ -188,16 +209,16 @@ export function ClientsTab() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <p className="text-sm text-muted-foreground">{clients?.length || 0} clientes cadastrados</p>
+        <p className="text-sm text-muted-foreground">{totalCount} clientes cadastrados</p>
       </div>
 
       {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
-          placeholder="Buscar por nome, email, telefone, instagram ou tag..."
+          placeholder="Buscar por nome, email, telefone ou instagram..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           className="pl-9"
         />
       </div>
@@ -341,6 +362,34 @@ export function ClientsTab() {
         </div>
       )}
 
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-2">
+          <p className="text-sm text-muted-foreground">
+            Página {page + 1} de {totalPages} ({totalCount} total)
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 0}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= totalPages - 1}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Próximo
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
       {/* Client Detail Modal */}
       <Dialog open={!!selectedClientId} onOpenChange={(open) => !open && setSelectedClientId(null)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
