@@ -152,7 +152,8 @@ const URGENCY_LABELS: Record<string, string> = {
   apenas_informacao: "💬 Só informações",
 };
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 25;
+const SERVER_PAGE_SIZE = 500;
 
 // Source Badge Component
 function SourceBadge({ source }: { source: LeadSource }) {
@@ -354,30 +355,34 @@ export function UnifiedLeadsTab() {
   }, []);
 
   // Fetch quiz leads
-  const { data: quizLeads, isLoading: quizLoading } = useQuery({
+  const { data: quizResult, isLoading: quizLoading } = useQuery({
     queryKey: ["unified-quiz-leads"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error, count } = await supabase
         .from("quiz_responses")
-        .select("*, quizzes(name), quiz_results(title)")
-        .order("created_at", { ascending: false });
+        .select("*, quizzes(name), quiz_results(title)", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(0, SERVER_PAGE_SIZE - 1);
       if (error) throw error;
-      return data;
+      return { data, count: count ?? 0 };
     },
   });
+  const quizLeads = quizResult?.data;
 
   // Fetch Contact form leads
-  const { data: contactLeads, isLoading: contactLoading } = useQuery({
+  const { data: contactResult, isLoading: contactLoading } = useQuery({
     queryKey: ["unified-contact-leads"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error, count } = await supabase
         .from("contact_submissions")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("*", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(0, SERVER_PAGE_SIZE - 1);
       if (error) throw error;
-      return data;
+      return { data, count: count ?? 0 };
     },
   });
+  const contactLeads = contactResult?.data;
 
   // Fetch services for contact leads
   const { data: services } = useQuery({
@@ -705,7 +710,10 @@ export function UnifiedLeadsTab() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <p className="text-sm text-muted-foreground">
-          {filteredLeads.length} leads encontrados
+          {filteredLeads.length} leads carregados
+          {((quizResult?.count ?? 0) + (contactResult?.count ?? 0)) > allLeads.length && (
+            <span> (de {(quizResult?.count ?? 0) + (contactResult?.count ?? 0)} total)</span>
+          )}
         </p>
         <div className="flex items-center gap-2">
           {/* View Toggle */}
