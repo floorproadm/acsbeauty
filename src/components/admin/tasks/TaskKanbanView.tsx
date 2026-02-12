@@ -75,7 +75,7 @@ export function TaskKanbanView({ tasks, onEditTask }: TaskKanbanViewProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       {columns.map((column) => {
         const columnTasks = tasks.filter((t) => t.status === column.id);
 
@@ -83,7 +83,7 @@ export function TaskKanbanView({ tasks, onEditTask }: TaskKanbanViewProps) {
           <div
             key={column.id}
             className={cn(
-              "rounded-xl border-2 p-4 min-h-[400px]",
+              "rounded-xl border-2 p-4 min-h-[200px] lg:min-h-[400px]",
               column.color
             )}
             onDragOver={handleDragOver}
