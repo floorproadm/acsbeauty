@@ -29,7 +29,7 @@ const statusConfig: Record<BookingStatus, { label: string; color: string; icon: 
 
 export function BookingsTab() {
   const [viewMode, setViewMode] = useState<"list" | "week" | "month">("list");
-  const [dateFilter, setDateFilter] = useState<string>("today");
+  const [dateFilter, setDateFilter] = useState<string>("week");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
