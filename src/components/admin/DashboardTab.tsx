@@ -176,6 +176,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
             label: "Tarefas Pendentes",
             value: pendingTasksCount,
             loading: loadingTasks,
+            onClick: () => onNavigate("tasks"),
           },
         ].map((card, i) => (
           <motion.div
@@ -184,7 +185,8 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
             variants={cardVariants}
             initial="hidden"
             animate="visible"
-            className="bg-card rounded-xl p-4 border border-border shadow-soft"
+            onClick={card.onClick}
+            className={`bg-card rounded-xl p-4 border border-border shadow-soft ${card.onClick ? "cursor-pointer hover:border-primary/30 transition-colors" : ""}`}
           >
             <div className="flex items-center gap-3">
               <div className={`p-2 ${card.iconBg} rounded-lg`}>
