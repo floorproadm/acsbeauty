@@ -30,7 +30,7 @@ import {
   Sparkles,
   Pencil,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ClientEditModal } from "./ClientEditModal";
 
@@ -162,6 +162,26 @@ export function ClientsTab() {
   };
 
 
+  // Client frequency & retention helpers
+  const getClientFrequency = (client: any) => {
+    const lastVisit = client.last_visit_at;
+    if (!lastVisit) return { label: "Novo", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: "✨" };
+    const days = differenceInDays(new Date(), new Date(lastVisit));
+    if (days <= 30) return { label: "Frequente", color: "bg-blue-100 text-blue-700 border-blue-200", icon: "🔥" };
+    if (days <= 60) return { label: "Ocasional", color: "bg-amber-100 text-amber-700 border-amber-200", icon: "⏳" };
+    if (days <= 90) return { label: "Ausente", color: "bg-orange-100 text-orange-700 border-orange-200", icon: "⚠️" };
+    return { label: "Inativo", color: "bg-red-100 text-red-700 border-red-200", icon: "🚨" };
+  };
+
+  const getRetentionAlert = (client: any) => {
+    if (!client.last_visit_at) return null;
+    const days = differenceInDays(new Date(), new Date(client.last_visit_at));
+    if (days >= 90) return { days, level: "critical", text: `${days} dias sem visita` };
+    if (days >= 60) return { days, level: "warning", text: `${days} dias sem visita` };
+    if (days >= 30) return { days, level: "notice", text: `${days} dias sem visita` };
+    return null;
+  };
+
   const filteredClients = clients;
 
   const tagColors: Record<string, string> = {
@@ -246,15 +266,33 @@ export function ClientsTab() {
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 {/* Client Info */}
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
                     <h3 className="font-semibold group-hover:text-rose-gold transition-colors">
                       {client.name}
                     </h3>
-                    {client.last_visit_at && (
-                      <span className="text-xs text-muted-foreground">
-                        Última visita: {format(new Date(client.last_visit_at), "dd/MM/yy", { locale: ptBR })}
-                      </span>
-                    )}
+                    {/* Frequency Badge */}
+                    {(() => {
+                      const freq = getClientFrequency(client);
+                      return (
+                        <Badge variant="outline" className={`text-xs ${freq.color}`}>
+                          {freq.icon} {freq.label}
+                        </Badge>
+                      );
+                    })()}
+                    {/* Retention Alert */}
+                    {(() => {
+                      const alert = getRetentionAlert(client);
+                      if (!alert) return null;
+                      return (
+                        <span className={`text-xs font-medium ${
+                          alert.level === "critical" ? "text-red-600" :
+                          alert.level === "warning" ? "text-orange-600" :
+                          "text-amber-600"
+                        }`}>
+                          {alert.text}
+                        </span>
+                      );
+                    })()}
                   </div>
 
                   <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3">
