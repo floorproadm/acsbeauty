@@ -134,7 +134,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
     <div className="space-y-6">
       {/* Header with Greeting */}
       <div>
-        <h1 className="font-serif text-2xl font-bold">
+        <h1 className="font-serif text-xl sm:text-2xl font-bold">
           {getGreeting()}{userName ? `, ${userName}` : ""} ✨
         </h1>
         <p className="text-muted-foreground text-sm">

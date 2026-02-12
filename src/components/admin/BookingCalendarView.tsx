@@ -84,59 +84,63 @@ export function BookingCalendarView({ bookings, onBookingClick, mode }: BookingC
       </div>
 
       {/* Week headers */}
-      <div className={cn("grid gap-1", mode === "week" ? "grid-cols-7" : "grid-cols-7")}>
-        {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((d) => (
-          <div key={d} className="text-center text-xs font-medium text-muted-foreground py-1">{d}</div>
-        ))}
-      </div>
+      <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0">
+        <div className="min-w-[500px]">
+          <div className={cn("grid gap-1", "grid-cols-7")}>
+            {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((d) => (
+              <div key={d} className="text-center text-xs font-medium text-muted-foreground py-1">{d}</div>
+            ))}
+          </div>
 
-      {/* Day grid */}
-      <div className={cn("grid gap-1", "grid-cols-7")}>
-        {days.map((day) => {
-          const key = format(day, "yyyy-MM-dd");
-          const dayBookings = bookingsByDay[key] || [];
-          const isCurrentMonth = mode === "month" ? day.getMonth() === currentDate.getMonth() : true;
+          {/* Day grid */}
+          <div className={cn("grid gap-1", "grid-cols-7")}>
+            {days.map((day) => {
+              const key = format(day, "yyyy-MM-dd");
+              const dayBookings = bookingsByDay[key] || [];
+              const isCurrentMonth = mode === "month" ? day.getMonth() === currentDate.getMonth() : true;
 
-          return (
-            <div
-              key={key}
-              className={cn(
-                "border border-border rounded-lg p-1 transition-colors",
-                mode === "week" ? "min-h-[200px]" : "min-h-[100px]",
-                isToday(day) && "bg-accent/10 border-accent",
-                !isCurrentMonth && "opacity-40"
-              )}
-            >
-              <div className={cn(
-                "text-xs font-medium mb-1 text-center rounded-full w-6 h-6 flex items-center justify-center mx-auto",
-                isToday(day) && "bg-accent text-accent-foreground"
-              )}>
-                {format(day, "d")}
-              </div>
+              return (
+                <div
+                  key={key}
+                  className={cn(
+                    "border border-border rounded-lg p-1 transition-colors",
+                    mode === "week" ? "min-h-[160px] sm:min-h-[200px]" : "min-h-[80px] sm:min-h-[100px]",
+                    isToday(day) && "bg-accent/10 border-accent",
+                    !isCurrentMonth && "opacity-40"
+                  )}
+                >
+                  <div className={cn(
+                    "text-xs font-medium mb-1 text-center rounded-full w-6 h-6 flex items-center justify-center mx-auto",
+                    isToday(day) && "bg-accent text-accent-foreground"
+                  )}>
+                    {format(day, "d")}
+                  </div>
 
-              <div className="space-y-0.5">
-                {dayBookings.slice(0, mode === "week" ? 10 : 3).map((booking) => (
-                  <button
-                    key={booking.id}
-                    onClick={() => onBookingClick(booking)}
-                    className={cn(
-                      "w-full text-left text-[10px] leading-tight px-1 py-0.5 rounded border cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1 truncate",
-                      statusColors[booking.status as BookingStatus] || statusColors.requested
+                  <div className="space-y-0.5">
+                    {dayBookings.slice(0, mode === "week" ? 10 : 3).map((booking) => (
+                      <button
+                        key={booking.id}
+                        onClick={() => onBookingClick(booking)}
+                        className={cn(
+                          "w-full text-left text-[10px] leading-tight px-1 py-0.5 rounded border cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1 truncate",
+                          statusColors[booking.status as BookingStatus] || statusColors.requested
+                        )}
+                        title={`${format(new Date(booking.start_time), "HH:mm")} - ${booking.client_name} - ${booking.services?.name || ""}`}
+                      >
+                        <StatusIcon status={booking.status as BookingStatus} />
+                        <span className="font-medium">{format(new Date(booking.start_time), "HH:mm")}</span>
+                        {mode === "week" && <span className="truncate hidden sm:inline">{booking.client_name}</span>}
+                      </button>
+                    ))}
+                    {dayBookings.length > (mode === "week" ? 10 : 3) && (
+                      <p className="text-[10px] text-muted-foreground text-center">+{dayBookings.length - (mode === "week" ? 10 : 3)}</p>
                     )}
-                    title={`${format(new Date(booking.start_time), "HH:mm")} - ${booking.client_name} - ${booking.services?.name || ""}`}
-                  >
-                    <StatusIcon status={booking.status as BookingStatus} />
-                    <span className="font-medium">{format(new Date(booking.start_time), "HH:mm")}</span>
-                    {mode === "week" && <span className="truncate">{booking.client_name}</span>}
-                  </button>
-                ))}
-                {dayBookings.length > (mode === "week" ? 10 : 3) && (
-                  <p className="text-[10px] text-muted-foreground text-center">+{dayBookings.length - (mode === "week" ? 10 : 3)}</p>
-                )}
-              </div>
-            </div>
-          );
-        })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Legend */}
