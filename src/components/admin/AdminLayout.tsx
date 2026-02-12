@@ -16,6 +16,7 @@ import {
   HelpCircle,
   ClipboardList,
   Layers,
+  ShieldCheck,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import {
@@ -43,7 +44,8 @@ export type AdminTab =
   | "skus"
   | "offers"
   | "quizzes"
-  | "tasks";
+  | "tasks"
+  | "access";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -59,6 +61,7 @@ const tabs: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: "services", label: "Serviços", icon: Sparkles },
   { id: "skus", label: "Opções", icon: Layers },
   { id: "quizzes", label: "Quizzes", icon: HelpCircle },
+  { id: "access", label: "Acessos", icon: ShieldCheck },
 ];
 
 function AdminSidebar({
