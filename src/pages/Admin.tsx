@@ -9,6 +9,7 @@ import { SkusTab } from "@/components/admin/SkusTab";
 import { OffersTab } from "@/components/admin/OffersTab";
 import { QuizzesTab } from "@/components/admin/QuizzesTab";
 import { TasksTab } from "@/components/admin/TasksTab";
+import { AllowedEmailsTab } from "@/components/admin/AllowedEmailsTab";
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
@@ -31,6 +32,8 @@ export default function Admin() {
         return <QuizzesTab />;
       case "tasks":
         return <TasksTab />;
+      case "access":
+        return <AllowedEmailsTab />;
       default:
         return <DashboardTab onNavigate={setActiveTab} />;
     }
