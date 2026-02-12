@@ -380,6 +380,63 @@ export type Database = {
           },
         ]
       }
+      lead_activities: {
+        Row: {
+          action: string
+          created_at: string
+          created_by: string | null
+          details: Json | null
+          id: string
+          lead_id: string
+          lead_source: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          created_by?: string | null
+          details?: Json | null
+          id?: string
+          lead_id: string
+          lead_source: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          created_by?: string | null
+          details?: Json | null
+          id?: string
+          lead_id?: string
+          lead_source?: string
+        }
+        Relationships: []
+      }
+      lead_notes: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string
+          id: string
+          lead_id: string
+          lead_source: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by: string
+          id?: string
+          lead_id: string
+          lead_source: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          lead_id?: string
+          lead_source?: string
+        }
+        Relationships: []
+      }
       offers: {
         Row: {
           active: boolean | null
