@@ -288,7 +288,7 @@ function KanbanColumn({
   const Icon = config.icon;
 
   return (
-    <div className={`flex flex-col bg-muted/30 rounded-lg border border-t-4 ${config.columnColor} min-w-[280px] max-w-[320px] flex-1`}>
+    <div className={`flex flex-col bg-muted/30 rounded-lg border border-t-4 ${config.columnColor} min-w-[220px] max-w-[320px] flex-1`}>
       <div className="p-3 border-b bg-background/50 rounded-t-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -734,7 +734,7 @@ export function UnifiedLeadsTab() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <p className="text-sm text-muted-foreground">
           {filteredLeads.length} leads carregados
           {((quizResult?.count ?? 0) + (contactResult?.count ?? 0)) > allLeads.length && (
@@ -779,7 +779,7 @@ export function UnifiedLeadsTab() {
       </div>
 
       {/* Pipeline Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {(Object.keys(STATUS_CONFIG) as LeadStatus[]).map((status) => {
           const config = STATUS_CONFIG[status];
           const Icon = config.icon;
@@ -829,7 +829,7 @@ export function UnifiedLeadsTab() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col lg:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -850,7 +850,7 @@ export function UnifiedLeadsTab() {
             setCurrentPage(1);
           }}
         >
-          <SelectTrigger className="w-full sm:w-[150px]">
+          <SelectTrigger className="w-full lg:w-[150px]">
             <Globe className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Origem" />
           </SelectTrigger>
@@ -868,7 +868,7 @@ export function UnifiedLeadsTab() {
             setCurrentPage(1);
           }}
         >
-          <SelectTrigger className="w-full sm:w-[150px]">
+          <SelectTrigger className="w-full lg:w-[150px]">
             <SelectValue placeholder="UTM Source" />
           </SelectTrigger>
           <SelectContent>
@@ -888,7 +888,7 @@ export function UnifiedLeadsTab() {
             setCurrentPage(1);
           }}
         >
-          <SelectTrigger className="w-full sm:w-[140px]">
+          <SelectTrigger className="w-full lg:w-[140px]">
             <Calendar className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Período" />
           </SelectTrigger>
