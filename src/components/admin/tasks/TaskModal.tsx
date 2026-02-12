@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,9 +24,20 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Loader2, Save } from "lucide-react";
-import { format } from "date-fns";
+import { CalendarIcon, Loader2, Save, Trash2, User, Clock } from "lucide-react";
+import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
@@ -42,6 +53,9 @@ interface Task {
   priority: TaskPriority;
   due_date: string | null;
   created_by: string;
+  assigned_to?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface TaskModalProps {
@@ -58,18 +72,50 @@ export function TaskModal({ task, open, onOpenChange, mode }: TaskModalProps) {
     status: "todo" as TaskStatus,
     priority: "medium" as TaskPriority,
     due_date: null as Date | null,
+    assigned_to: null as string | null,
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const { data: staffMembers } = useQuery({
+    queryKey: ["staff-profiles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("staff_profiles")
+        .select("user_id, name")
+        .eq("active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch full task data with timestamps when editing
+  const { data: fullTask } = useQuery({
+    queryKey: ["task-detail", task?.id],
+    queryFn: async () => {
+      if (!task?.id) return null;
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("id", task.id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: mode === "edit" && !!task?.id && open,
+  });
+
   useEffect(() => {
-    if (task && mode === "edit") {
+    const source = fullTask || task;
+    if (source && mode === "edit") {
       setFormData({
-        title: task.title,
-        description: task.description || "",
-        status: task.status,
-        priority: task.priority,
-        due_date: task.due_date ? new Date(task.due_date) : null,
+        title: source.title,
+        description: source.description || "",
+        status: source.status,
+        priority: source.priority,
+        due_date: source.due_date ? new Date(source.due_date) : null,
+        assigned_to: source.assigned_to || null,
       });
     } else if (mode === "create") {
       setFormData({
@@ -78,9 +124,10 @@ export function TaskModal({ task, open, onOpenChange, mode }: TaskModalProps) {
         status: "todo",
         priority: "medium",
         due_date: null,
+        assigned_to: null,
       });
     }
-  }, [task, mode, open]);
+  }, [task, fullTask, mode, open]);
 
   const createTask = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -93,6 +140,7 @@ export function TaskModal({ task, open, onOpenChange, mode }: TaskModalProps) {
         status: data.status,
         priority: data.priority,
         due_date: data.due_date ? format(data.due_date, "yyyy-MM-dd") : null,
+        assigned_to: data.assigned_to || null,
         created_by: session.session.user.id,
       });
 
@@ -120,6 +168,7 @@ export function TaskModal({ task, open, onOpenChange, mode }: TaskModalProps) {
           status: data.status,
           priority: data.priority,
           due_date: data.due_date ? format(data.due_date, "yyyy-MM-dd") : null,
+          assigned_to: data.assigned_to || null,
         })
         .eq("id", task.id);
 
@@ -132,6 +181,22 @@ export function TaskModal({ task, open, onOpenChange, mode }: TaskModalProps) {
     },
     onError: () => {
       toast({ title: "Erro ao atualizar tarefa", variant: "destructive" });
+    },
+  });
+
+  const deleteTask = useMutation({
+    mutationFn: async () => {
+      if (!task) return;
+      const { error } = await supabase.from("tasks").delete().eq("id", task.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-tasks"] });
+      toast({ title: "Tarefa excluída!" });
+      onOpenChange(false);
+    },
+    onError: () => {
+      toast({ title: "Erro ao excluir tarefa", variant: "destructive" });
     },
   });
 
@@ -150,6 +215,7 @@ export function TaskModal({ task, open, onOpenChange, mode }: TaskModalProps) {
   };
 
   const isPending = createTask.isPending || updateTask.isPending;
+  const taskData = fullTask || task;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -226,6 +292,31 @@ export function TaskModal({ task, open, onOpenChange, mode }: TaskModalProps) {
             </div>
           </div>
 
+          {/* Responsável */}
+          <div className="space-y-2">
+            <Label>Responsável</Label>
+            <Select
+              value={formData.assigned_to || "unassigned"}
+              onValueChange={(value) =>
+                setFormData({ ...formData, assigned_to: value === "unassigned" ? null : value })
+              }
+            >
+              <SelectTrigger>
+                <User className="w-4 h-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Sem responsável" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unassigned">Sem responsável</SelectItem>
+                {staffMembers?.map((staff) => (
+                  <SelectItem key={staff.user_id} value={staff.user_id}>
+                    {staff.name || "Sem nome"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Data de Vencimento */}
           <div className="space-y-2">
             <Label>Data de Vencimento</Label>
             <Popover>
@@ -257,7 +348,66 @@ export function TaskModal({ task, open, onOpenChange, mode }: TaskModalProps) {
             </Popover>
           </div>
 
+          {/* Timestamps - only in edit mode */}
+          {mode === "edit" && taskData?.created_at && (
+            <div className="rounded-lg bg-muted/50 p-3 space-y-1.5 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Clock className="w-3.5 h-3.5" />
+                <span>
+                  Criada {formatDistanceToNow(new Date(taskData.created_at), { addSuffix: true, locale: ptBR })}
+                  {" · "}
+                  {format(new Date(taskData.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                </span>
+              </div>
+              {taskData.updated_at && taskData.updated_at !== taskData.created_at && (
+                <div className="flex items-center gap-2 pl-5">
+                  <span>
+                    Atualizada {formatDistanceToNow(new Date(taskData.updated_at), { addSuffix: true, locale: ptBR })}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Actions */}
           <div className="flex gap-2 pt-4">
+            {mode === "edit" && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                    disabled={deleteTask.isPending}
+                  >
+                    {deleteTask.isPending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Excluir tarefa?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Essa ação não pode ser desfeita. A tarefa "{formData.title}" será excluída permanentemente.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteTask.mutate()}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Excluir
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+
             <Button
               type="button"
               variant="outline"

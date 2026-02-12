@@ -1,9 +1,9 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { GripVertical, Calendar, Flag } from "lucide-react";
+import { GripVertical, Calendar, Flag, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -18,6 +18,9 @@ interface Task {
   priority: TaskPriority;
   due_date: string | null;
   created_by: string;
+  assigned_to: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface TaskKanbanViewProps {
@@ -40,6 +43,23 @@ const priorityConfig: Record<TaskPriority, { label: string; color: string }> = {
 export function TaskKanbanView({ tasks, onEditTask }: TaskKanbanViewProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const { data: staffMembers } = useQuery({
+    queryKey: ["staff-profiles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("staff_profiles")
+        .select("user_id, name")
+        .eq("active", true);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const getStaffName = (userId: string | null) => {
+    if (!userId || !staffMembers) return null;
+    return staffMembers.find((s) => s.user_id === userId)?.name || null;
+  };
 
   const updateStatus = useMutation({
     mutationFn: async ({ taskId, status }: { taskId: string; status: TaskStatus }) => {
@@ -114,7 +134,7 @@ export function TaskKanbanView({ tasks, onEditTask }: TaskKanbanViewProps) {
                           {task.description}
                         </p>
                       )}
-                      <div className="flex items-center gap-3 mt-2">
+                      <div className="flex items-center gap-3 mt-2 flex-wrap">
                         <span
                           className={cn(
                             "flex items-center gap-1 text-xs",
@@ -128,6 +148,12 @@ export function TaskKanbanView({ tasks, onEditTask }: TaskKanbanViewProps) {
                           <span className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Calendar className="w-3 h-3" />
                             {format(new Date(task.due_date), "dd/MM", { locale: ptBR })}
+                          </span>
+                        )}
+                        {task.assigned_to && getStaffName(task.assigned_to) && (
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <User className="w-3 h-3" />
+                            {getStaffName(task.assigned_to)}
                           </span>
                         )}
                       </div>
