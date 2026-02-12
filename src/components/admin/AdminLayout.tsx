@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import acsLogo from "@/assets/acs-logo.png";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -118,7 +117,9 @@ function AdminSidebar({
     <Sidebar collapsible="offcanvas" className="border-r border-border">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2">
-          <img src={acsLogo} alt="ACS Beauty" className="w-8 h-8 rounded-lg object-cover" />
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-gold to-rose-gold/70 flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
           {!isCollapsed && (
             <div className="flex flex-col">
               <span className="font-serif text-lg font-bold tracking-tight">
