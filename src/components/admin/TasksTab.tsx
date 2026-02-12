@@ -20,6 +20,9 @@ interface Task {
   priority: TaskPriority;
   due_date: string | null;
   created_by: string;
+  assigned_to: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 type ViewMode = "kanban" | "calendar";
