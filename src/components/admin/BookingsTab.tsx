@@ -313,7 +313,16 @@ export function BookingsTab() {
         </>
       )}
 
-      <BookingDetailModal booking={selectedBooking} open={isModalOpen} onOpenChange={setIsModalOpen} />
+      <BookingDetailModal
+        booking={selectedBooking}
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onConfirm={(id) => updateStatus.mutate({ id, status: "confirmed" })}
+        onCancel={(id) => cancelBookingMutation.mutate(id)}
+        onComplete={(id) => updateStatus.mutate({ id, status: "completed" })}
+        onNoShow={(id) => updateStatus.mutate({ id, status: "no_show" })}
+        onReschedule={(booking) => setRescheduleBooking(booking)}
+      />
       <NewBookingModal open={isNewBookingOpen} onOpenChange={setIsNewBookingOpen} />
 
       {/* Reschedule Dialog */}
