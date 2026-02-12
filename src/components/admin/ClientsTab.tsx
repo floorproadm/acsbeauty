@@ -470,13 +470,13 @@ export function ClientsTab() {
                 )}
                 {selectedClient.instagram && (
                   <a
-                    href={`https://instagram.com/${selectedClient.instagram.replace("@", "")}`}
+                    href={`https://instagram.com/${selectedClient.instagram.replace("@", "").replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/^http:\/?\/?instagram\.com\//i, "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                   >
                     <Instagram className="w-4 h-4 text-rose-gold" />
-                    <span className="text-sm">@{selectedClient.instagram.replace("@", "")}</span>
+                    <span className="text-sm">@{selectedClient.instagram.replace("@", "").replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/^http:\/?\/?instagram\.com\//i, "")}</span>
                   </a>
                 )}
               </div>
