@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Users, Clock, AlertCircle, CheckCircle2, MessageCircle, Loader2 } from "lucide-react";
+import { Calendar, Users, Clock, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { format, startOfDay, endOfDay, subDays } from "date-fns";
+import { format, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AdminTab } from "./AdminLayout";
 import { BirthdayWidget } from "./BirthdayWidget";
@@ -85,33 +85,6 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
     },
   });
 
-  // WhatsApp clicks - today
-  const { data: whatsappToday, isLoading: loadingWhatsappToday } = useQuery({
-    queryKey: ["admin-whatsapp-today"],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("whatsapp_clicks")
-        .select("*", { count: "exact", head: true })
-        .gte("created_at", todayStart)
-        .lte("created_at", todayEnd);
-      if (error) throw error;
-      return count || 0;
-    },
-  });
-
-  // WhatsApp clicks - last 7 days
-  const sevenDaysAgo = subDays(today, 7).toISOString();
-  const { data: whatsapp7Days, isLoading: loadingWhatsapp7Days } = useQuery({
-    queryKey: ["admin-whatsapp-7days"],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("whatsapp_clicks")
-        .select("*", { count: "exact", head: true })
-        .gte("created_at", sevenDaysAgo);
-      if (error) throw error;
-      return count || 0;
-    },
-  });
 
   // Confirm booking mutation
   const confirmBookingMutation = useMutation({
@@ -184,27 +157,6 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
             value: clientsCount,
             loading: loadingClients,
           },
-          {
-            icon: MessageCircle,
-            iconBg: "bg-emerald-500/10",
-            iconColor: "text-emerald-600",
-            label: "WhatsApp Hoje",
-            value: whatsappToday,
-            loading: loadingWhatsappToday,
-            onClick: () => onNavigate("crm"),
-            extra: (
-              <div className="mt-2 pt-2 border-t border-border">
-                <p className="text-xs text-muted-foreground">
-                  Últimos 7 dias:{" "}
-                  {loadingWhatsapp7Days ? (
-                    <Skeleton className="inline-block h-4 w-6" />
-                  ) : (
-                    <span className="font-semibold text-foreground">{whatsapp7Days}</span>
-                  )}
-                </p>
-              </div>
-            ),
-          },
         ].map((card, i) => (
           <motion.div
             key={card.label}
@@ -212,10 +164,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
             variants={cardVariants}
             initial="hidden"
             animate="visible"
-            className={`bg-card rounded-xl p-4 border border-border shadow-soft ${
-              card.onClick ? "cursor-pointer hover:border-emerald-300 transition-colors" : ""
-            }`}
-            onClick={card.onClick}
+            className="bg-card rounded-xl p-4 border border-border shadow-soft"
           >
             <div className="flex items-center gap-3">
               <div className={`p-2 ${card.iconBg} rounded-lg`}>
@@ -230,7 +179,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
                 )}
               </div>
             </div>
-            {card.extra}
+            
           </motion.div>
         ))}
       </div>
