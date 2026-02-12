@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar as CalendarIcon, Search, Filter, CheckCircle, XCircle, Clock, UserX, RefreshCw, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, Search, Filter, CheckCircle, XCircle, Clock, UserX, RefreshCw, Loader2, Plus, Phone, MessageSquare } from "lucide-react";
 import { format, startOfDay, endOfDay, subDays, addDays, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BookingDetailModal } from "./BookingDetailModal";
+import { NewBookingModal } from "./NewBookingModal";
+import { cn } from "@/lib/utils";
 
 type BookingStatus = "requested" | "confirmed" | "completed" | "cancelled" | "no_show";
 
@@ -29,6 +31,7 @@ export function BookingsTab() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNewBookingOpen, setIsNewBookingOpen] = useState(false);
   const [rescheduleBooking, setRescheduleBooking] = useState<any>(null);
   const [rescheduleDate, setRescheduleDate] = useState<Date | undefined>();
   const [rescheduleSlots, setRescheduleSlots] = useState<any[]>([]);
@@ -111,6 +114,7 @@ export function BookingsTab() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-sidebar-pending"] });
       toast({ title: "Status atualizado!" });
     },
     onError: () => {
@@ -146,6 +150,12 @@ export function BookingsTab() {
     });
   };
 
+  const handleWhatsApp = (phone: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const clean = phone.replace(/\D/g, "");
+    window.open(`https://wa.me/1${clean}`, "_blank");
+  };
+
   const filteredBookings = bookings?.filter(
     (b) =>
       b.client_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -157,6 +167,10 @@ export function BookingsTab() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="font-serif text-2xl font-bold">Agendamentos</h1>
+        <Button onClick={() => setIsNewBookingOpen(true)} className="gap-2">
+          <Plus className="w-4 h-4" />
+          Novo Agendamento
+        </Button>
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -223,15 +237,41 @@ export function BookingsTab() {
                     <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full ${status?.color}`}>
                       <StatusIcon className="w-3 h-3" />{status?.label}
                     </span>
+
+                    {/* WhatsApp quick action */}
+                    {booking.client_phone && (
+                      <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50" onClick={(e) => handleWhatsApp(booking.client_phone!, e)} title="WhatsApp">
+                        <MessageSquare className="w-4 h-4" />
+                      </Button>
+                    )}
+
+                    {/* Requested: Confirm + Cancel */}
+                    {booking.status === "requested" && (
+                      <>
+                        <Button size="sm" onClick={(e) => { e.stopPropagation(); updateStatus.mutate({ id: booking.id, status: "confirmed" }); }} className="gap-1 text-xs">
+                          <CheckCircle className="w-3 h-3" />Confirmar
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-destructive text-xs" onClick={(e) => { e.stopPropagation(); cancelBookingMutation.mutate(booking.id); }} disabled={cancelBookingMutation.isPending}>
+                          {cancelBookingMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
+                        </Button>
+                      </>
+                    )}
+
+                    {/* Confirmed: Reschedule + Cancel + Complete + No-Show */}
                     {booking.status === "confirmed" && (
                       <>
-                        <Button size="sm" variant="outline" onClick={() => setRescheduleBooking(booking)}>
-                          <RefreshCw className="w-4 h-4 mr-1" />Remarcar
+                        <Button size="sm" variant="outline" className="text-xs gap-1" onClick={(e) => { e.stopPropagation(); setRescheduleBooking(booking); }}>
+                          <RefreshCw className="w-3 h-3" />Remarcar
                         </Button>
-                        <Button size="sm" variant="outline" className="text-red-600" onClick={() => cancelBookingMutation.mutate(booking.id)} disabled={cancelBookingMutation.isPending}>
-                          {cancelBookingMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                        <Button size="sm" variant="outline" className="text-xs" onClick={(e) => { e.stopPropagation(); updateStatus.mutate({ id: booking.id, status: "completed" }); }}>
+                          Concluir
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => updateStatus.mutate({ id: booking.id, status: "completed" })}>Concluir</Button>
+                        <Button size="sm" variant="outline" className="text-xs text-muted-foreground" onClick={(e) => { e.stopPropagation(); updateStatus.mutate({ id: booking.id, status: "no_show" }); }} title="Não compareceu">
+                          <UserX className="w-3 h-3" />
+                        </Button>
+                        <Button size="icon" variant="outline" className="h-8 w-8 text-destructive" onClick={(e) => { e.stopPropagation(); cancelBookingMutation.mutate(booking.id); }} disabled={cancelBookingMutation.isPending} title="Cancelar">
+                          {cancelBookingMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
+                        </Button>
                       </>
                     )}
                   </div>
@@ -243,13 +283,17 @@ export function BookingsTab() {
       )}
 
       <BookingDetailModal booking={selectedBooking} open={isModalOpen} onOpenChange={setIsModalOpen} />
+      <NewBookingModal open={isNewBookingOpen} onOpenChange={setIsNewBookingOpen} />
 
       {/* Reschedule Dialog */}
       <Dialog open={!!rescheduleBooking} onOpenChange={(open) => !open && setRescheduleBooking(null)}>
         <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Remarcar Agendamento</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Remarcar Agendamento</DialogTitle>
+            <DialogDescription>Selecione uma nova data e horário para o agendamento.</DialogDescription>
+          </DialogHeader>
           <div className="space-y-4">
-            <Calendar mode="single" selected={rescheduleDate} onSelect={handleRescheduleDateSelect} disabled={(date) => date < new Date() || date.getDay() === 0 || date.getDay() === 1} locale={ptBR} />
+            <Calendar mode="single" selected={rescheduleDate} onSelect={handleRescheduleDateSelect} disabled={(date) => date < new Date() || date.getDay() === 0 || date.getDay() === 1} locale={ptBR} className={cn("p-3 pointer-events-auto")} />
             {isLoadingSlots && <div className="flex justify-center"><Loader2 className="w-6 h-6 animate-spin" /></div>}
             {rescheduleSlots.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
