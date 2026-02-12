@@ -14,6 +14,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -1108,198 +1114,201 @@ export function UnifiedLeadsTab() {
         </DndContext>
       )}
 
-      {/* Lead Detail Modal */}
-      <Dialog open={!!selectedLead} onOpenChange={(open) => !open && setSelectedLead(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-serif text-xl flex items-center gap-2">
+      {/* Lead Detail Sidebar (Notion-style) */}
+      <Sheet open={!!selectedLead} onOpenChange={(open) => !open && setSelectedLead(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
+          <SheetHeader className="p-6 pb-4 border-b border-border">
+            <SheetTitle className="font-serif text-xl flex items-center gap-2">
               {selectedLead?.client_name || "Lead Anônimo"}
               {selectedLead && <SourceBadge source={selectedLead.source} />}
-            </DialogTitle>
-          </DialogHeader>
+            </SheetTitle>
+          </SheetHeader>
 
           {selectedLead && (
-            <div className="space-y-4">
-              {/* Status Selector */}
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-muted-foreground">Status</h4>
-                <div className="flex flex-wrap gap-2">
-                  {(Object.keys(STATUS_CONFIG) as LeadStatus[]).map((status) => {
-                    const config = STATUS_CONFIG[status];
-                    const Icon = config.icon;
-                    const isActive = selectedLead.status === status;
-                    
-                    return (
-                      <Button
-                        key={status}
-                        variant={isActive ? "default" : "outline"}
-                        size="sm"
-                        className={`gap-1.5 ${isActive ? "" : config.color}`}
-                        onClick={() => handleUpdateStatus(selectedLead, status)}
-                      >
-                        <Icon className="w-4 h-4" />
-                        {config.label}
-                      </Button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Contact Info (Quiz leads) */}
-              {selectedLead.source === "quiz" && (
+            <ScrollArea className="flex-1 p-6">
+              <div className="space-y-5">
+                {/* Status Selector */}
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-muted-foreground">Contato</h4>
-                  <div className="grid gap-2">
-                    {selectedLead.client_phone && (
-                      <>
-                        <a
-                          href={`tel:${selectedLead.client_phone}`}
-                          className="flex items-center gap-2 p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors text-sm"
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {(Object.keys(STATUS_CONFIG) as LeadStatus[]).map((status) => {
+                      const config = STATUS_CONFIG[status];
+                      const Icon = config.icon;
+                      const isActive = selectedLead.status === status;
+                      
+                      return (
+                        <Button
+                          key={status}
+                          variant={isActive ? "default" : "outline"}
+                          size="sm"
+                          className={`gap-1.5 ${isActive ? "" : config.color}`}
+                          onClick={() => handleUpdateStatus(selectedLead, status)}
                         >
-                          <Phone className="w-4 h-4 text-muted-foreground" />
-                          {selectedLead.client_phone}
-                        </a>
-                        <a
-                          href={`https://wa.me/${selectedLead.client_phone.replace(/\D/g, "")}?text=${encodeURIComponent(
-                            `Olá ${selectedLead.client_name || ""}! Vi que você respondeu nosso quiz e gostaria de falar sobre seu resultado.`
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 p-2 rounded-md bg-green-100 hover:bg-green-200 text-green-800 transition-colors text-sm font-medium"
-                        >
-                          <MessageCircle className="w-4 h-4" />
-                          Enviar WhatsApp
-                        </a>
-                      </>
-                    )}
-                    {selectedLead.client_email && (
-                      <a
-                        href={`mailto:${selectedLead.client_email}`}
-                        className="flex items-center gap-2 p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors text-sm"
-                      >
-                        <Mail className="w-4 h-4 text-muted-foreground" />
-                        {selectedLead.client_email}
-                      </a>
-                    )}
-                    {selectedLead.client_instagram && (
-                      <a
-                        href={`https://instagram.com/${selectedLead.client_instagram.replace("@", "")}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors text-sm"
-                      >
-                        <Instagram className="w-4 h-4 text-muted-foreground" />
-                        @{selectedLead.client_instagram.replace("@", "")}
-                      </a>
-                    )}
+                          <Icon className="w-4 h-4" />
+                          {config.label}
+                        </Button>
+                      );
+                    })}
                   </div>
                 </div>
-              )}
 
-              {/* Quiz Info */}
-              {selectedLead.source === "quiz" && (
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-muted-foreground">Quiz</h4>
-                  <div className="p-3 rounded-md bg-muted/50 space-y-1">
-                    {selectedLead.quiz_name && (
-                      <p className="text-sm font-medium">{selectedLead.quiz_name}</p>
-                    )}
-                    {selectedLead.quiz_result && (
-                      <p className="text-sm text-muted-foreground">
-                        Resultado: <span className="text-foreground">{selectedLead.quiz_result}</span>
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-
-              {/* Contact Form Info */}
-              {selectedLead.source === "contact" && (
-                <>
-                  {/* Contact Info */}
+                {/* Contact Info (Quiz leads) */}
+                {selectedLead.source === "quiz" && (
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-muted-foreground">Contato</h4>
+                    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Contato</h4>
                     <div className="grid gap-2">
                       {selectedLead.client_phone && (
-                        <a
-                          href={`tel:${selectedLead.client_phone}`}
-                          className="flex items-center gap-2 p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors text-sm"
-                        >
-                          <Phone className="w-4 h-4 text-muted-foreground" />
-                          {selectedLead.client_phone}
-                        </a>
+                        <>
+                          <a
+                            href={`tel:${selectedLead.client_phone}`}
+                            className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-sm"
+                          >
+                            <Phone className="w-4 h-4 text-muted-foreground" />
+                            {selectedLead.client_phone}
+                          </a>
+                          <a
+                            href={`https://wa.me/${selectedLead.client_phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+                              `Olá ${selectedLead.client_name || ""}! Vi que você respondeu nosso quiz e gostaria de falar sobre seu resultado.`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 p-2.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-800 transition-colors text-sm font-medium"
+                          >
+                            <MessageCircle className="w-4 h-4" />
+                            Enviar WhatsApp
+                          </a>
+                        </>
                       )}
                       {selectedLead.client_email && (
                         <a
                           href={`mailto:${selectedLead.client_email}`}
-                          className="flex items-center gap-2 p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors text-sm"
+                          className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-sm"
                         >
                           <Mail className="w-4 h-4 text-muted-foreground" />
                           {selectedLead.client_email}
                         </a>
                       )}
+                      {selectedLead.client_instagram && (
+                        <a
+                          href={`https://instagram.com/${selectedLead.client_instagram.replace("@", "")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-sm"
+                        >
+                          <Instagram className="w-4 h-4 text-muted-foreground" />
+                          @{selectedLead.client_instagram.replace("@", "")}
+                        </a>
+                      )}
                     </div>
                   </div>
+                )}
 
-                  {selectedLead.service_name && (
-                    <div className="p-3 rounded-lg bg-muted/50">
-                      <p className="text-xs text-muted-foreground mb-1">Serviço de Interesse</p>
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-primary" />
-                        <p className="font-medium">{selectedLead.service_name}</p>
+                {/* Quiz Info */}
+                {selectedLead.source === "quiz" && (
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Quiz</h4>
+                    <div className="p-3 rounded-lg bg-muted/50 space-y-1">
+                      {selectedLead.quiz_name && (
+                        <p className="text-sm font-medium">{selectedLead.quiz_name}</p>
+                      )}
+                      {selectedLead.quiz_result && (
+                        <p className="text-sm text-muted-foreground">
+                          Resultado: <span className="text-foreground">{selectedLead.quiz_result}</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Contact Form Info */}
+                {selectedLead.source === "contact" && (
+                  <>
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Contato</h4>
+                      <div className="grid gap-2">
+                        {selectedLead.client_phone && (
+                          <a
+                            href={`tel:${selectedLead.client_phone}`}
+                            className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-sm"
+                          >
+                            <Phone className="w-4 h-4 text-muted-foreground" />
+                            {selectedLead.client_phone}
+                          </a>
+                        )}
+                        {selectedLead.client_email && (
+                          <a
+                            href={`mailto:${selectedLead.client_email}`}
+                            className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-sm"
+                          >
+                            <Mail className="w-4 h-4 text-muted-foreground" />
+                            {selectedLead.client_email}
+                          </a>
+                        )}
                       </div>
                     </div>
-                  )}
 
-                  {selectedLead.message && (
-                    <div className="p-3 rounded-lg bg-muted/50">
-                      <p className="text-xs text-muted-foreground mb-1">Mensagem</p>
-                      <p className="text-sm whitespace-pre-wrap">{selectedLead.message}</p>
-                    </div>
-                  )}
-                </>
-              )}
-              {(selectedLead.utm_source || selectedLead.utm_campaign) && (
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-muted-foreground">Origem</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedLead.utm_source && (
-                      <Badge variant="outline" className="text-xs">
-                        Source: {selectedLead.utm_source}
-                      </Badge>
+                    {selectedLead.service_name && (
+                      <div className="space-y-2">
+                        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Serviço de Interesse</h4>
+                        <div className="p-3 rounded-lg bg-muted/50 flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-primary" />
+                          <p className="font-medium">{selectedLead.service_name}</p>
+                        </div>
+                      </div>
                     )}
-                    {selectedLead.utm_campaign && (
-                      <Badge variant="outline" className="text-xs">
-                        Campaign: {selectedLead.utm_campaign}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              )}
 
-              {/* Timestamp + Delete */}
-              <div className="pt-2 border-t flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">
-                  Capturado em:{" "}
-                  {format(new Date(selectedLead.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                </p>
-                {isAdmin && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                    onClick={() => setLeadToDelete(selectedLead)}
-                    disabled={isDeleting}
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
+                    {selectedLead.message && (
+                      <div className="space-y-2">
+                        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Mensagem</h4>
+                        <div className="p-3 rounded-lg bg-muted/50">
+                          <p className="text-sm whitespace-pre-wrap">{selectedLead.message}</p>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
+
+                {(selectedLead.utm_source || selectedLead.utm_campaign) && (
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Origem</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedLead.utm_source && (
+                        <Badge variant="outline" className="text-xs">
+                          Source: {selectedLead.utm_source}
+                        </Badge>
+                      )}
+                      {selectedLead.utm_campaign && (
+                        <Badge variant="outline" className="text-xs">
+                          Campaign: {selectedLead.utm_campaign}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Timestamp + Delete */}
+                <div className="pt-4 border-t flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">
+                    Capturado em:{" "}
+                    {format(new Date(selectedLead.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                  </p>
+                  {isAdmin && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => setLeadToDelete(selectedLead)}
+                      disabled={isDeleting}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
+            </ScrollArea>
           )}
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!leadToDelete} onOpenChange={(open) => !open && setLeadToDelete(null)}>
