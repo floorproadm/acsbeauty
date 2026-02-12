@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import {
   Loader2,
   LogOut,
@@ -13,9 +14,6 @@ import {
   Tag,
   Megaphone,
   HelpCircle,
-  UserCheck,
-  Menu,
-  ChevronLeft,
   ClipboardList,
   Layers,
 } from "lucide-react";
@@ -60,8 +58,6 @@ const tabs: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: "tasks", label: "Tarefas", icon: ClipboardList },
   { id: "services", label: "Serviços", icon: Sparkles },
   { id: "skus", label: "Opções", icon: Layers },
-  // ARCHIVED: Offers tab hidden temporarily - uncomment to restore
-  // { id: "offers", label: "Ofertas", icon: Tag },
   { id: "quizzes", label: "Quizzes", icon: HelpCircle },
 ];
 
@@ -78,6 +74,44 @@ function AdminSidebar({
 }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+
+  // Fetch pending bookings count
+  const { data: pendingCount } = useQuery({
+    queryKey: ["admin-sidebar-pending"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("bookings")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "requested");
+      if (error) return 0;
+      return count || 0;
+    },
+    refetchInterval: 30000,
+  });
+
+  // Fetch open tasks count
+  const { data: tasksCount } = useQuery({
+    queryKey: ["admin-sidebar-tasks"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("tasks")
+        .select("*", { count: "exact", head: true })
+        .in("status", ["todo", "in_progress"]);
+      if (error) return 0;
+      return count || 0;
+    },
+    refetchInterval: 30000,
+  });
+
+  const getBadge = (tabId: AdminTab) => {
+    if (tabId === "bookings" && pendingCount && pendingCount > 0) {
+      return { count: pendingCount, pulse: true };
+    }
+    if (tabId === "tasks" && tasksCount && tasksCount > 0) {
+      return { count: tasksCount, pulse: false };
+    }
+    return null;
+  };
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-border">
@@ -105,23 +139,43 @@ function AdminSidebar({
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {tabs.map((tab) => (
-                <SidebarMenuItem key={tab.id}>
-                  <SidebarMenuButton
-                    onClick={() => onTabChange(tab.id)}
-                    isActive={activeTab === tab.id}
-                    tooltip={tab.label}
-                    className={cn(
-                      "transition-all",
-                      activeTab === tab.id &&
-                        "bg-rose-light text-rose-gold hover:bg-rose-light hover:text-rose-gold"
-                    )}
-                  >
-                    <tab.icon className="w-4 h-4" />
-                    <span>{tab.label}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {tabs.map((tab) => {
+                const badge = getBadge(tab.id);
+                return (
+                  <SidebarMenuItem key={tab.id}>
+                    <SidebarMenuButton
+                      onClick={() => onTabChange(tab.id)}
+                      isActive={activeTab === tab.id}
+                      tooltip={tab.label}
+                      className={cn(
+                        "transition-all relative",
+                        activeTab === tab.id &&
+                          "bg-rose-light text-rose-gold hover:bg-rose-light hover:text-rose-gold"
+                      )}
+                    >
+                      <div className="relative">
+                        <tab.icon className="w-4 h-4" />
+                        {badge?.pulse && (
+                          <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                        )}
+                      </div>
+                      <span className="flex-1">{tab.label}</span>
+                      {badge && !isCollapsed && (
+                        <span
+                          className={cn(
+                            "ml-auto text-[10px] font-bold min-w-[20px] h-5 flex items-center justify-center rounded-full",
+                            badge.pulse
+                              ? "bg-red-500 text-white"
+                              : "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          {badge.count > 99 ? "99+" : badge.count}
+                        </span>
+                      )}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
