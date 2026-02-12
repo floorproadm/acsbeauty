@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addWeeks, subWeeks, addMonths, subMonths, isToday, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,31 @@ interface BookingCalendarViewProps {
 
 export function BookingCalendarView({ bookings, onBookingClick, mode }: BookingCalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
+
+  // Swipe gesture
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      const dir = dx < 0 ? 1 : -1;
+      setCurrentDate((d) =>
+        mode === "week"
+          ? dir > 0 ? addWeeks(d, 1) : subWeeks(d, 1)
+          : dir > 0 ? addMonths(d, 1) : subMonths(d, 1)
+      );
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  }, [mode]);
 
   const days = useMemo(() => {
     if (mode === "week") {
@@ -137,7 +162,7 @@ export function BookingCalendarView({ bookings, onBookingClick, mode }: BookingC
           </div>
 
           {/* Mobile: vertical list */}
-          <div className="sm:hidden space-y-2">
+          <div className="sm:hidden space-y-2" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
             {days.map((day) => {
               const key = format(day, "yyyy-MM-dd");
               const dayBookings = bookingsByDay[key] || [];
