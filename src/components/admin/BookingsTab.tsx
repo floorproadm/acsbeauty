@@ -176,51 +176,54 @@ export function BookingsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="font-serif text-2xl font-bold">Agendamentos</h1>
-        <div className="flex items-center gap-2">
-          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)} className="mr-2">
-            <TabsList className="h-9">
-              <TabsTrigger value="list" className="gap-1 px-2.5 text-xs"><List className="w-3.5 h-3.5" />Lista</TabsTrigger>
-              <TabsTrigger value="week" className="gap-1 px-2.5 text-xs"><LayoutGrid className="w-3.5 h-3.5" />Semana</TabsTrigger>
-              <TabsTrigger value="month" className="gap-1 px-2.5 text-xs"><CalendarIcon className="w-3.5 h-3.5" />Mês</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <Button onClick={() => setIsNewBookingOpen(true)} className="gap-2">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h1 className="font-serif text-xl sm:text-2xl font-bold">Agendamentos</h1>
+          <Button size="sm" onClick={() => setIsNewBookingOpen(true)} className="gap-1.5">
             <Plus className="w-4 h-4" />
-            Novo Agendamento
+            <span className="hidden sm:inline">Novo Agendamento</span>
+            <span className="sm:hidden">Novo</span>
           </Button>
         </div>
+        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)}>
+          <TabsList className="h-9 w-full sm:w-auto">
+            <TabsTrigger value="list" className="gap-1 px-2.5 text-xs flex-1 sm:flex-initial"><List className="w-3.5 h-3.5" />Lista</TabsTrigger>
+            <TabsTrigger value="week" className="gap-1 px-2.5 text-xs flex-1 sm:flex-initial"><LayoutGrid className="w-3.5 h-3.5" />Semana</TabsTrigger>
+            <TabsTrigger value="month" className="gap-1 px-2.5 text-xs flex-1 sm:flex-initial"><CalendarIcon className="w-3.5 h-3.5" />Mês</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Filters - only show in list mode */}
       {viewMode === "list" && (
-        <div className="flex flex-wrap gap-3">
-          <div className="relative flex-1 min-w-[200px]">
+        <div className="space-y-2 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-3">
+          <div className="relative flex-1 min-w-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input placeholder="Buscar cliente..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
           </div>
-          <Select value={dateFilter} onValueChange={setDateFilter}>
-            <SelectTrigger className="w-[140px]"><CalendarIcon className="w-4 h-4 mr-2" /><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="today">Hoje</SelectItem>
-              <SelectItem value="tomorrow">Amanhã</SelectItem>
-              <SelectItem value="week">Próx. 7 dias</SelectItem>
-              <SelectItem value="past">Últimos 30 dias</SelectItem>
-              <SelectItem value="all">Todos</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[150px]"><Filter className="w-4 h-4 mr-2" /><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos status</SelectItem>
-              <SelectItem value="requested">Aguardando</SelectItem>
-              <SelectItem value="confirmed">Confirmados</SelectItem>
-              <SelectItem value="completed">Concluídos</SelectItem>
-              <SelectItem value="cancelled">Cancelados</SelectItem>
-              <SelectItem value="no_show">Não compareceu</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2">
+            <Select value={dateFilter} onValueChange={setDateFilter}>
+              <SelectTrigger className="flex-1 sm:w-[140px]"><CalendarIcon className="w-4 h-4 mr-2" /><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="today">Hoje</SelectItem>
+                <SelectItem value="tomorrow">Amanhã</SelectItem>
+                <SelectItem value="week">Próx. 7 dias</SelectItem>
+                <SelectItem value="past">Últimos 30 dias</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="flex-1 sm:w-[150px]"><Filter className="w-4 h-4 mr-2" /><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos status</SelectItem>
+                <SelectItem value="requested">Aguardando</SelectItem>
+                <SelectItem value="confirmed">Confirmados</SelectItem>
+                <SelectItem value="completed">Concluídos</SelectItem>
+                <SelectItem value="cancelled">Cancelados</SelectItem>
+                <SelectItem value="no_show">Não compareceu</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       )}
 
@@ -268,7 +271,7 @@ export function BookingsTab() {
                           {booking.services?.name && <p className="text-xs text-rose-gold mt-1">{booking.services.name}</p>}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full ${status?.color}`}>
                           <StatusIcon className="w-3 h-3" />{status?.label}
                         </span>
