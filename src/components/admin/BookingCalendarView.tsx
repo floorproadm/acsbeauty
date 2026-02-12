@@ -112,7 +112,7 @@ export function BookingCalendarView({ bookings, onBookingClick, mode }: BookingC
       {mode === "week" ? (
         <>
           {/* Desktop: horizontal grid */}
-          <div className="hidden sm:block">
+          <div className="hidden md:block">
             <div className="grid gap-1 grid-cols-7">
               {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((d) => (
                 <div key={d} className="text-center text-xs font-medium text-muted-foreground py-1">{d}</div>
@@ -162,7 +162,7 @@ export function BookingCalendarView({ bookings, onBookingClick, mode }: BookingC
           </div>
 
           {/* Mobile: vertical list */}
-          <div className="sm:hidden space-y-2" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+          <div className="md:hidden space-y-2" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
             {days.map((day) => {
               const key = format(day, "yyyy-MM-dd");
               const dayBookings = bookingsByDay[key] || [];
