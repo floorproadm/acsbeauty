@@ -83,65 +83,170 @@ export function BookingCalendarView({ bookings, onBookingClick, mode }: BookingC
         </Button>
       </div>
 
-      {/* Week headers */}
-      <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0">
-        <div className="min-w-[500px]">
-          <div className={cn("grid gap-1", "grid-cols-7")}>
-            {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((d) => (
-              <div key={d} className="text-center text-xs font-medium text-muted-foreground py-1">{d}</div>
-            ))}
+      {/* Week view - vertical on mobile, grid on desktop */}
+      {mode === "week" ? (
+        <>
+          {/* Desktop: horizontal grid */}
+          <div className="hidden sm:block">
+            <div className="grid gap-1 grid-cols-7">
+              {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((d) => (
+                <div key={d} className="text-center text-xs font-medium text-muted-foreground py-1">{d}</div>
+              ))}
+            </div>
+            <div className="grid gap-1 grid-cols-7">
+              {days.map((day) => {
+                const key = format(day, "yyyy-MM-dd");
+                const dayBookings = bookingsByDay[key] || [];
+                return (
+                  <div
+                    key={key}
+                    className={cn(
+                      "border border-border rounded-lg p-1 min-h-[200px] transition-colors",
+                      isToday(day) && "bg-accent/10 border-accent"
+                    )}
+                  >
+                    <div className={cn(
+                      "text-xs font-medium mb-1 text-center rounded-full w-6 h-6 flex items-center justify-center mx-auto",
+                      isToday(day) && "bg-accent text-accent-foreground"
+                    )}>
+                      {format(day, "d")}
+                    </div>
+                    <div className="space-y-0.5">
+                      {dayBookings.slice(0, 10).map((booking) => (
+                        <button
+                          key={booking.id}
+                          onClick={() => onBookingClick(booking)}
+                          className={cn(
+                            "w-full text-left text-[10px] leading-tight px-1 py-0.5 rounded border cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1 truncate",
+                            statusColors[booking.status as BookingStatus] || statusColors.requested
+                          )}
+                        >
+                          <StatusIcon status={booking.status as BookingStatus} />
+                          <span className="font-medium">{format(new Date(booking.start_time), "HH:mm")}</span>
+                          <span className="truncate">{booking.client_name}</span>
+                        </button>
+                      ))}
+                      {dayBookings.length > 10 && (
+                        <p className="text-[10px] text-muted-foreground text-center">+{dayBookings.length - 10}</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Day grid */}
-          <div className={cn("grid gap-1", "grid-cols-7")}>
+          {/* Mobile: vertical list */}
+          <div className="sm:hidden space-y-2">
             {days.map((day) => {
               const key = format(day, "yyyy-MM-dd");
               const dayBookings = bookingsByDay[key] || [];
-              const isCurrentMonth = mode === "month" ? day.getMonth() === currentDate.getMonth() : true;
-
               return (
                 <div
                   key={key}
                   className={cn(
-                    "border border-border rounded-lg p-1 transition-colors",
-                    mode === "week" ? "min-h-[160px] sm:min-h-[200px]" : "min-h-[80px] sm:min-h-[100px]",
-                    isToday(day) && "bg-accent/10 border-accent",
-                    !isCurrentMonth && "opacity-40"
+                    "border border-border rounded-lg p-3 transition-colors",
+                    isToday(day) && "bg-accent/10 border-accent"
                   )}
                 >
-                  <div className={cn(
-                    "text-xs font-medium mb-1 text-center rounded-full w-6 h-6 flex items-center justify-center mx-auto",
-                    isToday(day) && "bg-accent text-accent-foreground"
-                  )}>
-                    {format(day, "d")}
-                  </div>
-
-                  <div className="space-y-0.5">
-                    {dayBookings.slice(0, mode === "week" ? 10 : 3).map((booking) => (
-                      <button
-                        key={booking.id}
-                        onClick={() => onBookingClick(booking)}
-                        className={cn(
-                          "w-full text-left text-[10px] leading-tight px-1 py-0.5 rounded border cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1 truncate",
-                          statusColors[booking.status as BookingStatus] || statusColors.requested
-                        )}
-                        title={`${format(new Date(booking.start_time), "HH:mm")} - ${booking.client_name} - ${booking.services?.name || ""}`}
-                      >
-                        <StatusIcon status={booking.status as BookingStatus} />
-                        <span className="font-medium">{format(new Date(booking.start_time), "HH:mm")}</span>
-                        {mode === "week" && <span className="truncate hidden sm:inline">{booking.client_name}</span>}
-                      </button>
-                    ))}
-                    {dayBookings.length > (mode === "week" ? 10 : 3) && (
-                      <p className="text-[10px] text-muted-foreground text-center">+{dayBookings.length - (mode === "week" ? 10 : 3)}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={cn(
+                      "text-sm font-medium rounded-full w-8 h-8 flex items-center justify-center shrink-0",
+                      isToday(day) && "bg-accent text-accent-foreground"
+                    )}>
+                      {format(day, "d")}
+                    </div>
+                    <span className="text-sm font-medium capitalize">
+                      {format(day, "EEEE", { locale: ptBR })}
+                    </span>
+                    {dayBookings.length > 0 && (
+                      <span className="ml-auto text-[10px] font-bold bg-muted text-muted-foreground rounded-full px-2 py-0.5">
+                        {dayBookings.length}
+                      </span>
                     )}
                   </div>
+                  {dayBookings.length === 0 ? (
+                    <p className="text-xs text-muted-foreground pl-10">Sem agendamentos</p>
+                  ) : (
+                    <div className="space-y-1 pl-10">
+                      {dayBookings.map((booking) => (
+                        <button
+                          key={booking.id}
+                          onClick={() => onBookingClick(booking)}
+                          className={cn(
+                            "w-full text-left text-xs px-2 py-1.5 rounded border cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-2",
+                            statusColors[booking.status as BookingStatus] || statusColors.requested
+                          )}
+                        >
+                          <StatusIcon status={booking.status as BookingStatus} />
+                          <span className="font-medium">{format(new Date(booking.start_time), "HH:mm")}</span>
+                          <span className="truncate">{booking.client_name}</span>
+                          {booking.services?.name && (
+                            <span className="ml-auto text-[10px] opacity-70 truncate max-w-[80px]">{booking.services.name}</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
+        </>
+      ) : (
+        /* Month view - always grid */
+        <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0">
+          <div className="min-w-[500px]">
+            <div className="grid gap-1 grid-cols-7">
+              {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((d) => (
+                <div key={d} className="text-center text-xs font-medium text-muted-foreground py-1">{d}</div>
+              ))}
+            </div>
+            <div className="grid gap-1 grid-cols-7">
+              {days.map((day) => {
+                const key = format(day, "yyyy-MM-dd");
+                const dayBookings = bookingsByDay[key] || [];
+                const isCurrentMonth = day.getMonth() === currentDate.getMonth();
+                return (
+                  <div
+                    key={key}
+                    className={cn(
+                      "border border-border rounded-lg p-1 min-h-[80px] sm:min-h-[100px] transition-colors",
+                      isToday(day) && "bg-accent/10 border-accent",
+                      !isCurrentMonth && "opacity-40"
+                    )}
+                  >
+                    <div className={cn(
+                      "text-xs font-medium mb-1 text-center rounded-full w-6 h-6 flex items-center justify-center mx-auto",
+                      isToday(day) && "bg-accent text-accent-foreground"
+                    )}>
+                      {format(day, "d")}
+                    </div>
+                    <div className="space-y-0.5">
+                      {dayBookings.slice(0, 3).map((booking) => (
+                        <button
+                          key={booking.id}
+                          onClick={() => onBookingClick(booking)}
+                          className={cn(
+                            "w-full text-left text-[10px] leading-tight px-1 py-0.5 rounded border cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1 truncate",
+                            statusColors[booking.status as BookingStatus] || statusColors.requested
+                          )}
+                        >
+                          <StatusIcon status={booking.status as BookingStatus} />
+                          <span className="font-medium">{format(new Date(booking.start_time), "HH:mm")}</span>
+                        </button>
+                      ))}
+                      {dayBookings.length > 3 && (
+                        <p className="text-[10px] text-muted-foreground text-center">+{dayBookings.length - 3}</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Legend */}
       <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground pt-2 border-t border-border">
