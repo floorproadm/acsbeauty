@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -67,9 +66,10 @@ export default function Auth() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = useCallback(async () => {
     setGoogleLoading(true);
     try {
+      const { lovable } = await import("@/integrations/lovable/index");
       const { error } = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
@@ -94,7 +94,7 @@ export default function Auth() {
     } finally {
       setGoogleLoading(false);
     }
-  };
+  }, [toast]);
 
   return (
     <div className="min-h-screen bg-gradient-hero">
