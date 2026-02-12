@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Users, Clock, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { Calendar, Users, Clock, AlertCircle, CheckCircle2, Loader2, ListTodo } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -85,6 +85,18 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
     },
   });
 
+  // Pending tasks
+  const { data: pendingTasksCount, isLoading: loadingTasks } = useQuery({
+    queryKey: ["admin-pending-tasks-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("tasks")
+        .select("*", { count: "exact", head: true })
+        .in("status", ["todo", "in_progress"]);
+      if (error) throw error;
+      return count || 0;
+    },
+  });
 
   // Confirm booking mutation
   const confirmBookingMutation = useMutation({
@@ -131,7 +143,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           {
             icon: Calendar,
@@ -156,6 +168,14 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
             label: "Clientes",
             value: clientsCount,
             loading: loadingClients,
+          },
+          {
+            icon: ListTodo,
+            iconBg: "bg-purple-500/10",
+            iconColor: "text-purple-600",
+            label: "Tarefas Pendentes",
+            value: pendingTasksCount,
+            loading: loadingTasks,
           },
         ].map((card, i) => (
           <motion.div
