@@ -152,6 +152,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
             label: "Hoje",
             value: todayBookings?.length || 0,
             loading: loadingBookings,
+            onClick: () => onNavigate("bookings"),
           },
           {
             icon: CheckCircle2,
@@ -160,6 +161,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
             label: "Confirmados",
             value: confirmedToday,
             loading: loadingBookings,
+            onClick: () => onNavigate("bookings"),
           },
           {
             icon: Users,
@@ -168,6 +170,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
             label: "Clientes",
             value: clientsCount,
             loading: loadingClients,
+            onClick: () => onNavigate("crm"),
           },
           {
             icon: ListTodo,
