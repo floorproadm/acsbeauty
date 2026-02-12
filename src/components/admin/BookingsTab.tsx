@@ -8,12 +8,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar as CalendarIcon, Search, Filter, CheckCircle, XCircle, Clock, UserX, RefreshCw, Loader2, Plus, Phone, MessageSquare } from "lucide-react";
-import { format, startOfDay, endOfDay, subDays, addDays, parseISO } from "date-fns";
+import { Calendar as CalendarIcon, Search, Filter, CheckCircle, XCircle, Clock, UserX, RefreshCw, Loader2, Plus, Phone, MessageSquare, List, LayoutGrid } from "lucide-react";
+import { format, startOfDay, endOfDay, subDays, addDays, parseISO, startOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BookingDetailModal } from "./BookingDetailModal";
 import { NewBookingModal } from "./NewBookingModal";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BookingCalendarView } from "./BookingCalendarView";
 
 type BookingStatus = "requested" | "confirmed" | "completed" | "cancelled" | "no_show";
 
@@ -26,6 +28,7 @@ const statusConfig: Record<BookingStatus, { label: string; color: string; icon: 
 };
 
 export function BookingsTab() {
+  const [viewMode, setViewMode] = useState<"list" | "week" | "month">("list");
   const [dateFilter, setDateFilter] = useState<string>("today");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,6 +45,14 @@ export function BookingsTab() {
 
   const getDateRange = () => {
     const now = new Date();
+    // Calendar views need broader data
+    if (viewMode === "week") {
+      const ws = startOfWeek(now, { weekStartsOn: 1 });
+      return { start: subDays(ws, 7), end: addDays(ws, 21) };
+    }
+    if (viewMode === "month") {
+      return { start: subDays(startOfDay(now), 35), end: addDays(now, 45) };
+    }
     switch (dateFilter) {
       case "today": return { start: startOfDay(now), end: endOfDay(now) };
       case "tomorrow": return { start: startOfDay(addDays(now, 1)), end: endOfDay(addDays(now, 1)) };
@@ -52,7 +63,7 @@ export function BookingsTab() {
   };
 
   const { data: bookings, isLoading } = useQuery({
-    queryKey: ["admin-bookings", dateFilter, statusFilter],
+    queryKey: ["admin-bookings", dateFilter, statusFilter, viewMode],
     queryFn: async () => {
       const { start, end } = getDateRange();
       let query = supabase
@@ -167,119 +178,139 @@ export function BookingsTab() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="font-serif text-2xl font-bold">Agendamentos</h1>
-        <Button onClick={() => setIsNewBookingOpen(true)} className="gap-2">
-          <Plus className="w-4 h-4" />
-          Novo Agendamento
-        </Button>
+        <div className="flex items-center gap-2">
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)} className="mr-2">
+            <TabsList className="h-9">
+              <TabsTrigger value="list" className="gap-1 px-2.5 text-xs"><List className="w-3.5 h-3.5" />Lista</TabsTrigger>
+              <TabsTrigger value="week" className="gap-1 px-2.5 text-xs"><LayoutGrid className="w-3.5 h-3.5" />Semana</TabsTrigger>
+              <TabsTrigger value="month" className="gap-1 px-2.5 text-xs"><CalendarIcon className="w-3.5 h-3.5" />Mês</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Button onClick={() => setIsNewBookingOpen(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
+            Novo Agendamento
+          </Button>
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Buscar cliente..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
+      {/* Filters - only show in list mode */}
+      {viewMode === "list" && (
+        <div className="flex flex-wrap gap-3">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input placeholder="Buscar cliente..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
+          </div>
+          <Select value={dateFilter} onValueChange={setDateFilter}>
+            <SelectTrigger className="w-[140px]"><CalendarIcon className="w-4 h-4 mr-2" /><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="today">Hoje</SelectItem>
+              <SelectItem value="tomorrow">Amanhã</SelectItem>
+              <SelectItem value="week">Próx. 7 dias</SelectItem>
+              <SelectItem value="past">Últimos 30 dias</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[150px]"><Filter className="w-4 h-4 mr-2" /><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos status</SelectItem>
+              <SelectItem value="requested">Aguardando</SelectItem>
+              <SelectItem value="confirmed">Confirmados</SelectItem>
+              <SelectItem value="completed">Concluídos</SelectItem>
+              <SelectItem value="cancelled">Cancelados</SelectItem>
+              <SelectItem value="no_show">Não compareceu</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Select value={dateFilter} onValueChange={setDateFilter}>
-          <SelectTrigger className="w-[140px]"><CalendarIcon className="w-4 h-4 mr-2" /><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="today">Hoje</SelectItem>
-            <SelectItem value="tomorrow">Amanhã</SelectItem>
-            <SelectItem value="week">Próx. 7 dias</SelectItem>
-            <SelectItem value="past">Últimos 30 dias</SelectItem>
-            <SelectItem value="all">Todos</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[150px]"><Filter className="w-4 h-4 mr-2" /><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos status</SelectItem>
-            <SelectItem value="requested">Aguardando</SelectItem>
-            <SelectItem value="confirmed">Confirmados</SelectItem>
-            <SelectItem value="completed">Concluídos</SelectItem>
-            <SelectItem value="cancelled">Cancelados</SelectItem>
-            <SelectItem value="no_show">Não compareceu</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      )}
 
-      {isLoading ? (
-        <div className="space-y-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}</div>
-      ) : filteredBookings?.length === 0 ? (
-        <div className="text-center py-12 bg-card rounded-xl border border-border">
-          <CalendarIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">Nenhum agendamento encontrado</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {filteredBookings?.map((booking) => {
-            const status = statusConfig[booking.status as BookingStatus];
-            const StatusIcon = status?.icon || Clock;
-            return (
-              <div key={booking.id} className={`bg-card rounded-xl border border-border p-4 shadow-soft border-l-4 ${
-                booking.status === "confirmed" ? "border-l-emerald-500" :
-                booking.status === "completed" ? "border-l-blue-500" :
-                booking.status === "cancelled" ? "border-l-red-500" :
-                booking.status === "no_show" ? "border-l-gray-400" :
-                "border-l-amber-500"
-              }`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-start gap-4 cursor-pointer" onClick={() => { setSelectedBooking(booking); setIsModalOpen(true); }}>
-                    <div className="text-center min-w-[60px] bg-muted rounded-lg p-2">
-                      <p className="text-xs text-muted-foreground">{format(new Date(booking.start_time), "dd MMM", { locale: ptBR })}</p>
-                      <p className="text-lg font-bold">{format(new Date(booking.start_time), "HH:mm")}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold">{booking.client_name}</p>
-                      <p className="text-sm text-muted-foreground">{booking.client_phone || booking.client_email}</p>
-                      {booking.services?.name && <p className="text-xs text-rose-gold mt-1">{booking.services.name}</p>}
+      {/* Calendar view */}
+      {(viewMode === "week" || viewMode === "month") && (
+        <BookingCalendarView
+          bookings={bookings || []}
+          onBookingClick={(booking) => { setSelectedBooking(booking); setIsModalOpen(true); }}
+          mode={viewMode}
+        />
+      )}
+
+      {/* List view */}
+      {viewMode === "list" && (
+        <>
+          {isLoading ? (
+            <div className="space-y-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}</div>
+          ) : filteredBookings?.length === 0 ? (
+            <div className="text-center py-12 bg-card rounded-xl border border-border">
+              <CalendarIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">Nenhum agendamento encontrado</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredBookings?.map((booking) => {
+                const status = statusConfig[booking.status as BookingStatus];
+                const StatusIcon = status?.icon || Clock;
+                return (
+                  <div key={booking.id} className={`bg-card rounded-xl border border-border p-4 shadow-soft border-l-4 ${
+                    booking.status === "confirmed" ? "border-l-emerald-500" :
+                    booking.status === "completed" ? "border-l-blue-500" :
+                    booking.status === "cancelled" ? "border-l-red-500" :
+                    booking.status === "no_show" ? "border-l-gray-400" :
+                    "border-l-amber-500"
+                  }`}>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-start gap-4 cursor-pointer" onClick={() => { setSelectedBooking(booking); setIsModalOpen(true); }}>
+                        <div className="text-center min-w-[60px] bg-muted rounded-lg p-2">
+                          <p className="text-xs text-muted-foreground">{format(new Date(booking.start_time), "dd MMM", { locale: ptBR })}</p>
+                          <p className="text-lg font-bold">{format(new Date(booking.start_time), "HH:mm")}</p>
+                        </div>
+                        <div>
+                          <p className="font-semibold">{booking.client_name}</p>
+                          <p className="text-sm text-muted-foreground">{booking.client_phone || booking.client_email}</p>
+                          {booking.services?.name && <p className="text-xs text-rose-gold mt-1">{booking.services.name}</p>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full ${status?.color}`}>
+                          <StatusIcon className="w-3 h-3" />{status?.label}
+                        </span>
+                        {booking.client_phone && (
+                          <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50" onClick={(e) => handleWhatsApp(booking.client_phone!, e)} title="WhatsApp">
+                            <MessageSquare className="w-4 h-4" />
+                          </Button>
+                        )}
+                        {booking.status === "requested" && (
+                          <>
+                            <Button size="sm" onClick={(e) => { e.stopPropagation(); updateStatus.mutate({ id: booking.id, status: "confirmed" }); }} className="gap-1 text-xs">
+                              <CheckCircle className="w-3 h-3" />Confirmar
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-destructive text-xs" onClick={(e) => { e.stopPropagation(); cancelBookingMutation.mutate(booking.id); }} disabled={cancelBookingMutation.isPending}>
+                              {cancelBookingMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
+                            </Button>
+                          </>
+                        )}
+                        {booking.status === "confirmed" && (
+                          <>
+                            <Button size="sm" variant="outline" className="text-xs gap-1" onClick={(e) => { e.stopPropagation(); setRescheduleBooking(booking); }}>
+                              <RefreshCw className="w-3 h-3" />Remarcar
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-xs" onClick={(e) => { e.stopPropagation(); updateStatus.mutate({ id: booking.id, status: "completed" }); }}>
+                              Concluir
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-xs text-muted-foreground" onClick={(e) => { e.stopPropagation(); updateStatus.mutate({ id: booking.id, status: "no_show" }); }} title="Não compareceu">
+                              <UserX className="w-3 h-3" />
+                            </Button>
+                            <Button size="icon" variant="outline" className="h-8 w-8 text-destructive" onClick={(e) => { e.stopPropagation(); cancelBookingMutation.mutate(booking.id); }} disabled={cancelBookingMutation.isPending} title="Cancelar">
+                              {cancelBookingMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full ${status?.color}`}>
-                      <StatusIcon className="w-3 h-3" />{status?.label}
-                    </span>
-
-                    {/* WhatsApp quick action */}
-                    {booking.client_phone && (
-                      <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50" onClick={(e) => handleWhatsApp(booking.client_phone!, e)} title="WhatsApp">
-                        <MessageSquare className="w-4 h-4" />
-                      </Button>
-                    )}
-
-                    {/* Requested: Confirm + Cancel */}
-                    {booking.status === "requested" && (
-                      <>
-                        <Button size="sm" onClick={(e) => { e.stopPropagation(); updateStatus.mutate({ id: booking.id, status: "confirmed" }); }} className="gap-1 text-xs">
-                          <CheckCircle className="w-3 h-3" />Confirmar
-                        </Button>
-                        <Button size="sm" variant="outline" className="text-destructive text-xs" onClick={(e) => { e.stopPropagation(); cancelBookingMutation.mutate(booking.id); }} disabled={cancelBookingMutation.isPending}>
-                          {cancelBookingMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
-                        </Button>
-                      </>
-                    )}
-
-                    {/* Confirmed: Reschedule + Cancel + Complete + No-Show */}
-                    {booking.status === "confirmed" && (
-                      <>
-                        <Button size="sm" variant="outline" className="text-xs gap-1" onClick={(e) => { e.stopPropagation(); setRescheduleBooking(booking); }}>
-                          <RefreshCw className="w-3 h-3" />Remarcar
-                        </Button>
-                        <Button size="sm" variant="outline" className="text-xs" onClick={(e) => { e.stopPropagation(); updateStatus.mutate({ id: booking.id, status: "completed" }); }}>
-                          Concluir
-                        </Button>
-                        <Button size="sm" variant="outline" className="text-xs text-muted-foreground" onClick={(e) => { e.stopPropagation(); updateStatus.mutate({ id: booking.id, status: "no_show" }); }} title="Não compareceu">
-                          <UserX className="w-3 h-3" />
-                        </Button>
-                        <Button size="icon" variant="outline" className="h-8 w-8 text-destructive" onClick={(e) => { e.stopPropagation(); cancelBookingMutation.mutate(booking.id); }} disabled={cancelBookingMutation.isPending} title="Cancelar">
-                          {cancelBookingMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
 
       <BookingDetailModal booking={selectedBooking} open={isModalOpen} onOpenChange={setIsModalOpen} />
