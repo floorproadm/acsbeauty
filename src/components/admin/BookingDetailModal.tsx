@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Phone, Mail, Instagram, Calendar, Clock, DollarSign, FileText, User } from "lucide-react";
+import { Phone, Mail, Calendar, Clock, DollarSign, FileText, User, CheckCircle, XCircle, RefreshCw, UserX } from "lucide-react";
 
 interface BookingDetailModalProps {
   booking: {
@@ -16,11 +16,16 @@ interface BookingDetailModalProps {
     status: string;
     notes?: string | null;
     total_price?: number | null;
-    services?: { name: string } | null;
+    services?: { name: string; duration_minutes?: number } | null;
     packages?: { name: string } | null;
   } | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onConfirm?: (id: string) => void;
+  onCancel?: (id: string) => void;
+  onComplete?: (id: string) => void;
+  onNoShow?: (id: string) => void;
+  onReschedule?: (booking: any) => void;
 }
 
 const statusLabels: Record<string, { label: string; color: string }> = {
@@ -31,7 +36,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   no_show: { label: "Não compareceu", color: "bg-gray-100 text-gray-700" },
 };
 
-export function BookingDetailModal({ booking, open, onOpenChange }: BookingDetailModalProps) {
+export function BookingDetailModal({ booking, open, onOpenChange, onConfirm, onCancel, onComplete, onNoShow, onReschedule }: BookingDetailModalProps) {
   if (!booking) return null;
 
   const status = statusLabels[booking.status] || statusLabels.requested;
@@ -43,9 +48,10 @@ export function BookingDetailModal({ booking, open, onOpenChange }: BookingDetai
     }
   };
 
-  const handleInstagram = () => {
-    // Try to find instagram from notes or use email as fallback
-    window.open(`https://www.instagram.com/`, "_blank");
+  const handleAction = (action: ((id: string) => void) | ((b: any) => void) | undefined, arg?: any) => {
+    if (!action) return;
+    action(arg ?? booking.id);
+    onOpenChange(false);
   };
 
   return (
@@ -54,7 +60,7 @@ export function BookingDetailModal({ booking, open, onOpenChange }: BookingDetai
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="w-5 h-5" />
-            Detalhes do Lead
+            Detalhes do Agendamento
           </DialogTitle>
         </DialogHeader>
 
@@ -147,8 +153,43 @@ export function BookingDetailModal({ booking, open, onOpenChange }: BookingDetai
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex gap-2 pt-4">
+          {/* Status-specific actions */}
+          <div className="space-y-2 pt-4 border-t border-border">
+            {booking.status === "requested" && (
+              <div className="flex gap-2">
+                <Button onClick={() => handleAction(onConfirm)} className="flex-1 gap-1">
+                  <CheckCircle className="w-4 h-4" />Confirmar
+                </Button>
+                <Button variant="outline" onClick={() => handleAction(onCancel)} className="flex-1 gap-1 text-destructive">
+                  <XCircle className="w-4 h-4" />Cancelar
+                </Button>
+              </div>
+            )}
+
+            {booking.status === "confirmed" && (
+              <>
+                <div className="flex gap-2">
+                  <Button onClick={() => handleAction(onReschedule, booking)} variant="outline" className="flex-1 gap-1">
+                    <RefreshCw className="w-4 h-4" />Remarcar
+                  </Button>
+                  <Button onClick={() => handleAction(onComplete)} className="flex-1 gap-1">
+                    <CheckCircle className="w-4 h-4" />Concluir
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => handleAction(onNoShow)} className="flex-1 gap-1 text-muted-foreground">
+                    <UserX className="w-4 h-4" />Não compareceu
+                  </Button>
+                  <Button variant="outline" onClick={() => handleAction(onCancel)} className="flex-1 gap-1 text-destructive">
+                    <XCircle className="w-4 h-4" />Cancelar
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* General actions */}
+          <div className="flex gap-2">
             {booking.client_phone && (
               <Button onClick={handleWhatsApp} className="flex-1 bg-green-600 hover:bg-green-700">
                 <Phone className="w-4 h-4 mr-2" />
