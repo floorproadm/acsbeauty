@@ -200,7 +200,13 @@ export function BookingsTab() {
             const status = statusConfig[booking.status as BookingStatus];
             const StatusIcon = status?.icon || Clock;
             return (
-              <div key={booking.id} className="bg-card rounded-xl border border-border p-4 shadow-soft">
+              <div key={booking.id} className={`bg-card rounded-xl border border-border p-4 shadow-soft border-l-4 ${
+                booking.status === "confirmed" ? "border-l-emerald-500" :
+                booking.status === "completed" ? "border-l-blue-500" :
+                booking.status === "cancelled" ? "border-l-red-500" :
+                booking.status === "no_show" ? "border-l-gray-400" :
+                "border-l-amber-500"
+              }`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-start gap-4 cursor-pointer" onClick={() => { setSelectedBooking(booking); setIsModalOpen(true); }}>
                     <div className="text-center min-w-[60px] bg-muted rounded-lg p-2">

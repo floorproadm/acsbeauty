@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { AdminLayout, AdminTab } from "@/components/admin/AdminLayout";
 import { DashboardTab } from "@/components/admin/DashboardTab";
 import { BookingsTab } from "@/components/admin/BookingsTab";
@@ -37,7 +38,17 @@ export default function Admin() {
 
   return (
     <AdminLayout activeTab={activeTab} onTabChange={setActiveTab}>
-      {renderTab()}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+        >
+          {renderTab()}
+        </motion.div>
+      </AnimatePresence>
     </AdminLayout>
   );
 }
