@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -23,12 +24,23 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Loader2, ShieldCheck } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import type { Database } from "@/integrations/supabase/types";
+
+type AppRole = Database["public"]["Enums"]["app_role"];
+
+const roleLabels: Record<AppRole, string> = {
+  admin_owner: "Admin",
+  staff: "Staff",
+  marketing: "Marketing",
+};
 
 export function AllowedEmailsTab() {
   const [newEmail, setNewEmail] = useState("");
+  const [newRole, setNewRole] = useState<AppRole>("staff");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -45,10 +57,10 @@ export function AllowedEmailsTab() {
   });
 
   const addMutation = useMutation({
-    mutationFn: async (email: string) => {
+    mutationFn: async ({ email, role }: { email: string; role: AppRole }) => {
       const { error } = await supabase
         .from("allowed_emails")
-        .insert({ email: email.toLowerCase().trim() });
+        .insert({ email: email.toLowerCase().trim(), role });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -81,7 +93,7 @@ export function AllowedEmailsTab() {
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmail.trim()) return;
-    addMutation.mutate(newEmail);
+    addMutation.mutate({ email: newEmail, role: newRole });
   };
 
   return (
@@ -96,7 +108,7 @@ export function AllowedEmailsTab() {
         </div>
       </div>
 
-      <form onSubmit={handleAdd} className="flex gap-2">
+      <form onSubmit={handleAdd} className="flex gap-2 flex-wrap">
         <Input
           type="email"
           placeholder="novo@email.com"
@@ -105,6 +117,16 @@ export function AllowedEmailsTab() {
           className="max-w-sm"
           required
         />
+        <Select value={newRole} onValueChange={(v) => setNewRole(v as AppRole)}>
+          <SelectTrigger className="w-[130px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="admin_owner">Admin</SelectItem>
+            <SelectItem value="staff">Staff</SelectItem>
+            <SelectItem value="marketing">Marketing</SelectItem>
+          </SelectContent>
+        </Select>
         <Button type="submit" disabled={addMutation.isPending} size="sm">
           {addMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
           Adicionar
@@ -119,8 +141,9 @@ export function AllowedEmailsTab() {
         <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow>
+             <TableRow>
                 <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
                 <TableHead>Adicionado em</TableHead>
                 <TableHead className="w-16" />
               </TableRow>
@@ -128,7 +151,7 @@ export function AllowedEmailsTab() {
             <TableBody>
               {emails?.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
                     Nenhum email autorizado ainda.
                   </TableCell>
                 </TableRow>
@@ -136,6 +159,16 @@ export function AllowedEmailsTab() {
               {emails?.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{item.email}</TableCell>
+                  <TableCell>
+                    <span className={cn(
+                      "text-xs px-2 py-0.5 rounded-full font-medium",
+                      (item as any).role === "admin_owner" ? "bg-rose-100 text-rose-700" :
+                      (item as any).role === "marketing" ? "bg-purple-100 text-purple-700" :
+                      "bg-blue-100 text-blue-700"
+                    )}>
+                      {roleLabels[(item as any).role as AppRole] || "Staff"}
+                    </span>
+                  </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
                     {format(new Date(item.created_at), "dd MMM yyyy", { locale: ptBR })}
                   </TableCell>

@@ -19,6 +19,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import {
   Sidebar,
   SidebarContent,
@@ -36,6 +37,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
+type AppRole = Database["public"]["Enums"]["app_role"];
+
 export type AdminTab =
   | "dashboard"
   | "bookings"
@@ -51,17 +54,18 @@ interface AdminLayoutProps {
   children: React.ReactNode;
   activeTab: AdminTab;
   onTabChange: (tab: AdminTab) => void;
+  userRole?: AppRole | null;
 }
 
-const tabs: { id: AdminTab; label: string; icon: React.ElementType }[] = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "bookings", label: "Agendamentos", icon: Calendar },
-  { id: "crm", label: "CRM", icon: Users },
-  { id: "tasks", label: "Tarefas", icon: ClipboardList },
-  { id: "services", label: "Serviços", icon: Sparkles },
-  { id: "skus", label: "Opções", icon: Layers },
-  { id: "quizzes", label: "Quizzes", icon: HelpCircle },
-  { id: "access", label: "Acessos", icon: ShieldCheck },
+const allTabs: { id: AdminTab; label: string; icon: React.ElementType; roles: AppRole[] }[] = [
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin_owner"] },
+  { id: "bookings", label: "Agendamentos", icon: Calendar, roles: ["admin_owner", "staff"] },
+  { id: "crm", label: "CRM", icon: Users, roles: ["admin_owner", "staff"] },
+  { id: "tasks", label: "Tarefas", icon: ClipboardList, roles: ["admin_owner", "staff"] },
+  { id: "services", label: "Serviços", icon: Sparkles, roles: ["admin_owner"] },
+  { id: "skus", label: "Opções", icon: Layers, roles: ["admin_owner"] },
+  { id: "quizzes", label: "Quizzes", icon: HelpCircle, roles: ["admin_owner"] },
+  { id: "access", label: "Acessos", icon: ShieldCheck, roles: ["admin_owner"] },
 ];
 
 function AdminSidebar({
@@ -69,14 +73,17 @@ function AdminSidebar({
   onTabChange,
   user,
   onSignOut,
+  userRole,
 }: {
   activeTab: AdminTab;
   onTabChange: (tab: AdminTab) => void;
   user: User | null;
   onSignOut: () => void;
+  userRole: AppRole | null;
 }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const tabs = allTabs.filter((t) => !userRole || t.roles.includes(userRole));
 
   // Fetch pending bookings count
   const { data: pendingCount } = useQuery({
@@ -215,12 +222,15 @@ function AdminHeader() {
   );
 }
 
-export function AdminLayout({ children, activeTab, onTabChange }: AdminLayoutProps) {
+export function AdminLayout({ children, activeTab, onTabChange, userRole }: AdminLayoutProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [detectedRole, setDetectedRole] = useState<AppRole | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const effectiveRole = userRole ?? detectedRole;
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -235,12 +245,15 @@ export function AdminLayout({ children, activeTab, onTabChange }: AdminLayoutPro
 
       setUser(session.user);
 
-      const { data: roleData, error } = await supabase.rpc("has_role", {
-        _user_id: session.user.id,
-        _role: "admin_owner",
-      });
+      // Check for any valid role (admin, staff, or marketing)
+      const { data: roleRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .limit(1)
+        .single();
 
-      if (error || !roleData) {
+      if (!roleRow) {
         toast({
           title: "Acesso negado",
           description: "Você não tem permissão para acessar esta área.",
@@ -250,6 +263,7 @@ export function AdminLayout({ children, activeTab, onTabChange }: AdminLayoutPro
         return;
       }
 
+      setDetectedRole(roleRow.role as AppRole);
       setIsAuthorized(true);
       setLoading(false);
     };
@@ -292,6 +306,7 @@ export function AdminLayout({ children, activeTab, onTabChange }: AdminLayoutPro
           onTabChange={onTabChange}
           user={user}
           onSignOut={handleSignOut}
+          userRole={effectiveRole}
         />
         <div className="flex-1 flex flex-col min-w-0">
           <AdminHeader />
