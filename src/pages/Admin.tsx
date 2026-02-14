@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { AdminLayout, AdminTab } from "@/components/admin/AdminLayout";
 import { DashboardTab } from "@/components/admin/DashboardTab";
@@ -10,9 +10,18 @@ import { OffersTab } from "@/components/admin/OffersTab";
 import { QuizzesTab } from "@/components/admin/QuizzesTab";
 import { TasksTab } from "@/components/admin/TasksTab";
 import { AllowedEmailsTab } from "@/components/admin/AllowedEmailsTab";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Admin() {
+  const { role } = useUserRole();
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
+
+  // Set default tab for non-admin roles
+  useEffect(() => {
+    if (role && role !== "admin_owner") {
+      setActiveTab("bookings");
+    }
+  }, [role]);
 
   const renderTab = () => {
     switch (activeTab) {
@@ -40,7 +49,7 @@ export default function Admin() {
   };
 
   return (
-    <AdminLayout activeTab={activeTab} onTabChange={setActiveTab}>
+    <AdminLayout activeTab={activeTab} onTabChange={setActiveTab} userRole={role}>
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
