@@ -947,6 +947,7 @@ export type Database = {
           promo_price: number | null
           service_id: string
           sku_code: string | null
+          slug: string | null
           sort_order: number
           updated_at: string
           variation_id: string | null
@@ -961,6 +962,7 @@ export type Database = {
           promo_price?: number | null
           service_id: string
           sku_code?: string | null
+          slug?: string | null
           sort_order?: number
           updated_at?: string
           variation_id?: string | null
@@ -975,6 +977,7 @@ export type Database = {
           promo_price?: number | null
           service_id?: string
           sku_code?: string | null
+          slug?: string | null
           sort_order?: number
           updated_at?: string
           variation_id?: string | null
@@ -1044,11 +1047,14 @@ export type Database = {
           created_at: string
           description: string | null
           duration_minutes: number
+          faq: Json | null
+          hero_image_url: string | null
           id: string
           is_active: boolean | null
           name: string
           price: number
           promo_price: number | null
+          slug: string | null
           status: Database["public"]["Enums"]["service_status"] | null
           updated_at: string
         }
@@ -1058,11 +1064,14 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_minutes?: number
+          faq?: Json | null
+          hero_image_url?: string | null
           id?: string
           is_active?: boolean | null
           name: string
           price: number
           promo_price?: number | null
+          slug?: string | null
           status?: Database["public"]["Enums"]["service_status"] | null
           updated_at?: string
         }
@@ -1072,11 +1081,14 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_minutes?: number
+          faq?: Json | null
+          hero_image_url?: string | null
           id?: string
           is_active?: boolean | null
           name?: string
           price?: number
           promo_price?: number | null
+          slug?: string | null
           status?: Database["public"]["Enums"]["service_status"] | null
           updated_at?: string
         }
