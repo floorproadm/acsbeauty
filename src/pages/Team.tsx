@@ -5,7 +5,7 @@ import founderImg from "@/assets/founder.jpg";
 
 const team = [
   {
-    name: "Ana Carolina",
+    name: "Ane Caroline",
     role: "Fundadora & Brow Artist",
     image: founderImg,
     specialties: ["Design de Sobrancelha", "Brow Lamination", "Henna Brows"],
