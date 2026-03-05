@@ -13,7 +13,7 @@ import hairImage from "@/assets/hair-service.png";
 import browsImage from "@/assets/brows-service.jpg";
 import nailsImage from "@/assets/nails-service.jpg";
 
-// Category config maps category values to display metadata
+// Category display metadata by category_slug
 const CATEGORY_CONFIG: Record<string, {
   icon: typeof Scissors;
   fallbackImage: string;
@@ -52,38 +52,30 @@ const CATEGORY_CONFIG: Record<string, {
   },
 };
 
-// Map URL slug → DB category value
-const SLUG_TO_CATEGORY: Record<string, string> = {
-  cabelo: "Cabelo",
-  sobrancelhas: "Sobrancelhas",
-  unhas: "Unhas",
-};
-
 export default function CategoryPage() {
   const { categoria } = useParams<{ categoria: string }>();
   const { t } = useLanguage();
   const categorySlug = categoria?.toLowerCase() || "";
-  const dbCategory = SLUG_TO_CATEGORY[categorySlug];
   const config = CATEGORY_CONFIG[categorySlug];
 
-  // Fetch services for this category
+  // Fetch services by category_slug
   const { data: services, isLoading } = useQuery({
-    queryKey: ["category-services", dbCategory],
+    queryKey: ["category-services", categorySlug],
     queryFn: async () => {
-      if (!dbCategory) return [];
+      if (!categorySlug) return [];
       const { data, error } = await supabase
         .from("services")
-        .select("id, name, slug, description, price, hero_image_url, faq")
-        .eq("category", dbCategory)
+        .select("id, name, slug, description, price, hero_image_url")
+        .eq("category_slug", categorySlug)
         .eq("is_active", true)
         .order("name");
       if (error) throw error;
       return data || [];
     },
-    enabled: !!dbCategory,
+    enabled: !!categorySlug,
   });
 
-  // Fetch min SKU price for each service in this category
+  // Fetch min SKU price for each service
   const serviceIds = services?.map((s) => s.id) || [];
   const { data: skuPrices } = useQuery({
     queryKey: ["category-sku-prices", serviceIds],
@@ -96,8 +88,6 @@ export default function CategoryPage() {
         .eq("is_active", true)
         .order("price", { ascending: true });
       if (error) throw error;
-
-      // Group by service_id, take min price
       const priceMap: Record<string, number> = {};
       for (const sku of data || []) {
         if (sku.price != null && (!priceMap[sku.service_id] || sku.price < priceMap[sku.service_id])) {
@@ -109,36 +99,37 @@ export default function CategoryPage() {
     enabled: serviceIds.length > 0,
   });
 
-  // If category doesn't exist, redirect to 404
-  if (!config || !dbCategory) {
+  // Fetch FAQs from service_faqs table for services in this category
+  const { data: faqs } = useQuery({
+    queryKey: ["category-faqs", serviceIds],
+    queryFn: async () => {
+      if (serviceIds.length === 0) return [];
+      const { data, error } = await supabase
+        .from("service_faqs")
+        .select("question, answer, sort_order")
+        .in("service_id", serviceIds)
+        .order("sort_order");
+      if (error) throw error;
+      return (data || []).map((f) => ({ question: f.question, answer: f.answer }));
+    },
+    enabled: serviceIds.length > 0,
+  });
+
+  // If category doesn't exist in config, redirect to 404
+  if (!config) {
     return <Navigate to="/404" replace />;
   }
 
-  const Icon = config.icon;
-  const heroImage = config.fallbackImage;
-
-  // Aggregate FAQ from services that have faq jsonb data, or fall back to translations
-  const dynamicFaqs: { question: string; answer: string }[] = [];
-  if (services) {
-    for (const service of services) {
-      if (service.faq && Array.isArray(service.faq)) {
-        for (const item of service.faq as { question: string; answer: string }[]) {
-          dynamicFaqs.push(item);
-        }
-      }
-    }
-  }
-
-  // Fall back to hardcoded translation FAQs if no dynamic FAQs exist
-  const faqKeys = categorySlug === "cabelo"
-    ? [1, 2, 3, 4, 5]
-    : [1, 2, 3, 4];
+  // Fall back to hardcoded translation FAQs if no dynamic FAQs
+  const faqKeys = categorySlug === "cabelo" ? [1, 2, 3, 4, 5] : [1, 2, 3, 4];
   const translationFaqs = faqKeys.map((i) => ({
     question: t(`servicos.${categorySlug}.faq_${i}_q`),
     answer: t(`servicos.${categorySlug}.faq_${i}_a`),
   }));
+  const finalFaqs = faqs && faqs.length > 0 ? faqs : translationFaqs;
 
-  const faqs = dynamicFaqs.length > 0 ? dynamicFaqs : translationFaqs;
+  const Icon = config.icon;
+  const heroImage = config.fallbackImage;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -147,46 +138,25 @@ export default function CategoryPage() {
         {/* Hero Section */}
         <section className="relative pt-20 pb-12 md:pt-0 md:pb-0 md:min-h-[80vh] flex items-center overflow-hidden">
           <div className="absolute inset-0 z-0">
-            <img
-              src={heroImage}
-              alt={`Serviços de ${categorySlug} ACS Beauty`}
-              className="w-full h-full object-cover"
-            />
+            <img src={heroImage} alt={t(config.titleKey)} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/85 to-background/60 md:bg-gradient-to-r md:from-background/90 md:via-background/70 md:to-background/40" />
           </div>
 
           <div className="container mx-auto px-5 md:px-6 relative z-10 py-6 md:py-0">
-            <Link
-              to="/services"
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 md:mb-8"
-            >
+            <Link to="/services" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 md:mb-8">
               <ArrowLeft className="w-4 h-4" />
               {t("global.back")}
             </Link>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-2xl"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-2xl">
               <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
                 <div className="p-2 md:p-3 rounded-full bg-rose-gold/20 backdrop-blur-sm">
                   <Icon className="w-5 h-5 md:w-6 md:h-6 text-rose-gold" />
                 </div>
-                <span className="text-xs md:text-sm font-medium tracking-wider text-rose-gold uppercase">
-                  {t(config.badgeKey)}
-                </span>
+                <span className="text-xs md:text-sm font-medium tracking-wider text-rose-gold uppercase">{t(config.badgeKey)}</span>
               </div>
-
-              <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 text-foreground leading-tight">
-                {t(config.titleKey)}
-              </h1>
-
-              <p className="text-base md:text-xl text-muted-foreground mb-6 md:mb-8 leading-relaxed">
-                {t(config.subtitleKey)}
-              </p>
-
+              <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 text-foreground leading-tight">{t(config.titleKey)}</h1>
+              <p className="text-base md:text-xl text-muted-foreground mb-6 md:mb-8 leading-relaxed">{t(config.subtitleKey)}</p>
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
                 <Link to="/book" className="w-full sm:w-auto">
                   <Button variant="hero" size="lg" className="group w-full">
@@ -194,50 +164,26 @@ export default function CategoryPage() {
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </Link>
-                <Link to="/services" className="w-full sm:w-auto">
-                  <Button variant="outline" size="lg" className="w-full backdrop-blur-sm bg-background/50">
-                    {t("servicos.view_related_offers")}
-                  </Button>
-                </Link>
               </div>
             </motion.div>
           </div>
         </section>
 
-        {/* About This Category */}
+        {/* About */}
         <section className="py-16 md:py-20">
           <div className="container mx-auto px-4 md:px-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="max-w-3xl mx-auto"
-            >
-              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-foreground">
-                {t(config.aboutTitleKey)}
-              </h2>
-              <p className="text-muted-foreground text-lg leading-relaxed">
-                {t(config.aboutTextKey)}
-              </p>
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="max-w-3xl mx-auto">
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-foreground">{t(config.aboutTitleKey)}</h2>
+              <p className="text-muted-foreground text-lg leading-relaxed">{t(config.aboutTextKey)}</p>
             </motion.div>
           </div>
         </section>
 
-        {/* Services List — Dynamic from DB */}
+        {/* Services List */}
         <section className="py-16 md:py-20 bg-muted/30">
           <div className="container mx-auto px-4 md:px-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="max-w-3xl mx-auto"
-            >
-              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-8 text-foreground">
-                {t("servicos.what_we_offer")}
-              </h2>
-
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="max-w-3xl mx-auto">
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-8 text-foreground">{t("servicos.what_we_offer")}</h2>
               {isLoading ? (
                 <div className="flex justify-center py-12">
                   <Loader2 className="w-6 h-6 animate-spin text-rose-gold" />
@@ -247,28 +193,15 @@ export default function CategoryPage() {
                   {services?.map((service, index) => {
                     const minPrice = skuPrices?.[service.id] ?? service.price;
                     return (
-                      <motion.div
-                        key={service.id}
-                        initial={{ opacity: 0, x: -10 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.4, delay: index * 0.05 }}
-                      >
-                        <Link
-                          to={`/servicos/${categorySlug}/${service.slug}`}
-                          className="flex items-center gap-3 p-4 bg-card rounded-lg shadow-soft hover:shadow-card transition-all group"
-                        >
+                      <motion.div key={service.id} initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: index * 0.05 }}>
+                        <Link to={`/servicos/${categorySlug}/${service.slug}`} className="flex items-center gap-3 p-4 bg-card rounded-lg shadow-soft hover:shadow-card transition-all group">
                           <div className="p-1.5 rounded-full bg-rose-gold/10">
                             <Check className="w-4 h-4 text-rose-gold" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-foreground font-medium group-hover:text-rose-gold transition-colors">
-                              {service.name}
-                            </span>
+                            <span className="text-foreground font-medium group-hover:text-rose-gold transition-colors">{service.name}</span>
                             {minPrice != null && (
-                              <p className="text-xs text-muted-foreground mt-0.5">
-                                a partir de ${Number(minPrice).toFixed(0)}
-                              </p>
+                              <p className="text-xs text-muted-foreground mt-0.5">a partir de ${Number(minPrice).toFixed(0)}</p>
                             )}
                           </div>
                           <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-rose-gold transition-colors shrink-0" />
@@ -282,35 +215,20 @@ export default function CategoryPage() {
           </div>
         </section>
 
-        {/* FAQ Section */}
-        <ServiceFAQ faqs={faqs} />
+        {/* FAQ */}
+        <ServiceFAQ faqs={finalFaqs} />
 
-        {/* Final CTA */}
+        {/* CTA */}
         <section className="py-16 md:py-20 bg-gradient-warm">
           <div className="container mx-auto px-4 md:px-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="max-w-2xl mx-auto text-center"
-            >
-              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-4 text-foreground">
-                {t("servicos.cta_title")}
-              </h2>
-              <p className="text-muted-foreground mb-8">
-                {t("servicos.cta_description")}
-              </p>
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="max-w-2xl mx-auto text-center">
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-4 text-foreground">{t("servicos.cta_title")}</h2>
+              <p className="text-muted-foreground mb-8">{t("servicos.cta_description")}</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link to="/book">
                   <Button variant="hero" size="lg" className="group w-full sm:w-auto">
                     {t("global.book_now")}
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </Button>
-                </Link>
-                <Link to="/services">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                    {t("servicos.view_related_offers")}
                   </Button>
                 </Link>
               </div>

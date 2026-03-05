@@ -1,50 +1,80 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Sparkles, ArrowRight, Scissors, Eye, Palette } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 
 import hairServiceImg from "@/assets/hair-service.png";
 import browsServiceImg from "@/assets/brows-service.jpg";
 import nailsServiceImg from "@/assets/nails-service.jpg";
 
-const services = [
-  {
-    id: "cabelo",
-    namePt: "Cabelo",
-    nameEn: "Hair",
-    descriptionPt: "Extensões de cabelos, highlights, progressiva, botox capilar, selagem, tratamentos capilares, corte, tintura e escova.",
-    descriptionEn: "Hair extensions, highlights, keratin treatment, hair botox, sealing, hair treatments, cut, color, and blowout.",
-    icon: Scissors,
-    image: hairServiceImg,
-    href: "/servicos/cabelo",
-  },
-  {
-    id: "sobrancelhas",
-    namePt: "Sobrancelhas",
-    nameEn: "Brows",
-    descriptionPt: "Design perfeito e técnicas avançadas para realçar seu olhar.",
-    descriptionEn: "Perfect design and advanced techniques to enhance your look.",
-    icon: Eye,
-    image: browsServiceImg,
-    href: "/servicos/sobrancelhas",
-  },
-  {
-    id: "unhas",
-    namePt: "Unhas",
-    nameEn: "Nails",
-    descriptionPt: "Nail art, alongamento e esmaltação em gel para mãos impecáveis.",
-    descriptionEn: "Nail art, extensions and gel polish for flawless hands.",
-    icon: Palette,
-    image: nailsServiceImg,
-    href: "/servicos/unhas",
-  },
-];
+// Fallback images and icons by category_slug
+const CATEGORY_META: Record<string, { icon: typeof Scissors; image: string }> = {
+  cabelo: { icon: Scissors, image: hairServiceImg },
+  sobrancelhas: { icon: Eye, image: browsServiceImg },
+  unhas: { icon: Palette, image: nailsServiceImg },
+};
 
 export default function Services() {
   const { t, language } = useLanguage();
+
+  // Fetch distinct categories from active services
+  const { data: categories } = useQuery({
+    queryKey: ["service-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("services")
+        .select("category, category_slug")
+        .eq("is_active", true)
+        .order("category");
+      if (error) throw error;
+
+      // Deduplicate by category_slug
+      const seen = new Set<string>();
+      const unique: { category: string; category_slug: string }[] = [];
+      for (const row of data || []) {
+        if (row.category_slug && !seen.has(row.category_slug)) {
+          seen.add(row.category_slug);
+          unique.push({ category: row.category!, category_slug: row.category_slug });
+        }
+      }
+      return unique;
+    },
+  });
+
+  // Translation keys per category_slug
+  const getCategoryLabel = (slug: string, category: string) => {
+    const keyMap: Record<string, { namePt: string; nameEn: string; descPt: string; descEn: string }> = {
+      cabelo: {
+        namePt: "Cabelo",
+        nameEn: "Hair",
+        descPt: "Extensões de cabelos, highlights, progressiva, botox capilar, selagem, tratamentos capilares, corte, tintura e escova.",
+        descEn: "Hair extensions, highlights, keratin treatment, hair botox, sealing, hair treatments, cut, color, and blowout.",
+      },
+      sobrancelhas: {
+        namePt: "Sobrancelhas",
+        nameEn: "Brows",
+        descPt: "Design perfeito e técnicas avançadas para realçar seu olhar.",
+        descEn: "Perfect design and advanced techniques to enhance your look.",
+      },
+      unhas: {
+        namePt: "Unhas",
+        nameEn: "Nails",
+        descPt: "Nail art, alongamento e esmaltação em gel para mãos impecáveis.",
+        descEn: "Nail art, extensions and gel polish for flawless hands.",
+      },
+    };
+    const meta = keyMap[slug];
+    if (!meta) return { name: category, description: "" };
+    return {
+      name: language === "pt" ? meta.namePt : meta.nameEn,
+      description: language === "pt" ? meta.descPt : meta.descEn,
+    };
+  };
 
   return (
     <div className="min-h-[100svh] bg-background">
@@ -69,11 +99,14 @@ export default function Services() {
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
-            {services.map((service, index) => {
-              const Icon = service.icon;
+            {(categories || []).map((cat, index) => {
+              const meta = CATEGORY_META[cat.category_slug] || { icon: Sparkles, image: hairServiceImg };
+              const Icon = meta.icon;
+              const labels = getCategoryLabel(cat.category_slug, cat.category);
+
               return (
                 <motion.div
-                  key={service.id}
+                  key={cat.category_slug}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -81,8 +114,8 @@ export default function Services() {
                 >
                   <div className="aspect-[4/3] overflow-hidden">
                     <img
-                      src={service.image}
-                      alt={language === "pt" ? service.namePt : service.nameEn}
+                      src={meta.image}
+                      alt={labels.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
@@ -92,13 +125,13 @@ export default function Services() {
                         <Icon className="w-4 h-4 text-rose-gold" />
                       </div>
                       <h2 className="font-serif text-xl md:text-2xl font-bold">
-                        {language === "pt" ? service.namePt : service.nameEn}
+                        {labels.name}
                       </h2>
                     </div>
                     <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                      {language === "pt" ? service.descriptionPt : service.descriptionEn}
+                      {labels.description}
                     </p>
-                    <Link to={service.href}>
+                    <Link to={`/servicos/${cat.category_slug}`}>
                       <Button variant="hero" size="default" className="w-full group/btn">
                         {t("global.learn_more")}
                         <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
