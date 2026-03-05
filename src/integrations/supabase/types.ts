@@ -404,6 +404,63 @@ export type Database = {
           },
         ]
       }
+      gift_cards: {
+        Row: {
+          amount: number
+          balance: number
+          buyer_email: string
+          buyer_name: string
+          code: string
+          created_at: string
+          delivered_at: string | null
+          expires_at: string | null
+          id: string
+          occasion: string | null
+          payment_method: string | null
+          personal_message: string | null
+          recipient_email: string
+          recipient_name: string
+          status: string
+          stripe_payment_intent_id: string | null
+        }
+        Insert: {
+          amount: number
+          balance: number
+          buyer_email: string
+          buyer_name: string
+          code: string
+          created_at?: string
+          delivered_at?: string | null
+          expires_at?: string | null
+          id?: string
+          occasion?: string | null
+          payment_method?: string | null
+          personal_message?: string | null
+          recipient_email: string
+          recipient_name: string
+          status?: string
+          stripe_payment_intent_id?: string | null
+        }
+        Update: {
+          amount?: number
+          balance?: number
+          buyer_email?: string
+          buyer_name?: string
+          code?: string
+          created_at?: string
+          delivered_at?: string | null
+          expires_at?: string | null
+          id?: string
+          occasion?: string | null
+          payment_method?: string | null
+          personal_message?: string | null
+          recipient_email?: string
+          recipient_name?: string
+          status?: string
+          stripe_payment_intent_id?: string | null
+        }
+        Relationships: []
+      }
       lead_activities: {
         Row: {
           action: string
