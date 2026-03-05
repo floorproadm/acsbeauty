@@ -1,24 +1,52 @@
 
-# Kanban como View Principal no CRM Captação
+# ACS v2.0 — Progresso de Implementação
 
-## Objetivo
-Definir a visualização Kanban (board) como padrão ao abrir a aba de Captação no CRM, em vez da visualização de tabela.
+## ✅ Fase 1: Rotas Dinâmicas de Serviços (CONCLUÍDA)
 
-## Mudança
+### Migration executada:
+- `services.slug` (text UNIQUE) — populado automaticamente
+- `service_skus.slug` (text)
+- `services.hero_image_url` (text)
+- `services.faq` (jsonb, default '[]')
 
-### UnifiedLeadsTab.tsx (linha 325)
+### Páginas criadas:
+- `src/pages/servicos/CategoryPage.tsx` → `/servicos/:categoria`
+  - Query dinâmica por categoria do banco
+  - "A partir de" usando menor preço dos SKUs
+  - FAQ dinâmico (jsonb) com fallback para traduções hardcoded
+  - Mesmo layout visual das páginas estáticas anteriores
 
-**Antes:**
-```typescript
-const [viewMode, setViewMode] = useState<ViewMode>("table");
-```
+- `src/pages/servicos/ServiceDetail.tsx` → `/servicos/:categoria/:slug`
+  - Mostra variações e SKUs com preços reais
+  - Agrupamento por técnica (variation)
+  - CTA direto para booking
 
-**Depois:**
-```typescript
-const [viewMode, setViewMode] = useState<ViewMode>("board");
-```
+### RLS adicionado:
+- `service_skus` → "Anyone can view active skus" (anon + authenticated, is_active=true)
+- `service_variations` → "Anyone can view active variations" (anon + authenticated, is_active=true)
 
-## Resultado
-- Ao acessar CRM → Captação, o usuário verá imediatamente o Kanban com as 4 colunas de status
-- O botão de toggle continua disponível para alternar para visualização em tabela quando necessário
-- Nenhuma outra mudança de lógica é necessária
+### Rotas atualizadas:
+- Páginas estáticas antigas removidas do App.tsx (Cabelo, Sobrancelhas, Unhas)
+- Imports legados de Packages/OfferLanding/PackageLanding removidos
+
+---
+
+## 🔲 Fase 2: Booking por Slug (Conversão)
+- `/agendar`, `/agendar/:serviceSlug`, `/agendar/:serviceSlug/:skuSlug`
+- Refactor Book.tsx em sub-componentes
+- Redirect `/book` → `/agendar`
+
+## 🔲 Fase 3: Quiz como Funil Real
+- `/quiz` landing, `/quiz/:slug/resultado`
+- WhatsApp com contexto
+
+## 🔲 Fase 4: Páginas de Conteúdo e Legal
+- `/privacidade`, `/termos`, `/perguntas-frequentes`
+- `/estudio`, `/equipe`
+
+## 🔲 Fase 5: Admin — Rotas Nomeadas
+- Sub-rotas reais com Outlet
+
+## 🔲 Fase 6: Limpeza
+- Remover arquivos legados
+- Atualizar Footer/Header
