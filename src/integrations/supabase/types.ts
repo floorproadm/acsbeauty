@@ -936,6 +936,41 @@ export type Database = {
         }
         Relationships: []
       }
+      service_faqs: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          question: string
+          service_id: string
+          sort_order: number
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          id?: string
+          question: string
+          service_id: string
+          sort_order?: number
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          question?: string
+          service_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_faqs_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_skus: {
         Row: {
           created_at: string
@@ -1044,6 +1079,7 @@ export type Database = {
         Row: {
           base_price: number | null
           category: string | null
+          category_slug: string | null
           created_at: string
           description: string | null
           duration_minutes: number
@@ -1054,13 +1090,14 @@ export type Database = {
           name: string
           price: number
           promo_price: number | null
-          slug: string | null
+          slug: string
           status: Database["public"]["Enums"]["service_status"] | null
           updated_at: string
         }
         Insert: {
           base_price?: number | null
           category?: string | null
+          category_slug?: string | null
           created_at?: string
           description?: string | null
           duration_minutes?: number
@@ -1071,13 +1108,14 @@ export type Database = {
           name: string
           price: number
           promo_price?: number | null
-          slug?: string | null
+          slug: string
           status?: Database["public"]["Enums"]["service_status"] | null
           updated_at?: string
         }
         Update: {
           base_price?: number | null
           category?: string | null
+          category_slug?: string | null
           created_at?: string
           description?: string | null
           duration_minutes?: number
@@ -1088,7 +1126,7 @@ export type Database = {
           name?: string
           price?: number
           promo_price?: number | null
-          slug?: string | null
+          slug?: string
           status?: Database["public"]["Enums"]["service_status"] | null
           updated_at?: string
         }
