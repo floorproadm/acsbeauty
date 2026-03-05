@@ -4,8 +4,10 @@ import { Footer } from "@/components/layout/Footer";
 import { GiftCardForm } from "@/components/gift-cards/GiftCardForm";
 import { GiftCardPreview } from "@/components/gift-cards/GiftCardPreview";
 import { Gift } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function GiftCards() {
+  const { language } = useLanguage();
   const [formData, setFormData] = useState({
     amount: 100,
     recipientName: "",
@@ -13,6 +15,8 @@ export default function GiftCards() {
     personalMessage: "",
     buyerName: "",
   });
+
+  const isPt = language === "pt";
 
   return (
     <div className="min-h-screen bg-background">
@@ -27,11 +31,16 @@ export default function GiftCards() {
               Gift Cards
             </div>
             <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">
-              Presenteie com{" "}
-              <span className="text-primary">Beleza</span>
+              {isPt ? (
+                <>Presenteie com{" "}<span className="text-primary">Beleza</span></>
+              ) : (
+                <>The Gift of{" "}<span className="text-primary">Beauty</span></>
+              )}
             </h1>
             <p className="text-muted-foreground max-w-lg mx-auto">
-              O presente perfeito para quem você ama. Escolha o valor, personalize e envie com carinho.
+              {isPt
+                ? "O presente perfeito para quem você ama. Escolha o valor, personalize e envie com carinho."
+                : "The perfect gift for someone you love. Choose the amount, personalize, and send with care."}
             </p>
           </div>
 
