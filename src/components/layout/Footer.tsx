@@ -60,10 +60,16 @@ export function Footer() {
                 {t("footer.book_appointment")}
               </Link>
               <Link
-                to="/about"
+                to="/studio"
                 className="text-foreground/70 hover:text-primary text-xs md:text-sm transition-colors font-light"
               >
-                {t("footer.about_us")}
+                Estúdio
+              </Link>
+              <Link
+                to="/team"
+                className="text-foreground/70 hover:text-primary text-xs md:text-sm transition-colors font-light"
+              >
+                Equipe
               </Link>
               <Link
                 to="/contact"
@@ -78,15 +84,30 @@ export function Footer() {
           <div className="space-y-3 md:space-y-4">
             <h4 className="font-light tracking-[0.1em] uppercase text-base md:text-lg">{t("footer.our_services")}</h4>
             <nav className="flex flex-col gap-2">
-              <span className="text-foreground/70 text-xs md:text-sm font-light">
-                {t("home.services.hair")}
-              </span>
-              <span className="text-foreground/70 text-xs md:text-sm font-light">
+              <Link
+                to="/servicos/sobrancelhas"
+                className="text-foreground/70 hover:text-primary text-xs md:text-sm transition-colors font-light"
+              >
                 {t("home.services.brows")}
-              </span>
-              <span className="text-foreground/70 text-xs md:text-sm font-light">
+              </Link>
+              <Link
+                to="/servicos/cabelo"
+                className="text-foreground/70 hover:text-primary text-xs md:text-sm transition-colors font-light"
+              >
+                {t("home.services.hair")}
+              </Link>
+              <Link
+                to="/servicos/unhas"
+                className="text-foreground/70 hover:text-primary text-xs md:text-sm transition-colors font-light"
+              >
                 {t("home.services.nails")}
-              </span>
+              </Link>
+              <Link
+                to="/shop"
+                className="text-foreground/70 hover:text-primary text-xs md:text-sm transition-colors font-light"
+              >
+                Shop
+              </Link>
             </nav>
           </div>
 

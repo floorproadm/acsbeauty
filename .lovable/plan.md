@@ -1,141 +1,82 @@
 
+# ACS v2.0 — Progresso de Implementação
 
-# Plano: SEO Local (Geo-Clusters) + Institucional + Shop
+## ✅ Fase 1: Rotas Dinâmicas de Serviços (CONCLUÍDA)
 
-Incorpora os 3 ajustes do usuário: rota hierárquica, indexes, e schema LocalBusiness.
+### Migration executada:
+- `services.slug` (text UNIQUE NOT NULL) — populado automaticamente
+- `services.category_slug` (text, indexed)
+- `service_skus.slug` (text, indexed)
+- `services.hero_image_url` (text)
+- `services.faq` (jsonb, default '[]') — legado, substituído por `service_faqs`
 
----
+### Tabela `service_faqs` criada:
+- `id`, `service_id`, `question`, `answer`, `sort_order`, `created_at`
+- RLS: SELECT público, ALL para admin_owner
+- Substitui o campo `faq` jsonb nos services
 
-## 1. Migration: Tabela `service_locations`
+### Indexes adicionados:
+- `idx_services_slug`
+- `idx_services_category`
+- `idx_services_category_slug`
+- `idx_skus_slug`
 
-```sql
-CREATE TABLE public.service_locations (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  service_id uuid NOT NULL REFERENCES public.services(id) ON DELETE CASCADE,
-  location_slug text NOT NULL,          -- "newark", "ironbound"
-  location_name text NOT NULL,          -- "Newark, NJ", "Ironbound"
-  canonical_service_id uuid REFERENCES public.services(id), -- para rel=canonical
-  meta_title text,
-  meta_description text,
-  body_text text,
-  is_active boolean NOT NULL DEFAULT true,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE(service_id, location_slug)
-);
+### Páginas criadas/atualizadas:
+- `src/pages/Services.tsx` → dinâmico, query categorias do banco
+- `src/pages/servicos/CategoryPage.tsx` → query por `category_slug` + FAQs da tabela `service_faqs`
+- `src/pages/servicos/ServiceDetail.tsx` → variações e SKUs com preços reais
 
-ALTER TABLE public.service_locations ENABLE ROW LEVEL SECURITY;
+### RLS adicionado:
+- `service_skus` → "Anyone can view active skus"
+- `service_variations` → "Anyone can view active variations"
+- `service_faqs` → "Anyone can view service faqs" + "Admins can manage service faqs"
 
-CREATE POLICY "Anyone can view active locations" ON public.service_locations
-  FOR SELECT USING (is_active = true);
-
-CREATE POLICY "Admins can manage locations" ON public.service_locations
-  FOR ALL USING (public.has_role(auth.uid(), 'admin_owner'));
-
-CREATE INDEX idx_service_locations_service_id ON public.service_locations(service_id);
-CREATE INDEX idx_service_locations_slug ON public.service_locations(location_slug);
-```
-
----
-
-## 2. Rotas (App.tsx)
-
-Novas rotas a adicionar:
-
-```text
-/servicos/:categoria/:slug/:locationSlug   → ServiceDetail (com geo overlay)
-/studio                                      → Studio.tsx
-/team                                        → Team.tsx
-/location/newark                             → LocationNewark.tsx
-/shop                                        → Shop.tsx (placeholder)
-```
-
-A rota `/servicos/:categoria/:slug` existente continua como página canônica. A rota com `:locationSlug` reutiliza o mesmo `ServiceDetail` mas carrega conteúdo localizado da tabela `service_locations`.
+### Rotas atualizadas:
+- Páginas estáticas antigas removidas do App.tsx (Cabelo, Sobrancelhas, Unhas)
 
 ---
 
-## 3. ServiceDetail.tsx — Suporte a Geo-Variants
+## ✅ Fase 1.5: SEO Local + Institucional + Shop (CONCLUÍDA)
 
-- Adicionar `locationSlug` como param opcional via `useParams`
-- Se `locationSlug` existe, fazer query em `service_locations` para buscar `meta_title`, `body_text`, etc.
-- Renderizar `<link rel="canonical">` apontando para a URL sem location (página base)
-- Adicionar `<head>` meta tags via `document.title` e meta description
-- Mostrar conteúdo localizado (body_text) como seção adicional quando disponível
+### Tabela `service_locations` criada:
+- `id`, `service_id`, `location_slug`, `location_name`, `canonical_service_id`
+- `meta_title`, `meta_description`, `body_text`, `is_active`
+- UNIQUE(service_id, location_slug)
+- RLS: SELECT público (is_active), ALL para admin_owner
+- Indexes: `idx_service_locations_service_id`, `idx_service_locations_slug`
 
----
+### Rota hierárquica para geo-variants:
+- `/servicos/:categoria/:slug/:locationSlug` → ServiceDetail com conteúdo localizado
+- `<link rel="canonical">` aponta para a URL sem location
+- `document.title` e meta description dinâmicos
 
-## 4. Páginas Institucionais (estáticas)
+### Páginas institucionais:
+- `/studio` → `src/pages/Studio.tsx` — espaço físico com mapa
+- `/team` → `src/pages/Team.tsx` — equipe com especialidades
+- `/location/newark` → `src/pages/LocationNewark.tsx` — Local SEO + schema LocalBusiness JSON-LD
+- `/shop` → `src/pages/Shop.tsx` — placeholder com email capture (contact_submissions)
 
-### `/studio` — Studio.tsx
-- Fotos do espaço (placeholder images por enquanto)
-- Descrição do estúdio
-- Endereço com mapa embed
-
-### `/team` — Team.tsx
-- Lista da equipe (estática por enquanto, futuramente pode vir de `staff_profiles`)
-- Fotos e especialidades
-
-### `/location/newark` — LocationNewark.tsx
-- Endereço completo: 375 Chestnut St, 3rd Floor, Suite 3B, Newark, NJ
-- Google Maps embed
-- Horários de funcionamento (query `business_hours`)
-- **Schema markup LocalBusiness** via `<script type="application/ld+json">`
-
-```json
-{
-  "@context": "https://schema.org",
-  "@type": "BeautySalon",
-  "name": "ACS Beauty Studio",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "375 Chestnut St, 3rd Floor, Suite 3B",
-    "addressLocality": "Newark",
-    "addressRegion": "NJ",
-    "postalCode": "07105",
-    "addressCountry": "US"
-  },
-  "telephone": "+17329153430",
-  "priceRange": "$$",
-  "url": "https://acsbeauty.lovable.app"
-}
-```
-
-### `/shop` — Shop.tsx
-- "Coming Soon" com email capture form
-- Saves to a simple `shop_waitlist` or reuses `contact_submissions` with a tag
+### Footer atualizado:
+- Quick Links: adicionados Studio, Equipe
+- Services: links para `/servicos/sobrancelhas`, `/servicos/cabelo`, `/servicos/unhas`, `/shop`
 
 ---
 
-## 5. Footer + Header Updates
+## 🔲 Fase 2: Booking por Slug (Conversão)
+- `/agendar`, `/agendar/:serviceSlug`, `/agendar/:serviceSlug/:skuSlug`
+- Refactor Book.tsx em sub-componentes
+- Redirect `/book` → `/agendar`
 
-- Footer: Services section links to `/servicos/cabelo`, `/servicos/sobrancelhas`, `/servicos/unhas`
-- Footer: Add `/studio` and `/team` links
-- Footer: Privacy/Terms links stay (pages created in Phase 4)
-- Header: No changes needed now
+## 🔲 Fase 3: Quiz como Funil Real
+- `/quiz` landing, `/quiz/:slug/resultado`
+- WhatsApp com contexto
 
----
+## 🔲 Fase 4: Páginas de Conteúdo e Legal
+- `/privacidade`, `/termos`, `/perguntas-frequentes`
 
-## 6. Arquivos a Criar/Editar
+## 🔲 Fase 5: Admin — Rotas Nomeadas
+- Sub-rotas reais com Outlet
 
-| Acao | Arquivo |
-|------|---------|
-| Migration | Nova SQL migration |
-| Criar | `src/pages/Studio.tsx` |
-| Criar | `src/pages/Team.tsx` |
-| Criar | `src/pages/LocationNewark.tsx` |
-| Criar | `src/pages/Shop.tsx` |
-| Editar | `src/pages/servicos/ServiceDetail.tsx` — geo-variant support |
-| Editar | `src/App.tsx` — novas rotas |
-| Editar | `src/components/layout/Footer.tsx` — links atualizados |
-| Editar | `.lovable/plan.md` — progresso |
-
----
-
-## Ordem de Execução
-
-1. Migration `service_locations`
-2. Páginas estáticas (Studio, Team, Location, Shop)
-3. Geo-variant no ServiceDetail
-4. Rotas no App.tsx
-5. Footer links
-6. Plan update
-
+## 🔲 Fase 6: Limpeza
+- Remover arquivos legados
+- Atualizar Header
