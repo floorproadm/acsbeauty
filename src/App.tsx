@@ -15,6 +15,10 @@ import Confirmation from "./pages/Confirmation";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Quiz from "./pages/Quiz";
+import Studio from "./pages/Studio";
+import Team from "./pages/Team";
+import LocationNewark from "./pages/LocationNewark";
+import Shop from "./pages/Shop";
 import NotFound from "./pages/NotFound";
 import { WhatsAppButton } from "./components/WhatsAppButton";
 
@@ -32,12 +36,17 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/servicos/:categoria/:slug/:locationSlug" element={<ServiceDetail />} />
           <Route path="/servicos/:categoria/:slug" element={<ServiceDetail />} />
           <Route path="/servicos/:categoria" element={<CategoryPage />} />
           <Route path="/book" element={<Book />} />
           <Route path="/confirm/:bookingId" element={<Confirmation />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/studio" element={<Studio />} />
+          <Route path="/team" element={<Team />} />
+          <Route path="/location/newark" element={<LocationNewark />} />
+          <Route path="/shop" element={<Shop />} />
           <Route path="/quiz/:slug" element={<Quiz />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

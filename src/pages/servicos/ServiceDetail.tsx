@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -11,7 +12,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default function ServiceDetail() {
-  const { categoria, slug } = useParams<{ categoria: string; slug: string }>();
+  const { categoria, slug, locationSlug } = useParams<{
+    categoria: string;
+    slug: string;
+    locationSlug?: string;
+  }>();
   const { t } = useLanguage();
 
   // Fetch the service by slug
@@ -28,6 +33,23 @@ export default function ServiceDetail() {
       return data;
     },
     enabled: !!slug,
+  });
+
+  // Fetch geo-location data if locationSlug is present
+  const { data: locationData } = useQuery({
+    queryKey: ["service-location", service?.id, locationSlug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_locations")
+        .select("*")
+        .eq("service_id", service!.id)
+        .eq("location_slug", locationSlug!)
+        .eq("is_active", true)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!service?.id && !!locationSlug,
   });
 
   // Fetch variations for this service
@@ -61,6 +83,43 @@ export default function ServiceDetail() {
     },
     enabled: !!service?.id,
   });
+
+  // SEO: Update document title and canonical
+  useEffect(() => {
+    if (!service) return;
+
+    if (locationData?.meta_title) {
+      document.title = locationData.meta_title;
+    } else {
+      document.title = `${service.name} — ACS Beauty Studio`;
+    }
+
+    // Meta description
+    const existingMeta = document.querySelector('meta[name="description"]');
+    const desc = locationData?.meta_description || service.description || "";
+    if (existingMeta) {
+      existingMeta.setAttribute("content", desc);
+    } else if (desc) {
+      const meta = document.createElement("meta");
+      meta.name = "description";
+      meta.content = desc;
+      document.head.appendChild(meta);
+    }
+
+    // Canonical link for geo pages
+    if (locationSlug && categoria && slug) {
+      let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "canonical";
+        document.head.appendChild(link);
+      }
+      link.href = `https://acsbeauty.lovable.app/servicos/${categoria}/${slug}`;
+      return () => {
+        link?.remove();
+      };
+    }
+  }, [service, locationData, locationSlug, categoria, slug]);
 
   if (isLoading) {
     return (
@@ -116,15 +175,20 @@ export default function ServiceDetail() {
               <Badge variant="secondary" className="mb-4 gap-1">
                 <Tag className="w-3 h-3" />
                 {service.category}
+                {locationData && (
+                  <span className="ml-1">• {locationData.location_name}</span>
+                )}
               </Badge>
 
               <h1 className="font-serif text-3xl md:text-5xl font-bold mb-4 text-foreground">
-                {service.name}
+                {locationData?.meta_title
+                  ? locationData.meta_title.split("—")[0]?.trim() || service.name
+                  : service.name}
               </h1>
 
-              {service.description && (
+              {(locationData?.body_text || service.description) && (
                 <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                  {service.description}
+                  {locationData?.body_text || service.description}
                 </p>
               )}
 
@@ -159,7 +223,6 @@ export default function ServiceDetail() {
                 </h2>
 
                 {hasVariations ? (
-                  // Grouped by variation
                   <div className="space-y-8">
                     {variations?.map((variation) => {
                       const variationSkus = skusByVariation.get(variation.id) || [];
@@ -177,7 +240,6 @@ export default function ServiceDetail() {
                         </div>
                       );
                     })}
-                    {/* SKUs without variation */}
                     {skusByVariation.has(null) && (
                       <div className="grid gap-3">
                         {skusByVariation.get(null)!.map((sku, idx) => (
@@ -187,7 +249,6 @@ export default function ServiceDetail() {
                     )}
                   </div>
                 ) : (
-                  // Flat list
                   <div className="grid gap-3">
                     {skus.map((sku, idx) => (
                       <SkuCard key={sku.id} sku={sku} index={idx} serviceId={service.id} />
