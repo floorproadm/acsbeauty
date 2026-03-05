@@ -971,6 +971,60 @@ export type Database = {
           },
         ]
       }
+      service_locations: {
+        Row: {
+          body_text: string | null
+          canonical_service_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          location_name: string
+          location_slug: string
+          meta_description: string | null
+          meta_title: string | null
+          service_id: string
+        }
+        Insert: {
+          body_text?: string | null
+          canonical_service_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          location_name: string
+          location_slug: string
+          meta_description?: string | null
+          meta_title?: string | null
+          service_id: string
+        }
+        Update: {
+          body_text?: string | null
+          canonical_service_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          location_name?: string
+          location_slug?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_locations_canonical_service_id_fkey"
+            columns: ["canonical_service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_locations_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_skus: {
         Row: {
           created_at: string
