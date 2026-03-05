@@ -4,30 +4,35 @@
 ## ✅ Fase 1: Rotas Dinâmicas de Serviços (CONCLUÍDA)
 
 ### Migration executada:
-- `services.slug` (text UNIQUE) — populado automaticamente
-- `service_skus.slug` (text)
+- `services.slug` (text UNIQUE NOT NULL) — populado automaticamente
+- `services.category_slug` (text, indexed)
+- `service_skus.slug` (text, indexed)
 - `services.hero_image_url` (text)
-- `services.faq` (jsonb, default '[]')
+- `services.faq` (jsonb, default '[]') — legado, substituído por `service_faqs`
 
-### Páginas criadas:
-- `src/pages/servicos/CategoryPage.tsx` → `/servicos/:categoria`
-  - Query dinâmica por categoria do banco
-  - "A partir de" usando menor preço dos SKUs
-  - FAQ dinâmico (jsonb) com fallback para traduções hardcoded
-  - Mesmo layout visual das páginas estáticas anteriores
+### Tabela `service_faqs` criada:
+- `id`, `service_id`, `question`, `answer`, `sort_order`, `created_at`
+- RLS: SELECT público, ALL para admin_owner
+- Substitui o campo `faq` jsonb nos services
 
-- `src/pages/servicos/ServiceDetail.tsx` → `/servicos/:categoria/:slug`
-  - Mostra variações e SKUs com preços reais
-  - Agrupamento por técnica (variation)
-  - CTA direto para booking
+### Indexes adicionados:
+- `idx_services_slug`
+- `idx_services_category`
+- `idx_services_category_slug`
+- `idx_skus_slug`
+
+### Páginas criadas/atualizadas:
+- `src/pages/Services.tsx` → dinâmico, query categorias do banco
+- `src/pages/servicos/CategoryPage.tsx` → query por `category_slug` + FAQs da tabela `service_faqs`
+- `src/pages/servicos/ServiceDetail.tsx` → variações e SKUs com preços reais
 
 ### RLS adicionado:
-- `service_skus` → "Anyone can view active skus" (anon + authenticated, is_active=true)
-- `service_variations` → "Anyone can view active variations" (anon + authenticated, is_active=true)
+- `service_skus` → "Anyone can view active skus"
+- `service_variations` → "Anyone can view active variations"
+- `service_faqs` → "Anyone can view service faqs" + "Admins can manage service faqs"
 
 ### Rotas atualizadas:
 - Páginas estáticas antigas removidas do App.tsx (Cabelo, Sobrancelhas, Unhas)
-- Imports legados de Packages/OfferLanding/PackageLanding removidos
 
 ---
 

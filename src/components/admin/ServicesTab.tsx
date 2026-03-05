@@ -103,8 +103,10 @@ export function ServicesTab() {
         .from("services")
         .insert({
           name: data.name,
+          slug: data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
           description: data.description || null,
           category: data.category,
+          category_slug: data.category ? data.category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : null,
           duration_minutes: data.duration_minutes,
           price: data.price,
           promo_price: data.promo_price ? Number(data.promo_price) : null,
