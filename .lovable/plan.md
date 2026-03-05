@@ -1,52 +1,75 @@
 
-# ACS v2.0 — Progresso de Implementação
 
-## ✅ Fase 1: Rotas Dinâmicas de Serviços (CONCLUÍDA)
+# Plano: Ajustes de Schema + /servicos Dinâmico
 
-### Migration executada:
-- `services.slug` (text UNIQUE) — populado automaticamente
-- `service_skus.slug` (text)
-- `services.hero_image_url` (text)
-- `services.faq` (jsonb, default '[]')
-
-### Páginas criadas:
-- `src/pages/servicos/CategoryPage.tsx` → `/servicos/:categoria`
-  - Query dinâmica por categoria do banco
-  - "A partir de" usando menor preço dos SKUs
-  - FAQ dinâmico (jsonb) com fallback para traduções hardcoded
-  - Mesmo layout visual das páginas estáticas anteriores
-
-- `src/pages/servicos/ServiceDetail.tsx` → `/servicos/:categoria/:slug`
-  - Mostra variações e SKUs com preços reais
-  - Agrupamento por técnica (variation)
-  - CTA direto para booking
-
-### RLS adicionado:
-- `service_skus` → "Anyone can view active skus" (anon + authenticated, is_active=true)
-- `service_variations` → "Anyone can view active variations" (anon + authenticated, is_active=true)
-
-### Rotas atualizadas:
-- Páginas estáticas antigas removidas do App.tsx (Cabelo, Sobrancelhas, Unhas)
-- Imports legados de Packages/OfferLanding/PackageLanding removidos
+Incorpora os 4 ajustes do usuário + a melhoria estratégica de tornar `/servicos` dinâmico.
 
 ---
 
-## 🔲 Fase 2: Booking por Slug (Conversão)
-- `/agendar`, `/agendar/:serviceSlug`, `/agendar/:serviceSlug/:skuSlug`
-- Refactor Book.tsx em sub-componentes
-- Redirect `/book` → `/agendar`
+## Migration SQL
 
-## 🔲 Fase 3: Quiz como Funil Real
-- `/quiz` landing, `/quiz/:slug/resultado`
-- WhatsApp com contexto
+Uma única migration para corrigir o schema existente:
 
-## 🔲 Fase 4: Páginas de Conteúdo e Legal
-- `/privacidade`, `/termos`, `/perguntas-frequentes`
-- `/estudio`, `/equipe`
+```sql
+-- 1. slug NOT NULL (backfill primeiro, depois constraint)
+UPDATE public.services SET slug = lower(regexp_replace(name, '[^a-z0-9]+', '-', 'gi')) WHERE slug IS NULL;
+ALTER TABLE public.services ALTER COLUMN slug SET NOT NULL;
 
-## 🔲 Fase 5: Admin — Rotas Nomeadas
-- Sub-rotas reais com Outlet
+-- 2. Indexes para performance
+CREATE INDEX IF NOT EXISTS idx_services_slug ON public.services(slug);
+CREATE INDEX IF NOT EXISTS idx_services_category ON public.services(category);
+CREATE INDEX IF NOT EXISTS idx_skus_slug ON public.service_skus(slug);
 
-## 🔲 Fase 6: Limpeza
-- Remover arquivos legados
-- Atualizar Footer/Header
+-- 3. category_slug na tabela services
+ALTER TABLE public.services ADD COLUMN category_slug text;
+UPDATE public.services SET category_slug = lower(regexp_replace(category, '[^a-z0-9]+', '-', 'gi')) WHERE category IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_services_category_slug ON public.services(category_slug);
+
+-- 4. Tabela service_faqs (substituindo jsonb)
+CREATE TABLE public.service_faqs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  service_id uuid NOT NULL REFERENCES public.services(id) ON DELETE CASCADE,
+  question text NOT NULL,
+  answer text NOT NULL,
+  sort_order integer NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.service_faqs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view service faqs" ON public.service_faqs
+  FOR SELECT USING (true);
+
+CREATE POLICY "Admins can manage service faqs" ON public.service_faqs
+  FOR ALL USING (public.has_role(auth.uid(), 'admin_owner'));
+```
+
+---
+
+## Código: CategoryPage.tsx
+
+- Remover o mapa `SLUG_TO_CATEGORY` hardcoded
+- Query por `category_slug` em vez de `category`
+- Buscar FAQs da nova tabela `service_faqs` em vez do campo `faq` jsonb
+
+---
+
+## Código: Services.tsx → Dinâmico
+
+Tornar `/servicos` dinâmico:
+- Query `SELECT DISTINCT category, category_slug FROM services WHERE is_active = true`
+- Renderizar cards de categoria a partir do banco
+- Manter imagens de fallback por `category_slug` (assets locais) enquanto não houver `hero_image_url` de categoria
+- Remover o array `const services = [...]` hardcoded
+
+---
+
+## Resumo de Arquivos
+
+| Ação | Arquivo |
+|------|---------|
+| Migration | Nova migration SQL |
+| Editar | `src/pages/Services.tsx` — query dinâmica |
+| Editar | `src/pages/servicos/CategoryPage.tsx` — usar `category_slug` + `service_faqs` |
+| Editar | `src/pages/servicos/ServiceDetail.tsx` — usar `category_slug` para breadcrumb |
+
