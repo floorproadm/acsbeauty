@@ -17,6 +17,7 @@ import {
   ClipboardList,
   Layers,
   ShieldCheck,
+  Gift,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
@@ -48,6 +49,7 @@ export type AdminTab =
   | "offers"
   | "quizzes"
   | "tasks"
+  | "gift-cards"
   | "access";
 
 interface AdminLayoutProps {
@@ -65,6 +67,7 @@ const allTabs: { id: AdminTab; label: string; icon: React.ElementType; roles: Ap
   { id: "services", label: "Serviços", icon: Sparkles, roles: ["admin_owner"] },
   { id: "skus", label: "Opções", icon: Layers, roles: ["admin_owner"] },
   { id: "quizzes", label: "Quizzes", icon: HelpCircle, roles: ["admin_owner"] },
+  { id: "gift-cards", label: "Gift Cards", icon: Gift, roles: ["admin_owner"] },
   { id: "access", label: "Acessos", icon: ShieldCheck, roles: ["admin_owner"] },
 ];
 

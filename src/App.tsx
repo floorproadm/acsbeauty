@@ -19,6 +19,7 @@ import Studio from "./pages/Studio";
 import Team from "./pages/Team";
 import LocationNewark from "./pages/LocationNewark";
 import Shop from "./pages/Shop";
+import GiftCards from "./pages/GiftCards";
 import NotFound from "./pages/NotFound";
 import { WhatsAppButton } from "./components/WhatsAppButton";
 
@@ -47,6 +48,7 @@ const App = () => (
           <Route path="/team" element={<Team />} />
           <Route path="/location/newark" element={<LocationNewark />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/gift-cards" element={<GiftCards />} />
           <Route path="/quiz/:slug" element={<Quiz />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

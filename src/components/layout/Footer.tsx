@@ -108,6 +108,12 @@ export function Footer() {
               >
                 Shop
               </Link>
+              <Link
+                to="/gift-cards"
+                className="text-foreground/70 hover:text-primary text-xs md:text-sm transition-colors font-light"
+              >
+                Gift Cards
+              </Link>
             </nav>
           </div>
 
