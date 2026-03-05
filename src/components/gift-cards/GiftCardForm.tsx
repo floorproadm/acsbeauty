@@ -203,54 +203,52 @@ export function GiftCardForm({ onFieldChange }: GiftCardFormProps) {
     }
   };
 
-  const handleWhatsApp = async () => {
+  const handleWhatsApp = () => {
     if (!canProceed()) return;
     setIsSubmitting(true);
 
-    try {
-      const code = generateCode();
-      await supabase.from("gift_cards").insert({
-        code,
-        amount: effectiveAmount,
-        balance: effectiveAmount,
-        buyer_name: buyerName.trim(),
-        buyer_email: buyerEmail.trim(),
-        recipient_name: recipientName.trim(),
-        recipient_email: recipientEmail.trim(),
-        occasion,
-        personal_message: personalMessage || null,
-        payment_method: "whatsapp",
-        status: "pending",
-      });
+    const code = generateCode();
+    const occasionLabel = occasions.find((o) => o.value === occasion)?.label || occasion;
+    const msg = txt.whatsappMsg(
+      effectiveAmount,
+      recipientName.trim(),
+      recipientEmail.trim(),
+      occasionLabel,
+      personalMessage,
+      buyerName.trim(),
+      buyerEmail.trim(),
+      code
+    );
 
-      const occasionLabel = occasions.find((o) => o.value === occasion)?.label || occasion;
-      const msg = txt.whatsappMsg(
-        effectiveAmount,
-        recipientName.trim(),
-        recipientEmail.trim(),
-        occasionLabel,
-        personalMessage,
-        buyerName.trim(),
-        buyerEmail.trim(),
-        code
-      );
+    // Open WhatsApp FIRST (synchronous, in click context) to avoid popup blocker
+    window.open(
+      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
 
-      window.open(
-        `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
-        "_blank",
-        "noopener,noreferrer"
-      );
-
-      toast({
-        title: txt.successTitle,
-        description: txt.successDesc,
-      });
-    } catch (err) {
-      console.error(err);
-      toast({ title: txt.errorTitle, description: txt.errorDesc, variant: "destructive" });
-    } finally {
+    // Then save to database (async, fire-and-forget)
+    supabase.from("gift_cards").insert({
+      code,
+      amount: effectiveAmount,
+      balance: effectiveAmount,
+      buyer_name: buyerName.trim(),
+      buyer_email: buyerEmail.trim(),
+      recipient_name: recipientName.trim(),
+      recipient_email: recipientEmail.trim(),
+      occasion,
+      personal_message: personalMessage || null,
+      payment_method: "whatsapp",
+      status: "pending",
+    }).then(({ error }) => {
+      if (error) {
+        console.error("[GiftCard] DB error:", error);
+        toast({ title: txt.errorTitle, description: txt.errorDesc, variant: "destructive" });
+      } else {
+        toast({ title: txt.successTitle, description: txt.successDesc });
+      }
       setIsSubmitting(false);
-    }
+    });
   };
 
   return (
