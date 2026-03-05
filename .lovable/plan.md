@@ -36,6 +36,32 @@
 
 ---
 
+## ✅ Fase 1.5: SEO Local + Institucional + Shop (CONCLUÍDA)
+
+### Tabela `service_locations` criada:
+- `id`, `service_id`, `location_slug`, `location_name`, `canonical_service_id`
+- `meta_title`, `meta_description`, `body_text`, `is_active`
+- UNIQUE(service_id, location_slug)
+- RLS: SELECT público (is_active), ALL para admin_owner
+- Indexes: `idx_service_locations_service_id`, `idx_service_locations_slug`
+
+### Rota hierárquica para geo-variants:
+- `/servicos/:categoria/:slug/:locationSlug` → ServiceDetail com conteúdo localizado
+- `<link rel="canonical">` aponta para a URL sem location
+- `document.title` e meta description dinâmicos
+
+### Páginas institucionais:
+- `/studio` → `src/pages/Studio.tsx` — espaço físico com mapa
+- `/team` → `src/pages/Team.tsx` — equipe com especialidades
+- `/location/newark` → `src/pages/LocationNewark.tsx` — Local SEO + schema LocalBusiness JSON-LD
+- `/shop` → `src/pages/Shop.tsx` — placeholder com email capture (contact_submissions)
+
+### Footer atualizado:
+- Quick Links: adicionados Studio, Equipe
+- Services: links para `/servicos/sobrancelhas`, `/servicos/cabelo`, `/servicos/unhas`, `/shop`
+
+---
+
 ## 🔲 Fase 2: Booking por Slug (Conversão)
 - `/agendar`, `/agendar/:serviceSlug`, `/agendar/:serviceSlug/:skuSlug`
 - Refactor Book.tsx em sub-componentes
@@ -47,11 +73,10 @@
 
 ## 🔲 Fase 4: Páginas de Conteúdo e Legal
 - `/privacidade`, `/termos`, `/perguntas-frequentes`
-- `/estudio`, `/equipe`
 
 ## 🔲 Fase 5: Admin — Rotas Nomeadas
 - Sub-rotas reais com Outlet
 
 ## 🔲 Fase 6: Limpeza
 - Remover arquivos legados
-- Atualizar Footer/Header
+- Atualizar Header
