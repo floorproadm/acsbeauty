@@ -5,8 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
-
-const DAY_NAMES = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function formatTime(t: string) {
   const [h, m] = t.split(":");
@@ -17,6 +16,10 @@ function formatTime(t: string) {
 }
 
 export default function LocationNewark() {
+  const { t } = useLanguage();
+
+  const dayNames = Array.from({ length: 7 }, (_, i) => t(`location.day_${i}`));
+
   const { data: hours } = useQuery({
     queryKey: ["business-hours-public"],
     queryFn: async () => {
@@ -59,7 +62,7 @@ export default function LocationNewark() {
         ?.filter((h) => h.is_open)
         .map((h) => ({
           "@type": "OpeningHoursSpecification",
-          dayOfWeek: DAY_NAMES[h.day_of_week],
+          dayOfWeek: dayNames[h.day_of_week],
           opens: h.open_time,
           closes: h.close_time,
         })),
@@ -68,7 +71,7 @@ export default function LocationNewark() {
     return () => {
       document.head.removeChild(script);
     };
-  }, [hours]);
+  }, [hours, dayNames]);
 
   useEffect(() => {
     document.title = "ACS Beauty Studio — Newark, NJ | Brows, Hair & Nails";
@@ -88,10 +91,10 @@ export default function LocationNewark() {
               className="max-w-3xl"
             >
               <h1 className="font-serif text-3xl md:text-5xl font-bold mb-4 text-foreground">
-                ACS Beauty Studio — Newark
+                {t("location.title")}
               </h1>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Seu destino de beleza no coração de Newark, NJ. Especialistas em sobrancelhas, cabelo e unhas.
+                {t("location.description")}
               </p>
             </motion.div>
           </div>
@@ -109,7 +112,7 @@ export default function LocationNewark() {
                 className="space-y-8"
               >
                 <div>
-                  <h2 className="font-serif text-2xl font-bold text-foreground mb-4">Endereço</h2>
+                  <h2 className="font-serif text-2xl font-bold text-foreground mb-4">{t("location.address_title")}</h2>
                   <div className="flex items-start gap-3 text-muted-foreground">
                     <MapPin className="w-5 h-5 mt-0.5 shrink-0 text-primary" />
                     <div>
@@ -121,7 +124,7 @@ export default function LocationNewark() {
                 </div>
 
                 <div>
-                  <h2 className="font-serif text-2xl font-bold text-foreground mb-4">Contato</h2>
+                  <h2 className="font-serif text-2xl font-bold text-foreground mb-4">{t("location.contact_title")}</h2>
                   <div className="space-y-3">
                     <a href="tel:+17329153430" className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
                       <Phone className="w-4 h-4" />
@@ -138,21 +141,21 @@ export default function LocationNewark() {
                 <div>
                   <h2 className="font-serif text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
                     <Clock className="w-5 h-5 text-primary" />
-                    Horários
+                    {t("location.hours_title")}
                   </h2>
                   {hours && hours.length > 0 ? (
                     <div className="space-y-2">
                       {hours.map((h) => (
                         <div key={h.id} className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">{DAY_NAMES[h.day_of_week]}</span>
+                          <span className="text-muted-foreground">{dayNames[h.day_of_week]}</span>
                           <span className={h.is_open ? "text-foreground font-medium" : "text-muted-foreground/50"}>
-                            {h.is_open ? `${formatTime(h.open_time)} – ${formatTime(h.close_time)}` : "Fechado"}
+                            {h.is_open ? `${formatTime(h.open_time)} – ${formatTime(h.close_time)}` : t("location.closed")}
                           </span>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">Horários em breve.</p>
+                    <p className="text-sm text-muted-foreground">{t("location.hours_soon")}</p>
                   )}
                 </div>
               </motion.div>

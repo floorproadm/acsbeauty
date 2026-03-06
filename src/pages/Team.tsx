@@ -4,6 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Instagram, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
 import founderImg from "@/assets/founder.jpg";
 
 interface TeamMember {
@@ -19,25 +20,15 @@ interface TeamMember {
   sort_order: number;
 }
 
-const values = [
-  {
-    icon: "✨",
-    title: "Excelência",
-    desc: "Cada detalhe importa. Buscamos a perfeição em cada procedimento.",
-  },
-  {
-    icon: "💛",
-    title: "Cuidado",
-    desc: "Tratamos cada cliente como única, respeitando sua individualidade.",
-  },
-  {
-    icon: "🌿",
-    title: "Naturalidade",
-    desc: "Realçamos sua beleza natural com técnicas que valorizam quem você é.",
-  },
-];
-
 export default function Team() {
+  const { t } = useLanguage();
+
+  const values = [
+    { icon: "✨", title: t("team.value_excellence"), desc: t("team.value_excellence_desc") },
+    { icon: "💛", title: t("team.value_care"), desc: t("team.value_care_desc") },
+    { icon: "🌿", title: t("team.value_naturalness"), desc: t("team.value_naturalness_desc") },
+  ];
+
   const { data: members = [], isLoading } = useQuery({
     queryKey: ["team-members"],
     queryFn: async () => {
@@ -51,7 +42,6 @@ export default function Team() {
     },
   });
 
-  // Use founder image as fallback for Ane Caroline
   const getImage = (member: TeamMember) => {
     if (member.image_url) return member.image_url;
     if (member.name.toLowerCase().includes("ane")) return founderImg;
@@ -83,16 +73,15 @@ export default function Team() {
               >
                 <Sparkles className="w-3.5 h-3.5 text-primary" />
                 <span className="text-xs font-medium tracking-[0.15em] uppercase text-primary">
-                  Conheça quem cuida de você
+                  {t("team.badge")}
                 </span>
               </motion.div>
               <h1 className="font-serif text-4xl md:text-6xl font-light tracking-tight mb-5 text-foreground">
-                Nossa{" "}
-                <span className="text-gradient-gold font-normal">Equipe</span>
+                {t("team.title_prefix")}{" "}
+                <span className="text-gradient-gold font-normal">{t("team.title_highlight")}</span>
               </h1>
               <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto">
-                Profissionais apaixonadas por beleza, dedicadas a entregar
-                resultados excepcionais com técnica e carinho.
+                {t("team.description")}
               </p>
             </motion.div>
           </div>
@@ -102,7 +91,7 @@ export default function Team() {
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4 md:px-6">
             {isLoading ? (
-              <div className="text-center text-muted-foreground">Carregando...</div>
+              <div className="text-center text-muted-foreground">{t("team.loading")}</div>
             ) : (
               <div className="space-y-24 max-w-5xl mx-auto">
                 {members.map((member, idx) => {
@@ -136,13 +125,12 @@ export default function Team() {
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center bg-muted">
-                                <span className="text-sm text-muted-foreground">Foto</span>
+                                <span className="text-sm text-muted-foreground">{t("team.photo_placeholder")}</span>
                               </div>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 via-transparent to-transparent" />
                           </div>
 
-                          {/* Floating badge */}
                           {member.badge_label && member.badge_value && (
                             <motion.div
                               initial={{ opacity: 0, y: 10 }}
@@ -178,11 +166,10 @@ export default function Team() {
                             </p>
                           )}
 
-                          {/* Specialties */}
                           {member.specialties?.length > 0 && (
                             <div className="mb-8">
                               <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground mb-3">
-                                Especialidades
+                                {t("team.specialties")}
                               </p>
                               <div className="flex flex-wrap gap-2">
                                 {member.specialties.map((s, i) => (
@@ -201,7 +188,6 @@ export default function Team() {
                             </div>
                           )}
 
-                          {/* Instagram */}
                           {member.instagram && (
                             <motion.a
                               href={`https://instagram.com/${member.instagram.replace("@", "")}`}
@@ -240,10 +226,10 @@ export default function Team() {
               className="text-center mb-12"
             >
               <h2 className="font-serif text-2xl md:text-3xl font-light text-foreground mb-3">
-                Nossos Valores
+                {t("team.values_title")}
               </h2>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                O que nos guia em cada atendimento
+                {t("team.values_subtitle")}
               </p>
             </motion.div>
 

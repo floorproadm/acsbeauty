@@ -285,6 +285,60 @@ const translations: Record<Language, Record<string, string>> = {
     "confirm.addon_note": "Request this add-on and we'll confirm availability.",
     "confirm.addon_request": "Request Add-On",
     "confirm.addon_requested": "Add-on request sent! We'll confirm when you arrive.",
+
+    // ========== TEAM PAGE ==========
+    "team.badge": "Meet who takes care of you",
+    "team.title_prefix": "Our",
+    "team.title_highlight": "Team",
+    "team.description": "Professionals passionate about beauty, dedicated to delivering exceptional results with technique and care.",
+    "team.specialties": "Specialties",
+    "team.photo_placeholder": "Photo",
+    "team.loading": "Loading...",
+    "team.values_title": "Our Values",
+    "team.values_subtitle": "What guides us in every service",
+    "team.value_excellence": "Excellence",
+    "team.value_excellence_desc": "Every detail matters. We strive for perfection in every procedure.",
+    "team.value_care": "Care",
+    "team.value_care_desc": "We treat every client as unique, respecting their individuality.",
+    "team.value_naturalness": "Naturalness",
+    "team.value_naturalness_desc": "We enhance your natural beauty with techniques that celebrate who you are.",
+
+    // ========== SHOP PAGE ==========
+    "shop.title": "Shop — Coming Soon",
+    "shop.description": "We're preparing a special selection of hair, brow, and nail care products. Leave your email to be the first to know!",
+    "shop.success": "✨ All set! We'll let you know when the shop opens.",
+    "shop.notify_me": "Notify me",
+    "shop.on_list": "You're on the list!",
+    "shop.error": "Error saving. Please try again.",
+
+    // ========== STUDIO PAGE ==========
+    "studio.title": "Our Studio",
+    "studio.description": "A space designed for you to feel welcome, relax, and leave even more beautiful.",
+    "studio.photo_placeholder": "Studio Photo",
+    "studio.comfort_title": "Beauty with Comfort",
+    "studio.comfort_text_1": "ACS Beauty Studio was created to be more than a salon — it's an experience. Every detail of our space was designed to provide comfort, privacy, and impeccable results.",
+    "studio.comfort_text_2": "Located in the heart of Newark, our studio offers a warm and modern environment, with high-quality products and professionals specialized in enhancing your natural beauty.",
+
+    // ========== LOCATION PAGE ==========
+    "location.title": "ACS Beauty Studio — Newark",
+    "location.description": "Your beauty destination in the heart of Newark, NJ. Specialists in brows, hair, and nails.",
+    "location.address_title": "Address",
+    "location.contact_title": "Contact",
+    "location.hours_title": "Hours",
+    "location.closed": "Closed",
+    "location.hours_soon": "Hours coming soon.",
+    "location.day_0": "Sunday",
+    "location.day_1": "Monday",
+    "location.day_2": "Tuesday",
+    "location.day_3": "Wednesday",
+    "location.day_4": "Thursday",
+    "location.day_5": "Friday",
+    "location.day_6": "Saturday",
+
+    // ========== NOT FOUND PAGE ==========
+    "notfound.title": "404",
+    "notfound.message": "Oops! Page not found",
+    "notfound.back": "Return to Home",
   },
   pt: {
     // ========== GLOBAL ==========
@@ -558,6 +612,60 @@ const translations: Record<Language, Record<string, string>> = {
     "confirm.addon_note": "Solicite este adicional e confirmaremos a disponibilidade.",
     "confirm.addon_request": "Solicitar Adicional",
     "confirm.addon_requested": "Solicitação enviada! Confirmaremos quando você chegar.",
+
+    // ========== TEAM PAGE ==========
+    "team.badge": "Conheça quem cuida de você",
+    "team.title_prefix": "Nossa",
+    "team.title_highlight": "Equipe",
+    "team.description": "Profissionais apaixonadas por beleza, dedicadas a entregar resultados excepcionais com técnica e carinho.",
+    "team.specialties": "Especialidades",
+    "team.photo_placeholder": "Foto",
+    "team.loading": "Carregando...",
+    "team.values_title": "Nossos Valores",
+    "team.values_subtitle": "O que nos guia em cada atendimento",
+    "team.value_excellence": "Excelência",
+    "team.value_excellence_desc": "Cada detalhe importa. Buscamos a perfeição em cada procedimento.",
+    "team.value_care": "Cuidado",
+    "team.value_care_desc": "Tratamos cada cliente como única, respeitando sua individualidade.",
+    "team.value_naturalness": "Naturalidade",
+    "team.value_naturalness_desc": "Realçamos sua beleza natural com técnicas que valorizam quem você é.",
+
+    // ========== SHOP PAGE ==========
+    "shop.title": "Shop — Em Breve",
+    "shop.description": "Estamos preparando uma seleção especial de produtos para cuidados com cabelos, sobrancelhas e unhas. Deixe seu email para ser a primeira a saber!",
+    "shop.success": "✨ Pronto! Vamos te avisar quando a loja abrir.",
+    "shop.notify_me": "Avisar-me",
+    "shop.on_list": "Você está na lista!",
+    "shop.error": "Erro ao salvar. Tente novamente.",
+
+    // ========== STUDIO PAGE ==========
+    "studio.title": "Nosso Estúdio",
+    "studio.description": "Um espaço pensado para você se sentir acolhida, relaxar e sair ainda mais bonita.",
+    "studio.photo_placeholder": "Foto do Estúdio",
+    "studio.comfort_title": "Beleza com Conforto",
+    "studio.comfort_text_1": "O ACS Beauty Studio foi criado para ser mais do que um salão — é uma experiência. Cada detalhe do nosso espaço foi planejado para proporcionar conforto, privacidade e resultados impecáveis.",
+    "studio.comfort_text_2": "Localizado no coração de Newark, nosso estúdio oferece um ambiente acolhedor e moderno, com produtos de alta qualidade e profissionais especializadas em realçar sua beleza natural.",
+
+    // ========== LOCATION PAGE ==========
+    "location.title": "ACS Beauty Studio — Newark",
+    "location.description": "Seu destino de beleza no coração de Newark, NJ. Especialistas em sobrancelhas, cabelo e unhas.",
+    "location.address_title": "Endereço",
+    "location.contact_title": "Contato",
+    "location.hours_title": "Horários",
+    "location.closed": "Fechado",
+    "location.hours_soon": "Horários em breve.",
+    "location.day_0": "Domingo",
+    "location.day_1": "Segunda",
+    "location.day_2": "Terça",
+    "location.day_3": "Quarta",
+    "location.day_4": "Quinta",
+    "location.day_5": "Sexta",
+    "location.day_6": "Sábado",
+
+    // ========== NOT FOUND PAGE ==========
+    "notfound.title": "404",
+    "notfound.message": "Oops! Página não encontrada",
+    "notfound.back": "Voltar ao Início",
   },
 };
 
