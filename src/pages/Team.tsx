@@ -115,7 +115,7 @@ export default function Team() {
                       className="absolute -bottom-4 -right-4 md:-right-6 bg-card border border-border rounded-xl px-4 py-3 shadow-card"
                     >
                       <p className="text-xs text-muted-foreground">Especialista em</p>
-                      <p className="text-sm font-medium text-foreground">Brow Design</p>
+                      <p className="text-sm font-medium text-foreground">Hair Styling</p>
                     </motion.div>
                   </motion.div>
 
