@@ -2,18 +2,22 @@ import { motion } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Instagram, Sparkles } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import founderImg from "@/assets/founder.jpg";
 
-const team = [
-  {
-    name: "Ane Caroline",
-    role: "Fundadora & Hair Stylist",
-    image: founderImg,
-    bio: "Especialista em realçar a beleza natural de cada cliente, com anos de experiência e formação internacional em técnicas capilares.",
-    specialties: ["Corte", "Coloração", "Tratamentos Capilares"],
-    instagram: "@acsbeautystudio",
-  },
-];
+interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  specialties: string[];
+  image_url: string | null;
+  instagram: string | null;
+  badge_label: string | null;
+  badge_value: string | null;
+  sort_order: number;
+}
 
 const values = [
   {
@@ -34,13 +38,32 @@ const values = [
 ];
 
 export default function Team() {
+  const { data: members = [], isLoading } = useQuery({
+    queryKey: ["team-members"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("team_members")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order");
+      if (error) throw error;
+      return data as TeamMember[];
+    },
+  });
+
+  // Use founder image as fallback for Ane Caroline
+  const getImage = (member: TeamMember) => {
+    if (member.image_url) return member.image_url;
+    if (member.name.toLowerCase().includes("ane")) return founderImg;
+    return null;
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-grow">
         {/* Hero */}
         <section className="relative pt-28 md:pt-36 pb-16 md:pb-24 overflow-hidden">
-          {/* Decorative bg */}
           <div className="absolute inset-0 bg-gradient-hero opacity-60" />
           <div className="absolute top-20 right-0 w-72 h-72 rounded-full bg-gold/5 blur-3xl" />
           <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-nude-dark/10 blur-3xl" />
@@ -75,101 +98,134 @@ export default function Team() {
           </div>
         </section>
 
-        {/* Featured Team Member */}
+        {/* Team Members */}
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4 md:px-6">
-            {team.map((member, idx) => (
-              <motion.div
-                key={member.name}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="max-w-5xl mx-auto"
-              >
-                <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
-                  {/* Image */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -40 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.7, delay: 0.1 }}
-                    className="relative group"
-                  >
-                    <div className="absolute -inset-3 bg-gradient-gold rounded-3xl opacity-[0.08] group-hover:opacity-[0.15] transition-opacity duration-500 blur-sm" />
-                    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-elevated">
-                      <img
-                        src={member.image}
-                        alt={member.name}
-                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
-                      />
-                      {/* Overlay gradient */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 via-transparent to-transparent" />
-                    </div>
-                  </motion.div>
+            {isLoading ? (
+              <div className="text-center text-muted-foreground">Carregando...</div>
+            ) : (
+              <div className="space-y-24 max-w-5xl mx-auto">
+                {members.map((member, idx) => {
+                  const img = getImage(member);
+                  const isEven = idx % 2 === 1;
 
-                  {/* Info */}
-                  <motion.div
-                    initial={{ opacity: 0, x: 40 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.7, delay: 0.2 }}
-                    className="flex flex-col"
-                  >
-                    <span className="text-xs font-medium tracking-[0.2em] uppercase text-primary mb-3">
-                      {member.role}
-                    </span>
-                    <h2 className="font-serif text-3xl md:text-4xl font-light text-foreground mb-4">
-                      {member.name}
-                    </h2>
-                    <div className="w-12 h-px bg-primary/40 mb-6" />
-                    <p className="text-muted-foreground leading-relaxed mb-8">
-                      {member.bio}
-                    </p>
+                  return (
+                    <motion.div
+                      key={member.id}
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <div className={`grid md:grid-cols-2 gap-10 md:gap-16 items-center ${isEven ? "md:direction-rtl" : ""}`}>
+                        {/* Image */}
+                        <motion.div
+                          initial={{ opacity: 0, x: isEven ? 40 : -40 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.7, delay: 0.1 }}
+                          className={`relative group ${isEven ? "md:order-2" : ""}`}
+                        >
+                          <div className="absolute -inset-3 bg-gradient-gold rounded-3xl opacity-[0.08] group-hover:opacity-[0.15] transition-opacity duration-500 blur-sm" />
+                          <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-elevated">
+                            {img ? (
+                              <img
+                                src={img}
+                                alt={member.name}
+                                className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-muted">
+                                <span className="text-sm text-muted-foreground">Foto</span>
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 via-transparent to-transparent" />
+                          </div>
 
-                    {/* Specialties */}
-                    <div className="mb-8">
-                      <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground mb-3">
-                        Especialidades
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {member.specialties.map((s, i) => (
-                          <motion.span
-                            key={s}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.3, delay: 0.4 + i * 0.1 }}
-                            className="text-xs bg-secondary border border-border px-3.5 py-1.5 rounded-full text-foreground/80"
-                          >
-                            {s}
-                          </motion.span>
-                        ))}
+                          {/* Floating badge */}
+                          {member.badge_label && member.badge_value && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 10 }}
+                              whileInView={{ opacity: 1, y: 0 }}
+                              viewport={{ once: true }}
+                              transition={{ duration: 0.5, delay: 0.5 }}
+                              className="absolute -bottom-4 -right-4 md:-right-6 bg-card border border-border rounded-xl px-4 py-3 shadow-card"
+                            >
+                              <p className="text-xs text-muted-foreground">{member.badge_label}</p>
+                              <p className="text-sm font-medium text-foreground">{member.badge_value}</p>
+                            </motion.div>
+                          )}
+                        </motion.div>
+
+                        {/* Info */}
+                        <motion.div
+                          initial={{ opacity: 0, x: isEven ? -40 : 40 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.7, delay: 0.2 }}
+                          className={`flex flex-col ${isEven ? "md:order-1" : ""}`}
+                        >
+                          <span className="text-xs font-medium tracking-[0.2em] uppercase text-primary mb-3">
+                            {member.role}
+                          </span>
+                          <h2 className="font-serif text-3xl md:text-4xl font-light text-foreground mb-4">
+                            {member.name}
+                          </h2>
+                          <div className="w-12 h-px bg-primary/40 mb-6" />
+                          {member.bio && (
+                            <p className="text-muted-foreground leading-relaxed mb-8">
+                              {member.bio}
+                            </p>
+                          )}
+
+                          {/* Specialties */}
+                          {member.specialties?.length > 0 && (
+                            <div className="mb-8">
+                              <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground mb-3">
+                                Especialidades
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {member.specialties.map((s, i) => (
+                                  <motion.span
+                                    key={s}
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.3, delay: 0.4 + i * 0.1 }}
+                                    className="text-xs bg-secondary border border-border px-3.5 py-1.5 rounded-full text-foreground/80"
+                                  >
+                                    {s}
+                                  </motion.span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Instagram */}
+                          {member.instagram && (
+                            <motion.a
+                              href={`https://instagram.com/${member.instagram.replace("@", "")}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              initial={{ opacity: 0 }}
+                              whileInView={{ opacity: 1 }}
+                              viewport={{ once: true }}
+                              transition={{ duration: 0.4, delay: 0.6 }}
+                              className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors group/link"
+                            >
+                              <Instagram className="w-4 h-4" />
+                              <span className="border-b border-transparent group-hover/link:border-primary/40 transition-colors">
+                                {member.instagram}
+                              </span>
+                            </motion.a>
+                          )}
+                        </motion.div>
                       </div>
-                    </div>
-
-                    {/* Instagram */}
-                    {member.instagram && (
-                      <motion.a
-                        href={`https://instagram.com/${member.instagram.replace("@", "")}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.4, delay: 0.6 }}
-                        className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors group/link"
-                      >
-                        <Instagram className="w-4 h-4" />
-                        <span className="border-b border-transparent group-hover/link:border-primary/40 transition-colors">
-                          {member.instagram}
-                        </span>
-                      </motion.a>
-                    )}
-                  </motion.div>
-                </div>
-              </motion.div>
-            ))}
+                    </motion.div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </section>
 

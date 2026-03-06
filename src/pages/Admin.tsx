@@ -11,6 +11,7 @@ import { QuizzesTab } from "@/components/admin/QuizzesTab";
 import { TasksTab } from "@/components/admin/TasksTab";
 import { AllowedEmailsTab } from "@/components/admin/AllowedEmailsTab";
 import { GiftCardsTab } from "@/components/admin/GiftCardsTab";
+import { TeamTab } from "@/components/admin/TeamTab";
 import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Admin() {
@@ -44,6 +45,8 @@ export default function Admin() {
         return <TasksTab />;
       case "gift-cards":
         return <GiftCardsTab />;
+      case "team":
+        return <TeamTab />;
       case "access":
         return <AllowedEmailsTab />;
       default:
