@@ -27,7 +27,7 @@ export function CTASection() {
             {t("home.cta.title_1")}{" "}
             <span className="text-champagne">{t("home.cta.title_2")}</span>
           </h2>
-          <p className="text-primary-foreground/70 text-base md:text-lg lg:text-xl mb-8 md:mb-10 leading-relaxed">
+          <p className="text-white/80 text-base md:text-lg lg:text-xl mb-8 md:mb-10 leading-relaxed">
             {t("home.cta.description")}
           </p>
           <div className="flex flex-col gap-3 md:gap-4 sm:flex-row justify-center">
