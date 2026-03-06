@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { Instagram, Sparkles } from "lucide-react";
 import founderImg from "@/assets/founder.jpg";
 
 const team = [
@@ -8,7 +9,27 @@ const team = [
     name: "Ane Caroline",
     role: "Fundadora & Brow Artist",
     image: founderImg,
+    bio: "Especialista em realçar a beleza natural de cada cliente, com anos de experiência e formação internacional em design de sobrancelhas.",
     specialties: ["Design de Sobrancelha", "Brow Lamination", "Henna Brows"],
+    instagram: "@acsbeautystudio",
+  },
+];
+
+const values = [
+  {
+    icon: "✨",
+    title: "Excelência",
+    desc: "Cada detalhe importa. Buscamos a perfeição em cada procedimento.",
+  },
+  {
+    icon: "💛",
+    title: "Cuidado",
+    desc: "Tratamos cada cliente como única, respeitando sua individualidade.",
+  },
+  {
+    icon: "🌿",
+    title: "Naturalidade",
+    desc: "Realçamos sua beleza natural com técnicas que valorizam quem você é.",
   },
 ];
 
@@ -18,62 +39,186 @@ export default function Team() {
       <Header />
       <main className="flex-grow">
         {/* Hero */}
-        <section className="pt-28 md:pt-32 pb-12 md:pb-16">
-          <div className="container mx-auto px-4 md:px-6">
+        <section className="relative pt-28 md:pt-36 pb-16 md:pb-24 overflow-hidden">
+          {/* Decorative bg */}
+          <div className="absolute inset-0 bg-gradient-hero opacity-60" />
+          <div className="absolute top-20 right-0 w-72 h-72 rounded-full bg-gold/5 blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-nude-dark/10 blur-3xl" />
+
+          <div className="container mx-auto px-4 md:px-6 relative z-10">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-3xl"
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="max-w-2xl mx-auto text-center"
             >
-              <h1 className="font-serif text-3xl md:text-5xl font-bold mb-4 text-foreground">
-                Nossa Equipe
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="inline-flex items-center gap-2 bg-secondary px-4 py-1.5 rounded-full mb-6"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-primary" />
+                <span className="text-xs font-medium tracking-[0.15em] uppercase text-primary">
+                  Conheça quem cuida de você
+                </span>
+              </motion.div>
+              <h1 className="font-serif text-4xl md:text-6xl font-light tracking-tight mb-5 text-foreground">
+                Nossa{" "}
+                <span className="text-gradient-gold font-normal">Equipe</span>
               </h1>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Profissionais apaixonadas por beleza, dedicadas a entregar resultados excepcionais.
+              <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto">
+                Profissionais apaixonadas por beleza, dedicadas a entregar
+                resultados excepcionais com técnica e carinho.
               </p>
             </motion.div>
           </div>
         </section>
 
-        {/* Team Grid */}
-        <section className="pb-16 md:pb-20">
+        {/* Featured Team Member */}
+        <section className="py-16 md:py-24">
           <div className="container mx-auto px-4 md:px-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl">
-              {team.map((member, idx) => (
-                <motion.div
-                  key={member.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  className="group"
-                >
-                  <div className="aspect-[3/4] rounded-2xl overflow-hidden mb-4 bg-muted/50">
-                    {member.image ? (
+            {team.map((member, idx) => (
+              <motion.div
+                key={member.name}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="max-w-5xl mx-auto"
+              >
+                <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+                  {/* Image */}
+                  <motion.div
+                    initial={{ opacity: 0, x: -40 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.7, delay: 0.1 }}
+                    className="relative group"
+                  >
+                    <div className="absolute -inset-3 bg-gradient-gold rounded-3xl opacity-[0.08] group-hover:opacity-[0.15] transition-opacity duration-500 blur-sm" />
+                    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-elevated">
                       <img
                         src={member.image}
                         alt={member.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
                       />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
-                        <span className="text-sm font-light tracking-wider uppercase">Foto</span>
+                      {/* Overlay gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 via-transparent to-transparent" />
+                    </div>
+                    {/* Floating badge */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: 0.5 }}
+                      className="absolute -bottom-4 -right-4 md:-right-6 bg-card border border-border rounded-xl px-4 py-3 shadow-card"
+                    >
+                      <p className="text-xs text-muted-foreground">Especialista em</p>
+                      <p className="text-sm font-medium text-foreground">Brow Design</p>
+                    </motion.div>
+                  </motion.div>
+
+                  {/* Info */}
+                  <motion.div
+                    initial={{ opacity: 0, x: 40 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.7, delay: 0.2 }}
+                    className="flex flex-col"
+                  >
+                    <span className="text-xs font-medium tracking-[0.2em] uppercase text-primary mb-3">
+                      {member.role}
+                    </span>
+                    <h2 className="font-serif text-3xl md:text-4xl font-light text-foreground mb-4">
+                      {member.name}
+                    </h2>
+                    <div className="w-12 h-px bg-primary/40 mb-6" />
+                    <p className="text-muted-foreground leading-relaxed mb-8">
+                      {member.bio}
+                    </p>
+
+                    {/* Specialties */}
+                    <div className="mb-8">
+                      <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground mb-3">
+                        Especialidades
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {member.specialties.map((s, i) => (
+                          <motion.span
+                            key={s}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.3, delay: 0.4 + i * 0.1 }}
+                            className="text-xs bg-secondary border border-border px-3.5 py-1.5 rounded-full text-foreground/80"
+                          >
+                            {s}
+                          </motion.span>
+                        ))}
                       </div>
-                    )}
-                  </div>
-                  <h3 className="font-serif text-xl font-semibold text-foreground">{member.name}</h3>
-                  <p className="text-sm text-primary font-medium mb-2">{member.role}</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {member.specialties.map((s) => (
-                      <span
-                        key={s}
-                        className="text-xs bg-muted px-2.5 py-1 rounded-full text-muted-foreground"
+                    </div>
+
+                    {/* Instagram */}
+                    {member.instagram && (
+                      <motion.a
+                        href={`https://instagram.com/${member.instagram.replace("@", "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.4, delay: 0.6 }}
+                        className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors group/link"
                       >
-                        {s}
-                      </span>
-                    ))}
-                  </div>
+                        <Instagram className="w-4 h-4" />
+                        <span className="border-b border-transparent group-hover/link:border-primary/40 transition-colors">
+                          {member.instagram}
+                        </span>
+                      </motion.a>
+                    )}
+                  </motion.div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* Values */}
+        <section className="py-16 md:py-20 bg-secondary/40">
+          <div className="container mx-auto px-4 md:px-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h2 className="font-serif text-2xl md:text-3xl font-light text-foreground mb-3">
+                Nossos Valores
+              </h2>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                O que nos guia em cada atendimento
+              </p>
+            </motion.div>
+
+            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              {values.map((v, i) => (
+                <motion.div
+                  key={v.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.12 }}
+                  className="bg-card border border-border rounded-2xl p-6 text-center hover:shadow-card transition-shadow duration-300"
+                >
+                  <span className="text-2xl mb-3 block">{v.icon}</span>
+                  <h3 className="font-serif text-lg font-medium text-foreground mb-2">
+                    {v.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {v.desc}
+                  </p>
                 </motion.div>
               ))}
             </div>
