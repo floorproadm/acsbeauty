@@ -7,10 +7,10 @@ import founderImg from "@/assets/founder.jpg";
 const team = [
   {
     name: "Ane Caroline",
-    role: "Fundadora & Brow Artist",
+    role: "Fundadora & Hair Stylist",
     image: founderImg,
-    bio: "Especialista em realçar a beleza natural de cada cliente, com anos de experiência e formação internacional em design de sobrancelhas.",
-    specialties: ["Design de Sobrancelha", "Brow Lamination", "Henna Brows"],
+    bio: "Especialista em realçar a beleza natural de cada cliente, com anos de experiência e formação internacional em técnicas capilares.",
+    specialties: ["Corte", "Coloração", "Tratamentos Capilares"],
     instagram: "@acsbeautystudio",
   },
 ];
