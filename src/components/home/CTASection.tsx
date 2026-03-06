@@ -23,9 +23,9 @@ export function CTASection() {
           transition={{ duration: 0.6 }}
           className="text-center max-w-3xl mx-auto"
         >
-          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-primary-foreground mb-4 md:mb-6">
+          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 md:mb-6">
             {t("home.cta.title_1")}{" "}
-            <span className="text-rose-gold">{t("home.cta.title_2")}</span>
+            <span className="text-champagne">{t("home.cta.title_2")}</span>
           </h2>
           <p className="text-primary-foreground/70 text-base md:text-lg lg:text-xl mb-8 md:mb-10 leading-relaxed">
             {t("home.cta.description")}
