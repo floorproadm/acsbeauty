@@ -11,8 +11,8 @@ export function CTASection() {
     <section className="py-20 md:py-24 bg-primary relative overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-rose-gold/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-48 md:w-80 h-48 md:h-80 bg-rose-gold/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-champagne/15 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-48 md:w-80 h-48 md:h-80 bg-champagne/15 rounded-full blur-3xl" />
       </div>
 
       <div className="container mx-auto px-4 md:px-6 relative z-10">
