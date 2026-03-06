@@ -7,10 +7,10 @@ import founderImg from "@/assets/founder.jpg";
 const team = [
   {
     name: "Ane Caroline",
-    role: "Fundadora & Brow Artist",
+    role: "Fundadora & Hair Stylist",
     image: founderImg,
-    bio: "Especialista em realçar a beleza natural de cada cliente, com anos de experiência e formação internacional em design de sobrancelhas.",
-    specialties: ["Design de Sobrancelha", "Brow Lamination", "Henna Brows"],
+    bio: "Especialista em realçar a beleza natural de cada cliente, com anos de experiência e formação internacional em técnicas capilares.",
+    specialties: ["Corte", "Coloração", "Tratamentos Capilares"],
     instagram: "@acsbeautystudio",
   },
 ];
@@ -115,7 +115,7 @@ export default function Team() {
                       className="absolute -bottom-4 -right-4 md:-right-6 bg-card border border-border rounded-xl px-4 py-3 shadow-card"
                     >
                       <p className="text-xs text-muted-foreground">Especialista em</p>
-                      <p className="text-sm font-medium text-foreground">Brow Design</p>
+                      <p className="text-sm font-medium text-foreground">Hair Styling</p>
                     </motion.div>
                   </motion.div>
 
