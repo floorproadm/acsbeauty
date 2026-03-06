@@ -22,7 +22,7 @@ export default function Shop() {
         name: "Shop Waitlist",
         email,
         message: "Interesse na loja online — waitlist",
-        service_interest: "shop",
+        service_interest: "shop"
       });
       if (error) throw error;
       setSubmitted(true);
@@ -43,8 +43,8 @@ export default function Shop() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="max-w-lg mx-auto text-center space-y-8"
-          >
+            className="max-w-lg mx-auto text-center space-y-8">
+            
             <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
               <ShoppingBag className="w-8 h-8 text-primary" />
             </div>
@@ -54,41 +54,41 @@ export default function Shop() {
                 Shop — Em Breve
               </h1>
               <p className="text-muted-foreground leading-relaxed">
-                Estamos preparando uma seleção especial de produtos para cuidados com sobrancelhas,
-                cabelo e unhas. Deixe seu email para ser a primeira a saber!
+                Estamos preparando uma seleção especial de produtos para cuidados com cabelos, sobrancelhas e unhas. Deixe seu email para ser a primeira a saber!
+              
               </p>
             </div>
 
-            {submitted ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-primary/5 rounded-xl p-6"
-              >
+            {submitted ?
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-primary/5 rounded-xl p-6">
+              
                 <p className="text-primary font-medium">
                   ✨ Pronto! Vamos te avisar quando a loja abrir.
                 </p>
-              </motion.div>
-            ) : (
-              <form onSubmit={handleSubmit} className="flex gap-3 max-w-sm mx-auto">
+              </motion.div> :
+
+            <form onSubmit={handleSubmit} className="flex gap-3 max-w-sm mx-auto">
                 <Input
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="flex-1"
-                />
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex-1" />
+              
                 <Button type="submit" disabled={loading} className="gap-1 shrink-0">
                   Avisar-me
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </form>
-            )}
+            }
           </motion.div>
         </div>
       </main>
       <Footer />
-    </div>
-  );
+    </div>);
+
 }
