@@ -436,7 +436,7 @@ export default function Book() {
           >
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-light text-rose-gold text-sm font-medium mb-4">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary text-accent text-sm font-medium mb-4">
                 <Calendar className="w-4 h-4" />
                 {t("booking.badge")}
               </div>
