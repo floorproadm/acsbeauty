@@ -612,6 +612,60 @@ const translations: Record<Language, Record<string, string>> = {
     "confirm.addon_note": "Solicite este adicional e confirmaremos a disponibilidade.",
     "confirm.addon_request": "Solicitar Adicional",
     "confirm.addon_requested": "Solicitação enviada! Confirmaremos quando você chegar.",
+
+    // ========== TEAM PAGE ==========
+    "team.badge": "Conheça quem cuida de você",
+    "team.title_prefix": "Nossa",
+    "team.title_highlight": "Equipe",
+    "team.description": "Profissionais apaixonadas por beleza, dedicadas a entregar resultados excepcionais com técnica e carinho.",
+    "team.specialties": "Especialidades",
+    "team.photo_placeholder": "Foto",
+    "team.loading": "Carregando...",
+    "team.values_title": "Nossos Valores",
+    "team.values_subtitle": "O que nos guia em cada atendimento",
+    "team.value_excellence": "Excelência",
+    "team.value_excellence_desc": "Cada detalhe importa. Buscamos a perfeição em cada procedimento.",
+    "team.value_care": "Cuidado",
+    "team.value_care_desc": "Tratamos cada cliente como única, respeitando sua individualidade.",
+    "team.value_naturalness": "Naturalidade",
+    "team.value_naturalness_desc": "Realçamos sua beleza natural com técnicas que valorizam quem você é.",
+
+    // ========== SHOP PAGE ==========
+    "shop.title": "Shop — Em Breve",
+    "shop.description": "Estamos preparando uma seleção especial de produtos para cuidados com cabelos, sobrancelhas e unhas. Deixe seu email para ser a primeira a saber!",
+    "shop.success": "✨ Pronto! Vamos te avisar quando a loja abrir.",
+    "shop.notify_me": "Avisar-me",
+    "shop.on_list": "Você está na lista!",
+    "shop.error": "Erro ao salvar. Tente novamente.",
+
+    // ========== STUDIO PAGE ==========
+    "studio.title": "Nosso Estúdio",
+    "studio.description": "Um espaço pensado para você se sentir acolhida, relaxar e sair ainda mais bonita.",
+    "studio.photo_placeholder": "Foto do Estúdio",
+    "studio.comfort_title": "Beleza com Conforto",
+    "studio.comfort_text_1": "O ACS Beauty Studio foi criado para ser mais do que um salão — é uma experiência. Cada detalhe do nosso espaço foi planejado para proporcionar conforto, privacidade e resultados impecáveis.",
+    "studio.comfort_text_2": "Localizado no coração de Newark, nosso estúdio oferece um ambiente acolhedor e moderno, com produtos de alta qualidade e profissionais especializadas em realçar sua beleza natural.",
+
+    // ========== LOCATION PAGE ==========
+    "location.title": "ACS Beauty Studio — Newark",
+    "location.description": "Seu destino de beleza no coração de Newark, NJ. Especialistas em sobrancelhas, cabelo e unhas.",
+    "location.address_title": "Endereço",
+    "location.contact_title": "Contato",
+    "location.hours_title": "Horários",
+    "location.closed": "Fechado",
+    "location.hours_soon": "Horários em breve.",
+    "location.day_0": "Domingo",
+    "location.day_1": "Segunda",
+    "location.day_2": "Terça",
+    "location.day_3": "Quarta",
+    "location.day_4": "Quinta",
+    "location.day_5": "Sexta",
+    "location.day_6": "Sábado",
+
+    // ========== NOT FOUND PAGE ==========
+    "notfound.title": "404",
+    "notfound.message": "Oops! Página não encontrada",
+    "notfound.back": "Voltar ao Início",
   },
 };
 

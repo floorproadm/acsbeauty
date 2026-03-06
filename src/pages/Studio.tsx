@@ -21,10 +21,10 @@ export default function Studio() {
               className="max-w-3xl"
             >
               <h1 className="font-serif text-3xl md:text-5xl font-bold mb-4 text-foreground">
-                Nosso Estúdio
+                {t("studio.title")}
               </h1>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Um espaço pensado para você se sentir acolhida, relaxar e sair ainda mais bonita.
+                {t("studio.description")}
               </p>
             </motion.div>
           </div>
@@ -42,7 +42,7 @@ export default function Studio() {
                 className="aspect-[4/5] rounded-2xl bg-muted/50 overflow-hidden"
               >
                 <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
-                  <span className="text-sm font-light tracking-wider uppercase">Foto do Estúdio</span>
+                  <span className="text-sm font-light tracking-wider uppercase">{t("studio.photo_placeholder")}</span>
                 </div>
               </motion.div>
 
@@ -53,17 +53,13 @@ export default function Studio() {
                 className="space-y-6"
               >
                 <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
-                  Beleza com Conforto
+                  {t("studio.comfort_title")}
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  O ACS Beauty Studio foi criado para ser mais do que um salão — é uma experiência.
-                  Cada detalhe do nosso espaço foi planejado para proporcionar conforto, privacidade e
-                  resultados impecáveis.
+                  {t("studio.comfort_text_1")}
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
-                  Localizado no coração de Newark, nosso estúdio oferece um ambiente acolhedor e
-                  moderno, com produtos de alta qualidade e profissionais especializadas em realçar
-                  sua beleza natural.
+                  {t("studio.comfort_text_2")}
                 </p>
 
                 <div className="pt-4 border-t border-border">
