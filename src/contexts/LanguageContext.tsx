@@ -285,6 +285,60 @@ const translations: Record<Language, Record<string, string>> = {
     "confirm.addon_note": "Request this add-on and we'll confirm availability.",
     "confirm.addon_request": "Request Add-On",
     "confirm.addon_requested": "Add-on request sent! We'll confirm when you arrive.",
+
+    // ========== TEAM PAGE ==========
+    "team.badge": "Meet who takes care of you",
+    "team.title_prefix": "Our",
+    "team.title_highlight": "Team",
+    "team.description": "Professionals passionate about beauty, dedicated to delivering exceptional results with technique and care.",
+    "team.specialties": "Specialties",
+    "team.photo_placeholder": "Photo",
+    "team.loading": "Loading...",
+    "team.values_title": "Our Values",
+    "team.values_subtitle": "What guides us in every service",
+    "team.value_excellence": "Excellence",
+    "team.value_excellence_desc": "Every detail matters. We strive for perfection in every procedure.",
+    "team.value_care": "Care",
+    "team.value_care_desc": "We treat every client as unique, respecting their individuality.",
+    "team.value_naturalness": "Naturalness",
+    "team.value_naturalness_desc": "We enhance your natural beauty with techniques that celebrate who you are.",
+
+    // ========== SHOP PAGE ==========
+    "shop.title": "Shop — Coming Soon",
+    "shop.description": "We're preparing a special selection of hair, brow, and nail care products. Leave your email to be the first to know!",
+    "shop.success": "✨ All set! We'll let you know when the shop opens.",
+    "shop.notify_me": "Notify me",
+    "shop.on_list": "You're on the list!",
+    "shop.error": "Error saving. Please try again.",
+
+    // ========== STUDIO PAGE ==========
+    "studio.title": "Our Studio",
+    "studio.description": "A space designed for you to feel welcome, relax, and leave even more beautiful.",
+    "studio.photo_placeholder": "Studio Photo",
+    "studio.comfort_title": "Beauty with Comfort",
+    "studio.comfort_text_1": "ACS Beauty Studio was created to be more than a salon — it's an experience. Every detail of our space was designed to provide comfort, privacy, and impeccable results.",
+    "studio.comfort_text_2": "Located in the heart of Newark, our studio offers a warm and modern environment, with high-quality products and professionals specialized in enhancing your natural beauty.",
+
+    // ========== LOCATION PAGE ==========
+    "location.title": "ACS Beauty Studio — Newark",
+    "location.description": "Your beauty destination in the heart of Newark, NJ. Specialists in brows, hair, and nails.",
+    "location.address_title": "Address",
+    "location.contact_title": "Contact",
+    "location.hours_title": "Hours",
+    "location.closed": "Closed",
+    "location.hours_soon": "Hours coming soon.",
+    "location.day_0": "Sunday",
+    "location.day_1": "Monday",
+    "location.day_2": "Tuesday",
+    "location.day_3": "Wednesday",
+    "location.day_4": "Thursday",
+    "location.day_5": "Friday",
+    "location.day_6": "Saturday",
+
+    // ========== NOT FOUND PAGE ==========
+    "notfound.title": "404",
+    "notfound.message": "Oops! Page not found",
+    "notfound.back": "Return to Home",
   },
   pt: {
     // ========== GLOBAL ==========
