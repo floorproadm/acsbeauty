@@ -1323,6 +1323,54 @@ export type Database = {
           },
         ]
       }
+      team_members: {
+        Row: {
+          badge_label: string | null
+          badge_value: string | null
+          bio: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          instagram: string | null
+          is_active: boolean
+          name: string
+          role: string
+          sort_order: number
+          specialties: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          badge_label?: string | null
+          badge_value?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          instagram?: string | null
+          is_active?: boolean
+          name: string
+          role?: string
+          sort_order?: number
+          specialties?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          badge_label?: string | null
+          badge_value?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          instagram?: string | null
+          is_active?: boolean
+          name?: string
+          role?: string
+          sort_order?: number
+          specialties?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
