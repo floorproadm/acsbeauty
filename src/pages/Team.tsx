@@ -106,17 +106,6 @@ export default function Team() {
                       {/* Overlay gradient */}
                       <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 via-transparent to-transparent" />
                     </div>
-                    {/* Floating badge */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: 0.5 }}
-                      className="absolute -bottom-4 -right-4 md:-right-6 bg-card border border-border rounded-xl px-4 py-3 shadow-card"
-                    >
-                      <p className="text-xs text-muted-foreground">Especialista em</p>
-                      <p className="text-sm font-medium text-foreground">Hair Styling</p>
-                    </motion.div>
                   </motion.div>
 
                   {/* Info */}
