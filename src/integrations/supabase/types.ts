@@ -112,6 +112,7 @@ export type Database = {
           notes: string | null
           package_id: string | null
           service_id: string | null
+          sku_id: string | null
           staff_id: string | null
           start_time: string
           status: string
@@ -131,6 +132,7 @@ export type Database = {
           notes?: string | null
           package_id?: string | null
           service_id?: string | null
+          sku_id?: string | null
           staff_id?: string | null
           start_time: string
           status?: string
@@ -150,6 +152,7 @@ export type Database = {
           notes?: string | null
           package_id?: string | null
           service_id?: string | null
+          sku_id?: string | null
           staff_id?: string | null
           start_time?: string
           status?: string
@@ -177,6 +180,13 @@ export type Database = {
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
             referencedColumns: ["id"]
           },
           {
