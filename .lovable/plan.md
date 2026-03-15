@@ -8,12 +8,10 @@
 - `services.category_slug` (text, indexed)
 - `service_skus.slug` (text, indexed)
 - `services.hero_image_url` (text)
-- `services.faq` (jsonb, default '[]') — legado, substituído por `service_faqs`
+- `services.faq` (jsonb, default '[]') — usado para FAQs inline
 
-### Tabela `service_faqs` criada:
-- `id`, `service_id`, `question`, `answer`, `sort_order`, `created_at`
-- RLS: SELECT público, ALL para admin_owner
-- Substitui o campo `faq` jsonb nos services
+### Tabela `service_faqs` criada (legado, não usada pelo frontend):
+- Frontend usa `services.faq` jsonb diretamente
 
 ### Indexes adicionados:
 - `idx_services_slug`
@@ -23,49 +21,67 @@
 
 ### Páginas criadas/atualizadas:
 - `src/pages/Services.tsx` → dinâmico, query categorias do banco
-- `src/pages/servicos/CategoryPage.tsx` → query por `category_slug` + FAQs da tabela `service_faqs`
-- `src/pages/servicos/ServiceDetail.tsx` → variações e SKUs com preços reais
+- `src/pages/servicos/CategoryPage.tsx` → query por `category_slug`
+- `src/pages/servicos/ServiceDetail.tsx` → variações, SKUs, FAQs (jsonb), JSON-LD geo
 
 ### RLS adicionado:
 - `service_skus` → "Anyone can view active skus"
 - `service_variations` → "Anyone can view active variations"
 - `service_faqs` → "Anyone can view service faqs" + "Admins can manage service faqs"
 
-### Rotas atualizadas:
-- Páginas estáticas antigas removidas do App.tsx (Cabelo, Sobrancelhas, Unhas)
-
 ---
 
 ## ✅ Fase 1.5: SEO Local + Institucional + Shop (CONCLUÍDA)
 
-### Tabela `service_locations` criada:
-- `id`, `service_id`, `location_slug`, `location_name`, `canonical_service_id`
-- `meta_title`, `meta_description`, `body_text`, `is_active`
-- UNIQUE(service_id, location_slug)
-- RLS: SELECT público (is_active), ALL para admin_owner
-- Indexes: `idx_service_locations_service_id`, `idx_service_locations_slug`
-
-### Rota hierárquica para geo-variants:
-- `/servicos/:categoria/:slug/:locationSlug` → ServiceDetail com conteúdo localizado
-- `<link rel="canonical">` aponta para a URL sem location
-- `document.title` e meta description dinâmicos
-
-### Páginas institucionais:
-- `/studio` → `src/pages/Studio.tsx` — espaço físico com mapa
-- `/team` → `src/pages/Team.tsx` — equipe com especialidades
-- `/location/newark` → `src/pages/LocationNewark.tsx` — Local SEO + schema LocalBusiness JSON-LD
-- `/shop` → `src/pages/Shop.tsx` — placeholder com email capture (contact_submissions)
-
-### Footer atualizado:
-- Quick Links: adicionados Studio, Equipe
-- Services: links para `/servicos/sobrancelhas`, `/servicos/cabelo`, `/servicos/unhas`, `/shop`
+### Tabela `service_locations` criada
+### Rota hierárquica para geo-variants com canonical
+### Páginas institucionais: Studio, Team, LocationNewark, Shop
 
 ---
 
-## 🔲 Fase 2: Booking por Slug (Conversão)
-- `/agendar`, `/agendar/:serviceSlug`, `/agendar/:serviceSlug/:skuSlug`
-- Refactor Book.tsx em sub-componentes
-- Redirect `/book` → `/agendar`
+## ✅ Fase 2: Booking por SKU + Slug (CONCLUÍDA)
+
+### Migration executada:
+- `bookings.sku_id` (uuid, nullable, FK → service_skus)
+
+### Book.tsx — SKU selection flow:
+- Novo state: `pickedVariationId`, `pickedSkuId`
+- Step "sku" entre "service" e "date"
+- Auto-skip: sem variations → pular; 1 SKU → auto-selecionar
+- `serviceDuration` usa SKU duration com fallback
+- `sku_id` enviado no payload de hold/confirm
+
+### Book.tsx — Slug-based URL pre-selection:
+- Query params `?service=slug` e `?sku=slug`
+- UUID regex: `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`
+- UUID → WHERE id = param; Slug → WHERE slug = param
+- Pre-seleciona serviço e SKU, pula para date
+
+### ServiceDetail.tsx — Slug links:
+- CTA principal: `/book?service=${service.slug}`
+- SkuCard: `/book?service=${service.slug}&sku=${sku.slug}`
+
+### ServiceDetail.tsx — FAQs:
+- Renderiza `services.faq` (jsonb array `[{question, answer}]`)
+- Accordion shadcn com estilo ServiceFAQ
+
+### ServiceDetail.tsx — JSON-LD geo-cluster:
+- `<script type="application/ld+json">` com schema LocalBusiness quando locationData existe
+
+### Admin — BookingsTab:
+- Join `service_skus(name, price)` na query
+- Colunas SKU name e preço na listagem
+
+### Admin — DashboardTab:
+- Cards: "Receita do Mês" e "Bookings do Mês"
+- Bar chart (recharts): top 5 serviços por booking count
+
+### Edge function — Price lock:
+- `calendar-confirm-booking` aceita `sku_id`
+- Busca preço do SKU no banco (nunca confia no frontend)
+- `total_price = promo_price || price` salvo no booking
+
+---
 
 ## 🔲 Fase 3: Quiz como Funil Real
 - `/quiz` landing, `/quiz/:slug/resultado`
