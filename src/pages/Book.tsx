@@ -6,7 +6,7 @@ import { ArrowLeft, Calendar, Check, Loader2, Clock, AlertCircle } from "lucide-
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, addDays, isSameDay, parseISO } from "date-fns";
+import { format, addDays, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -70,34 +70,43 @@ interface ConfirmResponse {
   code?: string;
 }
 
-// Default consultation duration when no service is selected (in minutes)
 const DEFAULT_CONSULTATION_DURATION = 30;
+
+const isUUID = (param: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(param);
 
 export default function Book() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const offerId = searchParams.get("offer_id");
   const packageId = searchParams.get("package_id");
-  const serviceId = searchParams.get("service_id");
-  const flowMode = searchParams.get("flow"); // "calendar" mode skips to date picker
+  const serviceParam = searchParams.get("service_id") || searchParams.get("service");
+  const skuParam = searchParams.get("sku");
+  const flowMode = searchParams.get("flow");
   const { t, language } = useLanguage();
 
-  // Determine if we're in direct calendar flow (no service pre-selected)
-  const isCalendarFlow = flowMode === "calendar" && !offerId && !packageId && !serviceId;
+  // Resolve service param (UUID vs slug)
+  const serviceParamIsUUID = serviceParam ? isUUID(serviceParam) : false;
 
-  // Booking flow state - include "service" step for optional service selection
-  const [step, setStep] = useState<"service" | "date" | "time" | "form">(isCalendarFlow ? "date" : "date");
+  // Determine if we're in direct calendar flow
+  const isCalendarFlow = flowMode === "calendar" && !offerId && !packageId && !serviceParam;
+
+  // Booking flow state
+  const [step, setStep] = useState<"service" | "sku" | "date" | "time" | "form">(
+    isCalendarFlow ? "date" : serviceParam ? "date" : "date"
+  );
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [holdId, setHoldId] = useState<string | null>(null);
   const [holdExpiresAt, setHoldExpiresAt] = useState<Date | null>(null);
   const [countdown, setCountdown] = useState<number>(0);
-  
-  // Selected service from picker (when user chooses from service step)
+
+  // Selected service/variation/SKU
   const [pickedServiceId, setPickedServiceId] = useState<string | null>(null);
-  
-  // Category filter for service selection
+  const [pickedVariationId, setPickedVariationId] = useState<string | null>(null);
+  const [pickedSkuId, setPickedSkuId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [slugResolved, setSlugResolved] = useState(false);
 
   const bookingSchema = z.object({
     name: z.string().trim().min(2, t("booking.name_min_error")).max(100),
@@ -106,6 +115,65 @@ export default function Book() {
   });
 
   type BookingFormData = z.infer<typeof bookingSchema>;
+
+  // Resolve service by slug (when param is not UUID)
+  const { data: resolvedServiceBySlug } = useQuery({
+    queryKey: ["resolve-service-slug", serviceParam],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("services")
+        .select("*")
+        .eq("slug", serviceParam!)
+        .eq("is_active", true)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!serviceParam && !serviceParamIsUUID,
+  });
+
+  // Resolve SKU by slug
+  const { data: resolvedSkuBySlug } = useQuery({
+    queryKey: ["resolve-sku-slug", skuParam, pickedServiceId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_skus")
+        .select("*")
+        .eq("slug", skuParam!)
+        .eq("service_id", pickedServiceId!)
+        .eq("is_active", true)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!skuParam && !!pickedServiceId && !isUUID(skuParam),
+  });
+
+  // Effect: resolve slug params and pre-select
+  useEffect(() => {
+    if (slugResolved) return;
+
+    if (serviceParam && serviceParamIsUUID) {
+      setPickedServiceId(serviceParam);
+      setSlugResolved(true);
+    } else if (resolvedServiceBySlug) {
+      setPickedServiceId(resolvedServiceBySlug.id);
+      setSlugResolved(true);
+    }
+  }, [serviceParam, serviceParamIsUUID, resolvedServiceBySlug, slugResolved]);
+
+  // Effect: resolve SKU slug after service is resolved
+  useEffect(() => {
+    if (!pickedServiceId || !skuParam || pickedSkuId) return;
+
+    if (isUUID(skuParam)) {
+      setPickedSkuId(skuParam);
+      setStep("date");
+    } else if (resolvedSkuBySlug) {
+      setPickedSkuId(resolvedSkuBySlug.id);
+      setStep("date");
+    }
+  }, [pickedServiceId, skuParam, resolvedSkuBySlug, pickedSkuId]);
 
   // Fetch offer details
   const { data: offer } = useQuery({
@@ -137,9 +205,9 @@ export default function Book() {
     enabled: !!packageId,
   });
 
-  // Fetch service details (from URL param OR picked from service step)
-  const activeServiceId = pickedServiceId || serviceId;
-  
+  // Fetch service details
+  const activeServiceId = pickedServiceId || (serviceParam && serviceParamIsUUID ? serviceParam : null);
+
   const { data: service } = useQuery({
     queryKey: ["service", activeServiceId],
     queryFn: async () => {
@@ -167,43 +235,122 @@ export default function Book() {
       if (error) throw error;
       return data;
     },
-    enabled: step === "service", // Only fetch when on service step
+    enabled: step === "service",
   });
 
-  // Determine service duration - use default for calendar flow without service
-  const serviceDuration = offer?.services?.duration_minutes || 
-                          service?.duration_minutes || 
-                          DEFAULT_CONSULTATION_DURATION;
+  // Fetch variations for picked service
+  const { data: serviceVariations } = useQuery({
+    queryKey: ["book-variations", activeServiceId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_variations")
+        .select("*")
+        .eq("service_id", activeServiceId!)
+        .eq("is_active", true)
+        .order("sort_order");
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!activeServiceId && step === "sku",
+  });
+
+  // Fetch SKUs for picked service (filtered by variation if selected)
+  const { data: serviceSkus } = useQuery({
+    queryKey: ["book-skus", activeServiceId, pickedVariationId],
+    queryFn: async () => {
+      let query = supabase
+        .from("service_skus")
+        .select("*")
+        .eq("service_id", activeServiceId!)
+        .eq("is_active", true)
+        .order("sort_order");
+
+      if (pickedVariationId) {
+        query = query.eq("variation_id", pickedVariationId);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!activeServiceId && step === "sku",
+  });
+
+  // Get selected SKU object
+  const { data: selectedSkuData } = useQuery({
+    queryKey: ["selected-sku", pickedSkuId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_skus")
+        .select("*")
+        .eq("id", pickedSkuId!)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!pickedSkuId,
+  });
+
+  // Auto-skip logic for SKU step
+  useEffect(() => {
+    if (step !== "sku" || !activeServiceId) return;
+    if (!serviceVariations || !serviceSkus) return;
+
+    // If no variations, and only 1 SKU → auto-select
+    if (serviceVariations.length === 0 && serviceSkus.length === 1) {
+      setPickedSkuId(serviceSkus[0].id);
+      setStep("date");
+      return;
+    }
+
+    // If no variations and no SKUs → go to date (legacy mode)
+    if (serviceVariations.length === 0 && serviceSkus.length === 0) {
+      setStep("date");
+      return;
+    }
+
+    // If 1 variation → auto-select it
+    if (serviceVariations.length === 1 && !pickedVariationId) {
+      setPickedVariationId(serviceVariations[0].id);
+    }
+  }, [step, activeServiceId, serviceVariations, serviceSkus, pickedVariationId]);
+
+  // When variation is auto-selected and SKUs load, auto-select if only 1
+  useEffect(() => {
+    if (step !== "sku" || !pickedVariationId || !serviceSkus) return;
+
+    const filteredSkus = serviceSkus.filter(s => s.variation_id === pickedVariationId);
+    if (filteredSkus.length === 1) {
+      setPickedSkuId(filteredSkus[0].id);
+      setStep("date");
+    }
+  }, [step, pickedVariationId, serviceSkus]);
+
+  // Service duration: use SKU duration > service duration > default
+  const serviceDuration = selectedSkuData?.duration_minutes ||
+    offer?.services?.duration_minutes ||
+    service?.duration_minutes ||
+    DEFAULT_CONSULTATION_DURATION;
 
   // Fetch available slots for selected date
   const { data: availability, isLoading: isLoadingSlots, refetch: refetchSlots } = useQuery({
     queryKey: ["availability", selectedDate?.toISOString(), serviceDuration],
     queryFn: async (): Promise<AvailabilityResponse> => {
       const dateStr = format(selectedDate!, "yyyy-MM-dd");
-      
       const response = await supabase.functions.invoke("calendar-availability", {
-        body: {
-          date: dateStr,
-          service_duration_minutes: serviceDuration,
-        },
+        body: { date: dateStr, service_duration_minutes: serviceDuration },
       });
-
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
+      if (response.error) throw new Error(response.error.message);
       return response.data;
     },
     enabled: !!selectedDate && step === "time",
-    staleTime: 30000, // Cache for 30 seconds
+    staleTime: 30000,
   });
 
   // Create hold mutation
   const createHold = useMutation({
     mutationFn: async (slot: TimeSlot): Promise<HoldResponse> => {
-      // Use activeServiceId which includes picked service
       const finalServiceId = offer?.service_id || activeServiceId || null;
-      
       const response = await supabase.functions.invoke("calendar-hold", {
         body: {
           start_time: slot.start,
@@ -212,11 +359,7 @@ export default function Book() {
           package_id: packageId || null,
         },
       });
-
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
+      if (response.error) throw new Error(response.error.message);
       return response.data;
     },
     onSuccess: (data) => {
@@ -226,9 +369,9 @@ export default function Book() {
         setStep("form");
         toast.success(language === "pt" ? "Horário reservado por 5 minutos" : "Time slot reserved for 5 minutes");
       } else if (data.code === 'RATE_LIMITED') {
-        toast.error(language === "pt" 
-          ? "Muitas tentativas. Aguarde um momento ou fale conosco pelo WhatsApp." 
-          : "Too many attempts. Please wait or contact us via WhatsApp.", 
+        toast.error(language === "pt"
+          ? "Muitas tentativas. Aguarde um momento ou fale conosco pelo WhatsApp."
+          : "Too many attempts. Please wait or contact us via WhatsApp.",
           { duration: 8000, action: { label: "WhatsApp", onClick: () => window.open("https://wa.me/19739004498", "_blank") } }
         );
       } else {
@@ -240,8 +383,8 @@ export default function Book() {
       console.error("Hold error:", error);
       const msg = error instanceof Error ? error.message : "";
       if (msg.includes("429") || msg.toLowerCase().includes("too many")) {
-        toast.error(language === "pt" 
-          ? "Muitas tentativas. Aguarde um momento ou fale conosco pelo WhatsApp." 
+        toast.error(language === "pt"
+          ? "Muitas tentativas. Aguarde um momento ou fale conosco pelo WhatsApp."
           : "Too many attempts. Please wait or contact us via WhatsApp.",
           { duration: 8000, action: { label: "WhatsApp", onClick: () => window.open("https://wa.me/19739004498", "_blank") } }
         );
@@ -252,14 +395,11 @@ export default function Book() {
     },
   });
 
-  // Confirm booking mutation with retry logic
+  // Confirm booking mutation
   const confirmBooking = useMutation({
     mutationFn: async (formData: BookingFormData): Promise<ConfirmResponse> => {
-      if (!holdId || !selectedSlot) {
-        throw new Error("Missing booking information");
-      }
+      if (!holdId || !selectedSlot) throw new Error("Missing booking information");
 
-      // Use activeServiceId which includes picked service
       const finalServiceId = offer?.service_id || activeServiceId || null;
 
       const requestBody = {
@@ -270,16 +410,15 @@ export default function Book() {
         service_id: finalServiceId,
         package_id: packageId || null,
         offer_id: offerId || null,
+        sku_id: pickedSkuId || null,
         start_time: selectedSlot.start,
         end_time: selectedSlot.end,
       };
 
-      // Try with direct fetch for better timeout control
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       try {
         const response = await fetch(`${supabaseUrl}/functions/v1/calendar-confirm-booking`, {
@@ -297,9 +436,7 @@ export default function Book() {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          if (response.status === 429 || errorData.code === 'RATE_LIMITED') {
-            throw new Error('RATE_LIMITED');
-          }
+          if (response.status === 429 || errorData.code === 'RATE_LIMITED') throw new Error('RATE_LIMITED');
           throw new Error(errorData.error || `HTTP ${response.status}`);
         }
 
@@ -315,13 +452,9 @@ export default function Book() {
     onSuccess: (data) => {
       if (data.success && data.booking) {
         toast.success(t("booking.success_title"));
-        // Pass booking data through navigation state to avoid RLS issues
-        navigate(`/confirm/${data.booking.id}`, { 
-          state: { bookingData: data.booking }
-        });
+        navigate(`/confirm/${data.booking.id}`, { state: { bookingData: data.booking } });
       } else {
         toast.error(data.error || "Failed to confirm booking");
-        // Reset to time selection
         setStep("time");
         setHoldId(null);
         setSelectedSlot(null);
@@ -332,8 +465,8 @@ export default function Book() {
       console.error("Confirm error:", error);
       const msg = error instanceof Error ? error.message : "";
       if (msg === 'RATE_LIMITED' || msg.includes("429")) {
-        toast.error(language === "pt" 
-          ? "Muitas tentativas. Aguarde um momento ou fale conosco pelo WhatsApp." 
+        toast.error(language === "pt"
+          ? "Muitas tentativas. Aguarde um momento ou fale conosco pelo WhatsApp."
           : "Too many attempts. Please wait or contact us via WhatsApp.",
           { duration: 8000, action: { label: "WhatsApp", onClick: () => window.open("https://wa.me/19739004498", "_blank") } }
         );
@@ -341,7 +474,7 @@ export default function Book() {
         toast.error(msg || (language === "pt" ? "Erro ao confirmar agendamento" : "Failed to confirm booking"));
       }
     },
-    retry: 1, // Retry once on failure
+    retry: 1,
     retryDelay: 1000,
   });
 
@@ -352,14 +485,11 @@ export default function Book() {
   // Countdown timer for hold expiration
   useEffect(() => {
     if (!holdExpiresAt) return;
-
     const interval = setInterval(() => {
       const now = new Date();
       const remaining = Math.max(0, Math.floor((holdExpiresAt.getTime() - now.getTime()) / 1000));
       setCountdown(remaining);
-
       if (remaining <= 0) {
-        // Hold expired
         toast.error(language === "pt" ? "Tempo expirado. Por favor, selecione um novo horário." : "Time expired. Please select a new time.");
         setStep("time");
         setHoldId(null);
@@ -368,17 +498,29 @@ export default function Book() {
         refetchSlots();
       }
     }, 1000);
-
     return () => clearInterval(interval);
   }, [holdExpiresAt, language, refetchSlots]);
+
+  // Handle service selection — go to SKU step to check for variations/SKUs
+  const handleServiceSelect = (serviceId: string | null) => {
+    setPickedServiceId(serviceId);
+    setPickedVariationId(null);
+    setPickedSkuId(null);
+
+    if (!serviceId) {
+      // Consultation — no SKU needed
+      setStep("date");
+    } else {
+      // Go to SKU step (auto-skip will handle if no SKUs exist)
+      setStep("sku");
+    }
+  };
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
     setSelectedSlot(null);
     setHoldId(null);
-    if (date) {
-      setStep("time");
-    }
+    if (date) setStep("time");
   };
 
   const handleSlotSelect = (slot: TimeSlot) => {
@@ -392,13 +534,62 @@ export default function Book() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Display name for what's being booked (includes picked service)
-  const itemName = offer?.headline || offer?.name || pkg?.name || service?.name || 
+  // Display name
+  const skuName = selectedSkuData?.name;
+  const itemName = offer?.headline || offer?.name || pkg?.name || skuName || service?.name ||
     ((isCalendarFlow || step === "service") ? (language === "pt" ? "Consulta" : "Consultation") : "Consultation");
 
-  // Generate available dates (next 30 days, excluding past dates)
   const today = new Date();
   const maxDate = addDays(today, 60);
+
+  // Step list for indicator
+  const allSteps = (() => {
+    const base: string[] = [];
+    if (!serviceParam && !offerId && !packageId) base.push("service");
+    if (activeServiceId) base.push("sku");
+    base.push("date", "time", "form");
+    return base;
+  })();
+
+  // Handle back navigation
+  const handleBack = () => {
+    if (step === "form") {
+      setStep("time");
+      setHoldId(null);
+      setHoldExpiresAt(null);
+    } else if (step === "time") {
+      setStep("date");
+      setSelectedDate(undefined);
+    } else if (step === "date") {
+      if (pickedSkuId || activeServiceId) {
+        setStep("sku");
+      } else if (isCalendarFlow) {
+        setStep("service");
+      } else {
+        navigate(-1);
+      }
+    } else if (step === "sku") {
+      setPickedVariationId(null);
+      setPickedSkuId(null);
+      setStep("service");
+    } else if (step === "service") {
+      navigate(-1);
+    } else {
+      navigate(-1);
+    }
+  };
+
+  // On mount: if service param exists and no sku param, go to sku step to check
+  useEffect(() => {
+    if (!slugResolved || !activeServiceId) return;
+    if (skuParam) return; // SKU resolution effect handles this
+    if (pickedSkuId) return; // Already resolved
+
+    // If service is pre-selected via URL but no SKU param, show SKU selection
+    if (serviceParam && !pickedSkuId) {
+      setStep("sku");
+    }
+  }, [slugResolved, activeServiceId, serviceParam, skuParam, pickedSkuId]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -406,34 +597,12 @@ export default function Book() {
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-lg">
           {/* Back button */}
-          <button
-            onClick={() => {
-              if (step === "form") {
-                setStep("time");
-                setHoldId(null);
-                setHoldExpiresAt(null);
-              } else if (step === "time") {
-                setStep("date");
-                setSelectedDate(undefined);
-              } else if (step === "date" && isCalendarFlow) {
-                // In calendar flow, allow going back to service selection
-                setStep("service");
-              } else if (step === "service") {
-                navigate(-1);
-              } else {
-                navigate(-1);
-              }
-            }}
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
-          >
+          <button onClick={handleBack} className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
             <ArrowLeft className="w-4 h-4" />
             {t("global.back")}
           </button>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             {/* Header */}
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary text-accent text-sm font-medium mb-4">
@@ -448,22 +617,19 @@ export default function Book() {
 
             {/* Step indicator */}
             <div className="flex items-center justify-center gap-2 mb-8">
-              {(step === "service" ? ["service", "date", "time", "form"] : ["date", "time", "form"]).map((s, i, arr) => (
+              {allSteps.map((s, i) => (
                 <div
                   key={s}
                   className={`h-2 rounded-full transition-all ${
-                    step === s
-                      ? "w-8 bg-rose-gold"
-                      : arr.indexOf(step) > i
-                      ? "w-2 bg-rose-gold"
-                      : "w-2 bg-muted"
+                    step === s ? "w-8 bg-rose-gold" :
+                    allSteps.indexOf(step) > i ? "w-2 bg-rose-gold" : "w-2 bg-muted"
                   }`}
                 />
               ))}
             </div>
 
             <AnimatePresence mode="wait">
-              {/* Step 0: Service Selection (optional, shown when going back from calendar flow) */}
+              {/* Step: Service Selection */}
               {step === "service" && (
                 <motion.div
                   key="service"
@@ -476,8 +642,8 @@ export default function Book() {
                     {language === "pt" ? "Escolha o serviço" : "Choose a service"}
                   </h2>
                   <p className="text-center text-sm text-muted-foreground mb-6">
-                    {language === "pt" 
-                      ? "Selecione o serviço desejado ou continue com consulta" 
+                    {language === "pt"
+                      ? "Selecione o serviço desejado ou continue com consulta"
                       : "Select your desired service or continue with consultation"}
                   </p>
 
@@ -496,9 +662,7 @@ export default function Book() {
                           <button
                             onClick={() => setSelectedCategory(null)}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                              selectedCategory === null
-                                ? "bg-rose-gold text-white"
-                                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                              selectedCategory === null ? "bg-rose-gold text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"
                             }`}
                           >
                             {language === "pt" ? "Todos" : "All"}
@@ -506,19 +670,14 @@ export default function Book() {
                           {["Cabelo", "Sobrancelhas", "Unhas"].map((cat) => {
                             const hasServices = allServices.some(s => s.category === cat);
                             if (!hasServices) return null;
-                            
-                            const categoryLabel = language === "pt" ? cat : 
-                              cat === "Cabelo" ? "Hair" : 
-                              cat === "Sobrancelhas" ? "Brows" : "Nails";
-                            
+                            const categoryLabel = language === "pt" ? cat :
+                              cat === "Cabelo" ? "Hair" : cat === "Sobrancelhas" ? "Brows" : "Nails";
                             return (
                               <button
                                 key={cat}
                                 onClick={() => setSelectedCategory(cat)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                                  selectedCategory === cat
-                                    ? "bg-rose-gold text-white"
-                                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                                  selectedCategory === cat ? "bg-rose-gold text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"
                                 }`}
                               >
                                 {categoryLabel}
@@ -528,30 +687,21 @@ export default function Book() {
                         </div>
                       )}
 
-                      {/* Default consultation option - only show when no category filter */}
+                      {/* Default consultation option */}
                       {!selectedCategory && (
                         <button
-                          onClick={() => {
-                            setPickedServiceId(null);
-                            setStep("date");
-                          }}
+                          onClick={() => handleServiceSelect(null)}
                           className={`w-full p-4 rounded-xl border-2 text-left transition-all hover:border-rose-gold/50 ${
                             !pickedServiceId ? "border-rose-gold bg-rose-light/30" : "border-muted"
                           }`}
                         >
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="font-medium">
-                                {language === "pt" ? "Consulta" : "Consultation"}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {DEFAULT_CONSULTATION_DURATION} min
-                              </p>
+                              <p className="font-medium">{language === "pt" ? "Consulta" : "Consultation"}</p>
+                              <p className="text-sm text-muted-foreground">{DEFAULT_CONSULTATION_DURATION} min</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-sm text-muted-foreground">
-                                {language === "pt" ? "Grátis" : "Free"}
-                              </p>
+                              <p className="text-sm text-muted-foreground">{language === "pt" ? "Grátis" : "Free"}</p>
                             </div>
                           </div>
                         </button>
@@ -562,7 +712,7 @@ export default function Book() {
                         const filteredServices = selectedCategory
                           ? allServices.filter(s => s.category === selectedCategory)
                           : allServices;
-                        
+
                         const groupedServices = filteredServices.reduce((acc, svc) => {
                           const cat = svc.category || (language === "pt" ? "Outros" : "Other");
                           if (!acc[cat]) acc[cat] = [];
@@ -574,9 +724,9 @@ export default function Book() {
                           <div key={category} className="pt-2">
                             {!selectedCategory && (
                               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                                {language === "pt" ? category : 
-                                  category === "Cabelo" ? "Hair" : 
-                                  category === "Sobrancelhas" ? "Brows" : 
+                                {language === "pt" ? category :
+                                  category === "Cabelo" ? "Hair" :
+                                  category === "Sobrancelhas" ? "Brows" :
                                   category === "Unhas" ? "Nails" : category}
                               </p>
                             )}
@@ -584,10 +734,7 @@ export default function Book() {
                               {services.map((svc) => (
                                 <button
                                   key={svc.id}
-                                  onClick={() => {
-                                    setPickedServiceId(svc.id);
-                                    setStep("date");
-                                  }}
+                                  onClick={() => handleServiceSelect(svc.id)}
                                   className={`w-full p-4 rounded-xl border-2 text-left transition-all hover:border-rose-gold/50 ${
                                     pickedServiceId === svc.id ? "border-rose-gold bg-rose-light/30" : "border-muted"
                                   }`}
@@ -595,19 +742,13 @@ export default function Book() {
                                   <div className="flex items-center justify-between">
                                     <div>
                                       <p className="font-medium">{svc.name}</p>
-                                      <p className="text-sm text-muted-foreground">
-                                        {svc.duration_minutes} min
-                                      </p>
+                                      <p className="text-sm text-muted-foreground">{svc.duration_minutes} min</p>
                                     </div>
                                     <div className="text-right">
                                       {svc.promo_price ? (
                                         <>
-                                          <p className="text-sm line-through text-muted-foreground">
-                                            ${svc.price}
-                                          </p>
-                                          <p className="font-semibold text-rose-gold">
-                                            ${svc.promo_price}
-                                          </p>
+                                          <p className="text-sm line-through text-muted-foreground">${svc.price}</p>
+                                          <p className="font-semibold text-rose-gold">${svc.promo_price}</p>
                                         </>
                                       ) : (
                                         <p className="font-semibold">${svc.price}</p>
@@ -625,7 +766,112 @@ export default function Book() {
                 </motion.div>
               )}
 
-              {/* Step 1: Date Selection */}
+              {/* Step: Variation & SKU Selection */}
+              {step === "sku" && (
+                <motion.div
+                  key="sku"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="bg-card rounded-2xl p-6 shadow-soft"
+                >
+                  <h2 className="font-serif text-xl font-semibold mb-2 text-center">
+                    {language === "pt" ? "Escolha a opção" : "Choose an option"}
+                  </h2>
+                  <p className="text-center text-sm text-muted-foreground mb-6">
+                    {service?.name || (language === "pt" ? "Carregando..." : "Loading...")}
+                  </p>
+
+                  {(!serviceVariations || !serviceSkus) ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-rose-gold mb-4" />
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {/* Variation selector (if multiple) */}
+                      {serviceVariations.length > 1 && (
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium text-muted-foreground">
+                            {language === "pt" ? "Técnica" : "Technique"}
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {serviceVariations.map((v) => (
+                              <button
+                                key={v.id}
+                                onClick={() => {
+                                  setPickedVariationId(v.id);
+                                  setPickedSkuId(null);
+                                }}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                                  pickedVariationId === v.id
+                                    ? "bg-rose-gold text-white"
+                                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                                }`}
+                              >
+                                {v.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* SKU list */}
+                      {(() => {
+                        const displaySkus = pickedVariationId
+                          ? serviceSkus.filter(s => s.variation_id === pickedVariationId)
+                          : serviceSkus;
+
+                        if (displaySkus.length === 0 && !pickedVariationId && serviceVariations.length > 1) {
+                          return (
+                            <p className="text-center text-sm text-muted-foreground py-4">
+                              {language === "pt" ? "Selecione uma técnica acima" : "Select a technique above"}
+                            </p>
+                          );
+                        }
+
+                        return (
+                          <div className="space-y-2">
+                            {displaySkus.map((sku) => {
+                              const hasPromo = sku.promo_price != null && Number(sku.promo_price) < Number(sku.price);
+                              return (
+                                <button
+                                  key={sku.id}
+                                  onClick={() => {
+                                    setPickedSkuId(sku.id);
+                                    setStep("date");
+                                  }}
+                                  className={`w-full p-4 rounded-xl border-2 text-left transition-all hover:border-rose-gold/50 ${
+                                    pickedSkuId === sku.id ? "border-rose-gold bg-rose-light/30" : "border-muted"
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="font-medium">{sku.name}</p>
+                                      <p className="text-sm text-muted-foreground">{sku.duration_minutes} min</p>
+                                    </div>
+                                    <div className="text-right">
+                                      {hasPromo ? (
+                                        <>
+                                          <p className="text-sm line-through text-muted-foreground">${Number(sku.price).toFixed(0)}</p>
+                                          <p className="font-semibold text-rose-gold">${Number(sku.promo_price).toFixed(0)}</p>
+                                        </>
+                                      ) : sku.price != null ? (
+                                        <p className="font-semibold">${Number(sku.price).toFixed(0)}</p>
+                                      ) : null}
+                                    </div>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Step: Date Selection */}
               {step === "date" && (
                 <motion.div
                   key="date"
@@ -637,58 +883,63 @@ export default function Book() {
                   <h2 className="font-serif text-xl font-semibold mb-2 text-center">
                     {language === "pt" ? "Escolha a data" : "Choose a date"}
                   </h2>
-                  
-                  {/* Service selection shortcut - only in calendar flow */}
-                  {isCalendarFlow && (
+
+                  {/* Service/SKU summary shortcut */}
+                  {(isCalendarFlow || activeServiceId) && (
                     <div className="mb-4">
                       <button
-                        onClick={() => setStep("service")}
-                        className="w-full flex items-center justify-between p-3 rounded-xl border-2 border-dashed border-muted hover:border-gold/50 transition-all group"
+                        onClick={() => {
+                          if (activeServiceId) {
+                            setPickedVariationId(null);
+                            setPickedSkuId(null);
+                            setStep("sku");
+                          } else {
+                            setStep("service");
+                          }
+                        }}
+                        className="w-full flex items-center justify-between p-3 rounded-xl border-2 border-dashed border-muted hover:border-rose-gold/50 transition-all group"
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
-                            <Calendar className="w-5 h-5 text-gold" />
+                            <Calendar className="w-5 h-5 text-rose-gold" />
                           </div>
                           <div className="text-left">
                             <p className="font-medium text-sm">
-                              {pickedServiceId && service ? service.name : (language === "pt" ? "Consulta" : "Consultation")}
+                              {selectedSkuData ? `${service?.name} — ${selectedSkuData.name}` :
+                               service ? service.name :
+                               (language === "pt" ? "Consulta" : "Consultation")}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              {serviceDuration} min
-                            </p>
+                            <p className="text-xs text-muted-foreground">{serviceDuration} min</p>
                           </div>
                         </div>
-                        <span className="text-xs text-gold font-medium group-hover:underline">
-                          {language === "pt" ? "Alterar serviço" : "Change service"}
+                        <span className="text-xs text-rose-gold font-medium group-hover:underline">
+                          {language === "pt" ? "Alterar" : "Change"}
                         </span>
                       </button>
                     </div>
                   )}
-                  
+
                   <div className="flex justify-center">
                     <CalendarComponent
                       mode="single"
                       selected={selectedDate}
                       onSelect={handleDateSelect}
-                      disabled={(date) => 
-                        date < today || 
-                        date > maxDate ||
-                        date.getDay() === 0 || // Sunday
-                        date.getDay() === 1    // Monday
+                      disabled={(date) =>
+                        date < today || date > maxDate || date.getDay() === 0 || date.getDay() === 1
                       }
                       locale={language === "pt" ? ptBR : undefined}
                       className="rounded-md border"
                     />
                   </div>
                   <p className="text-center text-sm text-muted-foreground mt-4">
-                    {language === "pt" 
-                      ? "Atendemos de terça a sábado, 9h às 18h" 
+                    {language === "pt"
+                      ? "Atendemos de terça a sábado, 9h às 18h"
                       : "We're open Tuesday to Saturday, 9am to 6pm"}
                   </p>
                 </motion.div>
               )}
 
-              {/* Step 2: Time Selection */}
+              {/* Step: Time Selection */}
               {step === "time" && (
                 <motion.div
                   key="time"
@@ -715,11 +966,7 @@ export default function Book() {
                     <div className="text-center py-12">
                       <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
                       <p className="text-destructive">{availability.error}</p>
-                      <Button 
-                        variant="outline" 
-                        className="mt-4"
-                        onClick={() => refetchSlots()}
-                      >
+                      <Button variant="outline" className="mt-4" onClick={() => refetchSlots()}>
                         {language === "pt" ? "Tentar novamente" : "Try again"}
                       </Button>
                     </div>
@@ -727,15 +974,9 @@ export default function Book() {
                     <div className="text-center py-12">
                       <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                       <p className="text-muted-foreground">
-                        {language === "pt" 
-                          ? "Nenhum horário disponível neste dia" 
-                          : "No available times on this day"}
+                        {language === "pt" ? "Nenhum horário disponível neste dia" : "No available times on this day"}
                       </p>
-                      <Button 
-                        variant="outline" 
-                        className="mt-4"
-                        onClick={() => setStep("date")}
-                      >
+                      <Button variant="outline" className="mt-4" onClick={() => setStep("date")}>
                         {language === "pt" ? "Escolher outra data" : "Choose another date"}
                       </Button>
                     </div>
@@ -744,15 +985,11 @@ export default function Book() {
                       {availability?.available_slots?.map((slot) => {
                         const slotTime = parseISO(slot.start);
                         const isSelected = selectedSlot?.start === slot.start;
-                        
-                        // Format time in business timezone (America/New_York)
                         const displayTime = new Intl.DateTimeFormat('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          hour12: false,
+                          hour: '2-digit', minute: '2-digit', hour12: false,
                           timeZone: availability.timezone || 'America/New_York',
                         }).format(slotTime);
-                        
+
                         return (
                           <Button
                             key={slot.start}
@@ -763,9 +1000,7 @@ export default function Book() {
                           >
                             {createHold.isPending && selectedSlot?.start === slot.start ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              displayTime
-                            )}
+                            ) : displayTime}
                           </Button>
                         );
                       })}
@@ -774,7 +1009,7 @@ export default function Book() {
                 </motion.div>
               )}
 
-              {/* Step 3: Client Information */}
+              {/* Step: Client Information */}
               {step === "form" && (
                 <motion.div
                   key="form"
@@ -808,9 +1043,7 @@ export default function Book() {
                           {selectedDate && format(selectedDate, "dd/MM/yyyy", { locale: language === "pt" ? ptBR : undefined })}
                           {" "}{language === "pt" ? "às" : "at"}{" "}
                           {selectedSlot && new Intl.DateTimeFormat('en-US', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: false,
+                            hour: '2-digit', minute: '2-digit', hour12: false,
                             timeZone: 'America/New_York',
                           }).format(parseISO(selectedSlot.start))}
                         </p>
@@ -839,9 +1072,7 @@ export default function Book() {
                         {...register("name")}
                         className={errors.name ? "border-destructive" : ""}
                       />
-                      {errors.name && (
-                        <p className="text-sm text-destructive">{errors.name.message}</p>
-                      )}
+                      {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -853,18 +1084,12 @@ export default function Book() {
                         {...register("phone")}
                         className={errors.phone ? "border-destructive" : ""}
                       />
-                      {errors.phone && (
-                        <p className="text-sm text-destructive">{errors.phone.message}</p>
-                      )}
+                      {errors.phone && <p className="text-sm text-destructive">{errors.phone.message}</p>}
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="instagram">{t("booking.instagram")}</Label>
-                      <Input
-                        id="instagram"
-                        placeholder="@yourusername"
-                        {...register("instagram")}
-                      />
+                      <Input id="instagram" placeholder="@yourusername" {...register("instagram")} />
                     </div>
 
                     <Button

@@ -1,0 +1,1 @@
+ALTER TABLE public.bookings ADD COLUMN sku_id uuid REFERENCES public.service_skus(id);

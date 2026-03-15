@@ -15,6 +15,7 @@ interface ConfirmBookingRequest {
   service_id?: string;
   package_id?: string;
   offer_id?: string;
+  sku_id?: string;
   start_time: string;
   end_time: string;
   notes?: string;
@@ -62,7 +63,7 @@ serve(async (req) => {
     const body = await req.json() as ConfirmBookingRequest;
     const { 
       hold_id, client_name, client_phone, client_email, client_instagram,
-      service_id, package_id, offer_id, start_time, end_time, notes 
+      service_id, package_id, offer_id, sku_id, start_time, end_time, notes 
     } = body;
 
     if (!hold_id || !client_name || !client_phone || !start_time || !end_time) {
@@ -228,6 +229,22 @@ serve(async (req) => {
       clientId = newClient.id;
     }
 
+    // Fetch SKU price from DB (price lock — never trust frontend)
+    let skuTotalPrice: number | null = null;
+    if (sku_id) {
+      const { data: skuData, error: skuError } = await supabase
+        .from('service_skus')
+        .select('price, promo_price')
+        .eq('id', sku_id)
+        .single();
+      
+      if (!skuError && skuData) {
+        skuTotalPrice = (skuData.promo_price != null && Number(skuData.promo_price) < Number(skuData.price))
+          ? Number(skuData.promo_price)
+          : Number(skuData.price);
+      }
+    }
+
     // Create booking
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
@@ -238,6 +255,8 @@ serve(async (req) => {
         client_email: client_email || `${client_phone.replace(/\D/g, '')}@placeholder.com`,
         service_id: service_id || null,
         package_id: package_id || null,
+        sku_id: sku_id || null,
+        total_price: skuTotalPrice,
         start_time,
         end_time,
         timezone,

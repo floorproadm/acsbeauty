@@ -1,116 +1,98 @@
 
+# ACS v2.0 — Progresso de Implementação
 
-# Plano Final Aprovado — Blocos 1, 2 e 3
+## ✅ Fase 1: Rotas Dinâmicas de Serviços (CONCLUÍDA)
 
-Todas as correções incorporadas. Pronto para execução sequencial.
+### Migration executada:
+- `services.slug` (text UNIQUE NOT NULL) — populado automaticamente
+- `services.category_slug` (text, indexed)
+- `service_skus.slug` (text, indexed)
+- `services.hero_image_url` (text)
+- `services.faq` (jsonb, default '[]') — usado para FAQs inline
+
+### Tabela `service_faqs` criada (legado, não usada pelo frontend):
+- Frontend usa `services.faq` jsonb diretamente
+
+### Indexes adicionados:
+- `idx_services_slug`
+- `idx_services_category`
+- `idx_services_category_slug`
+- `idx_skus_slug`
+
+### Páginas criadas/atualizadas:
+- `src/pages/Services.tsx` → dinâmico, query categorias do banco
+- `src/pages/servicos/CategoryPage.tsx` → query por `category_slug`
+- `src/pages/servicos/ServiceDetail.tsx` → variações, SKUs, FAQs (jsonb), JSON-LD geo
+
+### RLS adicionado:
+- `service_skus` → "Anyone can view active skus"
+- `service_variations` → "Anyone can view active variations"
+- `service_faqs` → "Anyone can view service faqs" + "Admins can manage service faqs"
 
 ---
 
-## Passo 0 — Migration: `sku_id` em `bookings`
+## ✅ Fase 1.5: SEO Local + Institucional + Shop (CONCLUÍDA)
 
-```sql
-ALTER TABLE public.bookings ADD COLUMN sku_id uuid REFERENCES public.service_skus(id);
-```
-
----
-
-## Passo 1 — Bloco 1A: SKU Selection no Book.tsx
-
-**Novo state:** `pickedVariationId`, `pickedSkuId`
-
-**Fluxo após selecionar serviço:**
-1. Query `service_variations` WHERE `service_id` = picked AND `is_active` = true
-2. Se tem variations > 1, mostrar seletor. Se 1, auto-selecionar. Se 0, pular.
-3. Query `service_skus` WHERE `service_id` = picked AND (`variation_id` = picked OR null se sem variation) AND `is_active` = true
-4. Se tem SKUs > 1, mostrar seletor. Se 1, auto-selecionar.
-5. `serviceDuration` usa `selectedSku.duration_minutes` com fallback para `service.duration_minutes`
-6. Payload de hold/confirm inclui `sku_id` (opcional, edge functions ignoram)
-
-**Arquivo:** `src/pages/Book.tsx`
+### Tabela `service_locations` criada
+### Rota hierárquica para geo-variants com canonical
+### Páginas institucionais: Studio, Team, LocationNewark, Shop
 
 ---
 
-## Passo 3 — Bloco 1B: Slug-based URL pre-selection
+## ✅ Fase 2: Booking por SKU + Slug (CONCLUÍDA)
 
-**Detecção UUID vs Slug:**
-```typescript
-const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(param);
-```
-- Se UUID: `WHERE id = param`
-- Se slug: `WHERE slug = param`
+### Migration executada:
+- `bookings.sku_id` (uuid, nullable, FK → service_skus)
 
-**Query params:** `?service=slug` e `?sku=slug-do-sku`
-- Pre-selecionar serviço e SKU, pular direto para step "date"
+### Book.tsx — SKU selection flow:
+- Novo state: `pickedVariationId`, `pickedSkuId`
+- Step "sku" entre "service" e "date"
+- Auto-skip: sem variations → pular; 1 SKU → auto-selecionar
+- `serviceDuration` usa SKU duration com fallback
+- `sku_id` enviado no payload de hold/confirm
 
-**ServiceDetail.tsx — atualizar links:**
-- SkuCard: `/book?service=${service.slug}&sku=${sku.slug}` (atualmente usa `service.id`)
+### Book.tsx — Slug-based URL pre-selection:
+- Query params `?service=slug` e `?sku=slug`
+- UUID regex: `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`
+- UUID → WHERE id = param; Slug → WHERE slug = param
+- Pre-seleciona serviço e SKU, pula para date
+
+### ServiceDetail.tsx — Slug links:
 - CTA principal: `/book?service=${service.slug}`
+- SkuCard: `/book?service=${service.slug}&sku=${sku.slug}`
 
-**Arquivos:** `src/pages/Book.tsx`, `src/pages/servicos/ServiceDetail.tsx`
+### ServiceDetail.tsx — FAQs:
+- Renderiza `services.faq` (jsonb array `[{question, answer}]`)
+- Accordion shadcn com estilo ServiceFAQ
 
----
+### ServiceDetail.tsx — JSON-LD geo-cluster:
+- `<script type="application/ld+json">` com schema LocalBusiness quando locationData existe
 
-## Passo 4 — Bloco 2A: FAQs no ServiceDetail
+### Admin — BookingsTab:
+- Join `service_skus(name, price)` na query
+- Colunas SKU name e preço na listagem
 
-**Correção aplicada:** Usar campo `services.faq` (jsonb array `[{question, answer}]`), **NAO** a tabela `service_faqs`.
+### Admin — DashboardTab:
+- Cards: "Receita do Mês" e "Bookings do Mês"
+- Bar chart (recharts): top 5 serviços por booking count
 
-- Parsear `service.faq` (já vem na query existente)
-- Se array tem items, renderizar seção com `Accordion` do shadcn
-- Estilo similar ao `ServiceFAQ` component existente
-
-**Arquivo:** `src/pages/servicos/ServiceDetail.tsx`
-
----
-
-## Passo 5 — Bloco 2B: JSON-LD geo-cluster
-
-ServiceDetail.tsx ja busca `service_locations` corretamente. Adicionar:
-- `<script type="application/ld+json">` com schema `LocalBusiness` quando `locationData` existe
-- Campos: name, address (locationName), url
-
-**Arquivo:** `src/pages/servicos/ServiceDetail.tsx`
+### Edge function — Price lock:
+- `calendar-confirm-booking` aceita `sku_id`
+- Busca preço do SKU no banco (nunca confia no frontend)
+- `total_price = promo_price || price` salvo no booking
 
 ---
 
-## Passo 6 — Bloco 3: Analytics por SKU
+## 🔲 Fase 3: Quiz como Funil Real
+- `/quiz` landing, `/quiz/:slug/resultado`
+- WhatsApp com contexto
 
-### BookingsTab
-- Alterar query para incluir join: `service_skus(name, price)`
-- Adicionar colunas "SKU" e "Preço" na listagem
+## 🔲 Fase 4: Páginas de Conteúdo e Legal
+- `/privacidade`, `/termos`, `/perguntas-frequentes`
 
-### DashboardTab
-- Query: bookings confirmados do mes atual com `SUM(total_price)`
-- Cards: "Receita do Mes" e "Bookings do Mes"
-- Bar chart (recharts): top 3 servicos por booking count
+## 🔲 Fase 5: Admin — Rotas Nomeadas
+- Sub-rotas reais com Outlet
 
-**Arquivos:** `src/components/admin/BookingsTab.tsx`, `src/components/admin/DashboardTab.tsx`
-
----
-
-## Passo 7 — Edge function: price lock
-
-**`supabase/functions/calendar-confirm-booking/index.ts`:**
-- Aceitar `sku_id` no request body
-- Se `sku_id` presente: buscar `service_skus` WHERE `id = sku_id` → pegar `price` e `promo_price`
-- `total_price = promo_price || price` (do banco, nunca do frontend)
-- Salvar `sku_id` e `total_price` no INSERT de `bookings`
-- Se `sku_id` ausente: manter comportamento atual
-
-**Arquivo:** `supabase/functions/calendar-confirm-booking/index.ts`
-
----
-
-## Resumo
-
-| Passo | Escopo | Arquivo(s) |
-|-------|--------|------------|
-| 0 | Migration sku_id | SQL |
-| 1 | SKU selection + auto-skip | Book.tsx |
-| 3 | Slug URL (UUID regex fix) | Book.tsx, ServiceDetail.tsx |
-| 4 | FAQ via jsonb | ServiceDetail.tsx |
-| 5 | JSON-LD geo | ServiceDetail.tsx |
-| 6 | Analytics recharts | BookingsTab.tsx, DashboardTab.tsx |
-| 7 | Price lock edge function | calendar-confirm-booking/index.ts |
-
-NewBookingModal.tsx fica para depois (nao bloqueante).
-
+## 🔲 Fase 6: Limpeza
+- Remover arquivos legados
+- Atualizar Header
