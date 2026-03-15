@@ -1,14 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Users, Clock, AlertCircle, CheckCircle2, Loader2, ListTodo } from "lucide-react";
+import { Calendar, Users, Clock, AlertCircle, CheckCircle2, Loader2, ListTodo, DollarSign, TrendingUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { format, startOfDay, endOfDay } from "date-fns";
+import { format, startOfDay, endOfDay, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AdminTab } from "./AdminLayout";
 import { BirthdayWidget } from "./BirthdayWidget";
 import { motion } from "framer-motion";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 interface DashboardTabProps {
   onNavigate: (tab: AdminTab) => void;
@@ -21,10 +22,20 @@ function getGreeting() {
   return "Boa noite";
 }
 
+const CHART_COLORS = [
+  "hsl(var(--primary))",
+  "hsl(var(--accent))",
+  "hsl(142, 76%, 36%)",
+  "hsl(217, 91%, 60%)",
+  "hsl(280, 67%, 53%)",
+];
+
 export function DashboardTab({ onNavigate }: DashboardTabProps) {
   const today = new Date();
   const todayStart = startOfDay(today).toISOString();
   const todayEnd = endOfDay(today).toISOString();
+  const monthStart = startOfMonth(today).toISOString();
+  const monthEnd = endOfMonth(today).toISOString();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -98,6 +109,36 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
     },
   });
 
+  // Monthly revenue data
+  const { data: monthlyStats, isLoading: loadingMonthly } = useQuery({
+    queryKey: ["admin-monthly-stats", monthStart],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("id, total_price, status, service_id, services(name)")
+        .gte("start_time", monthStart)
+        .lte("start_time", monthEnd)
+        .in("status", ["confirmed", "completed"]);
+      if (error) throw error;
+
+      const totalRevenue = (data || []).reduce((sum, b) => sum + (Number(b.total_price) || 0), 0);
+      const totalBookings = data?.length || 0;
+
+      // Top services by booking count
+      const serviceCounts: Record<string, { name: string; count: number }> = {};
+      for (const b of data || []) {
+        const svcName = (b.services as any)?.name || "Consulta";
+        if (!serviceCounts[svcName]) serviceCounts[svcName] = { name: svcName, count: 0 };
+        serviceCounts[svcName].count++;
+      }
+      const topServices = Object.values(serviceCounts)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+      return { totalRevenue, totalBookings, topServices };
+    },
+  });
+
   // Confirm booking mutation
   const confirmBookingMutation = useMutation({
     mutationFn: async (bookingId: string) => {
@@ -124,8 +165,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
   const cardVariants = {
     hidden: { opacity: 0, y: 12 },
     visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
+      opacity: 1, y: 0,
       transition: { delay: i * 0.08, duration: 0.3, ease: "easeOut" as const },
     }),
   };
@@ -146,39 +186,23 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           {
-            icon: Calendar,
-            iconBg: "bg-rose-gold/10",
-            iconColor: "text-rose-gold",
-            label: "Hoje",
-            value: todayBookings?.length || 0,
-            loading: loadingBookings,
+            icon: Calendar, iconBg: "bg-rose-gold/10", iconColor: "text-rose-gold",
+            label: "Hoje", value: todayBookings?.length || 0, loading: loadingBookings,
             onClick: () => onNavigate("bookings"),
           },
           {
-            icon: CheckCircle2,
-            iconBg: "bg-emerald-500/10",
-            iconColor: "text-emerald-600",
-            label: "Confirmados",
-            value: confirmedToday,
-            loading: loadingBookings,
+            icon: CheckCircle2, iconBg: "bg-emerald-500/10", iconColor: "text-emerald-600",
+            label: "Confirmados", value: confirmedToday, loading: loadingBookings,
             onClick: () => onNavigate("bookings"),
           },
           {
-            icon: Users,
-            iconBg: "bg-blue-500/10",
-            iconColor: "text-blue-600",
-            label: "Clientes",
-            value: clientsCount,
-            loading: loadingClients,
+            icon: Users, iconBg: "bg-blue-500/10", iconColor: "text-blue-600",
+            label: "Clientes", value: clientsCount, loading: loadingClients,
             onClick: () => onNavigate("crm"),
           },
           {
-            icon: ListTodo,
-            iconBg: "bg-purple-500/10",
-            iconColor: "text-purple-600",
-            label: "Tarefas Pendentes",
-            value: pendingTasksCount,
-            loading: loadingTasks,
+            icon: ListTodo, iconBg: "bg-purple-500/10", iconColor: "text-purple-600",
+            label: "Tarefas Pendentes", value: pendingTasksCount, loading: loadingTasks,
             onClick: () => onNavigate("tasks"),
           },
         ].map((card, i) => (
@@ -204,10 +228,88 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
                 )}
               </div>
             </div>
-            
           </motion.div>
         ))}
       </div>
+
+      {/* Revenue Summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.3 }}
+          className="bg-card rounded-xl p-4 border border-border shadow-soft"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-emerald-500/10 rounded-lg">
+              <DollarSign className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Receita do Mês</p>
+              {loadingMonthly ? (
+                <Skeleton className="h-7 w-20" />
+              ) : (
+                <p className="text-2xl font-bold">${(monthlyStats?.totalRevenue || 0).toFixed(0)}</p>
+              )}
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.3 }}
+          className="bg-card rounded-xl p-4 border border-border shadow-soft"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-rose-gold/10 rounded-lg">
+              <TrendingUp className="w-5 h-5 text-rose-gold" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Bookings do Mês</p>
+              {loadingMonthly ? (
+                <Skeleton className="h-7 w-12" />
+              ) : (
+                <p className="text-2xl font-bold">{monthlyStats?.totalBookings || 0}</p>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Top Services Chart */}
+      {monthlyStats?.topServices && monthlyStats.topServices.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.3 }}
+          className="bg-card rounded-xl border border-border shadow-soft"
+        >
+          <div className="p-4 border-b border-border">
+            <h2 className="font-semibold flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-rose-gold" />
+              Top Serviços — {format(today, "MMMM", { locale: ptBR })}
+            </h2>
+          </div>
+          <div className="p-4">
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={monthlyStats.topServices} layout="vertical" margin={{ left: 0, right: 20 }}>
+                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
+                <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12 }} />
+                <Tooltip
+                  formatter={(value: number) => [`${value} bookings`, "Total"]}
+                  contentStyle={{ borderRadius: "8px", border: "1px solid hsl(var(--border))" }}
+                />
+                <Bar dataKey="count" radius={[0, 6, 6, 0]}>
+                  {monthlyStats.topServices.map((_, idx) => (
+                    <Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+      )}
 
       {/* Two Column Layout */}
       <div className="grid lg:grid-cols-2 gap-6">
@@ -215,7 +317,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.3 }}
+          transition={{ delay: 0.5, duration: 0.3 }}
           className="bg-card rounded-xl border border-border shadow-soft"
         >
           <div className="p-4 border-b border-border flex items-center justify-between">
@@ -223,9 +325,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
               <Clock className="w-4 h-4 text-rose-gold" />
               Agenda de Hoje
             </h2>
-            <Button variant="ghost" size="sm" onClick={() => onNavigate("bookings")}>
-              Ver tudo
-            </Button>
+            <Button variant="ghost" size="sm" onClick={() => onNavigate("bookings")}>Ver tudo</Button>
           </div>
           <div className="p-4">
             {loadingBookings ? (
@@ -235,9 +335,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
             ) : todayBookings?.length === 0 ? (
               <div className="text-center py-8">
                 <Calendar className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
-                <p className="text-muted-foreground text-sm">
-                  Nenhum agendamento para hoje
-                </p>
+                <p className="text-muted-foreground text-sm">Nenhum agendamento para hoje</p>
               </div>
             ) : (
               <div className="space-y-3 max-h-80 overflow-y-auto">
@@ -247,17 +345,11 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
                     booking.status === "completed" ? "border-l-blue-500" :
                     booking.status === "cancelled" ? "border-l-red-500" :
                     "border-l-amber-500";
-
                   return (
-                    <div
-                      key={booking.id}
-                      className={`flex items-center justify-between p-3 bg-muted/50 rounded-lg border-l-4 ${statusBorder}`}
-                    >
+                    <div key={booking.id} className={`flex items-center justify-between p-3 bg-muted/50 rounded-lg border-l-4 ${statusBorder}`}>
                       <div className="flex items-center gap-3">
                         <div className="text-center min-w-[50px]">
-                          <p className="text-sm font-bold">
-                            {format(new Date(booking.start_time), "HH:mm")}
-                          </p>
+                          <p className="text-sm font-bold">{format(new Date(booking.start_time), "HH:mm")}</p>
                         </div>
                         <div>
                           <p className="font-medium text-sm">{booking.client_name}</p>
@@ -288,7 +380,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.3 }}
+          transition={{ delay: 0.55, duration: 0.3 }}
           className="bg-card rounded-xl border border-border shadow-soft"
         >
           <div className="p-4 border-b border-border flex items-center justify-between">
@@ -301,9 +393,7 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
                 </span>
               )}
             </h2>
-            <Button variant="ghost" size="sm" onClick={() => onNavigate("bookings")}>
-              Ver tudo
-            </Button>
+            <Button variant="ghost" size="sm" onClick={() => onNavigate("bookings")}>Ver tudo</Button>
           </div>
           <div className="p-4">
             {loadingPending ? (
@@ -313,17 +403,12 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
             ) : pendingBookings?.length === 0 ? (
               <div className="text-center py-8">
                 <CheckCircle2 className="w-10 h-10 text-emerald-500/30 mx-auto mb-2" />
-                <p className="text-muted-foreground text-sm">
-                  Tudo confirmado! 🎉
-                </p>
+                <p className="text-muted-foreground text-sm">Tudo confirmado! 🎉</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {pendingBookings?.map((booking) => (
-                  <div
-                    key={booking.id}
-                    className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-lg border-l-4 border-l-amber-500"
-                  >
+                  <div key={booking.id} className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-lg border-l-4 border-l-amber-500">
                     <div>
                       <p className="font-medium text-sm">{booking.client_name}</p>
                       <p className="text-xs text-muted-foreground">

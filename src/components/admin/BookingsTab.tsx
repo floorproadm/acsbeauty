@@ -268,7 +268,14 @@ export function BookingsTab() {
                         <div>
                           <p className="font-semibold">{booking.client_name}</p>
                           <p className="text-sm text-muted-foreground">{booking.client_phone || booking.client_email}</p>
-                          {booking.services?.name && <p className="text-xs text-rose-gold mt-1">{booking.services.name}</p>}
+                          {(booking as any).service_skus?.name ? (
+                            <p className="text-xs text-rose-gold mt-1">{booking.services?.name} — {(booking as any).service_skus.name}</p>
+                          ) : booking.services?.name ? (
+                            <p className="text-xs text-rose-gold mt-1">{booking.services.name}</p>
+                          ) : null}
+                          {booking.total_price != null && Number(booking.total_price) > 0 && (
+                            <p className="text-xs text-muted-foreground">${Number(booking.total_price).toFixed(0)}</p>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
