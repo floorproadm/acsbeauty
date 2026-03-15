@@ -68,7 +68,7 @@ export function BookingsTab() {
       const { start, end } = getDateRange();
       let query = supabase
         .from("bookings")
-        .select("*, services(name, duration_minutes), packages(name)")
+        .select("*, services(name, duration_minutes), packages(name), service_skus(name, price)")
         .gte("start_time", start.toISOString())
         .lte("start_time", end.toISOString())
         .order("start_time", { ascending: true });
