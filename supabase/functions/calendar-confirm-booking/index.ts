@@ -63,7 +63,7 @@ serve(async (req) => {
     const body = await req.json() as ConfirmBookingRequest;
     const { 
       hold_id, client_name, client_phone, client_email, client_instagram,
-      service_id, package_id, offer_id, start_time, end_time, notes 
+      service_id, package_id, offer_id, sku_id, start_time, end_time, notes 
     } = body;
 
     if (!hold_id || !client_name || !client_phone || !start_time || !end_time) {
