@@ -15,6 +15,7 @@ interface ConfirmBookingRequest {
   service_id?: string;
   package_id?: string;
   offer_id?: string;
+  sku_id?: string;
   start_time: string;
   end_time: string;
   notes?: string;
