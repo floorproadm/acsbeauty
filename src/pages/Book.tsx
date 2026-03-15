@@ -93,7 +93,7 @@ export default function Book() {
 
   // Booking flow state
   const [step, setStep] = useState<"service" | "sku" | "date" | "time" | "form">(
-    isCalendarFlow ? "date" : serviceParam ? "date" : "date"
+    isCalendarFlow ? "date" : serviceParam ? "sku" : "service"
   );
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
