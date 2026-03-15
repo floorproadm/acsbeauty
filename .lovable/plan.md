@@ -1,82 +1,116 @@
 
-# ACS v2.0 — Progresso de Implementação
 
-## ✅ Fase 1: Rotas Dinâmicas de Serviços (CONCLUÍDA)
+# Plano Final Aprovado — Blocos 1, 2 e 3
 
-### Migration executada:
-- `services.slug` (text UNIQUE NOT NULL) — populado automaticamente
-- `services.category_slug` (text, indexed)
-- `service_skus.slug` (text, indexed)
-- `services.hero_image_url` (text)
-- `services.faq` (jsonb, default '[]') — legado, substituído por `service_faqs`
-
-### Tabela `service_faqs` criada:
-- `id`, `service_id`, `question`, `answer`, `sort_order`, `created_at`
-- RLS: SELECT público, ALL para admin_owner
-- Substitui o campo `faq` jsonb nos services
-
-### Indexes adicionados:
-- `idx_services_slug`
-- `idx_services_category`
-- `idx_services_category_slug`
-- `idx_skus_slug`
-
-### Páginas criadas/atualizadas:
-- `src/pages/Services.tsx` → dinâmico, query categorias do banco
-- `src/pages/servicos/CategoryPage.tsx` → query por `category_slug` + FAQs da tabela `service_faqs`
-- `src/pages/servicos/ServiceDetail.tsx` → variações e SKUs com preços reais
-
-### RLS adicionado:
-- `service_skus` → "Anyone can view active skus"
-- `service_variations` → "Anyone can view active variations"
-- `service_faqs` → "Anyone can view service faqs" + "Admins can manage service faqs"
-
-### Rotas atualizadas:
-- Páginas estáticas antigas removidas do App.tsx (Cabelo, Sobrancelhas, Unhas)
+Todas as correções incorporadas. Pronto para execução sequencial.
 
 ---
 
-## ✅ Fase 1.5: SEO Local + Institucional + Shop (CONCLUÍDA)
+## Passo 0 — Migration: `sku_id` em `bookings`
 
-### Tabela `service_locations` criada:
-- `id`, `service_id`, `location_slug`, `location_name`, `canonical_service_id`
-- `meta_title`, `meta_description`, `body_text`, `is_active`
-- UNIQUE(service_id, location_slug)
-- RLS: SELECT público (is_active), ALL para admin_owner
-- Indexes: `idx_service_locations_service_id`, `idx_service_locations_slug`
-
-### Rota hierárquica para geo-variants:
-- `/servicos/:categoria/:slug/:locationSlug` → ServiceDetail com conteúdo localizado
-- `<link rel="canonical">` aponta para a URL sem location
-- `document.title` e meta description dinâmicos
-
-### Páginas institucionais:
-- `/studio` → `src/pages/Studio.tsx` — espaço físico com mapa
-- `/team` → `src/pages/Team.tsx` — equipe com especialidades
-- `/location/newark` → `src/pages/LocationNewark.tsx` — Local SEO + schema LocalBusiness JSON-LD
-- `/shop` → `src/pages/Shop.tsx` — placeholder com email capture (contact_submissions)
-
-### Footer atualizado:
-- Quick Links: adicionados Studio, Equipe
-- Services: links para `/servicos/sobrancelhas`, `/servicos/cabelo`, `/servicos/unhas`, `/shop`
+```sql
+ALTER TABLE public.bookings ADD COLUMN sku_id uuid REFERENCES public.service_skus(id);
+```
 
 ---
 
-## 🔲 Fase 2: Booking por Slug (Conversão)
-- `/agendar`, `/agendar/:serviceSlug`, `/agendar/:serviceSlug/:skuSlug`
-- Refactor Book.tsx em sub-componentes
-- Redirect `/book` → `/agendar`
+## Passo 1 — Bloco 1A: SKU Selection no Book.tsx
 
-## 🔲 Fase 3: Quiz como Funil Real
-- `/quiz` landing, `/quiz/:slug/resultado`
-- WhatsApp com contexto
+**Novo state:** `pickedVariationId`, `pickedSkuId`
 
-## 🔲 Fase 4: Páginas de Conteúdo e Legal
-- `/privacidade`, `/termos`, `/perguntas-frequentes`
+**Fluxo após selecionar serviço:**
+1. Query `service_variations` WHERE `service_id` = picked AND `is_active` = true
+2. Se tem variations > 1, mostrar seletor. Se 1, auto-selecionar. Se 0, pular.
+3. Query `service_skus` WHERE `service_id` = picked AND (`variation_id` = picked OR null se sem variation) AND `is_active` = true
+4. Se tem SKUs > 1, mostrar seletor. Se 1, auto-selecionar.
+5. `serviceDuration` usa `selectedSku.duration_minutes` com fallback para `service.duration_minutes`
+6. Payload de hold/confirm inclui `sku_id` (opcional, edge functions ignoram)
 
-## 🔲 Fase 5: Admin — Rotas Nomeadas
-- Sub-rotas reais com Outlet
+**Arquivo:** `src/pages/Book.tsx`
 
-## 🔲 Fase 6: Limpeza
-- Remover arquivos legados
-- Atualizar Header
+---
+
+## Passo 3 — Bloco 1B: Slug-based URL pre-selection
+
+**Detecção UUID vs Slug:**
+```typescript
+const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(param);
+```
+- Se UUID: `WHERE id = param`
+- Se slug: `WHERE slug = param`
+
+**Query params:** `?service=slug` e `?sku=slug-do-sku`
+- Pre-selecionar serviço e SKU, pular direto para step "date"
+
+**ServiceDetail.tsx — atualizar links:**
+- SkuCard: `/book?service=${service.slug}&sku=${sku.slug}` (atualmente usa `service.id`)
+- CTA principal: `/book?service=${service.slug}`
+
+**Arquivos:** `src/pages/Book.tsx`, `src/pages/servicos/ServiceDetail.tsx`
+
+---
+
+## Passo 4 — Bloco 2A: FAQs no ServiceDetail
+
+**Correção aplicada:** Usar campo `services.faq` (jsonb array `[{question, answer}]`), **NAO** a tabela `service_faqs`.
+
+- Parsear `service.faq` (já vem na query existente)
+- Se array tem items, renderizar seção com `Accordion` do shadcn
+- Estilo similar ao `ServiceFAQ` component existente
+
+**Arquivo:** `src/pages/servicos/ServiceDetail.tsx`
+
+---
+
+## Passo 5 — Bloco 2B: JSON-LD geo-cluster
+
+ServiceDetail.tsx ja busca `service_locations` corretamente. Adicionar:
+- `<script type="application/ld+json">` com schema `LocalBusiness` quando `locationData` existe
+- Campos: name, address (locationName), url
+
+**Arquivo:** `src/pages/servicos/ServiceDetail.tsx`
+
+---
+
+## Passo 6 — Bloco 3: Analytics por SKU
+
+### BookingsTab
+- Alterar query para incluir join: `service_skus(name, price)`
+- Adicionar colunas "SKU" e "Preço" na listagem
+
+### DashboardTab
+- Query: bookings confirmados do mes atual com `SUM(total_price)`
+- Cards: "Receita do Mes" e "Bookings do Mes"
+- Bar chart (recharts): top 3 servicos por booking count
+
+**Arquivos:** `src/components/admin/BookingsTab.tsx`, `src/components/admin/DashboardTab.tsx`
+
+---
+
+## Passo 7 — Edge function: price lock
+
+**`supabase/functions/calendar-confirm-booking/index.ts`:**
+- Aceitar `sku_id` no request body
+- Se `sku_id` presente: buscar `service_skus` WHERE `id = sku_id` → pegar `price` e `promo_price`
+- `total_price = promo_price || price` (do banco, nunca do frontend)
+- Salvar `sku_id` e `total_price` no INSERT de `bookings`
+- Se `sku_id` ausente: manter comportamento atual
+
+**Arquivo:** `supabase/functions/calendar-confirm-booking/index.ts`
+
+---
+
+## Resumo
+
+| Passo | Escopo | Arquivo(s) |
+|-------|--------|------------|
+| 0 | Migration sku_id | SQL |
+| 1 | SKU selection + auto-skip | Book.tsx |
+| 3 | Slug URL (UUID regex fix) | Book.tsx, ServiceDetail.tsx |
+| 4 | FAQ via jsonb | ServiceDetail.tsx |
+| 5 | JSON-LD geo | ServiceDetail.tsx |
+| 6 | Analytics recharts | BookingsTab.tsx, DashboardTab.tsx |
+| 7 | Price lock edge function | calendar-confirm-booking/index.ts |
+
+NewBookingModal.tsx fica para depois (nao bloqueante).
+
