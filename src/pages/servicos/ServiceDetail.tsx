@@ -240,12 +240,6 @@ export default function ServiceDetail() {
                 </p>
               )}
 
-              <div className="flex items-center gap-6 text-muted-foreground mb-8">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-rose-gold" />
-                  <span>{service.duration_minutes} min</span>
-                </div>
-              </div>
 
               <Link to={`/book?service=${service.slug}`}>
                 <Button variant="hero" size="lg" className="group">
@@ -392,12 +386,6 @@ function SkuCard({ sku, index, serviceSlug }: { sku: any; index: number; service
         <CardContent className="flex items-center justify-between p-4 md:p-5">
           <div className="flex-1 min-w-0">
             <h4 className="font-medium text-foreground">{sku.name}</h4>
-            <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5" />
-                {sku.duration_minutes} min
-              </span>
-            </div>
           </div>
           <Link to={`/book?service=${serviceSlug}${skuSlugParam}`}>
             <Button variant="outline" size="sm" className="shrink-0 gap-1">
