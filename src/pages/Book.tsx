@@ -833,7 +833,6 @@ export default function Book() {
                                   <div className="flex items-center justify-between">
                                     <div>
                                       <p className="font-medium">{sku.name}</p>
-                                      <p className="text-sm text-muted-foreground">{sku.duration_minutes} min</p>
                                     </div>
                                   </div>
                                 </button>
