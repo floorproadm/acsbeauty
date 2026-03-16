@@ -104,7 +104,7 @@ export function Hero() {
             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-elevated">
               <div className="absolute inset-0 bg-gradient-to-br from-gold/20 via-transparent to-gold-dark/20" />
               <img
-                src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80"
+                src={founderImg}
                 alt="Beauty treatment"
                 className="w-full h-full object-cover"
                 loading="eager"
