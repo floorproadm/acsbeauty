@@ -105,7 +105,7 @@ export function Hero() {
               <div className="absolute inset-0 bg-gradient-to-br from-gold/20 via-transparent to-gold-dark/20" />
               <img
                 src={founderImg}
-                alt="Beauty treatment"
+                alt="ACS Beauty - Fundadora"
                 className="w-full h-full object-cover"
                 loading="eager"
                 fetchPriority="high"
