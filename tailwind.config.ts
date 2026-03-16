@@ -17,6 +17,7 @@ export default {
         // Brand Manual: Adam font (using Inter as web equivalent for elegant sans-serif)
         serif: ['Inter', 'system-ui', 'sans-serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        editorial: ['"Playfair Display"', 'Georgia', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
