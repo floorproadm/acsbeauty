@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import founderImg from "@/assets/founder.jpg";
 
 export function Hero() {
   const { t } = useLanguage();
@@ -14,14 +15,14 @@ export function Hero() {
   ];
 
   return (
-    <section className="relative min-h-[85svh] flex items-center bg-gradient-nude overflow-hidden">
+    <section className="relative min-h-[85svh] lg:min-h-0 flex items-center bg-gradient-nude overflow-hidden">
       {/* Decorative elements - Gold accents */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 right-0 w-64 md:w-96 h-64 md:h-96 bg-gold/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 left-0 w-48 md:w-80 h-48 md:h-80 bg-nude-dark/30 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 md:px-6 pt-28 md:pt-24 pb-8 md:pb-12 relative z-10">
+      <div className="container mx-auto px-4 md:px-6 pt-28 md:pt-24 pb-8 md:pb-12 lg:py-20 relative z-10">
         <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Content */}
           <div className="max-w-xl">
@@ -103,8 +104,8 @@ export function Hero() {
             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-elevated">
               <div className="absolute inset-0 bg-gradient-to-br from-gold/20 via-transparent to-gold-dark/20" />
               <img
-                src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80"
-                alt="Beauty treatment"
+                src={founderImg}
+                alt="ACS Beauty - Fundadora"
                 className="w-full h-full object-cover"
                 loading="eager"
                 fetchPriority="high"
