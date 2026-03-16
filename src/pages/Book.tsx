@@ -700,9 +700,6 @@ export default function Book() {
                               <p className="font-medium">{language === "pt" ? "Consulta" : "Consultation"}</p>
                               <p className="text-sm text-muted-foreground">{DEFAULT_CONSULTATION_DURATION} min</p>
                             </div>
-                            <div className="text-right">
-                              <p className="text-sm text-muted-foreground">{language === "pt" ? "Grátis" : "Free"}</p>
-                            </div>
                           </div>
                         </button>
                       )}
