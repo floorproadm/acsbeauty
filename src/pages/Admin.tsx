@@ -11,6 +11,7 @@ import { QuizzesTab } from "@/components/admin/QuizzesTab";
 import { TasksTab } from "@/components/admin/TasksTab";
 import { AllowedEmailsTab } from "@/components/admin/AllowedEmailsTab";
 import { GiftCardsTab } from "@/components/admin/GiftCardsTab";
+import { GalleryTab } from "@/components/admin/GalleryTab";
 import { TeamTab } from "@/components/admin/TeamTab";
 import { useUserRole } from "@/hooks/useUserRole";
 
