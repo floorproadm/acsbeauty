@@ -127,6 +127,23 @@ export function ServicesPreview() {
               );
             })}
           </div>
+
+          {/* CTA Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="text-center mt-10 md:mt-14"
+          >
+            <Link to="/book">
+              <Button variant="hero" size="lg" className="group min-h-[52px] px-8 text-base">
+                <Calendar className="w-5 h-5" />
+                {t("home.hero.cta_services")}
+                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
+          </motion.div>
         </div>
       </section>
 
