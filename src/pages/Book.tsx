@@ -698,7 +698,7 @@ export default function Book() {
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="font-medium">{language === "pt" ? "Consulta" : "Consultation"}</p>
-                              <p className="text-sm text-muted-foreground">{DEFAULT_CONSULTATION_DURATION} min</p>
+                              
                             </div>
                           </div>
                         </button>
