@@ -739,7 +739,6 @@ export default function Book() {
                                   <div className="flex items-center justify-between">
                                     <div>
                                       <p className="font-medium">{svc.name}</p>
-                                      <p className="text-sm text-muted-foreground">{svc.duration_minutes} min</p>
                                     </div>
                                   </div>
                                 </button>
