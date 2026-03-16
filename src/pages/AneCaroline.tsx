@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronRight, Instagram, MessageCircle, Plus, Minus } from "lucide-react";
+import aneHeroImg from "@/assets/ane-hero.jpg";
 import founderImg from "@/assets/founder.jpg";
 import { useState } from "react";
 
