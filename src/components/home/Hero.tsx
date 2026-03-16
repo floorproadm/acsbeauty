@@ -31,7 +31,8 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="font-sans text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light tracking-[0.02em] leading-tight mb-4 md:mb-6"
             >
-              {t("home.hero.title_1")}{" "}
+              {t("home.hero.title_1")}
+              <br />
               <span className="text-gradient-gold">{t("home.hero.title_2")}</span>
             </motion.h1>
 

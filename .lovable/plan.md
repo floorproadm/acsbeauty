@@ -1,47 +1,98 @@
 
+# ACS v2.0 — Progresso de Implementação
 
-# Seed SKU Data for Design de Sobrancelhas
+## ✅ Fase 1: Rotas Dinâmicas de Serviços (CONCLUÍDA)
 
-The database has 3 active services but zero variations and zero SKUs. This blocks Flow 3 testing and makes Passos 6/7 meaningless.
+### Migration executada:
+- `services.slug` (text UNIQUE NOT NULL) — populado automaticamente
+- `services.category_slug` (text, indexed)
+- `service_skus.slug` (text, indexed)
+- `services.hero_image_url` (text)
+- `services.faq` (jsonb, default '[]') — usado para FAQs inline
 
-## What to Insert
+### Tabela `service_faqs` criada (legado, não usada pelo frontend):
+- Frontend usa `services.faq` jsonb diretamente
 
-### 1. Two Variations for "Design de Sobrancelhas" (id: `22222222-2222-2222-2222-222222222222`)
+### Indexes adicionados:
+- `idx_services_slug`
+- `idx_services_category`
+- `idx_services_category_slug`
+- `idx_skus_slug`
 
-| Name | Slug | sort_order |
-|------|------|-----------|
-| Sem Henna | sem-henna | 0 |
-| Com Henna | com-henna | 1 |
+### Páginas criadas/atualizadas:
+- `src/pages/Services.tsx` → dinâmico, query categorias do banco
+- `src/pages/servicos/CategoryPage.tsx` → query por `category_slug`
+- `src/pages/servicos/ServiceDetail.tsx` → variações, SKUs, FAQs (jsonb), JSON-LD geo
 
-### 2. Two SKUs (one per variation)
+### RLS adicionado:
+- `service_skus` → "Anyone can view active skus"
+- `service_variations` → "Anyone can view active variations"
+- `service_faqs` → "Anyone can view service faqs" + "Admins can manage service faqs"
 
-| Name | Slug | Variation | Duration | Price | Promo |
-|------|------|-----------|----------|-------|-------|
-| Design de Sobrancelha — Sem Henna | design-sobrancelha-sem-henna | Sem Henna | 45 | 120.00 | null |
-| Design de Sobrancelha — Com Henna | design-sobrancelha-com-henna | Com Henna | 60 | 150.00 | 135.00 |
+---
 
-### 3. One SKU for "Corte Feminino" (no variation, tests auto-skip)
+## ✅ Fase 1.5: SEO Local + Institucional + Shop (CONCLUÍDA)
 
-| Name | Slug | Variation | Duration | Price |
-|------|------|-----------|----------|-------|
-| Corte Feminino — Padrão | corte-feminino-padrao | null | 60 | 75.00 |
+### Tabela `service_locations` criada
+### Rota hierárquica para geo-variants com canonical
+### Páginas institucionais: Studio, Team, LocationNewark, Shop
 
-## SQL Execution
+---
 
-Three INSERT statements via the data insert tool:
-1. Insert 2 rows into `service_variations`
-2. Insert 3 rows into `service_skus` (referencing the variation IDs from step 1)
+## ✅ Fase 2: Booking por SKU + Slug (CONCLUÍDA)
 
-Since we can't get the generated UUIDs back from the insert tool, we'll use deterministic UUIDs in the INSERT to link variations → SKUs.
+### Migration executada:
+- `bookings.sku_id` (uuid, nullable, FK → service_skus)
 
-## After Seeding
+### Book.tsx — SKU selection flow:
+- Novo state: `pickedVariationId`, `pickedSkuId`
+- Step "sku" entre "service" e "date"
+- Auto-skip: sem variations → pular; 1 SKU → auto-selecionar
+- `serviceDuration` usa SKU duration com fallback
+- `sku_id` enviado no payload de hold/confirm
 
-Test URLs:
-- `/book?service=design-de-sobrancelhas` → shows 2 variations → then SKU picker
-- `/book?service=design-de-sobrancelhas&sku=design-sobrancelha-sem-henna` → skips to date
-- `/book?service=corte-feminino` → auto-skips variation + SKU (only 1 SKU, no variations)
+### Book.tsx — Slug-based URL pre-selection:
+- Query params `?service=slug` e `?sku=slug`
+- UUID regex: `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`
+- UUID → WHERE id = param; Slug → WHERE slug = param
+- Pre-seleciona serviço e SKU, pula para date
 
-## Files Changed
+### ServiceDetail.tsx — Slug links:
+- CTA principal: `/book?service=${service.slug}`
+- SkuCard: `/book?service=${service.slug}&sku=${sku.slug}`
 
-None. Database-only operation.
+### ServiceDetail.tsx — FAQs:
+- Renderiza `services.faq` (jsonb array `[{question, answer}]`)
+- Accordion shadcn com estilo ServiceFAQ
 
+### ServiceDetail.tsx — JSON-LD geo-cluster:
+- `<script type="application/ld+json">` com schema LocalBusiness quando locationData existe
+
+### Admin — BookingsTab:
+- Join `service_skus(name, price)` na query
+- Colunas SKU name e preço na listagem
+
+### Admin — DashboardTab:
+- Cards: "Receita do Mês" e "Bookings do Mês"
+- Bar chart (recharts): top 5 serviços por booking count
+
+### Edge function — Price lock:
+- `calendar-confirm-booking` aceita `sku_id`
+- Busca preço do SKU no banco (nunca confia no frontend)
+- `total_price = promo_price || price` salvo no booking
+
+---
+
+## 🔲 Fase 3: Quiz como Funil Real
+- `/quiz` landing, `/quiz/:slug/resultado`
+- WhatsApp com contexto
+
+## 🔲 Fase 4: Páginas de Conteúdo e Legal
+- `/privacidade`, `/termos`, `/perguntas-frequentes`
+
+## 🔲 Fase 5: Admin — Rotas Nomeadas
+- Sub-rotas reais com Outlet
+
+## 🔲 Fase 6: Limpeza
+- Remover arquivos legados
+- Atualizar Header

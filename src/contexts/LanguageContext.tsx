@@ -47,9 +47,9 @@ const translations: Record<Language, Record<string, string>> = {
     "footer.terms_of_service": "Terms of Service",
 
     // ========== HOME ==========
-    "home.hero.badge": "Premium Beauty Studio",
-    "home.hero.title_1": "Hair, Brows & Nails",
-    "home.hero.title_2": "with Technique & Sophistication",
+    "home.hero.badge": "Beauty Studio · Newark, NJ",
+    "home.hero.title_1": "Where you become",
+    "home.hero.title_2": "exactly who you already are.",
     "home.hero.description": "We enhance your natural beauty with specialized hair, brow, and nail services, offering personalized care in an elegant and welcoming environment.",
     "home.hero.cta_offers": "View Special Offers",
     "home.hero.cta_services": "Book Now",
@@ -374,9 +374,9 @@ const translations: Record<Language, Record<string, string>> = {
     "footer.terms_of_service": "Termos de Uso",
 
     // ========== HOME ==========
-    "home.hero.badge": "Estúdio de Beleza Premium",
-    "home.hero.title_1": "Cabelo, Sobrancelhas e Unhas",
-    "home.hero.title_2": "com Técnica e Sofisticação",
+    "home.hero.badge": "Estúdio de Beleza · Newark, NJ",
+    "home.hero.title_1": "Onde você se torna",
+    "home.hero.title_2": "exatamente o que já é.",
     "home.hero.description": "Realçamos sua beleza natural com serviços especializados em cabelo, sobrancelhas e unhas, oferecendo atendimento personalizado em um ambiente elegante e acolhedor.",
     "home.hero.cta_offers": "Ver Ofertas Especiais",
     "home.hero.cta_services": "Agendar Horário",
