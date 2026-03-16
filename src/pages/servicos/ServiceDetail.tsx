@@ -242,10 +242,6 @@ export default function ServiceDetail() {
 
               <div className="flex items-center gap-6 text-muted-foreground mb-8">
                 <div className="flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-rose-gold" />
-                  <span>a partir de <strong className="text-foreground">${minPrice.toFixed(0)}</strong></span>
-                </div>
-                <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-rose-gold" />
                   <span>{service.duration_minutes} min</span>
                 </div>
@@ -400,17 +396,6 @@ function SkuCard({ sku, index, serviceSlug }: { sku: any; index: number; service
               <span className="flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5" />
                 {sku.duration_minutes} min
-              </span>
-              <span className="flex items-center gap-1">
-                <DollarSign className="w-3.5 h-3.5" />
-                {hasPromo ? (
-                  <>
-                    <span className="line-through text-muted-foreground/50">${Number(sku.price).toFixed(0)}</span>
-                    <span className="text-rose-gold font-semibold">${Number(sku.promo_price).toFixed(0)}</span>
-                  </>
-                ) : (
-                  <span>${Number(sku.price).toFixed(0)}</span>
-                )}
               </span>
             </div>
           </div>

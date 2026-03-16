@@ -700,9 +700,6 @@ export default function Book() {
                               <p className="font-medium">{language === "pt" ? "Consulta" : "Consultation"}</p>
                               <p className="text-sm text-muted-foreground">{DEFAULT_CONSULTATION_DURATION} min</p>
                             </div>
-                            <div className="text-right">
-                              <p className="text-sm text-muted-foreground">{language === "pt" ? "Grátis" : "Free"}</p>
-                            </div>
                           </div>
                         </button>
                       )}
@@ -743,16 +740,6 @@ export default function Book() {
                                     <div>
                                       <p className="font-medium">{svc.name}</p>
                                       <p className="text-sm text-muted-foreground">{svc.duration_minutes} min</p>
-                                    </div>
-                                    <div className="text-right">
-                                      {svc.promo_price ? (
-                                        <>
-                                          <p className="text-sm line-through text-muted-foreground">${svc.price}</p>
-                                          <p className="font-semibold text-rose-gold">${svc.promo_price}</p>
-                                        </>
-                                      ) : (
-                                        <p className="font-semibold">${svc.price}</p>
-                                      )}
                                     </div>
                                   </div>
                                 </button>
@@ -848,16 +835,6 @@ export default function Book() {
                                     <div>
                                       <p className="font-medium">{sku.name}</p>
                                       <p className="text-sm text-muted-foreground">{sku.duration_minutes} min</p>
-                                    </div>
-                                    <div className="text-right">
-                                      {hasPromo ? (
-                                        <>
-                                          <p className="text-sm line-through text-muted-foreground">${Number(sku.price).toFixed(0)}</p>
-                                          <p className="font-semibold text-rose-gold">${Number(sku.promo_price).toFixed(0)}</p>
-                                        </>
-                                      ) : sku.price != null ? (
-                                        <p className="font-semibold">${Number(sku.price).toFixed(0)}</p>
-                                      ) : null}
                                     </div>
                                   </div>
                                 </button>

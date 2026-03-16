@@ -200,9 +200,6 @@ export default function CategoryPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <span className="text-foreground font-medium group-hover:text-rose-gold transition-colors">{service.name}</span>
-                            {minPrice != null && (
-                              <p className="text-xs text-muted-foreground mt-0.5">a partir de ${Number(minPrice).toFixed(0)}</p>
-                            )}
                           </div>
                           <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-rose-gold transition-colors shrink-0" />
                         </Link>
