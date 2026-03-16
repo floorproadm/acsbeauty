@@ -44,6 +44,8 @@ export default function Admin() {
         return <QuizzesTab />;
       case "tasks":
         return <TasksTab />;
+      case "gallery":
+        return <GalleryTab />;
       case "gift-cards":
         return <GiftCardsTab />;
       case "team":
