@@ -88,7 +88,7 @@ export default function AneCaroline() {
             className="relative w-full max-w-md mx-auto aspect-[3/4] overflow-hidden"
           >
             <img
-              src={founderImg}
+              src={aneHeroImg}
               alt="Ane Caroline - Hair Stylist"
               className="w-full h-full object-cover object-top"
               loading="eager"
