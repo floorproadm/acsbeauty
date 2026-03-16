@@ -107,12 +107,12 @@ export function ServicesPreview() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 text-primary-foreground">
-                    <div className="flex items-center gap-2 mb-2 md:mb-3">
+                  <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-6 text-primary-foreground">
+                    <div className="flex items-center gap-2 mb-2">
                       <cat.icon className="w-5 h-5 text-rose-gold" />
                       <h3 className="font-serif text-xl md:text-2xl font-semibold">{t(cat.titleKey)}</h3>
                     </div>
-                    <p className="text-primary-foreground/80 text-sm leading-relaxed">
+                    <p className="text-primary-foreground/80 text-sm leading-relaxed line-clamp-2">
                       {t(cat.descKey)}
                     </p>
                     {photoCount > 1 && (
