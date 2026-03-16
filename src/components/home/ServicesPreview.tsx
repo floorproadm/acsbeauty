@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Scissors, Eye, Sparkles, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Scissors, Eye, Sparkles, X, ChevronLeft, ChevronRight, Calendar, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 // Static imports as fallbacks
 import hairServiceImg from "@/assets/hair-service.png";
@@ -125,6 +127,23 @@ export function ServicesPreview() {
               );
             })}
           </div>
+
+          {/* CTA Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="text-center mt-10 md:mt-14"
+          >
+            <Link to="/book">
+              <Button variant="hero" size="lg" className="group min-h-[52px] px-8 text-base">
+                <Calendar className="w-5 h-5" />
+                {t("home.hero.cta_services")}
+                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
+          </motion.div>
         </div>
       </section>
 
