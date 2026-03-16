@@ -82,8 +82,8 @@ const translations: Record<Language, Record<string, string>> = {
     "home.testimonials.title": "What Our Clients Say",
     "home.testimonials.description": "Real stories from real clients who have experienced the ACS Beauty difference.",
 
-    "home.cta.title_1": "Ready to Be Cared for by",
-    "home.cta.title_2": "Specialist Professionals?",
+    "home.cta.title_1": "Ready to see",
+    "home.cta.title_2": "ACS's work?",
     "home.cta.description": "Book your appointment and experience the ACS Beauty difference in hair, brows, and nails.",
     "home.cta.view_services": "View Our Services",
     "home.cta.book_now": "Book Now",
@@ -409,8 +409,8 @@ const translations: Record<Language, Record<string, string>> = {
     "home.testimonials.title": "O Que Nossas Clientes Dizem",
     "home.testimonials.description": "Histórias reais de clientes que vivenciaram a diferença ACS Beauty.",
 
-    "home.cta.title_1": "Pronta para Cuidar de Você com",
-    "home.cta.title_2": "Profissionais Especialistas?",
+    "home.cta.title_1": "Pronta para conhecer",
+    "home.cta.title_2": "o trabalho da ACS?",
     "home.cta.description": "Agende seu horário e viva a experiência ACS Beauty em cabelo, sobrancelhas e unhas.",
     "home.cta.view_services": "Ver Nossos Serviços",
     "home.cta.book_now": "Agendar Agora",
