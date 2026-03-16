@@ -32,7 +32,7 @@ export function CTASection() {
           </p>
           <div className="flex flex-col gap-3 md:gap-4 sm:flex-row justify-center">
             <Link to="/services" className="w-full sm:w-auto">
-              <Button variant="rose" size="xl" className="group w-full sm:w-auto">
+              <Button size="xl" className="bg-white text-primary font-medium hover:bg-white/90 shadow-elevated group w-full sm:w-auto">
                 <Calendar className="w-5 h-5" />
                 {t("home.cta.view_services")}
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
@@ -42,7 +42,7 @@ export function CTASection() {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-rose-gold/50 text-rose-gold hover:bg-rose-gold/10 w-full sm:w-auto"
+                className="border-white/60 text-white hover:bg-white/10 w-full sm:w-auto"
               >
                 <Instagram className="w-4 h-4" />
                 {t("global.contact_us")}
