@@ -374,9 +374,9 @@ const translations: Record<Language, Record<string, string>> = {
     "footer.terms_of_service": "Termos de Uso",
 
     // ========== HOME ==========
-    "home.hero.badge": "Estúdio de Beleza Premium",
-    "home.hero.title_1": "Cabelo, Sobrancelhas e Unhas",
-    "home.hero.title_2": "com Técnica e Sofisticação",
+    "home.hero.badge": "Estúdio de Beleza · Newark, NJ",
+    "home.hero.title_1": "Onde você se torna",
+    "home.hero.title_2": "exatamente o que já é.",
     "home.hero.description": "Realçamos sua beleza natural com serviços especializados em cabelo, sobrancelhas e unhas, oferecendo atendimento personalizado em um ambiente elegante e acolhedor.",
     "home.hero.cta_offers": "Ver Ofertas Especiais",
     "home.hero.cta_services": "Agendar Horário",
