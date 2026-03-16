@@ -47,9 +47,9 @@ const translations: Record<Language, Record<string, string>> = {
     "footer.terms_of_service": "Terms of Service",
 
     // ========== HOME ==========
-    "home.hero.badge": "Premium Beauty Studio",
-    "home.hero.title_1": "Hair, Brows & Nails",
-    "home.hero.title_2": "with Technique & Sophistication",
+    "home.hero.badge": "Beauty Studio · Newark, NJ",
+    "home.hero.title_1": "Where you become",
+    "home.hero.title_2": "exactly who you already are.",
     "home.hero.description": "We enhance your natural beauty with specialized hair, brow, and nail services, offering personalized care in an elegant and welcoming environment.",
     "home.hero.cta_offers": "View Special Offers",
     "home.hero.cta_services": "Book Now",
