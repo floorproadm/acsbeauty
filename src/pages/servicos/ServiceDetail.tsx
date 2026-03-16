@@ -242,10 +242,6 @@ export default function ServiceDetail() {
 
               <div className="flex items-center gap-6 text-muted-foreground mb-8">
                 <div className="flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-rose-gold" />
-                  <span>a partir de <strong className="text-foreground">${minPrice.toFixed(0)}</strong></span>
-                </div>
-                <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-rose-gold" />
                   <span>{service.duration_minutes} min</span>
                 </div>
