@@ -51,6 +51,7 @@ export type AdminTab =
   | "offers"
   | "quizzes"
   | "tasks"
+  | "gallery"
   | "gift-cards"
   | "team"
   | "access";
