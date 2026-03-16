@@ -741,16 +741,6 @@ export default function Book() {
                                       <p className="font-medium">{svc.name}</p>
                                       <p className="text-sm text-muted-foreground">{svc.duration_minutes} min</p>
                                     </div>
-                                    <div className="text-right">
-                                      {svc.promo_price ? (
-                                        <>
-                                          <p className="text-sm line-through text-muted-foreground">${svc.price}</p>
-                                          <p className="font-semibold text-rose-gold">${svc.promo_price}</p>
-                                        </>
-                                      ) : (
-                                        <p className="font-semibold">${svc.price}</p>
-                                      )}
-                                    </div>
                                   </div>
                                 </button>
                               ))}
