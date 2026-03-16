@@ -20,6 +20,7 @@ import Team from "./pages/Team";
 import LocationNewark from "./pages/LocationNewark";
 import Shop from "./pages/Shop";
 import GiftCards from "./pages/GiftCards";
+import AneCaroline from "./pages/AneCaroline";
 import NotFound from "./pages/NotFound";
 import { WhatsAppButton } from "./components/WhatsAppButton";
 
@@ -50,6 +51,7 @@ const App = () => (
           <Route path="/shop" element={<Shop />} />
           <Route path="/gift-cards" element={<GiftCards />} />
           <Route path="/quiz/:slug" element={<Quiz />} />
+          <Route path="/ane-caroline" element={<AneCaroline />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
