@@ -1,12 +1,24 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronRight, Instagram, MessageCircle, Plus, Minus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import founderImg from "@/assets/founder.jpg";
 import { useState } from "react";
 
 const WHATSAPP_NUMBER = "19734944854";
 const INSTAGRAM = "anecaroline.hair";
+
+// Page-specific palette matching Canva reference
+const colors = {
+  dark: "#3d3d38",       // warm charcoal/olive for dark sections
+  darkText: "#f5f0eb",   // cream white text on dark
+  darkMuted: "#c5c0b8",  // muted text on dark
+  light: "#f5f0eb",      // warm cream background
+  lightText: "#2a2a26",  // dark text on light
+  lightMuted: "#7a7772", // muted text on light
+  accent: "#8b7355",     // warm brown for italic accents
+  border: "#e0d8cf",     // border on light
+  borderDark: "#5a5a54", // border on dark
+};
 
 const services = [
   "Highlights",
@@ -36,18 +48,23 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   return (
     <button
       onClick={() => setOpen(!open)}
-      className="w-full text-left border-b border-border/50 py-4 group"
+      className="w-full text-left py-4 group"
+      style={{ borderBottom: `1px solid ${colors.borderDark}` }}
     >
       <div className="flex items-start justify-between gap-4">
-        <p className="font-medium text-sm leading-snug">{q}</p>
+        <div>
+          <p className="font-semibold text-sm leading-snug" style={{ color: colors.darkText }}>
+            {q}
+          </p>
+        </div>
         {open ? (
-          <Minus className="w-4 h-4 shrink-0 text-muted-foreground mt-0.5" />
+          <Plus className="w-4 h-4 shrink-0 mt-0.5 rotate-45 transition-transform" style={{ color: colors.darkMuted }} />
         ) : (
-          <Plus className="w-4 h-4 shrink-0 text-muted-foreground mt-0.5" />
+          <Plus className="w-4 h-4 shrink-0 mt-0.5 transition-transform" style={{ color: colors.darkMuted }} />
         )}
       </div>
       {open && (
-        <p className="text-sm text-muted-foreground mt-2 leading-relaxed pr-8">
+        <p className="text-sm mt-2 leading-relaxed pr-8" style={{ color: colors.darkMuted }}>
           {a}
         </p>
       )}
@@ -59,9 +76,9 @@ export default function AneCaroline() {
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=Oi%20Ane!%20Vi%20seu%20perfil%20e%20gostaria%20de%20agendar.`;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen" style={{ backgroundColor: colors.light, color: colors.lightText }}>
       {/* Hero - Dark section with photo */}
-      <section className="relative bg-primary overflow-hidden">
+      <section className="relative overflow-hidden" style={{ backgroundColor: colors.dark }}>
         <div className="relative flex flex-col items-center pt-0">
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
@@ -76,8 +93,13 @@ export default function AneCaroline() {
               loading="eager"
               fetchPriority="high"
             />
-            {/* Gradient overlay for text */}
-            <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/40 to-transparent" />
+            {/* Gradient overlay */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(to top, ${colors.dark} 0%, ${colors.dark}99 25%, transparent 60%)`,
+              }}
+            />
 
             {/* Name overlay */}
             <div className="absolute bottom-8 left-0 right-0 text-center">
@@ -85,7 +107,8 @@ export default function AneCaroline() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
-                className="font-editorial italic text-4xl md:text-5xl text-primary-foreground mb-1"
+                className="font-editorial italic text-4xl md:text-5xl mb-1"
+                style={{ color: colors.darkText }}
               >
                 Ane Caroline
               </motion.h1>
@@ -93,7 +116,8 @@ export default function AneCaroline() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.45 }}
-                className="text-primary-foreground/80 text-sm tracking-[0.2em] uppercase"
+                className="text-sm tracking-[0.2em] uppercase"
+                style={{ color: colors.darkMuted }}
               >
                 Hair Stylist
               </motion.p>
@@ -103,13 +127,14 @@ export default function AneCaroline() {
       </section>
 
       {/* Social links bar */}
-      <section className="bg-background py-4">
-        <div className="flex justify-center gap-4">
+      <section className="py-5" style={{ backgroundColor: colors.light }}>
+        <div className="flex justify-center gap-3">
           <a
             href={`https://instagram.com/${INSTAGRAM}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-border hover:border-primary/50 transition-colors text-sm"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm transition-opacity hover:opacity-70"
+            style={{ border: `1px solid ${colors.border}`, color: colors.lightText }}
           >
             <Instagram className="w-4 h-4" />
             @{INSTAGRAM}
@@ -118,7 +143,8 @@ export default function AneCaroline() {
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground hover:opacity-90 transition-opacity text-sm"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm transition-opacity hover:opacity-90"
+            style={{ backgroundColor: colors.dark, color: colors.darkText }}
           >
             <MessageCircle className="w-4 h-4" />
             WhatsApp
@@ -134,18 +160,16 @@ export default function AneCaroline() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="font-editorial text-3xl mb-6">
-            Sobre <span className="italic text-primary">mim</span>
+          <h2 className="font-editorial text-3xl mb-6" style={{ color: colors.lightText }}>
+            Sobre <span className="italic" style={{ color: colors.accent }}>mim</span>
           </h2>
-          <div className="space-y-4 text-muted-foreground text-sm leading-relaxed">
+          <div className="space-y-4 text-sm leading-relaxed" style={{ color: colors.lightMuted }}>
             <p>Minha história com os cabelos começou cedo.</p>
             <p>
               Ainda criança, já cortava o cabelo das minhas irmãs, sem técnica,
               mas com muito cuidado.
             </p>
-            <p>
-              Com o tempo, esse gesto se transformou em profissão.
-            </p>
+            <p>Com o tempo, esse gesto se transformou em profissão.</p>
             <p>
               Desde 2016 venho construindo minha trajetória na área, formando uma
               clientela fiel e aprimorando constantemente minha técnica.
@@ -159,7 +183,7 @@ export default function AneCaroline() {
       </section>
 
       {/* Minha missão - Dark section */}
-      <section className="bg-primary text-primary-foreground px-6 py-12">
+      <section className="px-6 py-12" style={{ backgroundColor: colors.dark }}>
         <div className="max-w-lg mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -167,10 +191,10 @@ export default function AneCaroline() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="font-editorial text-3xl mb-6">
-              Minha <span className="italic">missão</span>
+            <h2 className="font-editorial text-3xl mb-6" style={{ color: colors.darkText }}>
+              Minha <span className="italic" style={{ color: colors.accent }}>missão</span>
             </h2>
-            <div className="space-y-4 text-primary-foreground/80 text-sm leading-relaxed">
+            <div className="space-y-4 text-sm leading-relaxed" style={{ color: colors.darkMuted }}>
               <p>
                 Minha missão é cuidar de cada pessoa que passa pela minha
                 cadeira com atenção, sensibilidade e excelência.
@@ -179,9 +203,7 @@ export default function AneCaroline() {
                 Acredito que o cabelo vai muito além da estética. Ele expressa
                 identidade, autoestima e confiança.
               </p>
-              <p>
-                Por isso, meu compromisso é oferecer mais do que um serviço.
-              </p>
+              <p>Por isso, meu compromisso é oferecer mais do que um serviço.</p>
               <p>
                 Quero proporcionar uma experiência onde cada cliente se sinta
                 valorizada, segura e ainda mais confiante com quem é.
@@ -199,44 +221,43 @@ export default function AneCaroline() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="font-editorial text-3xl mb-2 text-center">
-            Como posso
-          </h2>
-          <h2 className="font-editorial italic text-3xl mb-1 text-center text-primary">
-            te ajudar
-          </h2>
-          <h2 className="font-editorial text-3xl mb-8 text-center">
-            na sua jornada:
+          <h2 className="font-editorial text-3xl text-center leading-snug mb-8" style={{ color: colors.lightText }}>
+            Como posso<br />
+            <span className="italic" style={{ color: colors.accent }}>te ajudar</span> na sua<br />
+            jornada:
           </h2>
 
-          <div className="space-y-3">
+          <div className="space-y-0">
             {services.map((service) => (
               <div
                 key={service}
-                className="flex items-center gap-3 py-3 border-b border-border/50"
+                className="flex items-center gap-3 py-3.5"
+                style={{ borderBottom: `1px solid ${colors.border}` }}
               >
-                <ChevronRight className="w-4 h-4 text-primary shrink-0" />
-                <span className="text-sm">{service}</span>
+                <ChevronRight className="w-4 h-4 shrink-0" style={{ color: colors.accent }} />
+                <span className="text-sm" style={{ color: colors.lightText }}>{service}</span>
               </div>
             ))}
           </div>
 
           <div className="mt-8 text-center">
             <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-              <Button
-                variant="outline"
-                size="lg"
-                className="w-full max-w-xs border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+              <button
+                className="w-full max-w-xs px-8 py-3 rounded-full text-sm font-medium transition-opacity hover:opacity-90"
+                style={{
+                  backgroundColor: colors.dark,
+                  color: colors.darkText,
+                }}
               >
                 Entrar em contato
-              </Button>
+              </button>
             </a>
           </div>
         </motion.div>
       </section>
 
       {/* Second photo + FAQ - Dark section */}
-      <section className="bg-primary text-primary-foreground">
+      <section style={{ backgroundColor: colors.dark }}>
         {/* Photo */}
         <div className="relative w-full max-w-lg mx-auto aspect-[4/3] overflow-hidden">
           <img
@@ -255,8 +276,8 @@ export default function AneCaroline() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="font-editorial text-3xl mb-8">
-              Dúvidas <span className="italic">comuns</span>
+            <h2 className="font-editorial text-3xl mb-8" style={{ color: colors.darkText }}>
+              Dúvidas <span className="italic" style={{ color: colors.accent }}>comuns</span>
             </h2>
 
             <div className="space-y-0">
@@ -269,7 +290,7 @@ export default function AneCaroline() {
       </section>
 
       {/* Final CTA */}
-      <section className="px-6 py-12 max-w-lg mx-auto text-center">
+      <section className="px-6 py-12 max-w-lg mx-auto text-center" style={{ backgroundColor: colors.light }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -277,17 +298,19 @@ export default function AneCaroline() {
           transition={{ duration: 0.6 }}
         >
           <Link to="/book">
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full max-w-xs border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+            <button
+              className="w-full max-w-xs px-8 py-3 rounded-full text-sm font-medium transition-colors hover:opacity-90"
+              style={{
+                border: `1.5px solid ${colors.dark}`,
+                color: colors.lightText,
+                backgroundColor: "transparent",
+              }}
             >
-              Agendar agora
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+              Entrar em contato
+            </button>
           </Link>
 
-          <p className="text-xs text-muted-foreground mt-6">
+          <p className="text-xs mt-6" style={{ color: colors.lightMuted }}>
             © {new Date().getFullYear()} ACS Beauty · Feito com carinho em Newark, NJ
           </p>
         </motion.div>
