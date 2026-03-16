@@ -240,12 +240,6 @@ export default function ServiceDetail() {
                 </p>
               )}
 
-              <div className="flex items-center gap-6 text-muted-foreground mb-8">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-rose-gold" />
-                  <span>{service.duration_minutes} min</span>
-                </div>
-              </div>
 
               <Link to={`/book?service=${service.slug}`}>
                 <Button variant="hero" size="lg" className="group">
