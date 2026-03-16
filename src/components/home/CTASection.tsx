@@ -42,7 +42,7 @@ export function CTASection() {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-rose-gold/50 text-rose-gold hover:bg-rose-gold/10 w-full sm:w-auto"
+                className="border-white/60 text-white hover:bg-white/10 w-full sm:w-auto"
               >
                 <Instagram className="w-4 h-4" />
                 {t("global.contact_us")}
