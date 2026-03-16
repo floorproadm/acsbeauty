@@ -397,17 +397,6 @@ function SkuCard({ sku, index, serviceSlug }: { sku: any; index: number; service
                 <Clock className="w-3.5 h-3.5" />
                 {sku.duration_minutes} min
               </span>
-              <span className="flex items-center gap-1">
-                <DollarSign className="w-3.5 h-3.5" />
-                {hasPromo ? (
-                  <>
-                    <span className="line-through text-muted-foreground/50">${Number(sku.price).toFixed(0)}</span>
-                    <span className="text-rose-gold font-semibold">${Number(sku.promo_price).toFixed(0)}</span>
-                  </>
-                ) : (
-                  <span>${Number(sku.price).toFixed(0)}</span>
-                )}
-              </span>
             </div>
           </div>
           <Link to={`/book?service=${serviceSlug}${skuSlugParam}`}>

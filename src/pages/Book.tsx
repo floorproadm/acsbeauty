@@ -836,16 +836,6 @@ export default function Book() {
                                       <p className="font-medium">{sku.name}</p>
                                       <p className="text-sm text-muted-foreground">{sku.duration_minutes} min</p>
                                     </div>
-                                    <div className="text-right">
-                                      {hasPromo ? (
-                                        <>
-                                          <p className="text-sm line-through text-muted-foreground">${Number(sku.price).toFixed(0)}</p>
-                                          <p className="font-semibold text-rose-gold">${Number(sku.promo_price).toFixed(0)}</p>
-                                        </>
-                                      ) : sku.price != null ? (
-                                        <p className="font-semibold">${Number(sku.price).toFixed(0)}</p>
-                                      ) : null}
-                                    </div>
                                   </div>
                                 </button>
                               );
