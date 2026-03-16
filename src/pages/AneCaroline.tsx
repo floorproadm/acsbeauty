@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronRight, Instagram, MessageCircle, Plus, Minus } from "lucide-react";
+import aneHeroImg from "@/assets/ane-hero.jpg";
 import founderImg from "@/assets/founder.jpg";
 import { useState } from "react";
 
@@ -87,7 +88,7 @@ export default function AneCaroline() {
             className="relative w-full max-w-md mx-auto aspect-[3/4] overflow-hidden"
           >
             <img
-              src={founderImg}
+              src={aneHeroImg}
               alt="Ane Caroline - Hair Stylist"
               className="w-full h-full object-cover object-top"
               loading="eager"
