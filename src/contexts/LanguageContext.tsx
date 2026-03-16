@@ -82,8 +82,8 @@ const translations: Record<Language, Record<string, string>> = {
     "home.testimonials.title": "What Our Clients Say",
     "home.testimonials.description": "Real stories from real clients who have experienced the ACS Beauty difference.",
 
-    "home.cta.title_1": "Ready to Be Cared for by",
-    "home.cta.title_2": "Specialist Professionals?",
+    "home.cta.title_1": "Ready to see",
+    "home.cta.title_2": "ACS's work?",
     "home.cta.description": "Book your appointment and experience the ACS Beauty difference in hair, brows, and nails.",
     "home.cta.view_services": "View Our Services",
     "home.cta.book_now": "Book Now",
