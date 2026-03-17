@@ -193,7 +193,7 @@ export default function AneCaroline() {
             <img
               src={founderImg}
               alt="Ane Caroline"
-              className="w-full h-full object-cover object-center"
+              className="w-full h-full object-cover object-top"
               loading="lazy"
             />
           </div>
