@@ -88,19 +88,19 @@ export default function Team() {
             </motion.div>
 
             {/* Team photo between text and cards */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="w-full mt-8 relative"
-            >
-              <img
-                src={teamHeroImg}
-                alt="ACS Beauty Team"
-                className="w-full h-auto object-cover"
-              />
-              <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent pointer-events-none" />
-            </motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="w-full mt-8 relative"
+          >
+            <img
+              src={teamHeroImg}
+              alt="ACS Beauty Team"
+              className="w-full h-auto object-cover"
+            />
+            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+          </motion.div>
           </div>
         </section>
 
