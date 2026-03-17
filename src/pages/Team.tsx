@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Phone, Sparkles } from "lucide-react";
+import { Phone, Sparkles, MapPin, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -21,14 +21,22 @@ interface TeamMember {
   sort_order: number;
 }
 
-export default function Team() {
-  const { t } = useLanguage();
+const WHATSAPP_BASE = "https://wa.me/";
 
-  const values = [
-    { icon: "✨", title: t("team.value_excellence"), desc: t("team.value_excellence_desc") },
-    { icon: "💛", title: t("team.value_care"), desc: t("team.value_care_desc") },
-    { icon: "🌿", title: t("team.value_naturalness"), desc: t("team.value_naturalness_desc") },
-  ];
+function buildWhatsAppUrl(phone: string, name: string, isPt: boolean) {
+  const digits = phone.replace(/\D/g, "");
+  const msg = isPt
+    ? `Olá ${name}! Vi seu perfil na ACS Beauty e gostaria de agendar um horário.`
+    : `Hi ${name}! I saw your profile at ACS Beauty and would like to book an appointment.`;
+  return `${WHATSAPP_BASE}${digits}?text=${encodeURIComponent(msg)}`;
+}
+
+const ADDRESS = "375 Chestnut St, 3rd Floor, Suite 3B, Newark, NJ";
+const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`;
+
+export default function Team() {
+  const { language, t } = useLanguage();
+  const isPt = language === "pt";
 
   const { data: members = [], isLoading } = useQuery({
     queryKey: ["team-members"],
@@ -54,7 +62,7 @@ export default function Team() {
       <Header />
       <main className="flex-grow">
         {/* Hero */}
-        <section className="relative pt-28 md:pt-36 pb-16 md:pb-24 overflow-hidden">
+        <section className="relative pt-28 md:pt-36 pb-12 md:pb-20 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-hero opacity-60" />
           <div className="absolute top-20 right-0 w-72 h-72 rounded-full bg-gold/5 blur-3xl" />
           <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-nude-dark/10 blur-3xl" />
@@ -88,127 +96,86 @@ export default function Team() {
           </div>
         </section>
 
-        {/* Team Members */}
-        <section className="py-16 md:py-24">
-          <div className="container mx-auto px-4 md:px-6">
+        {/* Team Members — Compact WhatsApp Cards */}
+        <section className="py-10 md:py-16">
+          <div className="container mx-auto px-4 md:px-6 max-w-xl">
             {isLoading ? (
               <div className="text-center text-muted-foreground">{t("team.loading")}</div>
             ) : (
-              <div className="space-y-24 max-w-5xl mx-auto">
+              <div className="flex flex-col gap-3">
                 {members.map((member, idx) => {
                   const img = getImage(member);
-                  const isEven = idx % 2 === 1;
+                  const whatsappUrl = member.phone
+                    ? buildWhatsAppUrl(member.phone, member.name.split(" ")[0], isPt)
+                    : null;
 
                   return (
                     <motion.div
                       key={member.id}
-                      initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6 }}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: idx * 0.08 }}
                     >
-                      <div className={`grid md:grid-cols-2 gap-10 md:gap-16 items-center ${isEven ? "md:direction-rtl" : ""}`}>
-                        {/* Image */}
-                        <motion.div
-                          initial={{ opacity: 0, x: isEven ? 40 : -40 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.7, delay: 0.1 }}
-                          className={`relative group ${isEven ? "md:order-2" : ""}`}
+                      {whatsappUrl ? (
+                        <a
+                          href={whatsappUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-4 p-4 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-card transition-all duration-300 group"
                         >
-                          <div className="absolute -inset-3 bg-gradient-gold rounded-3xl opacity-[0.08] group-hover:opacity-[0.15] transition-opacity duration-500 blur-sm" />
-                          <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-elevated">
-                            {img ? (
-                              <img
-                                src={img}
-                                alt={member.name}
-                                className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-muted">
-                                <span className="text-sm text-muted-foreground">{t("team.photo_placeholder")}</span>
-                              </div>
-                            )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 via-transparent to-transparent" />
-                          </div>
-
-                          {member.badge_label && member.badge_value && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 10 }}
-                              whileInView={{ opacity: 1, y: 0 }}
-                              viewport={{ once: true }}
-                              transition={{ duration: 0.5, delay: 0.5 }}
-                              className="absolute -bottom-4 -right-4 md:-right-6 bg-card border border-border rounded-xl px-4 py-3 shadow-card"
-                            >
-                              <p className="text-xs text-muted-foreground">{member.badge_label}</p>
-                              <p className="text-sm font-medium text-foreground">{member.badge_value}</p>
-                            </motion.div>
-                          )}
-                        </motion.div>
-
-                        {/* Info */}
-                        <motion.div
-                          initial={{ opacity: 0, x: isEven ? -40 : 40 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.7, delay: 0.2 }}
-                          className={`flex flex-col ${isEven ? "md:order-1" : ""}`}
-                        >
-                          <span className="text-xs font-medium tracking-[0.2em] uppercase text-primary mb-3">
-                            {member.role}
-                          </span>
-                          <h2 className="font-serif text-3xl md:text-4xl font-light text-foreground mb-4">
-                            {member.name}
-                          </h2>
-                          <div className="w-12 h-px bg-primary/40 mb-6" />
-                          {member.bio && (
-                            <p className="text-muted-foreground leading-relaxed mb-8">
-                              {member.bio}
+                          <TeamAvatar img={img} name={member.name} />
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-semibold text-foreground truncate">
+                              {member.name}
+                            </h3>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {member.role}
                             </p>
-                          )}
-
-                          {member.specialties?.length > 0 && (
-                            <div className="mb-8">
-                              <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground mb-3">
-                                {t("team.specialties")}
-                              </p>
-                              <div className="flex flex-wrap gap-2">
-                                {member.specialties.map((s, i) => (
-                                  <motion.span
-                                    key={s}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    whileInView={{ opacity: 1, scale: 1 }}
-                                    viewport={{ once: true }}
-                                    transition={{ duration: 0.3, delay: 0.4 + i * 0.1 }}
-                                    className="text-xs bg-secondary border border-border px-3.5 py-1.5 rounded-full text-foreground/80"
-                                  >
-                                    {s}
-                                  </motion.span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {member.phone && (
-                            <motion.a
-                              href={`tel:${member.phone}`}
-                              initial={{ opacity: 0 }}
-                              whileInView={{ opacity: 1 }}
-                              viewport={{ once: true }}
-                              transition={{ duration: 0.4, delay: 0.6 }}
-                              className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors group/link"
-                            >
-                              <Phone className="w-4 h-4" />
-                              <span className="border-b border-transparent group-hover/link:border-primary/40 transition-colors">
-                                {member.phone}
-                              </span>
-                            </motion.a>
-                          )}
-                        </motion.div>
-                      </div>
+                          </div>
+                          <div className="shrink-0 w-10 h-10 rounded-full bg-[#25D366]/10 flex items-center justify-center group-hover:bg-[#25D366]/20 transition-colors">
+                            <Phone className="w-4 h-4 text-[#25D366]" />
+                          </div>
+                        </a>
+                      ) : (
+                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-card border border-border">
+                          <TeamAvatar img={img} name={member.name} />
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-semibold text-foreground truncate">
+                              {member.name}
+                            </h3>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {member.role}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </motion.div>
                   );
                 })}
+
+                {/* Location Button */}
+                <motion.a
+                  href={MAPS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: members.length * 0.08 }}
+                  className="flex items-center gap-4 p-4 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-card transition-all duration-300 group mt-1"
+                >
+                  <div className="shrink-0 w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-semibold text-foreground">
+                      {isPt ? "Nossa Localização" : "Our Location"}
+                    </h3>
+                    <p className="text-xs text-muted-foreground truncate">
+                      375 Chestnut St, 3rd Floor · Newark, NJ
+                    </p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                </motion.a>
               </div>
             )}
           </div>
@@ -233,7 +200,11 @@ export default function Team() {
             </motion.div>
 
             <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              {values.map((v, i) => (
+              {[
+                { icon: "✨", title: t("team.value_excellence"), desc: t("team.value_excellence_desc") },
+                { icon: "💛", title: t("team.value_care"), desc: t("team.value_care_desc") },
+                { icon: "🌿", title: t("team.value_naturalness"), desc: t("team.value_naturalness_desc") },
+              ].map((v, i) => (
                 <motion.div
                   key={v.title}
                   initial={{ opacity: 0, y: 20 }}
@@ -256,6 +227,25 @@ export default function Team() {
         </section>
       </main>
       <Footer />
+    </div>
+  );
+}
+
+function TeamAvatar({ img, name }: { img: string | null; name: string }) {
+  if (img) {
+    return (
+      <img
+        src={img}
+        alt={name}
+        className="w-11 h-11 rounded-full object-cover shrink-0 border-2 border-border"
+      />
+    );
+  }
+  return (
+    <div className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center shrink-0 border-2 border-border">
+      <span className="text-sm font-medium text-primary">
+        {name.charAt(0)}
+      </span>
     </div>
   );
 }
