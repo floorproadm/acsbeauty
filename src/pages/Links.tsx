@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, ChevronRight, MapPin, Clock, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import acsLogo from "@/assets/acs-logo.png";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageToggle } from "@/components/LanguageToggle";
 
 function useOGMeta() {
   useEffect(() => {
