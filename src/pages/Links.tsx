@@ -190,28 +190,6 @@ export default function Links() {
           </motion.div>
         </Link>
 
-        {/* LOCALIZAÇÃO */}
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="flex items-center h-[52px] px-5 rounded-xl cursor-pointer bg-card border border-border mb-1"
-          onClick={() => setShowGPS(true)}
-        >
-          <MapPin className="w-4 h-4 shrink-0 text-primary" />
-          <span className="flex-1 text-[12px] font-medium tracking-[0.03em] text-foreground ml-3 truncate">
-            375 Chestnut St, 3rd Floor · Newark, NJ
-          </span>
-          <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground" />
-        </motion.div>
-
-        {/* HORÁRIO */}
-        <div className="flex items-center h-[44px] px-5 rounded-xl bg-card border border-border mb-3">
-          <Clock className="w-4 h-4 shrink-0 text-primary" />
-          <span className="text-[12px] font-medium tracking-[0.03em] text-muted-foreground ml-3">
-            Seg–Sáb · 9:00 AM – 7:00 PM
-          </span>
-        </div>
-
         {/* LISTA DE LINKS */}
         <div className="flex flex-col gap-2">
           {linkItems.map((item) => (
