@@ -124,7 +124,7 @@ export default function AneCaroline() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}>
           
-          <h2 className="font-editorial text-[28px] mb-5" style={{ color: c.textDark }}>
+          <h2 className="font-editorial text-[30px] mb-5" style={{ color: c.textDark }}>
             Sobre <span className="italic" style={{ color: c.accent }}>mim</span>
           </h2>
           <div className="space-y-3 text-[15px] leading-[1.7]" style={{ color: c.mutedLight }}>
