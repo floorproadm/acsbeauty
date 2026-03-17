@@ -96,6 +96,7 @@ export function TeamTab() {
           specialties: member.specialties,
           image_url: member.image_url,
           instagram: member.instagram,
+          phone: member.phone,
           badge_label: member.badge_label,
           badge_value: member.badge_value,
           sort_order: member.sort_order,
