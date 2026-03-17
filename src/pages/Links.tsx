@@ -1,7 +1,64 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Calendar, ChevronRight, Scissors, Gift, MessageCircle, Instagram, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import founderImg from "@/assets/founder.jpg";
+
+function useOGMeta() {
+  useEffect(() => {
+    const prev = {
+      title: document.title,
+      metas: new Map<string, string>(),
+    };
+
+    const tags: Record<string, string> = {
+      "og:title": "Ane Caroline · Hair Stylist | ACS Beauty",
+      "og:description": "Hair Stylist em Newark, NJ. Agende seu horário, conheça nossos serviços e pacotes exclusivos.",
+      "og:type": "profile",
+      "og:locale": "pt_BR",
+      "og:site_name": "ACS Beauty",
+      "og:url": "https://acsbeauty.lovable.app/links",
+      "twitter:card": "summary",
+      "twitter:title": "Ane Caroline · Hair Stylist | ACS Beauty",
+      "twitter:description": "Hair Stylist em Newark, NJ. Agende seu horário, conheça nossos serviços e pacotes exclusivos.",
+    };
+
+    document.title = "Ane Caroline · Hair Stylist | ACS Beauty";
+
+    Object.entries(tags).forEach(([key, value]) => {
+      const attr = key.startsWith("og:") ? "property" : "name";
+      let el = document.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+      if (el) {
+        prev.metas.set(key, el.getAttribute("content") || "");
+        el.setAttribute("content", value);
+      } else {
+        el = document.createElement("meta");
+        el.setAttribute(attr, key);
+        el.setAttribute("content", value);
+        document.head.appendChild(el);
+        prev.metas.set(key, "__created__");
+      }
+    });
+
+    // Set description
+    const descEl = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    const prevDesc = descEl?.getAttribute("content") || "";
+    if (descEl) descEl.setAttribute("content", tags["og:description"]);
+
+    return () => {
+      document.title = prev.title;
+      if (descEl) descEl.setAttribute("content", prevDesc);
+      prev.metas.forEach((original, key) => {
+        const attr = key.startsWith("og:") ? "property" : "name";
+        const el = document.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+        if (!el) return;
+        if (original === "__created__") el.remove();
+        else el.setAttribute("content", original);
+      });
+    };
+  }, []);
+}
+
 
 const WHATSAPP_NUMBER = "17329153430";
 const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Olá Ane! Vi seu perfil e gostaria de saber mais!")}`;
