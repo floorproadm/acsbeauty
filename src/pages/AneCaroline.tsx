@@ -157,7 +157,7 @@ export default function AneCaroline() {
             <h2 className="font-editorial text-[28px] mb-5" style={{ color: c.cream }}>
               Minha <span className="italic" style={{ color: c.accent }}>missão</span>
             </h2>
-            <div className="space-y-3 text-[13px] leading-[1.7]" style={{ color: c.mutedDark }}>
+            <div className="space-y-3 text-[15px] leading-[1.7]" style={{ color: c.mutedDark }}>
               <p>
                 Minha missão é cuidar de cada pessoa que passa pela minha cadeira com atenção,
                 sensibilidade e excelência.
