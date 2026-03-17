@@ -31,8 +31,6 @@ function buildWhatsAppUrl(phone: string, name: string, isPt: boolean) {
   return `${WHATSAPP_BASE}${digits}?text=${encodeURIComponent(msg)}`;
 }
 
-const ADDRESS = "375 Chestnut St, 3rd Floor, Suite 3B, Newark, NJ";
-const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`;
 
 export default function Team() {
   const { language, t } = useLanguage();
