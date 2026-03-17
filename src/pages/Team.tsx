@@ -59,7 +59,7 @@ export default function Team() {
       <Header />
       <main className="flex-grow">
         {/* Hero text + team photo */}
-        <section className="pt-28 md:pt-36 pb-8 md:pb-12">
+        <section className="pt-28 md:pt-36 pb-0">
           <div className="container mx-auto px-4 md:px-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -86,8 +86,9 @@ export default function Team() {
                 {t("team.description")}
               </p>
             </motion.div>
+          </div>
 
-            {/* Team photo between text and cards */}
+          {/* Team photo - full width */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -101,7 +102,6 @@ export default function Team() {
             />
             <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent pointer-events-none" />
           </motion.div>
-          </div>
         </section>
 
         {/* Team Members — Compact WhatsApp Cards (no avatars) */}
