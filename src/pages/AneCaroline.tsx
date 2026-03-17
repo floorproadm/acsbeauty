@@ -85,9 +85,9 @@ export default function AneCaroline() {
               fetchPriority="high" />
             
             <div
-              className="absolute inset-x-0 bottom-0 h-40"
+              className="absolute inset-x-0 bottom-0 h-[60%]"
               style={{
-                background: `linear-gradient(to top, ${c.bg} 0%, ${c.bg}cc 30%, transparent 100%)`
+                background: `linear-gradient(to top, rgba(61,61,56,0.95) 0%, rgba(61,61,56,0.7) 40%, rgba(61,61,56,0.3) 70%, transparent 100%)`
               }} />
             
           </div>
@@ -98,7 +98,7 @@ export default function AneCaroline() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               className="font-editorial italic text-[42px] leading-none"
-              style={{ color: c.textDark }}>
+              style={{ color: '#ffffff' }}>
               
               Ane Caroline
             </motion.h1>
@@ -107,7 +107,7 @@ export default function AneCaroline() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.45 }}
               className="text-xs tracking-[0.25em] uppercase mt-2"
-              style={{ color: c.mutedLight }}>
+              style={{ color: '#d5cec5' }}>
               
               Hair Stylist
             </motion.p>
