@@ -199,20 +199,34 @@ export default function AneCaroline() {
             jornada:
           </h2>
 
-          <div className="mb-8">
-            {services.map((service) =>
-            <div
-              key={service}
-              className="flex items-center gap-3 py-3.5"
-              style={{ borderBottom: `1px solid ${c.border}` }}>
-              
-                <ChevronRight className="w-3.5 h-3.5 shrink-0" style={{ color: c.accent }} />
-                <span className="text-[16px]" style={{ color: c.textDark }}>
-                  {service}
-                </span>
-              </div>
-            )}
+          <div className="mb-4">
+            {services.map((service) => {
+              const msg = encodeURIComponent(`Olá Ane! Vi seu perfil e tenho interesse em ${service}. Gostaria de saber mais e agendar!`);
+              const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+              return (
+                <a
+                  key={service}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 py-3.5 cursor-pointer transition-opacity hover:opacity-70"
+                  style={{ borderBottom: `1px solid ${c.border}` }}>
+                  <ChevronRight className="w-3.5 h-3.5 shrink-0" style={{ color: c.accent }} />
+                  <span className="text-[16px] flex-1" style={{ color: c.textDark }}>
+                    {service}
+                  </span>
+                  <MessageCircle className="w-4 h-4 shrink-0" style={{ color: c.mutedLight }} />
+                </a>
+              );
+            })}
           </div>
+
+          <Link
+            to="/services"
+            className="block text-center text-[13px] mb-6 transition-opacity hover:opacity-70"
+            style={{ color: c.accent }}>
+            Ver todos os serviços →
+          </Link>
 
           <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="block">
             <button
