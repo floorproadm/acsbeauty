@@ -280,7 +280,7 @@ export default function AneCaroline() {
       <section className="pb-4 max-w-lg mx-auto" style={{ backgroundColor: c.bg }}>
         <div className="flex justify-center gap-5">
           <a
-            href={`https://instagram.com/${INSTAGRAM}`}
+            href="https://www.instagram.com/acsbeautynj"
             target="_blank"
             rel="noopener noreferrer"
             className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
