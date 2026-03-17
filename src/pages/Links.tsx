@@ -192,7 +192,7 @@ export default function Links() {
           >
             <Calendar className="w-4 h-4 shrink-0 text-primary-foreground/70" />
             <span className="flex-1 text-center text-[13px] font-medium uppercase tracking-[0.15em] text-primary-foreground">
-              Agendar agora
+              {isPt ? "Agendar agora" : "Book now"}
             </span>
             <ChevronRight className="w-4 h-4 shrink-0 text-primary-foreground/70" />
           </motion.div>
