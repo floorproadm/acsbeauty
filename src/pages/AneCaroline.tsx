@@ -126,7 +126,7 @@ export default function AneCaroline() {
           <h2 className="font-editorial text-[28px] mb-5" style={{ color: c.textDark }}>
             Sobre <span className="italic" style={{ color: c.accent }}>mim</span>
           </h2>
-          <div className="space-y-3 text-[13px] leading-[1.7]" style={{ color: c.mutedLight }}>
+          <div className="space-y-3 text-[15px] leading-[1.7]" style={{ color: c.mutedLight }}>
             <p>Minha história com os cabelos começou cedo.</p>
             <p>
               Ainda criança, já cortava o cabelo das minhas irmãs, sem técnica, mas com muito
