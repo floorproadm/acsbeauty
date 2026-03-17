@@ -154,8 +154,52 @@ export default function AneCaroline() {
         </motion.div>
       </section>
 
-      {/* ============ MINHA MISSÃO (dark section) ============ */}
+      {/* ============ SERVIÇOS ============ */}
+      <section className="px-8 pb-12 max-w-lg mx-auto" style={{ backgroundColor: c.bg }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}>
+          
+          <h2
+            className="font-editorial text-[28px] text-center leading-snug mb-8"
+            style={{ color: c.textDark }}>
+            
+            Como posso<br />
+            <span className="italic" style={{ color: c.accent }}>te ajudar</span> na sua<br />
+            jornada:
+          </h2>
+
+          <div>
+            {services.map((service) =>
+            <div
+              key={service}
+              className="flex items-center gap-3 py-3.5"
+              style={{ borderBottom: `1px solid ${c.border}` }}>
+              
+                <ChevronRight className="w-3.5 h-3.5 shrink-0" style={{ color: c.accent }} />
+                <span className="text-[13px]" style={{ color: c.textDark }}>{service}</span>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ============ SECOND PHOTO ============ */}
       <section style={{ backgroundColor: c.dark }}>
+        <div className="relative w-full max-w-lg mx-auto">
+          <div className="relative aspect-[4/3] overflow-hidden">
+            <img
+              src={founderImg}
+              alt="Ane Caroline"
+              className="w-full h-full object-cover object-top"
+              loading="lazy" />
+            
+          </div>
+        </div>
+
+        {/* ============ MINHA MISSÃO ============ */}
         <div className="px-8 py-12 max-w-lg mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -185,89 +229,28 @@ export default function AneCaroline() {
             </div>
           </motion.div>
         </div>
+
       </section>
 
-      {/* ============ SERVIÇOS + CTA ============ */}
+      {/* ============ CTA BUTTONS ============ */}
       <section className="px-8 py-12 max-w-lg mx-auto" style={{ backgroundColor: c.bg }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}>
+          transition={{ duration: 0.6 }}
+          className="space-y-3">
           
-          <h2
-            className="font-editorial text-[28px] text-center leading-snug mb-8"
-            style={{ color: c.textDark }}>
-            
-            Como posso<br />
-            <span className="italic" style={{ color: c.accent }}>te ajudar</span> na sua<br />
-            jornada:
-          </h2>
-
-          <div className="mb-10">
-            {services.map((service) =>
-            <div
-              key={service}
-              className="flex items-center gap-3 py-3.5"
-              style={{ borderBottom: `1px solid ${c.border}` }}>
-              
-                <ChevronRight className="w-3.5 h-3.5 shrink-0" style={{ color: c.accent }} />
-                <span className="text-[13px]" style={{ color: c.textDark }}>{service}</span>
-              </div>
-            )}
-          </div>
-
           <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="block">
             <button
               className="w-full py-3.5 rounded-full text-[13px] font-medium tracking-wide uppercase transition-opacity hover:opacity-90"
               style={{ backgroundColor: c.dark, color: c.cream }}>
+              
               Entrar em contato
             </button>
           </a>
-        </motion.div>
-      </section>
 
-      {/* ============ SECOND PHOTO ============ */}
-      <section style={{ backgroundColor: c.dark }}>
-        <div className="relative w-full max-w-lg mx-auto">
-          <div className="relative aspect-[4/3] overflow-hidden">
-            <img
-              src={founderImg}
-              alt="Ane Caroline"
-              className="w-full h-full object-cover object-top"
-              loading="lazy" />
-          </div>
-        </div>
-
-        {/* ============ DÚVIDAS COMUNS (FAQ) ============ */}
-        <div className="px-8 py-12 max-w-lg mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}>
-            
-            <h2 className="font-editorial text-[28px] mb-6" style={{ color: c.cream }}>
-              Dúvidas <span className="italic" style={{ color: c.accent }}>comuns</span>
-            </h2>
-            <div>
-              {faqs.map((faq) =>
-                <FAQItem key={faq.q} q={faq.q} a={faq.a} />
-              )}
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ============ FINAL CTA ============ */}
-      <section className="px-8 py-12 max-w-lg mx-auto" style={{ backgroundColor: c.bg }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}>
-          
-          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="block">
+          <Link to="/book" className="block">
             <button
               className="w-full py-3.5 rounded-full text-[13px] font-medium tracking-wide uppercase transition-opacity hover:opacity-80"
               style={{
@@ -275,9 +258,10 @@ export default function AneCaroline() {
                 color: c.textDark,
                 backgroundColor: "transparent"
               }}>
+              
               Entrar em contato
             </button>
-          </a>
+          </Link>
         </motion.div>
       </section>
 
@@ -290,6 +274,7 @@ export default function AneCaroline() {
             rel="noopener noreferrer"
             className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
             style={{ border: `1px solid ${c.border}` }}>
+            
             <Instagram className="w-4 h-4" style={{ color: c.textDark }} />
           </a>
           <a
@@ -298,6 +283,7 @@ export default function AneCaroline() {
             rel="noopener noreferrer"
             className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
             style={{ border: `1px solid ${c.border}` }}>
+            
             <MessageCircle className="w-4 h-4" style={{ color: c.textDark }} />
           </a>
         </div>
