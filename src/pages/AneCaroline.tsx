@@ -77,7 +77,7 @@ export default function AneCaroline() {
           transition={{ duration: 0.8 }}
           className="relative w-full max-w-lg mx-auto">
           
-          <div className="relative aspect-[3/4.5] overflow-hidden">
+          <div className="relative aspect-[3/4] overflow-hidden">
             <img
               src={aneHeroImg}
               alt="Ane Caroline - Hair Stylist"
