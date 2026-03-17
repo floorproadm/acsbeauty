@@ -70,7 +70,7 @@ const allTabs: { id: AdminTab; label: string; icon: React.ElementType; roles: Ap
   { id: "tasks", label: "Tarefas", icon: ClipboardList, roles: ["admin_owner", "staff"] },
   { id: "services", label: "Serviços", icon: Sparkles, roles: ["admin_owner"] },
   { id: "skus", label: "Opções", icon: Layers, roles: ["admin_owner"] },
-  { id: "quizzes", label: "Quizzes", icon: HelpCircle, roles: ["admin_owner"] },
+  // { id: "quizzes", label: "Quizzes", icon: HelpCircle, roles: ["admin_owner"] },
   { id: "gallery", label: "Galeria", icon: ImageIcon, roles: ["admin_owner"] },
   { id: "gift-cards", label: "Gift Cards", icon: Gift, roles: ["admin_owner"] },
   { id: "team", label: "Equipe", icon: UsersRound, roles: ["admin_owner"] },
