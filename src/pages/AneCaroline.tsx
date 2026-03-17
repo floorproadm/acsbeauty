@@ -230,24 +230,6 @@ export default function AneCaroline() {
           </motion.div>
         </div>
 
-        {/* ============ FAQ ============ */}
-        <div className="px-8 pb-12 max-w-lg mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="font-editorial text-[28px] mb-6" style={{ color: c.cream }}>
-              Dúvidas <span className="italic" style={{ color: c.accent }}>comuns</span>
-            </h2>
-            <div>
-              {faqs.map((faq) => (
-                <FAQItem key={faq.q} q={faq.q} a={faq.a} />
-              ))}
-            </div>
-          </motion.div>
-        </div>
       </section>
 
       {/* ============ CTA BUTTONS ============ */}
