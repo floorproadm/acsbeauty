@@ -2,11 +2,11 @@ import { motion } from "framer-motion";
 import { ChevronRight, Instagram, MessageCircle, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import aneHeroImg from "@/assets/ane-hero.jpg";
-import founderImg from "@/assets/founder.jpg";
 import { useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageToggle } from "@/components/LanguageToggle";
 
 const WHATSAPP_NUMBER = "17329153430";
-const INSTAGRAM = "anecaroline.hair";
 
 // Exact Canva reference palette
 const c = {
@@ -23,22 +23,7 @@ const c = {
 
 const services = ["Highlights", "Hair Extensions", "Brazilian Keratin"];
 
-const faqs = [
-{
-  q: "Como funciona o agendamento?",
-  a: "Você pode agendar diretamente pelo site ou pelo WhatsApp. Respondemos em até 2 horas."
-},
-{
-  q: "Qual o valor dos serviços?",
-  a: "Os valores variam de acordo com o comprimento do cabelo e a técnica escolhida. Entre em contato para um orçamento personalizado."
-},
-{
-  q: "Preciso levar algo no dia?",
-  a: "Não precisa levar nada! Apenas venha com o cabelo lavado e sem produtos. O restante fica por nossa conta."
-}];
-
-
-function FAQItem({ q, a }: {q: string;a: string;}) {
+function FAQItem({ q, a }: {q: string; a: string;}) {
   const [open, setOpen] = useState(false);
   return (
     <button
@@ -61,14 +46,31 @@ function FAQItem({ q, a }: {q: string;a: string;}) {
         </p>
       }
     </button>);
-
 }
 
 export default function AneCaroline() {
-  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=Oi%20Ane!%20Vi%20seu%20perfil%20e%20gostaria%20de%20agendar.`;
+  const { t, language } = useLanguage();
+
+  const whatsappGeneral = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t("ane.wa.general_msg"))}`;
+
+  const faqs = [
+    { q: t("ane.faq.q1"), a: t("ane.faq.a1") },
+    { q: t("ane.faq.q2"), a: t("ane.faq.a2") },
+    { q: t("ane.faq.q3"), a: t("ane.faq.a3") },
+  ];
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: c.bg }}>
+      {/* ============ LANGUAGE TOGGLE ============ */}
+      <div className="absolute top-4 right-4 z-10">
+        <div
+          className="rounded-full px-3 py-1.5 backdrop-blur-sm"
+          style={{ backgroundColor: "rgba(61,61,56,0.5)" }}
+        >
+          <LanguageToggle />
+        </div>
+      </div>
+
       {/* ============ HERO ============ */}
       <section className="relative" style={{ backgroundColor: c.bg }}>
         <motion.div
@@ -101,7 +103,7 @@ export default function AneCaroline() {
               className="font-editorial italic text-[42px] leading-none"
               style={{ color: '#ffffff' }}>
               
-              Ane Caroline
+              {t("ane.hero.title")}
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 8 }}
@@ -110,7 +112,7 @@ export default function AneCaroline() {
               className="text-xs tracking-[0.25em] uppercase mt-2"
               style={{ color: '#d5cec5' }}>
               
-              Hair Stylist
+              {t("ane.hero.subtitle")}
             </motion.p>
           </div>
         </motion.div>
@@ -125,23 +127,14 @@ export default function AneCaroline() {
           transition={{ duration: 0.6 }}>
           
           <h2 className="font-editorial text-[31px] mb-5" style={{ color: c.textDark }}>
-            Sobre <span className="italic" style={{ color: c.accent }}>mim</span>
+            {t("ane.about.title")} <span className="italic" style={{ color: c.accent }}>{t("ane.about.title_highlight")}</span>
           </h2>
           <div className="space-y-3 text-[15px] leading-[1.7]" style={{ color: c.mutedLight }}>
-            <p>Minha história com os cabelos começou cedo.</p>
-            <p>
-              Ainda criança, já cortava o cabelo das minhas irmãs, sem técnica, mas com muito
-              cuidado.
-            </p>
-            <p>Com o tempo, esse gesto se transformou em profissão.</p>
-            <p>
-              Desde 2016 venho construindo minha trajetória na área, formando uma clientela fiel e
-              aprimorando constantemente minha técnica.
-            </p>
-            <p>
-              Hoje, na ACS Beauty sigo fazendo o que sempre me guiou: cuidar de pessoas através do
-              meu trabalho.
-            </p>
+            <p>{t("ane.about.p1")}</p>
+            <p>{t("ane.about.p2")}</p>
+            <p>{t("ane.about.p3")}</p>
+            <p>{t("ane.about.p4")}</p>
+            <p>{t("ane.about.p5")}</p>
           </div>
         </motion.div>
       </section>
@@ -156,22 +149,13 @@ export default function AneCaroline() {
             transition={{ duration: 0.6 }}>
             
             <h2 className="font-editorial text-[31px] mb-5" style={{ color: c.cream }}>
-              Minha <span className="italic" style={{ color: c.accent }}>missão</span>
+              {t("ane.mission.title")} <span className="italic" style={{ color: c.accent }}>{t("ane.mission.title_highlight")}</span>
             </h2>
             <div className="space-y-3 text-[15px] leading-[1.7]" style={{ color: c.mutedDark }}>
-              <p>
-                Minha missão é cuidar de cada pessoa que passa pela minha cadeira com atenção,
-                sensibilidade e excelência.
-              </p>
-              <p>
-                Acredito que o cabelo vai muito além da estética. Ele expressa identidade, autoestima
-                e confiança.
-              </p>
-              <p>Por isso, meu compromisso é oferecer mais do que um serviço.</p>
-              <p>
-                Quero proporcionar uma experiência onde cada cliente se sinta valorizada, segura e
-                ainda mais confiante com quem é.
-              </p>
+              <p>{t("ane.mission.p1")}</p>
+              <p>{t("ane.mission.p2")}</p>
+              <p>{t("ane.mission.p3")}</p>
+              <p>{t("ane.mission.p4")}</p>
             </div>
           </motion.div>
         </div>
@@ -189,19 +173,19 @@ export default function AneCaroline() {
             className="font-editorial text-[31px] text-center leading-snug mb-8"
             style={{ color: c.textDark }}>
             
-            Como posso
+            {t("ane.services.title_1")}
             <br />
             <span className="italic" style={{ color: c.accent }}>
-              te ajudar
+              {t("ane.services.title_2")}
             </span>{" "}
-            na sua
+            {t("ane.services.title_3")}
             <br />
-            jornada:
+            {t("ane.services.title_4")}
           </h2>
 
           <div className="mb-4">
             {services.map((service) => {
-              const msg = encodeURIComponent(`Olá Ane! Vi seu perfil e tenho interesse em ${service}. Gostaria de saber mais e agendar!`);
+              const msg = encodeURIComponent(t("ane.wa.service_msg", { service }));
               const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
               return (
                 <a
@@ -225,15 +209,15 @@ export default function AneCaroline() {
             to="/services"
             className="block text-center text-[13px] mb-6 transition-opacity hover:opacity-70"
             style={{ color: c.accent }}>
-            Ver todos os serviços →
+            {t("ane.services.view_all")}
           </Link>
 
-          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="block">
+          <a href={whatsappGeneral} target="_blank" rel="noopener noreferrer" className="block">
             <button
               className="w-full py-3.5 rounded-full text-[13px] font-medium tracking-wide uppercase transition-opacity hover:opacity-90"
               style={{ backgroundColor: c.dark, color: c.cream }}>
               
-              Entrar em contato
+              {t("ane.cta.contact")}
             </button>
           </a>
         </motion.div>
@@ -242,39 +226,8 @@ export default function AneCaroline() {
       {/* ============ SECOND PHOTO (dark) ============ */}
       <section style={{ backgroundColor: c.dark }}>
         <div className="relative w-full max-w-lg mx-auto">
-          
-
-
-
-
-
-
-          
         </div>
       </section>
-
-      {/* ============ FINAL CTA ============ */}
-      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
 
       {/* ============ SOCIAL ICONS ============ */}
       <section className="pb-4 max-w-lg mx-auto" style={{ backgroundColor: c.bg }}>
@@ -289,7 +242,7 @@ export default function AneCaroline() {
             <Instagram className="w-4 h-4" style={{ color: c.textDark }} />
           </a>
           <a
-            href={whatsappUrl}
+            href={whatsappGeneral}
             target="_blank"
             rel="noopener noreferrer"
             className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
@@ -303,9 +256,8 @@ export default function AneCaroline() {
       {/* ============ FOOTER ============ */}
       <section className="pb-8 pt-4 max-w-lg mx-auto text-center" style={{ backgroundColor: c.bg }}>
         <p className="text-[11px]" style={{ color: c.mutedLight }}>
-          © {new Date().getFullYear()} Ane Caroline | Todos os direitos reservados
+          © {new Date().getFullYear()} Ane Caroline | {t("ane.footer.rights")}
         </p>
       </section>
     </div>);
-
 }
