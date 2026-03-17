@@ -228,11 +228,11 @@ export default function AneCaroline() {
       <section style={{ backgroundColor: c.dark }}>
         <div className="relative w-full max-w-lg mx-auto">
           <div className="relative aspect-[4/3] overflow-hidden">
-            <img
-              src={founderImg}
-              alt="Ane Caroline"
-              className="w-full h-full object-cover object-top"
-              loading="lazy" />
+            
+
+
+
+            
             
           </div>
         </div>
