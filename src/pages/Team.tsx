@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Phone, Sparkles, MapPin, ChevronRight } from "lucide-react";
+import { Phone, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -31,8 +31,6 @@ function buildWhatsAppUrl(phone: string, name: string, isPt: boolean) {
   return `${WHATSAPP_BASE}${digits}?text=${encodeURIComponent(msg)}`;
 }
 
-const ADDRESS = "375 Chestnut St, 3rd Floor, Suite 3B, Newark, NJ";
-const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`;
 
 export default function Team() {
   const { language, t } = useLanguage();
@@ -153,29 +151,6 @@ export default function Team() {
                   );
                 })}
 
-                {/* Location Button */}
-                <motion.a
-                  href={MAPS_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: members.length * 0.08 }}
-                  className="flex items-center gap-4 p-4 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-card transition-all duration-300 group mt-1"
-                >
-                  <div className="shrink-0 w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center">
-                    <MapPin className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-foreground">
-                      {isPt ? "Nossa Localização" : "Our Location"}
-                    </h3>
-                    <p className="text-xs text-muted-foreground truncate">
-                      375 Chestnut St, 3rd Floor · Newark, NJ
-                    </p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
-                </motion.a>
               </div>
             )}
           </div>
