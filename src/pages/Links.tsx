@@ -77,7 +77,7 @@ const linkItems = (isPt: boolean) => [
   { label: "WhatsApp", to: whatsappUrl, external: true },
 ];
 
-function LinkButton({ label, to, external }: typeof linkItems[number]) {
+function LinkButton({ label, to, external }: { label: string; to: string; external: boolean }) {
   const inner = (
     <motion.div
       whileHover={{ scale: 1.02 }}
