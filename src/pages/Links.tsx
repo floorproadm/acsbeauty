@@ -150,10 +150,17 @@ function GPSChooser({ onClose }: { onClose: () => void }) {
 export default function Links() {
   useOGMeta();
   const [showGPS, setShowGPS] = useState(false);
+  const { language } = useLanguage();
+  const isPt = language === "pt";
+  const links = linkItems(isPt);
 
   return (
     <div className="min-h-screen flex justify-center bg-background">
-      <div className="w-full max-w-[480px] px-6">
+      <div className="w-full max-w-[480px] px-6 relative">
+        {/* LANGUAGE TOGGLE */}
+        <div className="absolute top-4 right-6">
+          <LanguageToggle />
+        </div>
         {/* HERO */}
         <div className="pt-12 pb-8 text-center">
           <motion.div
