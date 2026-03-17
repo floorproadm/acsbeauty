@@ -70,12 +70,11 @@ const MAPS_LINKS = {
   waze: `https://waze.com/ul?q=${encodeURIComponent(ADDRESS)}`,
 };
 
-const linkItems = [
-  { label: "Sobre Ane", to: "/ane-caroline", external: false },
-  { label: "Nossos Serviços", to: "/services", external: false },
+const linkItems = (isPt: boolean) => [
+  { label: isPt ? "Sobre a Ane" : "About Ane", to: "/ane-caroline", external: false },
+  { label: isPt ? "Nossos Serviços" : "Our Services", to: "/services", external: false },
   { label: "Gift Cards", to: "/gift-cards", external: false },
   { label: "WhatsApp", to: whatsappUrl, external: true },
-  { label: "Instagram", to: "https://www.instagram.com/acsbeautynj", external: true },
 ];
 
 function LinkButton({ label, to, external }: typeof linkItems[number]) {
