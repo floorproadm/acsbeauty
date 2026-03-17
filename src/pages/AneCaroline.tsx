@@ -5,7 +5,7 @@ import aneHeroImg from "@/assets/ane-hero.jpg";
 import founderImg from "@/assets/founder.jpg";
 import { useState } from "react";
 
-const WHATSAPP_NUMBER = "19734944854";
+const WHATSAPP_NUMBER = "17329153430";
 const INSTAGRAM = "anecaroline.hair";
 
 // Exact Canva reference palette
