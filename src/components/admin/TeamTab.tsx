@@ -283,11 +283,11 @@ export function TeamTab() {
             </div>
 
             <div>
-              <Label>Instagram</Label>
+              <Label>Telefone</Label>
               <Input
-                value={form.instagram || ""}
-                onChange={(e) => setForm({ ...form, instagram: e.target.value || null })}
-                placeholder="@usuario"
+                value={form.phone || ""}
+                onChange={(e) => setForm({ ...form, phone: e.target.value || null })}
+                placeholder="(xxx) xxx-xxxx"
               />
             </div>
 
