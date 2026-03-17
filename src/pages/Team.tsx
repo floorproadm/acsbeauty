@@ -58,19 +58,9 @@ export default function Team() {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-grow">
-        {/* Hero with team photo */}
-        <section className="relative pt-28 md:pt-36 pb-16 md:pb-24 overflow-hidden">
-          {/* Background photo with overlay */}
-          <div className="absolute inset-0">
-            <img
-              src={teamHeroImg}
-              alt="ACS Beauty Team"
-              className="w-full h-full object-cover object-top"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
-          </div>
-
-          <div className="container mx-auto px-4 md:px-6 relative z-10">
+        {/* Hero text + team photo */}
+        <section className="pt-28 md:pt-36 pb-8 md:pb-12">
+          <div className="container mx-auto px-4 md:px-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -81,20 +71,34 @@ export default function Team() {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="inline-flex items-center gap-2 bg-secondary/80 backdrop-blur-sm px-4 py-1.5 rounded-full mb-6"
+                className="inline-flex items-center gap-2 bg-secondary/80 px-4 py-1.5 rounded-full mb-6"
               >
                 <Sparkles className="w-3.5 h-3.5 text-primary" />
                 <span className="text-xs font-medium tracking-[0.15em] uppercase text-primary">
                   {t("team.badge")}
                 </span>
               </motion.div>
-              <h1 className="font-serif text-4xl md:text-6xl font-light tracking-tight mb-5 text-foreground drop-shadow-sm">
+              <h1 className="font-serif text-4xl md:text-6xl font-light tracking-tight mb-5 text-foreground">
                 {t("team.title_prefix")}{" "}
                 <span className="text-gradient-gold font-normal">{t("team.title_highlight")}</span>
               </h1>
-              <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto drop-shadow-sm">
+              <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto">
                 {t("team.description")}
               </p>
+            </motion.div>
+
+            {/* Team photo between text and cards */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="max-w-md mx-auto mt-8 rounded-2xl overflow-hidden"
+            >
+              <img
+                src={teamHeroImg}
+                alt="ACS Beauty Team"
+                className="w-full h-auto object-cover"
+              />
             </motion.div>
           </div>
         </section>
