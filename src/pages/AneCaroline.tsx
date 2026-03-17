@@ -224,7 +224,7 @@ export default function AneCaroline() {
         </motion.div>
       </section>
 
-      {/* ============ PHOTO + FAQ (dark) ============ */}
+      {/* ============ SECOND PHOTO (dark) ============ */}
       <section style={{ backgroundColor: c.dark }}>
         <div className="relative w-full max-w-lg mx-auto">
           <div className="relative aspect-[4/3] overflow-hidden">
@@ -235,27 +235,6 @@ export default function AneCaroline() {
               loading="lazy"
             />
           </div>
-        </div>
-
-        <div className="px-8 py-12 max-w-lg mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="font-editorial text-[28px] mb-6" style={{ color: c.cream }}>
-              Dúvidas{" "}
-              <span className="italic" style={{ color: c.accent }}>
-                comuns
-              </span>
-            </h2>
-            <div>
-              {faqs.map((faq) => (
-                <FAQItem key={faq.q} q={faq.q} a={faq.a} />
-              ))}
-            </div>
-          </motion.div>
         </div>
       </section>
 
