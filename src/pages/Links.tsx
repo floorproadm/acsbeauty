@@ -197,27 +197,26 @@ export default function Links() {
           ))}
         </div>
 
-        {/* LOCALIZAÇÃO + HORÁRIO */}
-        <div className="mt-6 flex flex-col items-center gap-3">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={() => setShowGPS(true)}
-          >
-            <MapPin className="w-3.5 h-3.5 text-primary" />
-            <span className="text-[12px] font-medium tracking-[0.03em] text-muted-foreground">
-              375 Chestnut St, 3rd Floor · Newark, NJ
-            </span>
-            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />
-          </motion.div>
+        {/* LOCALIZAÇÃO */}
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="mt-3 flex items-center h-[52px] px-5 rounded-xl cursor-pointer bg-card border border-border"
+          onClick={() => setShowGPS(true)}
+        >
+          <MapPin className="w-4 h-4 shrink-0 text-primary" />
+          <span className="flex-1 text-[12px] font-medium tracking-[0.03em] text-foreground ml-3 truncate">
+            375 Chestnut St, 3rd Floor · Newark, NJ
+          </span>
+          <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground" />
+        </motion.div>
 
-          <div className="flex items-center gap-2">
-            <Clock className="w-3.5 h-3.5 text-primary" />
-            <span className="text-[12px] font-medium tracking-[0.03em] text-muted-foreground">
-              Ter–Sáb · 9:00 AM – 6:00 PM
-            </span>
-          </div>
+        {/* HORÁRIO */}
+        <div className="mt-3 flex items-center justify-center gap-2">
+          <Clock className="w-3.5 h-3.5 text-primary" />
+          <span className="text-[12px] font-medium tracking-[0.03em] text-muted-foreground">
+            Ter–Sáb · 9:00 AM – 6:00 PM
+          </span>
         </div>
 
         {/* FOOTER */}
