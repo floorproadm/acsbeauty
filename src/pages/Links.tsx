@@ -113,6 +113,8 @@ function LinkButton({ label, icon: Icon, to, external }: typeof linkItems[number
 }
 
 export default function Links() {
+  useOGMeta();
+
   return (
     <div className="min-h-screen flex justify-center" style={{ backgroundColor: c.bg }}>
       <div className="w-full max-w-[480px] px-6">
