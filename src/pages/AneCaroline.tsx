@@ -124,7 +124,7 @@ export default function AneCaroline() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}>
           
-          <h2 className="font-editorial text-[30px] mb-5" style={{ color: c.textDark }}>
+          <h2 className="font-editorial text-[31px] mb-5" style={{ color: c.textDark }}>
             Sobre <span className="italic" style={{ color: c.accent }}>mim</span>
           </h2>
           <div className="space-y-3 text-[15px] leading-[1.7]" style={{ color: c.mutedLight }}>
@@ -155,7 +155,7 @@ export default function AneCaroline() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}>
             
-            <h2 className="font-editorial text-[28px] mb-5" style={{ color: c.cream }}>
+            <h2 className="font-editorial text-[31px] mb-5" style={{ color: c.cream }}>
               Minha <span className="italic" style={{ color: c.accent }}>missão</span>
             </h2>
             <div className="space-y-3 text-[15px] leading-[1.7]" style={{ color: c.mutedDark }}>
@@ -186,7 +186,7 @@ export default function AneCaroline() {
           transition={{ duration: 0.6 }}>
           
           <h2
-            className="font-editorial text-[28px] text-center leading-snug mb-8"
+            className="font-editorial text-[31px] text-center leading-snug mb-8"
             style={{ color: c.textDark }}>
             
             Como posso
