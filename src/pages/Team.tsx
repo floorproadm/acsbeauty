@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Instagram, Sparkles } from "lucide-react";
+import { Phone, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -15,6 +15,7 @@ interface TeamMember {
   specialties: string[];
   image_url: string | null;
   instagram: string | null;
+  phone: string | null;
   badge_label: string | null;
   badge_value: string | null;
   sort_order: number;
@@ -188,20 +189,18 @@ export default function Team() {
                             </div>
                           )}
 
-                          {member.instagram && (
+                          {member.phone && (
                             <motion.a
-                              href={`https://instagram.com/${member.instagram.replace("@", "")}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                              href={`tel:${member.phone}`}
                               initial={{ opacity: 0 }}
                               whileInView={{ opacity: 1 }}
                               viewport={{ once: true }}
                               transition={{ duration: 0.4, delay: 0.6 }}
                               className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors group/link"
                             >
-                              <Instagram className="w-4 h-4" />
+                              <Phone className="w-4 h-4" />
                               <span className="border-b border-transparent group-hover/link:border-primary/40 transition-colors">
-                                {member.instagram}
+                                {member.phone}
                               </span>
                             </motion.a>
                           )}
