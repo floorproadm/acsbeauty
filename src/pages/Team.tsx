@@ -104,8 +104,14 @@ export default function Team() {
           </motion.div>
         </section>
 
+        {/* Welcome text */}
+        <section className="py-6 text-center">
+          <p className="text-base font-medium text-foreground">{isPt ? "Bem-vinda!" : "Welcome!"}</p>
+          <p className="text-sm text-muted-foreground mt-1">{isPt ? "Toque nos ícones para interagir." : "Tap the icons to interact."}</p>
+        </section>
+
         {/* Team Members — Compact WhatsApp Cards (no avatars) */}
-        <section className="py-10 md:py-16">
+        <section className="pb-10 md:pb-16">
           <div className="container mx-auto px-4 md:px-6 max-w-xl">
             {isLoading ? (
               <div className="text-center text-muted-foreground">{t("team.loading")}</div>
