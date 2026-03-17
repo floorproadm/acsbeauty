@@ -227,14 +227,14 @@ export default function AneCaroline() {
       {/* ============ SECOND PHOTO (dark) ============ */}
       <section style={{ backgroundColor: c.dark }}>
         <div className="relative w-full max-w-lg mx-auto">
-          <div className="relative aspect-[4/3] overflow-hidden">
-            
+          
 
 
 
-            
-            
-          </div>
+
+
+
+          
         </div>
       </section>
 
