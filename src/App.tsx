@@ -22,7 +22,7 @@ import Shop from "./pages/Shop";
 import GiftCards from "./pages/GiftCards";
 import AneCaroline from "./pages/AneCaroline";
 import NotFound from "./pages/NotFound";
-import { WhatsAppButton } from "./components/WhatsAppButton";
+
 
 const queryClient = new QueryClient();
 
