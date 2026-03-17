@@ -206,7 +206,7 @@ export default function AneCaroline() {
               style={{ borderBottom: `1px solid ${c.border}` }}>
               
                 <ChevronRight className="w-3.5 h-3.5 shrink-0" style={{ color: c.accent }} />
-                <span className="text-[13px]" style={{ color: c.textDark }}>
+                <span className="text-[16px]" style={{ color: c.textDark }}>
                   {service}
                 </span>
               </div>
