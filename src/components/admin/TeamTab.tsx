@@ -26,6 +26,7 @@ interface TeamMember {
   specialties: string[];
   image_url: string | null;
   instagram: string | null;
+  phone: string | null;
   badge_label: string | null;
   badge_value: string | null;
   sort_order: number;
@@ -39,6 +40,7 @@ const emptyMember: Omit<TeamMember, "id"> = {
   specialties: [],
   image_url: null,
   instagram: null,
+  phone: null,
   badge_label: null,
   badge_value: null,
   sort_order: 0,
