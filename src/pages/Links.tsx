@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, ChevronRight, MapPin, Clock, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import acsLogo from "@/assets/acs-logo.png";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageToggle } from "@/components/LanguageToggle";
 
 function useOGMeta() {
   useEffect(() => {
@@ -68,15 +70,14 @@ const MAPS_LINKS = {
   waze: `https://waze.com/ul?q=${encodeURIComponent(ADDRESS)}`,
 };
 
-const linkItems = [
-  { label: "Sobre Ane", to: "/ane-caroline", external: false },
-  { label: "Nossos Serviços", to: "/services", external: false },
+const linkItems = (isPt: boolean) => [
+  { label: isPt ? "Sobre a Ane" : "About Ane", to: "/ane-caroline", external: false },
+  { label: isPt ? "Nossos Serviços" : "Our Services", to: "/services", external: false },
   { label: "Gift Cards", to: "/gift-cards", external: false },
   { label: "WhatsApp", to: whatsappUrl, external: true },
-  { label: "Instagram", to: "https://www.instagram.com/acsbeautynj", external: true },
 ];
 
-function LinkButton({ label, to, external }: typeof linkItems[number]) {
+function LinkButton({ label, to, external }: { label: string; to: string; external: boolean }) {
   const inner = (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -149,10 +150,17 @@ function GPSChooser({ onClose }: { onClose: () => void }) {
 export default function Links() {
   useOGMeta();
   const [showGPS, setShowGPS] = useState(false);
+  const { language } = useLanguage();
+  const isPt = language === "pt";
+  const links = linkItems(isPt);
 
   return (
     <div className="min-h-screen flex justify-center bg-background">
-      <div className="w-full max-w-[480px] px-6">
+      <div className="w-full max-w-[480px] px-6 relative">
+        {/* LANGUAGE TOGGLE */}
+        <div className="absolute top-4 right-6">
+          <LanguageToggle />
+        </div>
         {/* HERO */}
         <div className="pt-12 pb-8 text-center">
           <motion.div
@@ -184,7 +192,7 @@ export default function Links() {
           >
             <Calendar className="w-4 h-4 shrink-0 text-primary-foreground/70" />
             <span className="flex-1 text-center text-[13px] font-medium uppercase tracking-[0.15em] text-primary-foreground">
-              Agendar agora
+              {isPt ? "Agendar agora" : "Book now"}
             </span>
             <ChevronRight className="w-4 h-4 shrink-0 text-primary-foreground/70" />
           </motion.div>
@@ -192,7 +200,7 @@ export default function Links() {
 
         {/* LISTA DE LINKS */}
         <div className="flex flex-col gap-2">
-          {linkItems.map((item) => (
+          {links.map((item) => (
             <LinkButton key={item.label} {...item} />
           ))}
         </div>
@@ -215,7 +223,7 @@ export default function Links() {
         <div className="mt-3 flex items-center justify-center gap-2">
           <Clock className="w-3.5 h-3.5 text-primary" />
           <span className="text-[12px] font-medium tracking-[0.03em] text-muted-foreground">
-            Ter–Sáb · 9:00 AM – 6:00 PM
+            {isPt ? "Ter–Sáb · 9:00 AM – 6:00 PM" : "Tue–Sat · 9:00 AM – 6:00 PM"}
           </span>
         </div>
 
