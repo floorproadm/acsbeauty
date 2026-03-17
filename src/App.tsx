@@ -21,6 +21,7 @@ import LocationNewark from "./pages/LocationNewark";
 import Shop from "./pages/Shop";
 import GiftCards from "./pages/GiftCards";
 import AneCaroline from "./pages/AneCaroline";
+import Links from "./pages/Links";
 import NotFound from "./pages/NotFound";
 
 
@@ -52,6 +53,7 @@ const App = () => (
           <Route path="/gift-cards" element={<GiftCards />} />
           <Route path="/quiz/:slug" element={<Quiz />} />
           <Route path="/ane-caroline" element={<AneCaroline />} />
+          <Route path="/links" element={<Links />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
