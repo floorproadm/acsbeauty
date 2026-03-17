@@ -223,7 +223,7 @@ export default function Links() {
         <div className="mt-3 flex items-center justify-center gap-2">
           <Clock className="w-3.5 h-3.5 text-primary" />
           <span className="text-[12px] font-medium tracking-[0.03em] text-muted-foreground">
-            Ter–Sáb · 9:00 AM – 6:00 PM
+            {isPt ? "Ter–Sáb · 9:00 AM – 6:00 PM" : "Tue–Sat · 9:00 AM – 6:00 PM"}
           </span>
         </div>
 
