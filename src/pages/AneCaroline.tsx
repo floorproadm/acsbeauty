@@ -249,19 +249,6 @@ export default function AneCaroline() {
               Entrar em contato
             </button>
           </a>
-
-          <Link to="/book" className="block">
-            <button
-              className="w-full py-3.5 rounded-full text-[13px] font-medium tracking-wide uppercase transition-opacity hover:opacity-80"
-              style={{
-                border: `1.5px solid ${c.dark}`,
-                color: c.textDark,
-                backgroundColor: "transparent",
-              }}
-            >
-              Entrar em contato
-            </button>
-          </Link>
         </motion.div>
       </section>
 
