@@ -5,7 +5,7 @@ import { Phone, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import founderImg from "@/assets/founder.jpg";
+import teamHeroImg from "@/assets/team-hero.jpg";
 
 interface TeamMember {
   id: string;
@@ -31,6 +31,11 @@ function buildWhatsAppUrl(phone: string, name: string, isPt: boolean) {
   return `${WHATSAPP_BASE}${digits}?text=${encodeURIComponent(msg)}`;
 }
 
+/** Display "Ane" instead of "Ane Caroline" */
+function displayName(name: string) {
+  if (name.toLowerCase().startsWith("ane caroline")) return "Ane";
+  return name;
+}
 
 export default function Team() {
   const { language, t } = useLanguage();
@@ -49,21 +54,21 @@ export default function Team() {
     },
   });
 
-  const getImage = (member: TeamMember) => {
-    if (member.image_url) return member.image_url;
-    if (member.name.toLowerCase().includes("ane")) return founderImg;
-    return null;
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-grow">
-        {/* Hero */}
-        <section className="relative pt-28 md:pt-36 pb-12 md:pb-20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-hero opacity-60" />
-          <div className="absolute top-20 right-0 w-72 h-72 rounded-full bg-gold/5 blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-nude-dark/10 blur-3xl" />
+        {/* Hero with team photo */}
+        <section className="relative pt-28 md:pt-36 pb-16 md:pb-24 overflow-hidden">
+          {/* Background photo with overlay */}
+          <div className="absolute inset-0">
+            <img
+              src={teamHeroImg}
+              alt="ACS Beauty Team"
+              className="w-full h-full object-cover object-top"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
+          </div>
 
           <div className="container mx-auto px-4 md:px-6 relative z-10">
             <motion.div
@@ -76,25 +81,25 @@ export default function Team() {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="inline-flex items-center gap-2 bg-secondary px-4 py-1.5 rounded-full mb-6"
+                className="inline-flex items-center gap-2 bg-secondary/80 backdrop-blur-sm px-4 py-1.5 rounded-full mb-6"
               >
                 <Sparkles className="w-3.5 h-3.5 text-primary" />
                 <span className="text-xs font-medium tracking-[0.15em] uppercase text-primary">
                   {t("team.badge")}
                 </span>
               </motion.div>
-              <h1 className="font-serif text-4xl md:text-6xl font-light tracking-tight mb-5 text-foreground">
+              <h1 className="font-serif text-4xl md:text-6xl font-light tracking-tight mb-5 text-foreground drop-shadow-sm">
                 {t("team.title_prefix")}{" "}
                 <span className="text-gradient-gold font-normal">{t("team.title_highlight")}</span>
               </h1>
-              <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto">
+              <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto drop-shadow-sm">
                 {t("team.description")}
               </p>
             </motion.div>
           </div>
         </section>
 
-        {/* Team Members — Compact WhatsApp Cards */}
+        {/* Team Members — Compact WhatsApp Cards (no avatars) */}
         <section className="py-10 md:py-16">
           <div className="container mx-auto px-4 md:px-6 max-w-xl">
             {isLoading ? (
@@ -102,9 +107,9 @@ export default function Team() {
             ) : (
               <div className="flex flex-col gap-3">
                 {members.map((member, idx) => {
-                  const img = getImage(member);
+                  const name = displayName(member.name);
                   const whatsappUrl = member.phone
-                    ? buildWhatsAppUrl(member.phone, member.name.split(" ")[0], isPt)
+                    ? buildWhatsAppUrl(member.phone, name, isPt)
                     : null;
 
                   return (
@@ -121,10 +126,9 @@ export default function Team() {
                           rel="noopener noreferrer"
                           className="flex items-center gap-4 p-4 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-card transition-all duration-300 group"
                         >
-                          <TeamAvatar img={img} name={member.name} />
                           <div className="flex-1 min-w-0">
                             <h3 className="text-sm font-semibold text-foreground truncate">
-                              {member.name}
+                              {name}
                             </h3>
                             <p className="text-xs text-muted-foreground truncate">
                               {member.role}
@@ -136,10 +140,9 @@ export default function Team() {
                         </a>
                       ) : (
                         <div className="flex items-center gap-4 p-4 rounded-2xl bg-card border border-border">
-                          <TeamAvatar img={img} name={member.name} />
                           <div className="flex-1 min-w-0">
                             <h3 className="text-sm font-semibold text-foreground truncate">
-                              {member.name}
+                              {name}
                             </h3>
                             <p className="text-xs text-muted-foreground truncate">
                               {member.role}
@@ -150,7 +153,6 @@ export default function Team() {
                     </motion.div>
                   );
                 })}
-
               </div>
             )}
           </div>
@@ -202,25 +204,6 @@ export default function Team() {
         </section>
       </main>
       <Footer />
-    </div>
-  );
-}
-
-function TeamAvatar({ img, name }: { img: string | null; name: string }) {
-  if (img) {
-    return (
-      <img
-        src={img}
-        alt={name}
-        className="w-11 h-11 rounded-full object-cover shrink-0 border-2 border-border"
-      />
-    );
-  }
-  return (
-    <div className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center shrink-0 border-2 border-border">
-      <span className="text-sm font-medium text-primary">
-        {name.charAt(0)}
-      </span>
     </div>
   );
 }
