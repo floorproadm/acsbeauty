@@ -200,7 +200,7 @@ export default function Links() {
 
         {/* LISTA DE LINKS */}
         <div className="flex flex-col gap-2">
-          {linkItems.map((item) => (
+          {links.map((item) => (
             <LinkButton key={item.label} {...item} />
           ))}
         </div>
