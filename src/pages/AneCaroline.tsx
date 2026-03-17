@@ -186,7 +186,7 @@ export default function AneCaroline() {
           transition={{ duration: 0.6 }}>
           
           <h2
-            className="font-editorial text-[28px] text-center leading-snug mb-8"
+            className="font-editorial text-[31px] text-center leading-snug mb-8"
             style={{ color: c.textDark }}>
             
             Como posso
