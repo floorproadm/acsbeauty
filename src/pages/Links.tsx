@@ -164,7 +164,7 @@ export default function Links() {
             <img
               src={acsLogo}
               alt="ACS Beauty"
-              className="w-[88px] h-[88px] rounded-full object-cover border-2 border-border"
+              className="w-[100px] h-auto object-contain"
             />
             <h1 className="font-editorial italic text-[28px] leading-tight mt-4 text-foreground">
               ACS Beauty
