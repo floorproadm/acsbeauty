@@ -664,7 +664,9 @@ export default function Book() {
       setStep("date");
       setSelectedDate(undefined);
     } else if (step === "date") {
-      if (pickedSkuId || activeServiceId) {
+      if (isPortalSource) {
+        navigate(-1);
+      } else if (pickedSkuId || activeServiceId) {
         setStep("sku");
       } else if (isCalendarFlow) {
         setStep("service");
@@ -672,9 +674,13 @@ export default function Book() {
         navigate(-1);
       }
     } else if (step === "sku") {
-      setPickedVariationId(null);
-      setPickedSkuId(null);
-      setStep("service");
+      if (isPortalSource) {
+        navigate(-1);
+      } else {
+        setPickedVariationId(null);
+        setPickedSkuId(null);
+        setStep("service");
+      }
     } else if (step === "service") {
       navigate(-1);
     } else {
