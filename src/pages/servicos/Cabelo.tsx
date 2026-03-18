@@ -29,13 +29,6 @@ export default function Cabelo() {
     t("servicos.cabelo.ideal_4"),
   ];
 
-  const faqs = [
-    { question: t("servicos.cabelo.faq_1_q"), answer: t("servicos.cabelo.faq_1_a") },
-    { question: t("servicos.cabelo.faq_2_q"), answer: t("servicos.cabelo.faq_2_a") },
-    { question: t("servicos.cabelo.faq_3_q"), answer: t("servicos.cabelo.faq_3_a") },
-    { question: t("servicos.cabelo.faq_4_q"), answer: t("servicos.cabelo.faq_4_a") },
-    { question: t("servicos.cabelo.faq_5_q"), answer: t("servicos.cabelo.faq_5_a") },
-  ];
 
   // Placeholder images for before/after gallery
   // Replace these with actual before/after images
