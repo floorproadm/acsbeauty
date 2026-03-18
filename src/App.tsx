@@ -24,6 +24,7 @@ import Shop from "./pages/Shop";
 import GiftCards from "./pages/GiftCards";
 import AneCaroline from "./pages/AneCaroline";
 import Links from "./pages/Links";
+import ClientPortal from "./pages/ClientPortal";
 import NotFound from "./pages/NotFound";
 
 
