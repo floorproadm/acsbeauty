@@ -708,10 +708,6 @@ export default function Book() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary text-accent text-sm font-medium mb-4">
-                <Calendar className="w-4 h-4" />
-                {t("booking.badge")}
-              </div>
               <h1 className="font-serif text-3xl font-bold mb-2">{t("booking.title")}</h1>
               <p className="text-muted-foreground">
                 {t("booking.for")}: <span className="font-medium text-foreground">{itemName}</span>
