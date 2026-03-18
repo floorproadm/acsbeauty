@@ -4,7 +4,7 @@ import { ArrowRight, ArrowLeft, Scissors, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { ServiceFAQ } from "@/components/services/ServiceFAQ";
+
 import { BeforeAfterGallery, BeforeAfterImage } from "@/components/services/BeforeAfterGallery";
 import { useLanguage } from "@/contexts/LanguageContext";
 import heroImage from "@/assets/hair-service.png";
@@ -29,13 +29,6 @@ export default function Cabelo() {
     t("servicos.cabelo.ideal_4"),
   ];
 
-  const faqs = [
-    { question: t("servicos.cabelo.faq_1_q"), answer: t("servicos.cabelo.faq_1_a") },
-    { question: t("servicos.cabelo.faq_2_q"), answer: t("servicos.cabelo.faq_2_a") },
-    { question: t("servicos.cabelo.faq_3_q"), answer: t("servicos.cabelo.faq_3_a") },
-    { question: t("servicos.cabelo.faq_4_q"), answer: t("servicos.cabelo.faq_4_a") },
-    { question: t("servicos.cabelo.faq_5_q"), answer: t("servicos.cabelo.faq_5_a") },
-  ];
 
   // Placeholder images for before/after gallery
   // Replace these with actual before/after images
@@ -214,8 +207,6 @@ export default function Cabelo() {
         {/* Before & After Gallery */}
         <BeforeAfterGallery images={galleryImages} />
 
-        {/* FAQ Section */}
-        <ServiceFAQ faqs={faqs} />
 
         {/* Final CTA */}
         <section className="py-16 md:py-20 bg-gradient-warm">
