@@ -36,6 +36,7 @@ interface ClientProfile {
   phone: string | null;
   birthday: string | null;
   email?: string | null;
+  avatar_url?: string | null;
 }
 
 interface Booking {
