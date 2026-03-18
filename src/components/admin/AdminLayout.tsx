@@ -248,7 +248,7 @@ export function AdminLayout({ children, activeTab, onTabChange, userRole }: Admi
       } = await supabase.auth.getSession();
 
       if (!session?.user) {
-        navigate("/auth");
+        navigate("/admin/auth");
         return;
       }
 
