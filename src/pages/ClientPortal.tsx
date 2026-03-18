@@ -1074,7 +1074,7 @@ export default function ClientPortal() {
             {tab === "book" && <BookingsTab bookings={bookings} isPt={isPt} />}
             {tab === "points" && <PointsTab points={points} transactions={transactions} isPt={isPt} />}
             {tab === "profile" && (
-              <ProfileTab profile={profile} isPt={isPt} onSignOut={handleSignOut} />
+              <ProfileTab profile={profile} isPt={isPt} onSignOut={handleSignOut} onProfileUpdate={(updated) => setProfile(prev => prev ? { ...prev, ...updated } : prev)} />
             )}
           </motion.div>
         </AnimatePresence>
