@@ -6,7 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import AdminAuth from "./pages/AdminAuth";
 import Admin from "./pages/Admin";
+import Onboarding from "./pages/Onboarding";
 import Services from "./pages/Services";
 import CategoryPage from "./pages/servicos/CategoryPage";
 import ServiceDetail from "./pages/servicos/ServiceDetail";
@@ -37,7 +39,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/admin/auth" element={<AdminAuth />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/services" element={<Services />} />
           <Route path="/servicos/:categoria/:slug/:locationSlug" element={<ServiceDetail />} />
           <Route path="/servicos/:categoria/:slug" element={<ServiceDetail />} />
