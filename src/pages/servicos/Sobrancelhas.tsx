@@ -102,7 +102,7 @@ export default function Sobrancelhas() {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-                <Link to="/book" className="w-full sm:w-auto">
+                <Link to="/portal" className="w-full sm:w-auto">
                   <Button variant="hero" size="lg" className="group w-full">
                     {t("global.book_now")}
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
