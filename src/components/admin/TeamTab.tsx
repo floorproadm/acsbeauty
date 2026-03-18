@@ -27,6 +27,7 @@ interface TeamMember {
   image_url: string | null;
   instagram: string | null;
   phone: string | null;
+  page_url: string | null;
   badge_label: string | null;
   badge_value: string | null;
   sort_order: number;
