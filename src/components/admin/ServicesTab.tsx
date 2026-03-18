@@ -61,7 +61,7 @@ const defaultFormData = {
   status: "entry" as ServiceStatus,
 };
 
-export function ServicesTab() {
+function ServicesListTab() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [editingService, setEditingService] = useState<Service | null>(null);
