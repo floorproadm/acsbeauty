@@ -148,7 +148,17 @@ function HomeTab({
           </div>
           <div>
             <h1 className="font-serif text-lg font-bold text-foreground leading-tight">
-              {isPt ? `Oi, ${firstName}!` : `Hi, ${firstName}!`}
+              {(() => {
+                const nyHour = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" })).getHours();
+                if (isPt) {
+                  if (nyHour >= 5 && nyHour < 12) return `Bom dia, ${firstName}!`;
+                  if (nyHour >= 12 && nyHour < 18) return `Boa tarde, ${firstName}!`;
+                  return `Boa noite, ${firstName}!`;
+                }
+                if (nyHour >= 5 && nyHour < 12) return `Good morning, ${firstName}!`;
+                if (nyHour >= 12 && nyHour < 18) return `Good afternoon, ${firstName}!`;
+                return `Good evening, ${firstName}!`;
+              })()}
             </h1>
             <p className="text-muted-foreground text-xs">
               {isPt ? "Como podemos cuidar de você hoje?" : "How can we take care of you today?"}
