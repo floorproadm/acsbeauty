@@ -19,6 +19,7 @@ interface TeamMember {
   badge_label: string | null;
   badge_value: string | null;
   sort_order: number;
+  page_url: string | null;
 }
 
 const WHATSAPP_BASE = "https://wa.me/";
