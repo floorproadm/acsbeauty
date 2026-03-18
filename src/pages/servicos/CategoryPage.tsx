@@ -5,7 +5,7 @@ import { ArrowRight, ArrowLeft, Check, Loader2, Scissors, Eye, Sparkles } from "
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { ServiceFAQ } from "@/components/services/ServiceFAQ";
+
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -99,34 +99,6 @@ export default function CategoryPage() {
     enabled: serviceIds.length > 0,
   });
 
-  // Fetch FAQs from service_faqs table for services in this category
-  const { data: faqs } = useQuery({
-    queryKey: ["category-faqs", serviceIds],
-    queryFn: async () => {
-      if (serviceIds.length === 0) return [];
-      const { data, error } = await supabase
-        .from("service_faqs")
-        .select("question, answer, sort_order")
-        .in("service_id", serviceIds)
-        .order("sort_order");
-      if (error) throw error;
-      return (data || []).map((f) => ({ question: f.question, answer: f.answer }));
-    },
-    enabled: serviceIds.length > 0,
-  });
-
-  // If category doesn't exist in config, redirect to 404
-  if (!config) {
-    return <Navigate to="/404" replace />;
-  }
-
-  // Fall back to hardcoded translation FAQs if no dynamic FAQs
-  const faqKeys = categorySlug === "cabelo" ? [1, 2, 3, 4, 5] : [1, 2, 3, 4];
-  const translationFaqs = faqKeys.map((i) => ({
-    question: t(`servicos.${categorySlug}.faq_${i}_q`),
-    answer: t(`servicos.${categorySlug}.faq_${i}_a`),
-  }));
-  const finalFaqs = faqs && faqs.length > 0 ? faqs : translationFaqs;
 
   const Icon = config.icon;
   const heroImage = config.fallbackImage;
@@ -212,8 +184,6 @@ export default function CategoryPage() {
           </div>
         </section>
 
-        {/* FAQ */}
-        <ServiceFAQ faqs={finalFaqs} />
 
         {/* CTA */}
         <section className="py-16 md:py-20 bg-gradient-warm">
