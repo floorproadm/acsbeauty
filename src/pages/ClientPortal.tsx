@@ -19,6 +19,7 @@ import {
   Bell,
   Gift,
   Scissors,
+  Camera,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -36,6 +37,7 @@ interface ClientProfile {
   phone: string | null;
   birthday: string | null;
   email?: string | null;
+  avatar_url?: string | null;
 }
 
 interface Booking {
@@ -475,15 +477,18 @@ function ProfileTab({
   profile,
   isPt,
   onSignOut,
+  onProfileUpdate,
 }: {
   profile: ClientProfile | null;
   isPt: boolean;
   onSignOut: () => void;
+  onProfileUpdate?: (updated: Partial<ClientProfile>) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(profile?.name ?? "");
   const [birthday, setBirthday] = useState(profile?.birthday ?? "");
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const { toast } = useToast();
 
   async function save() {
@@ -502,6 +507,56 @@ function ProfileTab({
     }
   }
 
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !profile) return;
+
+    // Validate file
+    if (!file.type.startsWith("image/")) {
+      toast({ title: isPt ? "Selecione uma imagem" : "Select an image", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: isPt ? "Imagem muito grande (máx 5MB)" : "Image too large (max 5MB)", variant: "destructive" });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const filePath = `${profile.id}/avatar.${ext}`;
+
+      // Upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from("client-avatars")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from("client-avatars")
+        .getPublicUrl(filePath);
+
+      const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
+      // Update clients table
+      const { error: updateError } = await supabase
+        .from("clients")
+        .update({ avatar_url: avatarUrl })
+        .eq("id", profile.id);
+
+      if (updateError) throw updateError;
+
+      onProfileUpdate?.({ avatar_url: avatarUrl });
+      toast({ title: isPt ? "Foto atualizada! 📸" : "Photo updated! 📸" });
+    } catch {
+      toast({ title: isPt ? "Erro ao enviar foto" : "Error uploading photo", variant: "destructive" });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }
+
   const initials = (profile?.name ?? "?")
     .split(" ")
     .map((w) => w[0])
@@ -513,8 +568,31 @@ function ProfileTab({
     <div className="space-y-5 pb-24">
       {/* Avatar + nome */}
       <div className="pt-2 text-center">
-        <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mx-auto mb-3 text-2xl font-semibold text-primary">
-          {initials}
+        <div className="relative w-20 h-20 mx-auto mb-3">
+          {profile?.avatar_url ? (
+            <img
+              src={profile.avatar_url}
+              alt={profile.name}
+              className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center text-2xl font-semibold text-primary">
+              {initials}
+            </div>
+          )}
+          <label className={cn(
+            "absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center cursor-pointer shadow-md hover:scale-110 transition-transform",
+            uploadingAvatar && "opacity-50 pointer-events-none"
+          )}>
+            <Camera className="w-3.5 h-3.5" />
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarUpload}
+              disabled={uploadingAvatar}
+            />
+          </label>
         </div>
         <h2 className="font-serif text-xl font-bold">{profile?.name}</h2>
         <p className="text-muted-foreground text-sm mt-0.5">{isPt ? "Meu Perfil" : "My Profile"}</p>
@@ -996,7 +1074,7 @@ export default function ClientPortal() {
             {tab === "book" && <BookingsTab bookings={bookings} isPt={isPt} />}
             {tab === "points" && <PointsTab points={points} transactions={transactions} isPt={isPt} />}
             {tab === "profile" && (
-              <ProfileTab profile={profile} isPt={isPt} onSignOut={handleSignOut} />
+              <ProfileTab profile={profile} isPt={isPt} onSignOut={handleSignOut} onProfileUpdate={(updated) => setProfile(prev => prev ? { ...prev, ...updated } : prev)} />
             )}
           </motion.div>
         </AnimatePresence>
