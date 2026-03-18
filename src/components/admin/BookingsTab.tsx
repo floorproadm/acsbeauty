@@ -308,8 +308,8 @@ export function BookingsTab() {
                         )}
                         {booking.status === "requested" && (
                           <>
-                            <Button size="sm" onClick={(e) => { e.stopPropagation(); updateStatus.mutate({ id: booking.id, status: "confirmed" }); }} className="gap-1 text-xs">
-                              <CheckCircle className="w-3 h-3" />Confirmar
+                            <Button size="sm" onClick={(e) => { e.stopPropagation(); approveBookingMutation.mutate(booking.id); }} className="gap-1 text-xs" disabled={approveBookingMutation.isPending}>
+                              {approveBookingMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}Confirmar
                             </Button>
                             <Button size="sm" variant="outline" className="text-destructive text-xs" onClick={(e) => { e.stopPropagation(); cancelBookingMutation.mutate(booking.id); }} disabled={cancelBookingMutation.isPending}>
                               {cancelBookingMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
