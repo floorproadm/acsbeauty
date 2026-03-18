@@ -459,3 +459,29 @@ function ServicesListTab() {
     </div>
   );
 }
+
+export function ServicesTab() {
+  return (
+    <div className="space-y-6">
+      <h1 className="font-serif text-2xl font-bold">Serviços</h1>
+      <Tabs defaultValue="services" className="w-full">
+        <TabsList className="w-full max-w-sm mx-auto grid grid-cols-2">
+          <TabsTrigger value="services" className="flex items-center gap-2">
+            <Wrench className="w-4 h-4" />
+            Serviços
+          </TabsTrigger>
+          <TabsTrigger value="options" className="flex items-center gap-2">
+            <Layers className="w-4 h-4" />
+            Opções
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="services">
+          <ServicesListTab />
+        </TabsContent>
+        <TabsContent value="options">
+          <SkusTab />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
