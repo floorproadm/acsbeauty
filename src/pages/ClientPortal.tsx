@@ -23,7 +23,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { LanguageToggle } from "@/components/LanguageToggle";
+import { cn } from "@/lib/utils";
 import acsLogo from "@/assets/acs-logo.png";
 import founderImg from "@/assets/founder.jpg";
 import teamHero from "@/assets/team-hero.jpg";
