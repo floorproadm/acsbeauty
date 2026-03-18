@@ -319,6 +319,44 @@ export type Database = {
         }
         Relationships: []
       }
+      client_points: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          redeemed_points: number
+          total_points: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          redeemed_points?: number
+          total_points?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          redeemed_points?: number
+          total_points?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_points_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           birthday: string | null
@@ -704,6 +742,51 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      point_transactions: {
+        Row: {
+          booking_id: string | null
+          client_id: string
+          created_at: string
+          description: string | null
+          id: string
+          points: number
+          type: string
+        }
+        Insert: {
+          booking_id?: string | null
+          client_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          points: number
+          type: string
+        }
+        Update: {
+          booking_id?: string | null
+          client_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          points?: number
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "point_transactions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "point_transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quiz_options: {
         Row: {

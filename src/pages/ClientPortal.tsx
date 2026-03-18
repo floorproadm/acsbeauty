@@ -571,7 +571,7 @@ export default function ClientPortal() {
         setBookings((bookingData as Booking[]) ?? []);
 
         // ACS Points
-        const { data: pointsData } = await supabase
+        const { data: pointsData } = await (supabase as any)
           .from("client_points")
           .select("total_points, redeemed_points")
           .eq("client_id", clientData.id)
@@ -581,7 +581,7 @@ export default function ClientPortal() {
         }
 
         // Transações de pontos
-        const { data: txData } = await supabase
+        const { data: txData } = await (supabase as any)
           .from("point_transactions")
           .select("*")
           .eq("client_id", clientData.id)
