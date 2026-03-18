@@ -36,8 +36,6 @@ export default function Admin() {
         return <CRMTab />;
       case "services":
         return <ServicesTab />;
-      case "skus":
-        return <SkusTab />;
       case "offers":
         return <OffersTab />;
       case "quizzes":
