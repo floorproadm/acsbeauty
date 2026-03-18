@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,31 +7,29 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/layout/Header";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 
 export default function AdminAuth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const [creatingAccount, setCreatingAccount] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     const checkAndRedirect = async (userId: string) => {
       const { data: isAdmin } = await supabase
-        .rpc('has_role', { _user_id: userId, _role: 'admin_owner' });
-      
+        .rpc("has_role", { _user_id: userId, _role: "admin_owner" });
+
       if (isAdmin) {
         navigate("/admin");
       } else {
-        // Cliente tentando acessar admin auth — manda para home
         navigate("/");
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       if (session?.user) {
         setTimeout(() => {
           checkAndRedirect(session.user.id);
@@ -53,34 +51,81 @@ export default function AdminAuth() {
     setLoading(true);
 
     try {
-      // Try login first
-      const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
-      
-      if (loginError) {
-        // If account doesn't exist, auto-create (only works if email is in allowed_emails via trigger)
-        if (loginError.message?.includes("Invalid login credentials")) {
-          const { error: signUpError } = await supabase.auth.signUp({ email, password });
-          if (signUpError) throw signUpError;
-          
-          // After signup with auto-confirm, sign in immediately
-          const { error: retryError } = await supabase.auth.signInWithPassword({ email, password });
-          if (retryError) throw retryError;
-          
-          toast({ title: "Conta criada!", description: "Bem-vindo(a) ao painel." });
-          return;
-        }
-        throw loginError;
-      }
-      
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+
       toast({ title: "Bem-vindo(a)!", description: "Login realizado com sucesso." });
     } catch (error: any) {
+      const message = String(error?.message || "").toLowerCase();
+      const isInvalidCredentials = message.includes("invalid login credentials");
+
       toast({
         title: "Erro",
-        description: error.message || "Credenciais inválidas.",
+        description: isInvalidCredentials
+          ? "Conta admin não encontrada ou senha incorreta. Se for primeiro acesso, use 'Criar conta admin'."
+          : (error?.message || "Não foi possível fazer login."),
         variant: "destructive",
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateAdminAccount = async () => {
+    if (!email || !password) {
+      toast({
+        title: "Dados obrigatórios",
+        description: "Preencha e-mail e senha para criar a conta admin.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCreatingAccount(true);
+
+    try {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
+      });
+
+      if (signUpError) {
+        const msg = String(signUpError.message || "").toLowerCase();
+
+        if (msg.includes("user already registered")) {
+          toast({
+            title: "Conta já existe",
+            description: "Esta conta admin já existe. Faça login com sua senha.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        throw signUpError;
+      }
+
+      const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (loginError) {
+        toast({
+          title: "Conta criada",
+          description: "Conta criada. Se necessário, confirme o e-mail e depois faça login.",
+        });
+        return;
+      }
+
+      toast({ title: "Conta criada!", description: "Acesso admin liberado com sucesso." });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao criar conta admin",
+        description: error?.message || "Não foi possível criar a conta.",
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingAccount(false);
     }
   };
 
@@ -123,19 +168,34 @@ export default function AdminAuth() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Entrar
-            </Button>
+            <div className="space-y-2">
+              <Button type="submit" className="w-full" disabled={loading || creatingAccount}>
+                {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Entrar
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleCreateAdminAccount}
+                disabled={loading || creatingAccount}
+              >
+                {creatingAccount && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Criar conta admin (primeiro acesso)
+              </Button>
+            </div>
           </form>
         </div>
       </div>
     </div>
   );
 }
+
