@@ -48,14 +48,23 @@ export default function AdminAuth() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  const [isSignUp, setIsSignUp] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      toast({ title: "Bem-vindo(a)!", description: "Login realizado com sucesso." });
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        toast({ title: "Conta criada!", description: "Verifique seu e-mail para confirmar ou faça login." });
+        setIsSignUp(false);
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        toast({ title: "Bem-vindo(a)!", description: "Login realizado com sucesso." });
+      }
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -114,9 +123,19 @@ export default function AdminAuth() {
 
             <Button type="submit" className="w-full" disabled={loading}>
               {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Entrar
+              {isSignUp ? "Criar conta" : "Entrar"}
             </Button>
           </form>
+
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-sm text-muted-foreground hover:text-foreground underline"
+            >
+              {isSignUp ? "Já tenho conta — Entrar" : "Primeiro acesso? Criar conta"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
