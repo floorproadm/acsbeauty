@@ -1,98 +1,21 @@
 
-# ACS v2.0 — Progresso de Implementação
 
-## ✅ Fase 1: Rotas Dinâmicas de Serviços (CONCLUÍDA)
+## Plan: Separate Admin Auth from Client Auth
 
-### Migration executada:
-- `services.slug` (text UNIQUE NOT NULL) — populado automaticamente
-- `services.category_slug` (text, indexed)
-- `service_skus.slug` (text, indexed)
-- `services.hero_image_url` (text)
-- `services.faq` (jsonb, default '[]') — usado para FAQs inline
+### Changes
 
-### Tabela `service_faqs` criada (legado, não usada pelo frontend):
-- Frontend usa `services.faq` jsonb diretamente
+1. **Create `src/pages/AdminAuth.tsx`** -- Copy the uploaded AdminAuth.tsx file exactly as provided (admin-only login with email/password, redirects to `/admin` on success).
 
-### Indexes adicionados:
-- `idx_services_slug`
-- `idx_services_category`
-- `idx_services_category_slug`
-- `idx_skus_slug`
+2. **Replace `src/pages/Auth.tsx`** -- Replace with the uploaded Auth.tsx file (client login/register using phone number, blocks admin users, uses framer-motion animations).
 
-### Páginas criadas/atualizadas:
-- `src/pages/Services.tsx` → dinâmico, query categorias do banco
-- `src/pages/servicos/CategoryPage.tsx` → query por `category_slug`
-- `src/pages/servicos/ServiceDetail.tsx` → variações, SKUs, FAQs (jsonb), JSON-LD geo
+3. **Create `src/pages/Onboarding.tsx`** -- Copy the uploaded Onboarding.tsx file exactly as provided (3-slide intro carousel with bilingual support).
 
-### RLS adicionado:
-- `service_skus` → "Anyone can view active skus"
-- `service_variations` → "Anyone can view active variations"
-- `service_faqs` → "Anyone can view service faqs" + "Admins can manage service faqs"
+4. **Update `src/App.tsx`** -- Add imports for `AdminAuth` and `Onboarding`, add routes `/admin/auth` and `/onboarding`.
 
----
+5. **Update `src/components/admin/AdminLayout.tsx`** -- Change both `navigate("/auth")` calls to `navigate("/admin/auth")` so admin auth redirects go to the correct page.
 
-## ✅ Fase 1.5: SEO Local + Institucional + Shop (CONCLUÍDA)
+### Notes
+- No database changes needed.
+- The Auth.tsx uses `framer-motion` which is already in the project dependencies.
+- The client auth uses a `phoneToEmail()` pattern to create fake emails from phone numbers, keeping client accounts separate from admin accounts.
 
-### Tabela `service_locations` criada
-### Rota hierárquica para geo-variants com canonical
-### Páginas institucionais: Studio, Team, LocationNewark, Shop
-
----
-
-## ✅ Fase 2: Booking por SKU + Slug (CONCLUÍDA)
-
-### Migration executada:
-- `bookings.sku_id` (uuid, nullable, FK → service_skus)
-
-### Book.tsx — SKU selection flow:
-- Novo state: `pickedVariationId`, `pickedSkuId`
-- Step "sku" entre "service" e "date"
-- Auto-skip: sem variations → pular; 1 SKU → auto-selecionar
-- `serviceDuration` usa SKU duration com fallback
-- `sku_id` enviado no payload de hold/confirm
-
-### Book.tsx — Slug-based URL pre-selection:
-- Query params `?service=slug` e `?sku=slug`
-- UUID regex: `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`
-- UUID → WHERE id = param; Slug → WHERE slug = param
-- Pre-seleciona serviço e SKU, pula para date
-
-### ServiceDetail.tsx — Slug links:
-- CTA principal: `/book?service=${service.slug}`
-- SkuCard: `/book?service=${service.slug}&sku=${sku.slug}`
-
-### ServiceDetail.tsx — FAQs:
-- Renderiza `services.faq` (jsonb array `[{question, answer}]`)
-- Accordion shadcn com estilo ServiceFAQ
-
-### ServiceDetail.tsx — JSON-LD geo-cluster:
-- `<script type="application/ld+json">` com schema LocalBusiness quando locationData existe
-
-### Admin — BookingsTab:
-- Join `service_skus(name, price)` na query
-- Colunas SKU name e preço na listagem
-
-### Admin — DashboardTab:
-- Cards: "Receita do Mês" e "Bookings do Mês"
-- Bar chart (recharts): top 5 serviços por booking count
-
-### Edge function — Price lock:
-- `calendar-confirm-booking` aceita `sku_id`
-- Busca preço do SKU no banco (nunca confia no frontend)
-- `total_price = promo_price || price` salvo no booking
-
----
-
-## 🔲 Fase 3: Quiz como Funil Real
-- `/quiz` landing, `/quiz/:slug/resultado`
-- WhatsApp com contexto
-
-## 🔲 Fase 4: Páginas de Conteúdo e Legal
-- `/privacidade`, `/termos`, `/perguntas-frequentes`
-
-## 🔲 Fase 5: Admin — Rotas Nomeadas
-- Sub-rotas reais com Outlet
-
-## 🔲 Fase 6: Limpeza
-- Remover arquivos legados
-- Atualizar Header
