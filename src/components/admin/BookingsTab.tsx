@@ -346,7 +346,7 @@ export function BookingsTab() {
         booking={selectedBooking}
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-        onConfirm={(id) => updateStatus.mutate({ id, status: "confirmed" })}
+        onConfirm={(id) => approveBookingMutation.mutate(id)}
         onCancel={(id) => cancelBookingMutation.mutate(id)}
         onComplete={(id) => updateStatus.mutate({ id, status: "completed" })}
         onNoShow={(id) => updateStatus.mutate({ id, status: "no_show" })}
