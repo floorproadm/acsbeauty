@@ -915,7 +915,7 @@ export default function ClientPortal() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="h-[100dvh] flex items-center justify-center bg-background">
         <div className="animate-spin w-8 h-8 rounded-full border-2 border-primary border-t-transparent" />
       </div>
     );
