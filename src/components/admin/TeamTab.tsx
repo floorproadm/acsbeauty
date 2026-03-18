@@ -301,6 +301,19 @@ export function TeamTab() {
               />
             </div>
 
+            <div>
+              <Label>Página pessoal (URL)</Label>
+              <Input
+                value={form.page_url || ""}
+                onChange={(e) => setForm({ ...form, page_url: e.target.value || null })}
+                placeholder="/ane-caroline"
+              />
+            </div>
+                onChange={(e) => setForm({ ...form, phone: e.target.value || null })}
+                placeholder="(xxx) xxx-xxxx"
+              />
+            </div>
+
             {/* Specialties */}
             <div>
               <Label>Especialidades</Label>
