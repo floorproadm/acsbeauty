@@ -895,8 +895,8 @@ export default function ClientPortal() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-[480px] mx-auto">
-      {/* Header — hidden on home tab since greeting replaces it */}
-      {tab !== "home" && (
+      {/* Header — hidden on home and select-service tabs */}
+      {tab !== "home" && tab !== "select-service" && (
         <header className="flex items-center justify-between px-5 pt-10 pb-2 shrink-0">
           <img src={acsLogo} alt="ACS Beauty" className="h-10 w-auto" />
           <LanguageToggle />
@@ -904,7 +904,7 @@ export default function ClientPortal() {
       )}
 
       {/* Content */}
-      <main className={`flex-1 overflow-y-auto px-5 ${tab === "home" ? "pt-10" : "pt-2"}`}>
+      <main className={`flex-1 overflow-y-auto px-5 ${tab === "home" || tab === "select-service" ? "pt-10" : "pt-2"}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={tab}
@@ -920,6 +920,12 @@ export default function ClientPortal() {
                 points={points}
                 isPt={isPt}
                 onTabChange={setTab}
+              />
+            )}
+            {tab === "select-service" && (
+              <ServiceSelectionTab
+                isPt={isPt}
+                onBack={() => setTab("home")}
               />
             )}
             {tab === "book" && <BookingsTab bookings={bookings} isPt={isPt} />}
