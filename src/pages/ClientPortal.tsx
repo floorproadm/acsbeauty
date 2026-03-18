@@ -1,0 +1,679 @@
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import {
+  Home,
+  Calendar,
+  Star,
+  User,
+  LogOut,
+  ChevronRight,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Sparkles,
+  Edit2,
+  Phone,
+  CalendarDays,
+  ArrowUpRight,
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageToggle } from "@/components/LanguageToggle";
+import acsLogo from "@/assets/acs-logo.png";
+import founderImg from "@/assets/founder.jpg";
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface ClientProfile {
+  id: string;
+  name: string;
+  phone: string | null;
+  birthday: string | null;
+  email?: string | null;
+}
+
+interface Booking {
+  id: string;
+  start_time: string;
+  status: string;
+  total_price: number | null;
+  notes: string | null;
+  service_id: string | null;
+  services?: { name: string } | null;
+}
+
+interface PointTransaction {
+  id: string;
+  type: string;
+  points: number;
+  description: string | null;
+  created_at: string;
+}
+
+type Tab = "home" | "book" | "points" | "profile";
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+}
+
+function statusColor(status: string) {
+  switch (status) {
+    case "confirmed": return "text-green-600 bg-green-50";
+    case "completed": return "text-blue-600 bg-blue-50";
+    case "cancelled": return "text-red-500 bg-red-50";
+    default: return "text-yellow-600 bg-yellow-50";
+  }
+}
+
+function statusLabel(status: string, isPt: boolean) {
+  const map: Record<string, [string, string]> = {
+    confirmed:  ["Confirmado", "Confirmed"],
+    completed:  ["Concluído",  "Completed"],
+    cancelled:  ["Cancelado",  "Cancelled"],
+    pending:    ["Pendente",   "Pending"],
+  };
+  return (map[status] ?? ["Pendente", "Pending"])[isPt ? 0 : 1];
+}
+
+function StatusIcon({ status }: { status: string }) {
+  if (status === "confirmed" || status === "completed")
+    return <CheckCircle2 className="w-4 h-4 text-green-500" />;
+  if (status === "cancelled")
+    return <XCircle className="w-4 h-4 text-red-400" />;
+  return <Clock className="w-4 h-4 text-yellow-500" />;
+}
+
+// ─── Sub-sections ─────────────────────────────────────────────────────────────
+
+function HomeTab({
+  profile,
+  bookings,
+  points,
+  isPt,
+  onTabChange,
+}: {
+  profile: ClientProfile | null;
+  bookings: Booking[];
+  points: number;
+  isPt: boolean;
+  onTabChange: (tab: Tab) => void;
+}) {
+  const next = bookings.find((b) => b.status === "confirmed" && new Date(b.start_time) > new Date());
+
+  return (
+    <div className="space-y-5 pb-24">
+      {/* Greeting */}
+      <div className="pt-2">
+        <p className="text-muted-foreground text-sm">{isPt ? "Olá," : "Hello,"}</p>
+        <h1 className="font-serif text-2xl font-bold text-foreground mt-0.5">
+          {profile?.name?.split(" ")[0] ?? ""}
+        </h1>
+      </div>
+
+      {/* ACS Points card */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="rounded-2xl bg-primary text-primary-foreground p-5 flex items-center justify-between"
+      >
+        <div>
+          <p className="text-primary-foreground/70 text-xs uppercase tracking-widest mb-1">ACS Points</p>
+          <p className="text-4xl font-light">{points}</p>
+          <p className="text-primary-foreground/60 text-xs mt-1">
+            {isPt ? "pontos disponíveis" : "points available"}
+          </p>
+        </div>
+        <button
+          onClick={() => onTabChange("points")}
+          className="flex items-center gap-1.5 bg-primary-foreground/10 hover:bg-primary-foreground/20 transition px-3 py-2 rounded-xl text-xs font-medium"
+        >
+          {isPt ? "Ver histórico" : "View history"}
+          <ArrowUpRight className="w-3.5 h-3.5" />
+        </button>
+      </motion.div>
+
+      {/* Próximo agendamento */}
+      {next && (
+        <div>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+            {isPt ? "Próximo agendamento" : "Next appointment"}
+          </p>
+          <div className="bg-card border border-border rounded-2xl p-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="font-medium text-foreground">
+                  {next.services?.name ?? (isPt ? "Serviço" : "Service")}
+                </p>
+                <p className="text-muted-foreground text-sm mt-0.5">
+                  {formatDate(next.start_time)} · {formatTime(next.start_time)}
+                </p>
+              </div>
+              <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColor(next.status)}`}>
+                {statusLabel(next.status, isPt)}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick actions */}
+      <div>
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+          {isPt ? "Acesso rápido" : "Quick access"}
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { icon: Calendar, label: isPt ? "Agendar" : "Book now", tab: "book" as Tab, accent: true },
+            { icon: Star, label: "ACS Points", tab: "points" as Tab, accent: false },
+          ].map(({ icon: Icon, label, tab, accent }) => (
+            <button
+              key={tab}
+              onClick={() => onTabChange(tab)}
+              className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border transition ${
+                accent
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card text-foreground border-border hover:border-primary/40"
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-xs font-medium">{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Histórico recente */}
+      {bookings.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              {isPt ? "Recentes" : "Recent"}
+            </p>
+            <button onClick={() => onTabChange("book")} className="text-xs text-primary">
+              {isPt ? "Ver todos" : "View all"}
+            </button>
+          </div>
+          <div className="space-y-2">
+            {bookings.slice(0, 3).map((b) => (
+              <div key={b.id} className="bg-card border border-border rounded-xl p-3.5 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <StatusIcon status={b.status} />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      {b.services?.name ?? (isPt ? "Serviço" : "Service")}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{formatDate(b.start_time)}</p>
+                  </div>
+                </div>
+                {b.total_price != null && (
+                  <span className="text-sm font-medium text-foreground">${b.total_price}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BookingsTab({ bookings, isPt }: { bookings: Booking[]; isPt: boolean }) {
+  const navigate = useNavigate();
+  return (
+    <div className="space-y-4 pb-24">
+      <div className="flex items-center justify-between pt-2">
+        <h2 className="font-serif text-xl font-bold">{isPt ? "Agendamentos" : "Bookings"}</h2>
+        <button
+          onClick={() => navigate("/book")}
+          className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-medium px-3.5 py-2 rounded-full"
+        >
+          <Calendar className="w-3.5 h-3.5" />
+          {isPt ? "Novo" : "New"}
+        </button>
+      </div>
+
+      {bookings.length === 0 ? (
+        <div className="text-center py-16">
+          <CalendarDays className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">
+            {isPt ? "Nenhum agendamento ainda." : "No bookings yet."}
+          </p>
+          <button
+            onClick={() => navigate("/book")}
+            className="mt-4 text-sm text-primary font-medium"
+          >
+            {isPt ? "Fazer primeiro agendamento" : "Book your first appointment"}
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {bookings.map((b) => (
+            <div key={b.id} className="bg-card border border-border rounded-2xl p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <p className="font-medium text-foreground">
+                    {b.services?.name ?? (isPt ? "Serviço" : "Service")}
+                  </p>
+                  <p className="text-muted-foreground text-sm mt-0.5">
+                    {formatDate(b.start_time)} · {formatTime(b.start_time)}
+                  </p>
+                </div>
+                <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColor(b.status)}`}>
+                  {statusLabel(b.status, isPt)}
+                </span>
+              </div>
+              {b.total_price != null && (
+                <div className="border-t border-border pt-3 flex justify-between text-sm">
+                  <span className="text-muted-foreground">{isPt ? "Total" : "Total"}</span>
+                  <span className="font-medium">${b.total_price}</span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PointsTab({
+  points,
+  transactions,
+  isPt,
+}: {
+  points: number;
+  transactions: PointTransaction[];
+  isPt: boolean;
+}) {
+  return (
+    <div className="space-y-5 pb-24">
+      {/* Header card */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-2xl bg-primary text-primary-foreground p-6 text-center"
+      >
+        <Star className="w-8 h-8 mx-auto mb-2 opacity-80" />
+        <p className="text-5xl font-light mb-1">{points}</p>
+        <p className="text-primary-foreground/70 text-sm">ACS Points</p>
+        <p className="text-primary-foreground/50 text-xs mt-3">
+          {isPt ? "1 ponto = $1 gasto · Resgate em serviços exclusivos" : "1 point = $1 spent · Redeem for exclusive services"}
+        </p>
+      </motion.div>
+
+      {/* Como funciona */}
+      <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+        <p className="text-sm font-medium text-foreground">{isPt ? "Como funciona" : "How it works"}</p>
+        {[
+          { icon: "💅", text: isPt ? "Ganhe 1 ponto por $1 gasto em serviços" : "Earn 1 point per $1 spent on services" },
+          { icon: "⭐", text: isPt ? "Acumule e resgate por serviços exclusivos" : "Accumulate and redeem for exclusive services" },
+          { icon: "🎂", text: isPt ? "Pontos bônus no seu aniversário" : "Bonus points on your birthday" },
+        ].map(({ icon, text }) => (
+          <div key={text} className="flex items-center gap-3">
+            <span className="text-lg">{icon}</span>
+            <p className="text-muted-foreground text-sm">{text}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Histórico de transações */}
+      <div>
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+          {isPt ? "Histórico" : "History"}
+        </p>
+        {transactions.length === 0 ? (
+          <div className="text-center py-10">
+            <Sparkles className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+            <p className="text-muted-foreground text-sm">
+              {isPt ? "Seus pontos aparecerão aqui após o primeiro agendamento." : "Your points will appear here after your first booking."}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {transactions.map((t) => (
+              <div key={t.id} className="bg-card border border-border rounded-xl p-3.5 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    {t.description ?? (isPt ? "ACS Points" : "ACS Points")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{formatDate(t.created_at)}</p>
+                </div>
+                <span className={`text-sm font-semibold ${t.points > 0 ? "text-green-600" : "text-red-500"}`}>
+                  {t.points > 0 ? "+" : ""}{t.points}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ProfileTab({
+  profile,
+  isPt,
+  onSignOut,
+}: {
+  profile: ClientProfile | null;
+  isPt: boolean;
+  onSignOut: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(profile?.name ?? "");
+  const [birthday, setBirthday] = useState(profile?.birthday ?? "");
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
+
+  async function save() {
+    if (!profile) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("clients")
+      .update({ name, birthday: birthday || null })
+      .eq("id", profile.id);
+    setSaving(false);
+    if (error) {
+      toast({ title: isPt ? "Erro ao salvar" : "Error saving", variant: "destructive" });
+    } else {
+      toast({ title: isPt ? "Perfil atualizado!" : "Profile updated!" });
+      setEditing(false);
+    }
+  }
+
+  const initials = (profile?.name ?? "?")
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+  return (
+    <div className="space-y-5 pb-24">
+      {/* Avatar + nome */}
+      <div className="pt-2 text-center">
+        <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mx-auto mb-3 text-2xl font-semibold text-primary">
+          {initials}
+        </div>
+        <h2 className="font-serif text-xl font-bold">{profile?.name}</h2>
+        <p className="text-muted-foreground text-sm mt-0.5">{isPt ? "Meu Perfil" : "My Profile"}</p>
+      </div>
+
+      {/* Language toggle */}
+      <div className="flex justify-center">
+        <LanguageToggle />
+      </div>
+
+      {/* Informações pessoais */}
+      <div className="bg-card border border-border rounded-2xl p-4">
+        <div className="flex items-center justify-between mb-4">
+          <p className="font-medium text-foreground text-sm">{isPt ? "Informações pessoais" : "Personal information"}</p>
+          <button onClick={() => setEditing(!editing)} className="p-1.5 rounded-lg hover:bg-muted transition">
+            <Edit2 className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          {/* Nome */}
+          <div className="flex items-center gap-3">
+            <User className="w-4 h-4 text-muted-foreground shrink-0" />
+            <div className="flex-1">
+              <p className="text-xs text-muted-foreground mb-0.5">{isPt ? "Nome" : "Name"}</p>
+              {editing ? (
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full text-sm border-b border-primary outline-none pb-0.5 bg-transparent"
+                />
+              ) : (
+                <p className="text-sm font-medium text-foreground">{profile?.name}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Telefone */}
+          <div className="flex items-center gap-3">
+            <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
+            <div className="flex-1">
+              <p className="text-xs text-muted-foreground mb-0.5">{isPt ? "Telefone" : "Phone"}</p>
+              <p className="text-sm font-medium text-foreground">{profile?.phone ?? "—"}</p>
+            </div>
+          </div>
+
+          {/* Data de nascimento */}
+          <div className="flex items-center gap-3">
+            <CalendarDays className="w-4 h-4 text-muted-foreground shrink-0" />
+            <div className="flex-1">
+              <p className="text-xs text-muted-foreground mb-0.5">{isPt ? "Data de nascimento" : "Birth date"}</p>
+              {editing ? (
+                <input
+                  type="date"
+                  value={birthday}
+                  onChange={(e) => setBirthday(e.target.value)}
+                  className="w-full text-sm border-b border-primary outline-none pb-0.5 bg-transparent"
+                />
+              ) : (
+                <p className="text-sm font-medium text-foreground">
+                  {profile?.birthday ? new Date(profile.birthday).toLocaleDateString("pt-BR") : "—"}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {editing && (
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => setEditing(false)}
+              className="flex-1 h-10 rounded-xl border border-border text-sm text-muted-foreground"
+            >
+              {isPt ? "Cancelar" : "Cancel"}
+            </button>
+            <button
+              onClick={save}
+              disabled={saving}
+              className="flex-1 h-10 rounded-xl bg-primary text-primary-foreground text-sm font-medium disabled:opacity-60"
+            >
+              {saving ? "..." : (isPt ? "Salvar" : "Save")}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Logout */}
+      <button
+        onClick={onSignOut}
+        className="w-full h-12 rounded-2xl border border-border flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-red-500 hover:border-red-200 transition-colors"
+      >
+        <LogOut className="w-4 h-4" />
+        {isPt ? "Sair da conta" : "Sign out"}
+      </button>
+    </div>
+  );
+}
+
+// ─── Bottom Nav ───────────────────────────────────────────────────────────────
+
+const navItems: { id: Tab; icon: typeof Home; labelPt: string; labelEn: string }[] = [
+  { id: "home",    icon: Home,     labelPt: "Início",         labelEn: "Home" },
+  { id: "book",    icon: Calendar, labelPt: "Agendamentos",   labelEn: "Bookings" },
+  { id: "points",  icon: Star,     labelPt: "ACS Points",     labelEn: "ACS Points" },
+  { id: "profile", icon: User,     labelPt: "Perfil",         labelEn: "Profile" },
+];
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
+export default function ClientPortal() {
+  const [tab, setTab] = useState<Tab>("home");
+  const [profile, setProfile] = useState<ClientProfile | null>(null);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [points, setPoints] = useState(0);
+  const [transactions, setTransactions] = useState<PointTransaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { language } = useLanguage();
+  const isPt = language === "pt";
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    setLoading(true);
+
+    // Verifica sessão
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { navigate("/auth"); return; }
+
+    // Verifica se é admin — se for, não deve estar aqui
+    const { data: roleRow } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", session.user.id)
+      .limit(1)
+      .maybeSingle();
+    if (roleRow) { navigate("/admin"); return; }
+
+    // Pega telefone do metadata (registrado no Auth)
+    const phone = session.user.user_metadata?.phone;
+
+    // Busca perfil na tabela clients pelo telefone
+    if (phone) {
+      const { data: clientData } = await supabase
+        .from("clients")
+        .select("*")
+        .eq("phone", phone)
+        .maybeSingle();
+      if (clientData) {
+        setProfile(clientData);
+
+        // Bookings do cliente
+        const { data: bookingData } = await supabase
+          .from("bookings")
+          .select("*, services(name)")
+          .eq("client_id", clientData.id)
+          .order("start_time", { ascending: false })
+          .limit(20);
+        setBookings((bookingData as Booking[]) ?? []);
+
+        // ACS Points
+        const { data: pointsData } = await supabase
+          .from("client_points")
+          .select("total_points, redeemed_points")
+          .eq("client_id", clientData.id)
+          .maybeSingle();
+        if (pointsData) {
+          setPoints(pointsData.total_points - pointsData.redeemed_points);
+        }
+
+        // Transações de pontos
+        const { data: txData } = await supabase
+          .from("point_transactions")
+          .select("*")
+          .eq("client_id", clientData.id)
+          .order("created_at", { ascending: false })
+          .limit(20);
+        setTransactions((txData as PointTransaction[]) ?? []);
+      }
+    }
+
+    setLoading(false);
+  }
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    navigate("/auth");
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col max-w-[480px] mx-auto">
+      {/* Header */}
+      <header className="flex items-center justify-between px-5 pt-10 pb-2 shrink-0">
+        <img src={acsLogo} alt="ACS Beauty" className="h-10 w-auto" />
+        <LanguageToggle />
+      </header>
+
+      {/* Content */}
+      <main className="flex-1 overflow-y-auto px-5 pt-2">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={tab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            {tab === "home" && (
+              <HomeTab
+                profile={profile}
+                bookings={bookings}
+                points={points}
+                isPt={isPt}
+                onTabChange={setTab}
+              />
+            )}
+            {tab === "book" && <BookingsTab bookings={bookings} isPt={isPt} />}
+            {tab === "points" && <PointsTab points={points} transactions={transactions} isPt={isPt} />}
+            {tab === "profile" && (
+              <ProfileTab profile={profile} isPt={isPt} onSignOut={handleSignOut} />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </main>
+
+      {/* Bottom Navigation */}
+      <nav className="shrink-0 border-t border-border bg-background/95 backdrop-blur-sm px-2 pb-safe">
+        <div className="flex items-center justify-around py-2">
+          {navItems.map(({ id, icon: Icon, labelPt, labelEn }) => {
+            const active = tab === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setTab(id)}
+                className="flex flex-col items-center gap-1 px-3 py-2 relative"
+              >
+                {active && (
+                  <motion.div
+                    layoutId="nav-pill"
+                    className="absolute inset-0 bg-primary/8 rounded-2xl"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <Icon
+                  className={`w-5 h-5 transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}
+                />
+                <span
+                  className={`text-[10px] font-medium transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}
+                >
+                  {isPt ? labelPt : labelEn}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+    </div>
+  );
+}
