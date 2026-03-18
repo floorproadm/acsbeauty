@@ -291,12 +291,9 @@ function ServicesListTab() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-2xl font-bold">Serviços</h1>
-          <p className="text-sm text-muted-foreground">
-            {services?.filter(s => s.is_active).length || 0} serviços ativos
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          {services?.filter(s => s.is_active).length || 0} serviços ativos
+        </p>
         <Button onClick={() => openCreateModal()}>
           <Plus className="w-4 h-4 mr-2" />
           Novo Serviço
