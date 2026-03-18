@@ -39,7 +39,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/admin/auth" element={<AdminAuth />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/services" element={<Services />} />
           <Route path="/servicos/:categoria/:slug/:locationSlug" element={<ServiceDetail />} />
           <Route path="/servicos/:categoria/:slug" element={<ServiceDetail />} />
