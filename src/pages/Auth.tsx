@@ -87,7 +87,7 @@ export default function Auth() {
       }
 
       toast({ title: isPt ? "Bem-vinda! 👋" : "Welcome! 👋" });
-      navigate("/");
+      navigate("/portal");
     } catch {
       toast({
         title: isPt ? "Telefone ou senha incorretos" : "Incorrect phone or password",
