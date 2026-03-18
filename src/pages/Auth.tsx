@@ -53,7 +53,7 @@ export default function Auth() {
           .eq("user_id", session.user.id)
           .limit(1)
           .maybeSingle();
-        navigate(roleRow ? "/admin/auth" : "/");
+        navigate(roleRow ? "/admin/auth" : "/portal");
       }
     });
     if (searchParams.get("mode") === "register") setMode("register");
@@ -87,7 +87,7 @@ export default function Auth() {
       }
 
       toast({ title: isPt ? "Bem-vinda! 👋" : "Welcome! 👋" });
-      navigate("/");
+      navigate("/portal");
     } catch {
       toast({
         title: isPt ? "Telefone ou senha incorretos" : "Incorrect phone or password",
@@ -137,7 +137,7 @@ export default function Auth() {
       }
 
       toast({ title: isPt ? "Conta criada! 🎉" : "Account created! 🎉", description: isPt ? "Bem-vinda à ACS Beauty." : "Welcome to ACS Beauty." });
-      navigate("/");
+      navigate("/portal");
     } catch (err: any) {
       const alreadyExists = err.message?.includes("already registered") || err.message?.includes("already exists");
       toast({
