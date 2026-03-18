@@ -137,7 +137,7 @@ export default function Auth() {
       }
 
       toast({ title: isPt ? "Conta criada! 🎉" : "Account created! 🎉", description: isPt ? "Bem-vinda à ACS Beauty." : "Welcome to ACS Beauty." });
-      navigate("/");
+      navigate("/portal");
     } catch (err: any) {
       const alreadyExists = err.message?.includes("already registered") || err.message?.includes("already exists");
       toast({
