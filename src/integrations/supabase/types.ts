@@ -1463,6 +1463,7 @@ export type Database = {
           instagram: string | null
           is_active: boolean
           name: string
+          page_url: string | null
           phone: string | null
           role: string
           sort_order: number
@@ -1479,6 +1480,7 @@ export type Database = {
           instagram?: string | null
           is_active?: boolean
           name: string
+          page_url?: string | null
           phone?: string | null
           role?: string
           sort_order?: number
@@ -1495,6 +1497,7 @@ export type Database = {
           instagram?: string | null
           is_active?: boolean
           name?: string
+          page_url?: string | null
           phone?: string | null
           role?: string
           sort_order?: number
