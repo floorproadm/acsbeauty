@@ -236,7 +236,7 @@ function HomeTab({
           <img
             src={teamHero}
             alt="ACS Beauty Team"
-            className="w-full h-44 object-cover object-top"
+            className="w-full h-44 object-cover" style={{ objectPosition: "center 30%" }}
           />
         </div>
       </motion.div>
