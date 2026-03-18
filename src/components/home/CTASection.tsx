@@ -31,7 +31,7 @@ export function CTASection() {
             {t("home.cta.description")}
           </p>
           <div className="flex flex-col gap-3 md:gap-4 sm:flex-row justify-center">
-            <Link to="/services" className="w-full sm:w-auto">
+            <Link to="/portal" className="w-full sm:w-auto">
               <Button size="xl" className="bg-white text-primary font-medium hover:bg-white/90 shadow-elevated group w-full sm:w-auto">
                 <Calendar className="w-5 h-5" />
                 {t("home.cta.view_services")}
