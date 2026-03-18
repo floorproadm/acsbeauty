@@ -668,11 +668,13 @@ export default function ClientPortal() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-[480px] mx-auto">
-      {/* Header */}
-      <header className="flex items-center justify-between px-5 pt-10 pb-2 shrink-0">
-        <img src={acsLogo} alt="ACS Beauty" className="h-10 w-auto" />
-        <LanguageToggle />
-      </header>
+      {/* Header — hidden on home tab since greeting replaces it */}
+      {tab !== "home" && (
+        <header className="flex items-center justify-between px-5 pt-10 pb-2 shrink-0">
+          <img src={acsLogo} alt="ACS Beauty" className="h-10 w-auto" />
+          <LanguageToggle />
+        </header>
+      )}
 
       {/* Content */}
       <main className="flex-1 overflow-y-auto px-5 pt-2">
