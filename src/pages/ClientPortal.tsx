@@ -836,45 +836,73 @@ export default function ClientPortal() {
 
     // Pega telefone do metadata (registrado no Auth)
     const phone = session.user.user_metadata?.phone;
+    const metaName = session.user.user_metadata?.full_name;
 
     // Busca perfil na tabela clients pelo telefone
+    let clientData: any = null;
     if (phone) {
-      const { data: clientData } = await supabase
+      const { data } = await supabase
         .from("clients")
         .select("*")
         .eq("phone", phone)
         .maybeSingle();
-      if (clientData) {
-        setProfile(clientData);
+      clientData = data;
+    }
 
-        // Bookings do cliente
-        const { data: bookingData } = await supabase
-          .from("bookings")
-          .select("*, services(name)")
-          .eq("client_id", clientData.id)
-          .order("start_time", { ascending: false })
-          .limit(20);
-        setBookings((bookingData as Booking[]) ?? []);
+    // Se não achou pelo phone, tenta criar o registro do client
+    if (!clientData && phone && metaName) {
+      const { data: inserted } = await supabase
+        .from("clients")
+        .insert({
+          name: metaName,
+          phone,
+          birthday: session.user.user_metadata?.birth_date || null,
+        })
+        .select()
+        .single();
+      clientData = inserted;
+    }
 
-        // ACS Points
-        const { data: pointsData } = await (supabase as any)
-          .from("client_points")
-          .select("total_points, redeemed_points")
-          .eq("client_id", clientData.id)
-          .maybeSingle();
-        if (pointsData) {
-          setPoints(pointsData.total_points - pointsData.redeemed_points);
-        }
+    // Fallback: cria perfil virtual a partir do metadata
+    if (!clientData && metaName) {
+      clientData = {
+        id: session.user.id,
+        name: metaName,
+        phone: phone || null,
+        birthday: session.user.user_metadata?.birth_date || null,
+      };
+    }
 
-        // Transações de pontos
-        const { data: txData } = await (supabase as any)
-          .from("point_transactions")
-          .select("*")
-          .eq("client_id", clientData.id)
-          .order("created_at", { ascending: false })
-          .limit(20);
-        setTransactions((txData as PointTransaction[]) ?? []);
+    if (clientData) {
+      setProfile(clientData);
+
+      // Bookings do cliente
+      const { data: bookingData } = await supabase
+        .from("bookings")
+        .select("*, services(name)")
+        .eq("client_id", clientData.id)
+        .order("start_time", { ascending: false })
+        .limit(20);
+      setBookings((bookingData as Booking[]) ?? []);
+
+      // ACS Points
+      const { data: pointsData } = await (supabase as any)
+        .from("client_points")
+        .select("total_points, redeemed_points")
+        .eq("client_id", clientData.id)
+        .maybeSingle();
+      if (pointsData) {
+        setPoints(pointsData.total_points - pointsData.redeemed_points);
       }
+
+      // Transações de pontos
+      const { data: txData } = await (supabase as any)
+        .from("point_transactions")
+        .select("*")
+        .eq("client_id", clientData.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      setTransactions((txData as PointTransaction[]) ?? []);
     }
 
     setLoading(false);
