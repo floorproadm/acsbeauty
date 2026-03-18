@@ -1,0 +1,1 @@
+ALTER TABLE public.team_members ADD COLUMN page_url text DEFAULT null;

@@ -27,6 +27,7 @@ interface TeamMember {
   image_url: string | null;
   instagram: string | null;
   phone: string | null;
+  page_url: string | null;
   badge_label: string | null;
   badge_value: string | null;
   sort_order: number;
@@ -41,6 +42,7 @@ const emptyMember: Omit<TeamMember, "id"> = {
   image_url: null,
   instagram: null,
   phone: null,
+  page_url: null,
   badge_label: null,
   badge_value: null,
   sort_order: 0,
@@ -81,6 +83,7 @@ export function TeamTab() {
             image_url: member.image_url,
             instagram: member.instagram,
             phone: member.phone,
+            page_url: member.page_url,
             badge_label: member.badge_label,
             badge_value: member.badge_value,
             sort_order: member.sort_order,
@@ -96,8 +99,9 @@ export function TeamTab() {
           specialties: member.specialties,
           image_url: member.image_url,
           instagram: member.instagram,
-          phone: member.phone,
-          badge_label: member.badge_label,
+           phone: member.phone,
+           page_url: member.page_url,
+           badge_label: member.badge_label,
           badge_value: member.badge_value,
           sort_order: member.sort_order,
           is_active: member.is_active,
@@ -145,6 +149,7 @@ export function TeamTab() {
       image_url: m.image_url,
       instagram: m.instagram,
       phone: m.phone,
+      page_url: m.page_url,
       badge_label: m.badge_label,
       badge_value: m.badge_value,
       sort_order: m.sort_order,
@@ -295,6 +300,17 @@ export function TeamTab() {
                 placeholder="(xxx) xxx-xxxx"
               />
             </div>
+
+            <div>
+              <Label>Página pessoal (URL)</Label>
+              <Input
+                value={form.page_url || ""}
+                onChange={(e) => setForm({ ...form, page_url: e.target.value || null })}
+                placeholder="/ane-caroline"
+              />
+            </div>
+
+
 
             {/* Specialties */}
             <div>
