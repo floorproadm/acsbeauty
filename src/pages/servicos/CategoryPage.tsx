@@ -184,8 +184,6 @@ export default function CategoryPage() {
           </div>
         </section>
 
-        {/* FAQ */}
-        <ServiceFAQ faqs={finalFaqs} />
 
         {/* CTA */}
         <section className="py-16 md:py-20 bg-gradient-warm">
