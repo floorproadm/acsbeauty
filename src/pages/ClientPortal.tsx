@@ -26,6 +26,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import acsLogo from "@/assets/acs-logo.png";
 import founderImg from "@/assets/founder.jpg";
+import teamHero from "@/assets/team-hero.jpg";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
