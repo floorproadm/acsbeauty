@@ -915,14 +915,14 @@ export default function ClientPortal() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="h-[100dvh] flex items-center justify-center bg-background">
         <div className="animate-spin w-8 h-8 rounded-full border-2 border-primary border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col max-w-[480px] mx-auto">
+    <div className="h-[100dvh] bg-background flex flex-col max-w-[480px] mx-auto overflow-hidden">
       {/* Header — hidden on home and select-service tabs */}
       {tab !== "home" && tab !== "select-service" && (
         <header className="flex items-center justify-between px-5 pt-10 pb-2 shrink-0">
@@ -967,7 +967,7 @@ export default function ClientPortal() {
 
       {/* Bottom Navigation — hidden during service selection */}
       {tab !== "select-service" && (
-        <nav className="shrink-0 border-t border-border bg-background/95 backdrop-blur-sm px-2 pb-safe">
+        <nav className="shrink-0 border-t border-border bg-background backdrop-blur-sm px-2" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
           <div className="flex items-center justify-around py-2">
             {navItems.map(({ id, icon: Icon, labelPt, labelEn }) => {
               const active = tab === id || (id === "book" && tab === ("select-service" as Tab));
