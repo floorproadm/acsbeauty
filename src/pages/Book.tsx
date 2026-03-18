@@ -83,6 +83,7 @@ export default function Book() {
   const serviceParam = searchParams.get("service_id") || searchParams.get("service");
   const skuParam = searchParams.get("sku");
   const flowMode = searchParams.get("flow");
+  const isPortalSource = searchParams.get("source") === "portal";
   const { t, language } = useLanguage();
 
   // Resolve service param (UUID vs slug)
