@@ -42,6 +42,7 @@ const emptyMember: Omit<TeamMember, "id"> = {
   image_url: null,
   instagram: null,
   phone: null,
+  page_url: null,
   badge_label: null,
   badge_value: null,
   sort_order: 0,
