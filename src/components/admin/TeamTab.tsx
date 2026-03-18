@@ -309,10 +309,8 @@ export function TeamTab() {
                 placeholder="/ane-caroline"
               />
             </div>
-                onChange={(e) => setForm({ ...form, phone: e.target.value || null })}
-                placeholder="(xxx) xxx-xxxx"
-              />
-            </div>
+
+
 
             {/* Specialties */}
             <div>
