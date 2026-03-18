@@ -965,7 +965,6 @@ export default function ClientPortal() {
       {tab !== "home" && tab !== "select-service" && (
         <header className="flex items-center justify-between px-5 pt-10 pb-2 shrink-0">
           <img src={acsLogo} alt="ACS Beauty" className="h-10 w-auto" />
-          <LanguageSelector />
         </header>
       )}
 
