@@ -47,7 +47,6 @@ export type AdminTab =
   | "bookings"
   | "crm"
   | "services"
-  | "skus"
   | "offers"
   | "quizzes"
   | "tasks"
