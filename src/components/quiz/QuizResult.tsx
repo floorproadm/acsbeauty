@@ -75,7 +75,7 @@ export function QuizResult({ result }: QuizResultProps) {
     } else if (result.package_id) {
       navigate(`/p/${result.package_id}`);
     } else if (result.service_id) {
-      navigate(`/book?service=${result.service_id}`);
+      navigate("/portal");
     } else {
       navigate("/portal");
     }

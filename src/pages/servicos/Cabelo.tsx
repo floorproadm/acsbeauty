@@ -225,7 +225,7 @@ export default function Cabelo() {
                 {t("servicos.cta_description")}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/book">
+                <Link to="/portal">
                   <Button variant="hero" size="lg" className="group w-full sm:w-auto">
                     {t("global.book_now")}
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
