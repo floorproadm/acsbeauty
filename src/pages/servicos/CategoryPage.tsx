@@ -5,7 +5,7 @@ import { ArrowRight, ArrowLeft, Check, Loader2, Scissors, Eye, Sparkles } from "
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { ServiceFAQ } from "@/components/services/ServiceFAQ";
+
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 
