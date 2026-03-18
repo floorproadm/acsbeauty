@@ -56,7 +56,19 @@ interface PointTransaction {
   created_at: string;
 }
 
-type Tab = "home" | "book" | "points" | "profile";
+type Tab = "home" | "book" | "select-service" | "points" | "profile";
+
+interface ServiceItem {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  duration_minutes: number;
+  hero_image_url: string | null;
+  category: string | null;
+  category_slug: string | null;
+  is_active: boolean | null;
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
