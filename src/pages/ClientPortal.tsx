@@ -922,7 +922,7 @@ export default function ClientPortal() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col max-w-[480px] mx-auto">
+    <div className="h-[100dvh] bg-background flex flex-col max-w-[480px] mx-auto overflow-hidden">
       {/* Header — hidden on home and select-service tabs */}
       {tab !== "home" && tab !== "select-service" && (
         <header className="flex items-center justify-between px-5 pt-10 pb-2 shrink-0">
