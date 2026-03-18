@@ -149,6 +149,7 @@ export function TeamTab() {
       image_url: m.image_url,
       instagram: m.instagram,
       phone: m.phone,
+      page_url: m.page_url,
       badge_label: m.badge_label,
       badge_value: m.badge_value,
       sort_order: m.sort_order,
