@@ -118,6 +118,25 @@ export function BookingsTab() {
     },
   });
 
+  const approveBookingMutation = useMutation({
+    mutationFn: async (bookingId: string) => {
+      const response = await supabase.functions.invoke("calendar-approve-booking", {
+        body: { booking_id: bookingId },
+      });
+      if (response.error) throw new Error(response.error.message);
+      if (!response.data.success) throw new Error(response.data.error);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-sidebar-pending"] });
+      toast({ title: "Agendamento confirmado e adicionado ao calendário!" });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao confirmar", description: error.message, variant: "destructive" });
+    },
+  });
+
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: BookingStatus }) => {
       const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
