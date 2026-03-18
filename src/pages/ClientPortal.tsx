@@ -16,6 +16,9 @@ import {
   Phone,
   CalendarDays,
   ArrowUpRight,
+  Bell,
+  Gift,
+  Scissors,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +26,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import acsLogo from "@/assets/acs-logo.png";
 import founderImg from "@/assets/founder.jpg";
+import teamHero from "@/assets/team-hero.jpg";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -110,122 +114,177 @@ function HomeTab({
   isPt: boolean;
   onTabChange: (tab: Tab) => void;
 }) {
-  const next = bookings.find((b) => b.status === "confirmed" && new Date(b.start_time) > new Date());
+  const navigate = useNavigate();
+  const upcoming = bookings.filter(
+    (b) => b.status === "confirmed" && new Date(b.start_time) > new Date()
+  );
+  const firstName = profile?.name?.split(" ")[0] ?? "";
+  const initials = (profile?.name ?? "?")
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <div className="space-y-5 pb-24">
-      {/* Greeting */}
-      <div className="pt-2">
-        <p className="text-muted-foreground text-sm">{isPt ? "Olá," : "Hello,"}</p>
-        <h1 className="font-serif text-2xl font-bold text-foreground mt-0.5">
-          {profile?.name?.split(" ")[0] ?? ""}
-        </h1>
+      {/* Greeting header */}
+      <div className="flex items-center justify-between pt-2">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-sm font-semibold text-primary">
+            {initials}
+          </div>
+          <div>
+            <h1 className="font-serif text-lg font-bold text-foreground leading-tight">
+              {isPt ? `Oi, ${firstName}!` : `Hi, ${firstName}!`}
+            </h1>
+            <p className="text-muted-foreground text-xs">
+              {isPt ? "Como podemos cuidar de você hoje?" : "How can we take care of you today?"}
+            </p>
+          </div>
+        </div>
+        <button className="w-9 h-9 rounded-full bg-muted/50 flex items-center justify-center">
+          <Bell className="w-4.5 h-4.5 text-muted-foreground" />
+        </button>
       </div>
 
-      {/* ACS Points card */}
+      {/* Book a service CTA */}
+      <motion.button
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        onClick={() => navigate("/book")}
+        className="w-full rounded-2xl bg-primary text-primary-foreground p-5 flex items-center justify-between"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary-foreground/15 flex items-center justify-center">
+            <Calendar className="w-5 h-5" />
+          </div>
+          <div className="text-left">
+            <p className="font-semibold text-base">{isPt ? "Agendar serviço" : "Book a service"}</p>
+            <p className="text-primary-foreground/70 text-xs">
+              {isPt ? "Escolha seu serviço e profissional" : "Choose your service and professional"}
+            </p>
+          </div>
+        </div>
+        <Scissors className="w-5 h-5 opacity-70" />
+      </motion.button>
+
+      {/* Quick access cards */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="rounded-2xl bg-primary text-primary-foreground p-5 flex items-center justify-between"
+        transition={{ duration: 0.35, delay: 0.08 }}
+        className="grid grid-cols-2 gap-3"
       >
-        <div>
-          <p className="text-primary-foreground/70 text-xs uppercase tracking-widest mb-1">ACS Points</p>
-          <p className="text-4xl font-light">{points}</p>
-          <p className="text-primary-foreground/60 text-xs mt-1">
-            {isPt ? "pontos disponíveis" : "points available"}
-          </p>
-        </div>
+        <button
+          onClick={() => navigate("/packages")}
+          className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border bg-card hover:border-primary/30 transition"
+        >
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Gift className="w-5 h-5 text-primary" />
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-foreground">
+              {isPt ? "Pacotes" : "Packages"}
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              {isPt ? "Pacotes & benefícios" : "Packages & benefits"}
+            </p>
+          </div>
+        </button>
         <button
           onClick={() => onTabChange("points")}
-          className="flex items-center gap-1.5 bg-primary-foreground/10 hover:bg-primary-foreground/20 transition px-3 py-2 rounded-xl text-xs font-medium"
+          className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border bg-card hover:border-primary/30 transition"
         >
-          {isPt ? "Ver histórico" : "View history"}
-          <ArrowUpRight className="w-3.5 h-3.5" />
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Star className="w-5 h-5 text-primary" />
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-foreground">ACS Points</p>
+            <p className="text-[11px] text-muted-foreground">
+              {points > 0
+                ? `${points} ${isPt ? "pontos" : "points"}`
+                : isPt ? "Acumule pontos" : "Earn points"}
+            </p>
+          </div>
         </button>
       </motion.div>
 
-      {/* Próximo agendamento */}
-      {next && (
-        <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-            {isPt ? "Próximo agendamento" : "Next appointment"}
-          </p>
-          <div className="bg-card border border-border rounded-2xl p-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="font-medium text-foreground">
-                  {next.services?.name ?? (isPt ? "Serviço" : "Service")}
-                </p>
-                <p className="text-muted-foreground text-sm mt-0.5">
-                  {formatDate(next.start_time)} · {formatTime(next.start_time)}
-                </p>
-              </div>
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColor(next.status)}`}>
-                {statusLabel(next.status, isPt)}
-              </span>
-            </div>
-          </div>
+      {/* About Us */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.16 }}
+      >
+        <h2 className="font-serif text-base font-bold text-foreground mb-2">
+          {isPt ? "Sobre nós" : "About Us"}
+        </h2>
+        <div className="rounded-2xl overflow-hidden">
+          <img
+            src={teamHero}
+            alt="ACS Beauty Team"
+            className="w-full h-44 object-cover"
+          />
         </div>
-      )}
+      </motion.div>
 
-      {/* Quick actions */}
-      <div>
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-          {isPt ? "Acesso rápido" : "Quick access"}
-        </p>
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            { icon: Calendar, label: isPt ? "Agendar" : "Book now", tab: "book" as Tab, accent: true },
-            { icon: Star, label: "ACS Points", tab: "points" as Tab, accent: false },
-          ].map(({ icon: Icon, label, tab, accent }) => (
+      {/* Upcoming appointments */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.24 }}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-serif text-base font-bold text-foreground">
+            {isPt ? "Próximos agendamentos" : "Upcoming appointments"}
+          </h2>
+          {upcoming.length > 0 && (
             <button
-              key={tab}
-              onClick={() => onTabChange(tab)}
-              className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border transition ${
-                accent
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-card text-foreground border-border hover:border-primary/40"
-              }`}
+              onClick={() => onTabChange("book")}
+              className="text-xs text-muted-foreground flex items-center gap-0.5"
             >
-              <Icon className="w-5 h-5" />
-              <span className="text-xs font-medium">{label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Histórico recente */}
-      {bookings.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              {isPt ? "Recentes" : "Recent"}
-            </p>
-            <button onClick={() => onTabChange("book")} className="text-xs text-primary">
               {isPt ? "Ver todos" : "View all"}
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {upcoming.length === 0 ? (
+          <div className="bg-card border border-border rounded-2xl py-10 text-center">
+            <CalendarDays className="w-10 h-10 text-muted-foreground/25 mx-auto mb-3" />
+            <p className="text-muted-foreground text-sm mb-4">
+              {isPt ? "Você não tem agendamentos futuros" : "You don't have upcoming appointments"}
+            </p>
+            <button
+              onClick={() => navigate("/book")}
+              className="bg-primary text-primary-foreground text-sm font-medium px-5 py-2.5 rounded-full"
+            >
+              {isPt ? "Agendar agora" : "Book now"}
             </button>
           </div>
+        ) : (
           <div className="space-y-2">
-            {bookings.slice(0, 3).map((b) => (
-              <div key={b.id} className="bg-card border border-border rounded-xl p-3.5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <StatusIcon status={b.status} />
+            {upcoming.slice(0, 3).map((b) => (
+              <div key={b.id} className="bg-card border border-border rounded-2xl p-4">
+                <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium text-foreground">
+                    <p className="font-medium text-foreground text-sm">
                       {b.services?.name ?? (isPt ? "Serviço" : "Service")}
                     </p>
-                    <p className="text-xs text-muted-foreground">{formatDate(b.start_time)}</p>
+                    <p className="text-muted-foreground text-xs mt-0.5">
+                      {formatDate(b.start_time)} · {formatTime(b.start_time)}
+                    </p>
                   </div>
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColor(b.status)}`}>
+                    {statusLabel(b.status, isPt)}
+                  </span>
                 </div>
-                {b.total_price != null && (
-                  <span className="text-sm font-medium text-foreground">${b.total_price}</span>
-                )}
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </motion.div>
     </div>
   );
 }
@@ -609,14 +668,16 @@ export default function ClientPortal() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-[480px] mx-auto">
-      {/* Header */}
-      <header className="flex items-center justify-between px-5 pt-10 pb-2 shrink-0">
-        <img src={acsLogo} alt="ACS Beauty" className="h-10 w-auto" />
-        <LanguageToggle />
-      </header>
+      {/* Header — hidden on home tab since greeting replaces it */}
+      {tab !== "home" && (
+        <header className="flex items-center justify-between px-5 pt-10 pb-2 shrink-0">
+          <img src={acsLogo} alt="ACS Beauty" className="h-10 w-auto" />
+          <LanguageToggle />
+        </header>
+      )}
 
       {/* Content */}
-      <main className="flex-1 overflow-y-auto px-5 pt-2">
+      <main className={`flex-1 overflow-y-auto px-5 ${tab === "home" ? "pt-10" : "pt-2"}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={tab}
