@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Wrench, Layers } from "lucide-react";
+import { SkusTab } from "./SkusTab";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -58,7 +61,7 @@ const defaultFormData = {
   status: "entry" as ServiceStatus,
 };
 
-export function ServicesTab() {
+function ServicesListTab() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -288,12 +291,9 @@ export function ServicesTab() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-2xl font-bold">Serviços</h1>
-          <p className="text-sm text-muted-foreground">
-            {services?.filter(s => s.is_active).length || 0} serviços ativos
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          {services?.filter(s => s.is_active).length || 0} serviços ativos
+        </p>
         <Button onClick={() => openCreateModal()}>
           <Plus className="w-4 h-4 mr-2" />
           Novo Serviço
@@ -453,6 +453,32 @@ export function ServicesTab() {
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+export function ServicesTab() {
+  return (
+    <div className="space-y-6">
+      <h1 className="font-serif text-2xl font-bold">Serviços</h1>
+      <Tabs defaultValue="services" className="w-full">
+        <TabsList className="w-full max-w-sm mx-auto grid grid-cols-2">
+          <TabsTrigger value="services" className="flex items-center gap-2">
+            <Wrench className="w-4 h-4" />
+            Serviços
+          </TabsTrigger>
+          <TabsTrigger value="options" className="flex items-center gap-2">
+            <Layers className="w-4 h-4" />
+            Opções
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="services">
+          <ServicesListTab />
+        </TabsContent>
+        <TabsContent value="options">
+          <SkusTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
