@@ -4,7 +4,7 @@ import { ArrowRight, ArrowLeft, Scissors, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { ServiceFAQ } from "@/components/services/ServiceFAQ";
+
 import { BeforeAfterGallery, BeforeAfterImage } from "@/components/services/BeforeAfterGallery";
 import { useLanguage } from "@/contexts/LanguageContext";
 import heroImage from "@/assets/hair-service.png";
