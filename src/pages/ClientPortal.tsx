@@ -748,9 +748,9 @@ function ServiceSelectionTab({
   function handleContinue() {
     const ids = Array.from(selected);
     if (ids.length === 1) {
-      navigate(`/book?service=${ids[0]}`);
+      navigate(`/book?service=${ids[0]}&source=portal`);
     } else {
-      navigate(`/book?services=${ids.join(",")}`);
+      navigate(`/book?services=${ids.join(",")}&source=portal`);
     }
   }
 

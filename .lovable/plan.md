@@ -1,83 +1,98 @@
 
+# ACS v2.0 — Progresso de Implementação
 
-## Plan: Fluxo de Agendamento com Aprovacao Pendente no Portal do Cliente
+## ✅ Fase 1: Rotas Dinâmicas de Serviços (CONCLUÍDA)
 
-### Contexto
+### Migration executada:
+- `services.slug` (text UNIQUE NOT NULL) — populado automaticamente
+- `services.category_slug` (text, indexed)
+- `service_skus.slug` (text, indexed)
+- `services.hero_image_url` (text)
+- `services.faq` (jsonb, default '[]') — usado para FAQs inline
 
-Atualmente, quando o cliente agenda pelo portal, o booking vai direto para o Google Calendar como `confirmed`. O novo fluxo proposto:
+### Tabela `service_faqs` criada (legado, não usada pelo frontend):
+- Frontend usa `services.faq` jsonb diretamente
 
-1. Cliente seleciona servico no portal (ja funciona)
-2. Cliente escolhe tecnica/opcao e horario
-3. Ao concluir, booking fica com status `pending` (nao cria evento no Google Calendar ainda)
-4. Admin ve o booking pendente no painel, verifica e confirma
-5. Ao confirmar, cria o evento no Google Calendar e notifica o cliente (no portal + email via Resend futuramente)
+### Indexes adicionados:
+- `idx_services_slug`
+- `idx_services_category`
+- `idx_services_category_slug`
+- `idx_skus_slug`
 
-### Mudancas Tecnicas
+### Páginas criadas/atualizadas:
+- `src/pages/Services.tsx` → dinâmico, query categorias do banco
+- `src/pages/servicos/CategoryPage.tsx` → query por `category_slug`
+- `src/pages/servicos/ServiceDetail.tsx` → variações, SKUs, FAQs (jsonb), JSON-LD geo
 
-**1. Modificar o fluxo de booking do portal**
+### RLS adicionado:
+- `service_skus` → "Anyone can view active skus"
+- `service_variations` → "Anyone can view active variations"
+- `service_faqs` → "Anyone can view service faqs" + "Admins can manage service faqs"
 
-O `/book` atualmente passa pelo `calendar-hold` + `calendar-confirm-booking` que cria o evento no Google Calendar imediatamente. Para bookings vindos do portal, o fluxo sera:
+---
 
-- Quando o cliente vem do portal (detectado via query param `source=portal`), ao invés de chamar `calendar-confirm-booking`, inserir diretamente na tabela `bookings` com status `pending` (sem criar evento no Google Calendar)
-- Remover o step de selecao de servico do `/book` quando o servico ja vem pre-selecionado do portal (ja funciona parcialmente com o auto-skip)
+## ✅ Fase 1.5: SEO Local + Institucional + Shop (CONCLUÍDA)
 
-**2. Nova Edge Function: `calendar-approve-booking`**
+### Tabela `service_locations` criada
+### Rota hierárquica para geo-variants com canonical
+### Páginas institucionais: Studio, Team, LocationNewark, Shop
 
-- Recebe `booking_id`
-- Busca o booking pendente
-- Cria o evento no Google Calendar
-- Atualiza status para `confirmed`
-- (Futuro: envia notificacao por email)
+---
 
-**3. Atualizar o Admin - BookingsTab**
+## ✅ Fase 2: Booking por SKU + Slug (CONCLUÍDA)
 
-- Adicionar botao "Confirmar" nos bookings com status `pending`
-- Ao clicar, chama `calendar-approve-booking`
+### Migration executada:
+- `bookings.sku_id` (uuid, nullable, FK → service_skus)
 
-**4. Atualizar o Portal do Cliente**
+### Book.tsx — SKU selection flow:
+- Novo state: `pickedVariationId`, `pickedSkuId`
+- Step "sku" entre "service" e "date"
+- Auto-skip: sem variations → pular; 1 SKU → auto-selecionar
+- `serviceDuration` usa SKU duration com fallback
+- `sku_id` enviado no payload de hold/confirm
 
-- Na aba `BookingsTab` do portal, mostrar bookings com status `pending` com badge amarelo
-- Quando o admin confirmar, o status muda para `confirmed` e o cliente ve a mudanca
+### Book.tsx — Slug-based URL pre-selection:
+- Query params `?service=slug` e `?sku=slug`
+- UUID regex: `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`
+- UUID → WHERE id = param; Slug → WHERE slug = param
+- Pre-seleciona serviço e SKU, pula para date
 
-**5. Simplificar o fluxo de booking vindo do portal**
+### ServiceDetail.tsx — Slug links:
+- CTA principal: `/book?service=${service.slug}`
+- SkuCard: `/book?service=${service.slug}&sku=${sku.slug}`
 
-- Como o servico ja foi selecionado no portal (`/portal` -> `select-service`), o `/book` ja recebe `service_id` via query param
-- O step "service" ja e pulado automaticamente
-- Ao concluir o formulario, em vez de chamar hold+confirm, inserir direto como `pending`
+### ServiceDetail.tsx — FAQs:
+- Renderiza `services.faq` (jsonb array `[{question, answer}]`)
+- Accordion shadcn com estilo ServiceFAQ
 
-### Sobre notificacoes
+### ServiceDetail.tsx — JSON-LD geo-cluster:
+- `<script type="application/ld+json">` com schema LocalBusiness quando locationData existe
 
-- Notificacao in-app: o portal ja busca bookings do cliente, entao o status `pending` -> `confirmed` sera visivel automaticamente
-- Email (Resend): sera implementado em fase posterior conforme voce decidir. A infraestrutura de email do Lovable Cloud pode ser configurada quando estiver pronto
+### Admin — BookingsTab:
+- Join `service_skus(name, price)` na query
+- Colunas SKU name e preço na listagem
 
-### Arquivos a criar/editar
+### Admin — DashboardTab:
+- Cards: "Receita do Mês" e "Bookings do Mês"
+- Bar chart (recharts): top 5 serviços por booking count
 
-| Arquivo | Acao |
-|---|---|
-| `src/pages/Book.tsx` | Adicionar modo `pending` para bookings do portal (sem hold/confirm do Google) |
-| `supabase/functions/calendar-approve-booking/index.ts` | Nova edge function para admin aprovar booking |
-| `src/components/admin/BookingsTab.tsx` | Adicionar botao de confirmacao para bookings pendentes |
-| `src/pages/ClientPortal.tsx` | Atualizar BookingsTab para mostrar status pendente com badge |
-| `src/pages/Confirmation.tsx` | Adaptar mensagem para bookings pendentes ("aguardando confirmacao") |
+### Edge function — Price lock:
+- `calendar-confirm-booking` aceita `sku_id`
+- Busca preço do SKU no banco (nunca confia no frontend)
+- `total_price = promo_price || price` salvo no booking
 
-### Fluxo resumido
+---
 
-```text
-Portal: Seleciona servico -> /book?service=X&source=portal
-  |
-  v
-/book: Escolhe opcao -> Data -> Horario -> Formulario
-  |
-  v
-Insere booking com status "pending" (sem Google Calendar)
-  |
-  v
-Admin ve no painel -> Clica "Confirmar"
-  |
-  v
-Edge function cria evento no Google Calendar -> status = "confirmed"
-  |
-  v
-Cliente ve no portal: "Confirmado"
-```
+## 🔲 Fase 3: Quiz como Funil Real
+- `/quiz` landing, `/quiz/:slug/resultado`
+- WhatsApp com contexto
 
+## 🔲 Fase 4: Páginas de Conteúdo e Legal
+- `/privacidade`, `/termos`, `/perguntas-frequentes`
+
+## 🔲 Fase 5: Admin — Rotas Nomeadas
+- Sub-rotas reais com Outlet
+
+## 🔲 Fase 6: Limpeza
+- Remover arquivos legados
+- Atualizar Header

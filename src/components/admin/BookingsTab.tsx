@@ -118,6 +118,25 @@ export function BookingsTab() {
     },
   });
 
+  const approveBookingMutation = useMutation({
+    mutationFn: async (bookingId: string) => {
+      const response = await supabase.functions.invoke("calendar-approve-booking", {
+        body: { booking_id: bookingId },
+      });
+      if (response.error) throw new Error(response.error.message);
+      if (!response.data.success) throw new Error(response.data.error);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-sidebar-pending"] });
+      toast({ title: "Agendamento confirmado e adicionado ao calendário!" });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao confirmar", description: error.message, variant: "destructive" });
+    },
+  });
+
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: BookingStatus }) => {
       const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
@@ -289,8 +308,8 @@ export function BookingsTab() {
                         )}
                         {booking.status === "requested" && (
                           <>
-                            <Button size="sm" onClick={(e) => { e.stopPropagation(); updateStatus.mutate({ id: booking.id, status: "confirmed" }); }} className="gap-1 text-xs">
-                              <CheckCircle className="w-3 h-3" />Confirmar
+                            <Button size="sm" onClick={(e) => { e.stopPropagation(); approveBookingMutation.mutate(booking.id); }} className="gap-1 text-xs" disabled={approveBookingMutation.isPending}>
+                              {approveBookingMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}Confirmar
                             </Button>
                             <Button size="sm" variant="outline" className="text-destructive text-xs" onClick={(e) => { e.stopPropagation(); cancelBookingMutation.mutate(booking.id); }} disabled={cancelBookingMutation.isPending}>
                               {cancelBookingMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
@@ -327,7 +346,7 @@ export function BookingsTab() {
         booking={selectedBooking}
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-        onConfirm={(id) => updateStatus.mutate({ id, status: "confirmed" })}
+        onConfirm={(id) => approveBookingMutation.mutate(id)}
         onCancel={(id) => cancelBookingMutation.mutate(id)}
         onComplete={(id) => updateStatus.mutate({ id, status: "completed" })}
         onNoShow={(id) => updateStatus.mutate({ id, status: "no_show" })}
