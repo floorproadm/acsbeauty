@@ -264,11 +264,6 @@ export function AdminLayout({ children, activeTab, onTabChange, userRole }: Admi
 
       if (!roleRow) {
         await supabase.auth.signOut();
-        toast({
-          title: "Acesso negado",
-          description: "Faça login com uma conta administrativa.",
-          variant: "destructive",
-        });
         navigate("/admin/auth", { replace: true });
         return;
       }
