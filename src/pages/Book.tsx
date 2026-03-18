@@ -1056,102 +1056,164 @@ export default function Book() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
-                  className="bg-card rounded-2xl p-6 shadow-soft"
+                  className="space-y-4"
                 >
-                  {/* Hold countdown */}
-                  {holdExpiresAt && countdown > 0 && (
-                    <div className={`text-center mb-6 p-3 rounded-lg ${
-                      countdown <= 60 ? "bg-destructive/10 text-destructive" : "bg-rose-light text-rose-gold"
-                    }`}>
-                      <div className="flex items-center justify-center gap-2">
-                        <Clock className="w-4 h-4" />
-                        <span className="font-medium">
-                          {language === "pt" ? "Reservado por" : "Reserved for"} {formatCountdown(countdown)}
-                        </span>
+                  {/* Service/SKU Summary Card */}
+                  {(selectedSkuData || service || pkg || offer) && (
+                    <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/50">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-rose-light flex items-center justify-center shrink-0">
+                          <Calendar className="w-6 h-6 text-rose-gold" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-serif text-lg font-semibold text-foreground leading-tight">
+                            {itemName}
+                          </h3>
+                          {selectedSkuData && selectedSkuData.name !== service?.name && (
+                            <p className="text-sm text-muted-foreground mt-0.5">{service?.name}</p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-4 border-t border-border/50 space-y-2.5">
+                        {/* Duration */}
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground flex items-center gap-2">
+                            <Clock className="w-4 h-4" />
+                            {language === "pt" ? "Duração" : "Duration"}
+                          </span>
+                          <span className="font-medium">{serviceDuration} min</span>
+                        </div>
+
+                        {/* Date & Time */}
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground flex items-center gap-2">
+                            <Calendar className="w-4 h-4" />
+                            {language === "pt" ? "Data e horário" : "Date & time"}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">
+                              {selectedDate && format(selectedDate, "dd/MM/yyyy")}
+                              {" "}{language === "pt" ? "às" : "at"}{" "}
+                              {selectedSlot && new Intl.DateTimeFormat('en-US', {
+                                hour: '2-digit', minute: '2-digit', hour12: false,
+                                timeZone: 'America/New_York',
+                              }).format(parseISO(selectedSlot.start))}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setStep("time");
+                                setHoldId(null);
+                                setHoldExpiresAt(null);
+                                setSelectedSlot(null);
+                              }}
+                              className="text-xs text-rose-gold hover:underline font-medium"
+                            >
+                              {language === "pt" ? "Alterar" : "Change"}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Price */}
+                        {(() => {
+                          const skuPrice = selectedSkuData?.price ? Number(selectedSkuData.price) : null;
+                          const skuPromo = selectedSkuData?.promo_price ? Number(selectedSkuData.promo_price) : null;
+                          const hasPromo = skuPromo != null && skuPrice != null && skuPromo < skuPrice;
+                          const displayPrice = hasPromo ? skuPromo : (skuPrice || (service?.promo_price ? Number(service.promo_price) : null) || service?.price);
+                          const originalPrice = hasPromo ? skuPrice : (service?.promo_price && Number(service.promo_price) < service.price ? service.price : null);
+
+                          if (!displayPrice) return null;
+                          return (
+                            <div className="flex items-center justify-between text-sm pt-2.5 border-t border-border/50">
+                              <span className="font-semibold text-foreground">Total</span>
+                              <div className="flex items-center gap-2">
+                                {originalPrice && (
+                                  <span className="text-muted-foreground line-through text-xs">
+                                    ${Number(originalPrice).toFixed(2)}
+                                  </span>
+                                )}
+                                <span className="font-bold text-lg text-rose-gold">
+                                  ${Number(displayPrice).toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                   )}
 
-                  {/* Selected time summary */}
-                  <div className="bg-muted rounded-lg p-4 mb-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          {language === "pt" ? "Data e horário" : "Date and time"}
-                        </p>
-                        <p className="font-medium">
-                          {selectedDate && format(selectedDate, "dd/MM/yyyy", { locale: language === "pt" ? ptBR : undefined })}
-                          {" "}{language === "pt" ? "às" : "at"}{" "}
-                          {selectedSlot && new Intl.DateTimeFormat('en-US', {
-                            hour: '2-digit', minute: '2-digit', hour12: false,
-                            timeZone: 'America/New_York',
-                          }).format(parseISO(selectedSlot.start))}
-                        </p>
+                  {/* Form Card */}
+                  <div className="bg-card rounded-2xl p-6 shadow-soft">
+                    {/* Hold countdown - compact */}
+                    {holdExpiresAt && countdown > 0 && !isPortalSource && (
+                      <div className={`text-center mb-5 p-2.5 rounded-lg text-sm ${
+                        countdown <= 60 ? "bg-destructive/10 text-destructive" : "bg-rose-light text-rose-gold"
+                      }`}>
+                        <div className="flex items-center justify-center gap-2">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span className="font-medium">
+                            {language === "pt" ? "Reservado por" : "Reserved for"} {formatCountdown(countdown)}
+                          </span>
+                        </div>
                       </div>
+                    )}
+
+                    <h3 className="font-serif text-lg font-semibold mb-4">
+                      {language === "pt" ? "Seus dados" : "Your information"}
+                    </h3>
+
+                    <form onSubmit={handleSubmit((data) => isPortalSource ? portalConfirmBooking.mutate(data) : confirmBooking.mutate(data))} className="space-y-5">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="name">{t("booking.full_name")} *</Label>
+                        <Input
+                          id="name"
+                          placeholder={t("booking.full_name_placeholder")}
+                          {...register("name")}
+                          className={errors.name ? "border-destructive" : ""}
+                        />
+                        {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="phone">{t("booking.phone")} *</Label>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          placeholder="+1 (555) 123-4567"
+                          {...register("phone")}
+                          className={errors.phone ? "border-destructive" : ""}
+                        />
+                        {errors.phone && <p className="text-sm text-destructive">{errors.phone.message}</p>}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="instagram">{t("booking.instagram")}</Label>
+                        <Input id="instagram" placeholder="@yourusername" {...register("instagram")} />
+                      </div>
+
                       <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setStep("time");
-                          setHoldId(null);
-                          setHoldExpiresAt(null);
-                          setSelectedSlot(null);
-                        }}
+                        type="submit"
+                        variant="hero"
+                        size="xl"
+                        className="w-full"
+                        disabled={confirmBooking.isPending || portalConfirmBooking.isPending || (!isPortalSource && countdown <= 0)}
                       >
-                        {language === "pt" ? "Alterar" : "Change"}
+                        {(confirmBooking.isPending || portalConfirmBooking.isPending) ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            {t("global.processing")}
+                          </>
+                        ) : (
+                          <>
+                            <Check className="w-5 h-5" />
+                            {isPortalSource ? (language === "pt" ? "Enviar solicitação" : "Submit request") : t("booking.confirm")}
+                          </>
+                        )}
                       </Button>
-                    </div>
+                    </form>
                   </div>
-
-                  <form onSubmit={handleSubmit((data) => isPortalSource ? portalConfirmBooking.mutate(data) : confirmBooking.mutate(data))} className="space-y-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">{t("booking.full_name")} *</Label>
-                      <Input
-                        id="name"
-                        placeholder={t("booking.full_name_placeholder")}
-                        {...register("name")}
-                        className={errors.name ? "border-destructive" : ""}
-                      />
-                      {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">{t("booking.phone")} *</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        placeholder="+1 (555) 123-4567"
-                        {...register("phone")}
-                        className={errors.phone ? "border-destructive" : ""}
-                      />
-                      {errors.phone && <p className="text-sm text-destructive">{errors.phone.message}</p>}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="instagram">{t("booking.instagram")}</Label>
-                      <Input id="instagram" placeholder="@yourusername" {...register("instagram")} />
-                    </div>
-
-                    <Button
-                      type="submit"
-                      variant="hero"
-                      size="xl"
-                      className="w-full"
-                      disabled={confirmBooking.isPending || portalConfirmBooking.isPending || countdown <= 0}
-                    >
-                      {(confirmBooking.isPending || portalConfirmBooking.isPending) ? (
-                        <>
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          {t("global.processing")}
-                        </>
-                      ) : (
-                        <>
-                          <Check className="w-5 h-5" />
-                          {isPortalSource ? (language === "pt" ? "Enviar solicitação" : "Submit request") : t("booking.confirm")}
-                        </>
-                      )}
-                    </Button>
-                  </form>
                 </motion.div>
               )}
             </AnimatePresence>
