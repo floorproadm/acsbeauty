@@ -23,7 +23,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { LanguageToggle } from "@/components/LanguageToggle";
+import { cn } from "@/lib/utils";
 import acsLogo from "@/assets/acs-logo.png";
 import founderImg from "@/assets/founder.jpg";
 import teamHero from "@/assets/team-hero.jpg";
@@ -444,6 +444,33 @@ function PointsTab({
   );
 }
 
+function LanguageSelector() {
+  const { language, setLanguage } = useLanguage();
+  const options = [
+    { code: "pt" as const, label: "Português", flag: "🇧🇷" },
+    { code: "en" as const, label: "English", flag: "🇺🇸" },
+  ];
+  return (
+    <div className="flex gap-2">
+      {options.map((opt) => (
+        <button
+          key={opt.code}
+          onClick={() => setLanguage(opt.code)}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all",
+            language === opt.code
+              ? "bg-primary/10 border border-primary/30 text-primary"
+              : "bg-muted/50 border border-transparent text-muted-foreground hover:bg-muted"
+          )}
+        >
+          <span>{opt.flag}</span>
+          <span>{opt.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function ProfileTab({
   profile,
   isPt,
@@ -493,9 +520,10 @@ function ProfileTab({
         <p className="text-muted-foreground text-sm mt-0.5">{isPt ? "Meu Perfil" : "My Profile"}</p>
       </div>
 
-      {/* Language toggle */}
-      <div className="flex justify-center">
-        <LanguageToggle />
+      {/* Idioma / Language preference */}
+      <div className="bg-card border border-border rounded-2xl p-4">
+        <p className="font-medium text-foreground text-sm mb-3">{isPt ? "Idioma preferido" : "Preferred language"}</p>
+        <LanguageSelector />
       </div>
 
       {/* Informações pessoais */}
@@ -937,7 +965,7 @@ export default function ClientPortal() {
       {tab !== "home" && tab !== "select-service" && (
         <header className="flex items-center justify-between px-5 pt-10 pb-2 shrink-0">
           <img src={acsLogo} alt="ACS Beauty" className="h-10 w-auto" />
-          <LanguageToggle />
+          <LanguageSelector />
         </header>
       )}
 
