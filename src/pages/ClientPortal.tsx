@@ -941,14 +941,14 @@ export default function ClientPortal() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) { navigate("/auth"); return; }
 
-    // Verifica se é admin — se for, não deve estar aqui
+    // Verifica se é admin — se for, permite navegar mas sem dados de cliente
     const { data: roleRow } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", session.user.id)
       .limit(1)
       .maybeSingle();
-    if (roleRow) { navigate("/admin"); return; }
+    const isStaffUser = !!roleRow;
 
     // Pega telefone do metadata (registrado no Auth)
     const phone = session.user.user_metadata?.phone;
