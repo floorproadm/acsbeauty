@@ -1175,9 +1175,9 @@ export default function Book() {
                       variant="hero"
                       size="xl"
                       className="w-full"
-                      disabled={confirmBooking.isPending || countdown <= 0}
+                      disabled={confirmBooking.isPending || portalConfirmBooking.isPending || countdown <= 0}
                     >
-                      {confirmBooking.isPending ? (
+                      {(confirmBooking.isPending || portalConfirmBooking.isPending) ? (
                         <>
                           <Loader2 className="w-5 h-5 animate-spin" />
                           {t("global.processing")}
@@ -1185,7 +1185,7 @@ export default function Book() {
                       ) : (
                         <>
                           <Check className="w-5 h-5" />
-                          {t("booking.confirm")}
+                          {isPortalSource ? (language === "pt" ? "Enviar solicitação" : "Submit request") : t("booking.confirm")}
                         </>
                       )}
                     </Button>
