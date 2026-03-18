@@ -166,8 +166,12 @@ export default function Auth() {
           <div className="px-8 pt-8 pb-4">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
-                {mode === "register" && (
+                {mode === "register" ? (
                   <button onClick={() => setMode("login")} className="p-1.5 rounded-full hover:bg-muted transition-colors">
+                    <ArrowLeft className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                ) : (
+                  <button onClick={() => navigate("/")} className="p-1.5 rounded-full hover:bg-muted transition-colors">
                     <ArrowLeft className="w-4 h-4 text-muted-foreground" />
                   </button>
                 )}
