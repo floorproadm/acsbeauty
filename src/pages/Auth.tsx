@@ -53,7 +53,7 @@ export default function Auth() {
           .eq("user_id", session.user.id)
           .limit(1)
           .maybeSingle();
-        navigate(roleRow ? "/admin/auth" : "/");
+        navigate(roleRow ? "/admin/auth" : "/portal");
       }
     });
     if (searchParams.get("mode") === "register") setMode("register");
