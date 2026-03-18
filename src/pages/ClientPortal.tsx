@@ -942,7 +942,7 @@ export default function ClientPortal() {
         <nav className="shrink-0 border-t border-border bg-background/95 backdrop-blur-sm px-2 pb-safe">
           <div className="flex items-center justify-around py-2">
             {navItems.map(({ id, icon: Icon, labelPt, labelEn }) => {
-              const active = tab === id || (id === "book" && tab === "select-service");
+              const active = tab === id || (id === "book" && tab === ("select-service" as Tab));
               return (
                 <button
                   key={id}
