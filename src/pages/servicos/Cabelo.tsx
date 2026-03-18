@@ -214,8 +214,6 @@ export default function Cabelo() {
         {/* Before & After Gallery */}
         <BeforeAfterGallery images={galleryImages} />
 
-        {/* FAQ Section */}
-        <ServiceFAQ faqs={faqs} />
 
         {/* Final CTA */}
         <section className="py-16 md:py-20 bg-gradient-warm">
