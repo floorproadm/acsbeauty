@@ -49,8 +49,8 @@ export default function Confirmation() {
   const { t } = useLanguage();
   
   // Get booking data from navigation state (passed from Book.tsx)
-  // This eliminates the need to query the database with RLS restrictions
   const bookingData = location.state?.bookingData as BookingData | undefined;
+  const isPending = location.state?.isPending === true || bookingData?.status === "requested";
 
   const generateGoogleCalendarUrl = () => {
     if (!bookingData) return "#";
