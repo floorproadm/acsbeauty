@@ -263,12 +263,13 @@ export function AdminLayout({ children, activeTab, onTabChange, userRole }: Admi
         .single();
 
       if (!roleRow) {
+        await supabase.auth.signOut();
         toast({
           title: "Acesso negado",
-          description: "Você não tem permissão para acessar esta área.",
+          description: "Faça login com uma conta administrativa.",
           variant: "destructive",
         });
-        navigate("/");
+        navigate("/admin/auth", { replace: true });
         return;
       }
 
