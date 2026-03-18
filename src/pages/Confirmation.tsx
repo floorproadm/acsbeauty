@@ -123,11 +123,17 @@ export default function Confirmation() {
           >
             {/* Success Header */}
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-rose-light rounded-full flex items-center justify-center mx-auto mb-4">
-                <Check className="w-8 h-8 text-rose-gold" />
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isPending ? "bg-yellow-100" : "bg-rose-light"}`}>
+                {isPending ? <Clock className="w-8 h-8 text-yellow-600" /> : <Check className="w-8 h-8 text-rose-gold" />}
               </div>
-              <h1 className="font-serif text-3xl font-bold mb-2">{t("confirm.title")}</h1>
-              <p className="text-muted-foreground">{t("confirm.subtitle")}</p>
+              <h1 className="font-serif text-3xl font-bold mb-2">
+                {isPending ? "Solicitação Enviada!" : t("confirm.title")}
+              </h1>
+              <p className="text-muted-foreground">
+                {isPending
+                  ? "Seu agendamento está aguardando confirmação. Você receberá uma notificação assim que for aprovado."
+                  : t("confirm.subtitle")}
+              </p>
             </div>
 
             {/* Booking Details */}
