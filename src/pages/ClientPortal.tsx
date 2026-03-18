@@ -165,7 +165,7 @@ function HomeTab({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
-        onClick={() => navigate("/book")}
+        onClick={() => onTabChange("select-service")}
         className="w-full rounded-2xl bg-primary text-primary-foreground p-5 flex items-center justify-between"
       >
         <div className="flex items-center gap-3">
