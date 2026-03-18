@@ -1141,7 +1141,7 @@ export default function Book() {
                     </div>
                   </div>
 
-                  <form onSubmit={handleSubmit((data) => confirmBooking.mutate(data))} className="space-y-6">
+                  <form onSubmit={handleSubmit((data) => isPortalSource ? portalConfirmBooking.mutate(data) : confirmBooking.mutate(data))} className="space-y-6">
                     <div className="space-y-2">
                       <Label htmlFor="name">{t("booking.full_name")} *</Label>
                       <Input
