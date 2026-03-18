@@ -648,8 +648,8 @@ export default function Book() {
   // Step list for indicator
   const allSteps = (() => {
     const base: string[] = [];
-    if (!serviceParam && !offerId && !packageId) base.push("service");
-    if (activeServiceId) base.push("sku");
+    if (!serviceParam && !offerId && !packageId && !isPortalSource) base.push("service");
+    if (activeServiceId && !isPortalSource) base.push("sku");
     base.push("date", "time", "form");
     return base;
   })();
