@@ -479,6 +479,108 @@ export default function Book() {
     retryDelay: 1000,
   });
 
+  // Portal confirm mutation — inserts booking as "requested" (pending) without Google Calendar
+  const portalConfirmBooking = useMutation({
+    mutationFn: async (formData: BookingFormData) => {
+      if (!holdId || !selectedSlot) throw new Error("Missing booking information");
+
+      const finalServiceId = offer?.service_id || activeServiceId || null;
+
+      // Upsert client by phone
+      const { data: existingClient } = await supabase
+        .from("clients")
+        .select("id")
+        .eq("phone", formData.phone)
+        .maybeSingle();
+
+      let clientId: string;
+      if (existingClient) {
+        clientId = existingClient.id;
+        await supabase.from("clients").update({
+          name: formData.name,
+          instagram: formData.instagram || null,
+        }).eq("id", clientId);
+      } else {
+        const { data: newClient, error: clientError } = await supabase
+          .from("clients")
+          .insert({
+            name: formData.name,
+            phone: formData.phone,
+            instagram: formData.instagram || null,
+          })
+          .select()
+          .single();
+        if (clientError) throw clientError;
+        clientId = newClient.id;
+      }
+
+      // Fetch SKU price (price lock)
+      let totalPrice: number | null = null;
+      if (pickedSkuId) {
+        const { data: skuData } = await supabase
+          .from("service_skus")
+          .select("price, promo_price")
+          .eq("id", pickedSkuId)
+          .single();
+        if (skuData) {
+          totalPrice = (skuData.promo_price != null && Number(skuData.promo_price) < Number(skuData.price))
+            ? Number(skuData.promo_price)
+            : Number(skuData.price);
+        }
+      }
+
+      // Insert booking as "requested" (pending approval)
+      const { data: booking, error: bookingError } = await supabase
+        .from("bookings")
+        .insert({
+          client_id: clientId,
+          client_name: formData.name,
+          client_phone: formData.phone,
+          client_email: `${formData.phone.replace(/\D/g, "")}@placeholder.com`,
+          service_id: finalServiceId,
+          package_id: packageId || null,
+          sku_id: pickedSkuId || null,
+          total_price: totalPrice,
+          start_time: selectedSlot.start,
+          end_time: selectedSlot.end,
+          timezone: "America/New_York",
+          status: "requested",
+          notes: null,
+        })
+        .select("*, services(id, name, duration_minutes, price, promo_price), packages(id, name, total_price, sessions_qty)")
+        .single();
+
+      if (bookingError) throw bookingError;
+
+      // Delete hold
+      await supabase.from("booking_holds").delete().eq("id", holdId);
+
+      return booking;
+    },
+    onSuccess: (booking) => {
+      toast.success(language === "pt" ? "Solicitação enviada!" : "Request submitted!");
+      navigate(`/confirm/${booking.id}`, {
+        state: {
+          bookingData: {
+            id: booking.id,
+            client_name: booking.client_name,
+            start_time: booking.start_time,
+            end_time: booking.end_time,
+            timezone: booking.timezone,
+            status: "requested",
+            services: booking.services,
+            packages: booking.packages,
+          },
+          isPending: true,
+        },
+      });
+    },
+    onError: (error) => {
+      console.error("Portal confirm error:", error);
+      toast.error(language === "pt" ? "Erro ao enviar solicitação" : "Failed to submit request");
+    },
+  });
+
   const { register, handleSubmit, formState: { errors } } = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
   });
