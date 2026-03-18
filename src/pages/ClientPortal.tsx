@@ -191,7 +191,7 @@ function HomeTab({
             </p>
           </div>
         </div>
-        <Scissors className="w-5 h-5 opacity-70" />
+        
       </motion.button>
 
       {/* Quick access cards */}
