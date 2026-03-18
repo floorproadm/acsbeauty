@@ -937,37 +937,39 @@ export default function ClientPortal() {
         </AnimatePresence>
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="shrink-0 border-t border-border bg-background/95 backdrop-blur-sm px-2 pb-safe">
-        <div className="flex items-center justify-around py-2">
-          {navItems.map(({ id, icon: Icon, labelPt, labelEn }) => {
-            const active = tab === id;
-            return (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                className="flex flex-col items-center gap-1 px-3 py-2 relative"
-              >
-                {active && (
-                  <motion.div
-                    layoutId="nav-pill"
-                    className="absolute inset-0 bg-primary/8 rounded-2xl"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <Icon
-                  className={`w-5 h-5 transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}
-                />
-                <span
-                  className={`text-[10px] font-medium transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}
+      {/* Bottom Navigation — hidden during service selection */}
+      {tab !== "select-service" && (
+        <nav className="shrink-0 border-t border-border bg-background/95 backdrop-blur-sm px-2 pb-safe">
+          <div className="flex items-center justify-around py-2">
+            {navItems.map(({ id, icon: Icon, labelPt, labelEn }) => {
+              const active = tab === id || (id === "book" && tab === "select-service");
+              return (
+                <button
+                  key={id}
+                  onClick={() => setTab(id === "book" ? "select-service" : id)}
+                  className="flex flex-col items-center gap-1 px-3 py-2 relative"
                 >
-                  {isPt ? labelPt : labelEn}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+                  {active && (
+                    <motion.div
+                      layoutId="nav-pill"
+                      className="absolute inset-0 bg-primary/8 rounded-2xl"
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                  <Icon
+                    className={`w-5 h-5 transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}
+                  />
+                  <span
+                    className={`text-[10px] font-medium transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}
+                  >
+                    {isPt ? labelPt : labelEn}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+      )}
     </div>
   );
 }
