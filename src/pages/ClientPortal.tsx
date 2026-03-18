@@ -964,7 +964,7 @@ export default function ClientPortal() {
       {/* Header — hidden on home and select-service tabs */}
       {tab !== "home" && tab !== "select-service" && (
         <header className="flex items-center justify-between px-5 pt-10 pb-2 shrink-0">
-          <img src={acsLogo} alt="ACS Beauty" className="h-10 w-auto" />
+          <img src={acsLogo} alt="ACS Beauty" className="h-10 w-auto cursor-pointer" onClick={() => setTab("home")} />
         </header>
       )}
 
