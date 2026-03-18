@@ -576,11 +576,226 @@ function ProfileTab({
   );
 }
 
+// ─── Service Selection Tab ────────────────────────────────────────────────────
+
+function ServiceSelectionTab({
+  isPt,
+  onBack,
+}: {
+  isPt: boolean;
+  onBack: () => void;
+}) {
+  const navigate = useNavigate();
+  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [loadingSvc, setLoadingSvc] = useState(true);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    async function fetch() {
+      const { data } = await supabase
+        .from("services")
+        .select("id, name, description, price, duration_minutes, hero_image_url, category, category_slug, is_active")
+        .eq("is_active", true)
+        .order("category_slug")
+        .order("name");
+      setServices((data as ServiceItem[]) ?? []);
+      setLoadingSvc(false);
+    }
+    fetch();
+  }, []);
+
+  function toggleService(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  const categories = [
+    { slug: "all", label: isPt ? "Todos" : "All" },
+    ...Array.from(new Set(services.map((s) => s.category_slug).filter(Boolean))).map((slug) => ({
+      slug: slug!,
+      label: services.find((s) => s.category_slug === slug)?.category ?? slug!,
+    })),
+  ];
+
+  const filtered = services.filter((s) => {
+    const matchCategory = activeCategory === "all" || s.category_slug === activeCategory;
+    const matchSearch = !search || s.name.toLowerCase().includes(search.toLowerCase());
+    return matchCategory && matchSearch;
+  });
+
+  function handleContinue() {
+    const ids = Array.from(selected);
+    if (ids.length === 1) {
+      navigate(`/book?service=${ids[0]}`);
+    } else {
+      navigate(`/book?services=${ids.join(",")}`);
+    }
+  }
+
+  return (
+    <div className="pb-32">
+      {/* Header */}
+      <div className="flex items-center gap-3 pt-2 mb-4">
+        <button onClick={onBack} className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center">
+          <ArrowUpRight className="w-4 h-4 text-muted-foreground rotate-[225deg]" />
+        </button>
+        <h2 className="font-serif text-xl font-bold text-foreground">
+          {isPt ? "Escolha seu serviço" : "Choose your service"}
+        </h2>
+      </div>
+
+      {/* Search */}
+      <div className="relative mb-4">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={isPt ? "Buscar serviços..." : "Search services..."}
+          className="w-full h-10 pl-4 pr-4 rounded-xl border border-border bg-card text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
+        />
+      </div>
+
+      {/* Category tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-3 mb-2 scrollbar-none">
+        {categories.map(({ slug, label }) => (
+          <button
+            key={slug}
+            onClick={() => setActiveCategory(slug)}
+            className={`shrink-0 px-4 py-2 rounded-full text-xs font-medium transition ${
+              activeCategory === slug
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted/50 text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Service cards */}
+      {loadingSvc ? (
+        <div className="flex justify-center py-16">
+          <div className="animate-spin w-7 h-7 rounded-full border-2 border-primary border-t-transparent" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-16">
+          <p className="text-muted-foreground text-sm">
+            {isPt ? "Nenhum serviço encontrado" : "No services found"}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filtered.map((svc) => {
+            const isSelected = selected.has(svc.id);
+            return (
+              <motion.button
+                key={svc.id}
+                onClick={() => toggleService(svc.id)}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`w-full text-left rounded-2xl border-2 overflow-hidden transition-all ${
+                  isSelected
+                    ? "border-primary shadow-md shadow-primary/10"
+                    : "border-border hover:border-primary/20"
+                } bg-card`}
+              >
+                {/* Service image */}
+                {svc.hero_image_url && (
+                  <div className="relative">
+                    <img
+                      src={svc.hero_image_url}
+                      alt={svc.name}
+                      className="w-full h-40 object-cover"
+                    />
+                    {isSelected && (
+                      <div className="absolute top-3 right-3 w-7 h-7 rounded-full bg-primary flex items-center justify-center">
+                        <CheckCircle2 className="w-5 h-5 text-primary-foreground" />
+                      </div>
+                    )}
+                  </div>
+                )}
+                {!svc.hero_image_url && isSelected && (
+                  <div className="absolute top-3 right-3 w-7 h-7 rounded-full bg-primary flex items-center justify-center">
+                    <CheckCircle2 className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                )}
+
+                {/* Service info */}
+                <div className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-foreground text-base">{svc.name}</h3>
+                      {svc.description && (
+                        <p className="text-muted-foreground text-sm mt-0.5 line-clamp-2">
+                          {svc.description}
+                        </p>
+                      )}
+                    </div>
+                    {!svc.hero_image_url && isSelected && (
+                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center ml-2 shrink-0">
+                        <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border/50">
+                    <span className="text-primary font-semibold text-sm">${svc.price.toFixed(2)}</span>
+                    <span className="flex items-center gap-1 text-muted-foreground text-xs">
+                      <Clock className="w-3.5 h-3.5" />
+                      {svc.duration_minutes} min
+                    </span>
+                    <div className="ml-auto w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <ChevronRight className="w-4 h-4 text-primary" />
+                    </div>
+                  </div>
+                </div>
+              </motion.button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Continue button */}
+      <AnimatePresence>
+        {selected.size > 0 && (
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="fixed bottom-20 left-0 right-0 px-5 z-50"
+          >
+            <div className="max-w-[480px] mx-auto">
+              <button
+                onClick={handleContinue}
+                className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-semibold text-base shadow-lg shadow-primary/25"
+              >
+                <span>{isPt ? "Continuar" : "Continue"}</span>
+                <span className="block text-primary-foreground/70 text-xs font-normal mt-0.5">
+                  {selected.size} {selected.size === 1
+                    ? (isPt ? "serviço selecionado" : "service selected")
+                    : (isPt ? "serviços selecionados" : "services selected")}
+                </span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ─── Bottom Nav ───────────────────────────────────────────────────────────────
 
 const navItems: { id: Tab; icon: typeof Home; labelPt: string; labelEn: string }[] = [
   { id: "home",    icon: Home,     labelPt: "Início",         labelEn: "Home" },
-  { id: "book",    icon: Calendar, labelPt: "Agendamentos",   labelEn: "Bookings" },
+  { id: "book",    icon: Calendar, labelPt: "Agendamentos",   labelEn: "Book" },
   { id: "points",  icon: Star,     labelPt: "ACS Points",     labelEn: "ACS Points" },
   { id: "profile", icon: User,     labelPt: "Perfil",         labelEn: "Profile" },
 ];
