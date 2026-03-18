@@ -493,9 +493,10 @@ function ProfileTab({
         <p className="text-muted-foreground text-sm mt-0.5">{isPt ? "Meu Perfil" : "My Profile"}</p>
       </div>
 
-      {/* Language toggle */}
-      <div className="flex justify-center">
-        <LanguageToggle />
+      {/* Idioma / Language preference */}
+      <div className="bg-card border border-border rounded-2xl p-4">
+        <p className="font-medium text-foreground text-sm mb-3">{isPt ? "Idioma preferido" : "Preferred language"}</p>
+        <LanguageSelector />
       </div>
 
       {/* Informações pessoais */}
