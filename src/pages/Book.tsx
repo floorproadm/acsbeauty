@@ -648,8 +648,8 @@ export default function Book() {
   // Step list for indicator
   const allSteps = (() => {
     const base: string[] = [];
-    if (!serviceParam && !offerId && !packageId) base.push("service");
-    if (activeServiceId) base.push("sku");
+    if (!serviceParam && !offerId && !packageId && !isPortalSource) base.push("service");
+    if (activeServiceId && !isPortalSource) base.push("sku");
     base.push("date", "time", "form");
     return base;
   })();
@@ -664,7 +664,9 @@ export default function Book() {
       setStep("date");
       setSelectedDate(undefined);
     } else if (step === "date") {
-      if (pickedSkuId || activeServiceId) {
+      if (isPortalSource) {
+        navigate(-1);
+      } else if (pickedSkuId || activeServiceId) {
         setStep("sku");
       } else if (isCalendarFlow) {
         setStep("service");
@@ -672,9 +674,13 @@ export default function Book() {
         navigate(-1);
       }
     } else if (step === "sku") {
-      setPickedVariationId(null);
-      setPickedSkuId(null);
-      setStep("service");
+      if (isPortalSource) {
+        navigate(-1);
+      } else {
+        setPickedVariationId(null);
+        setPickedSkuId(null);
+        setStep("service");
+      }
     } else if (step === "service") {
       navigate(-1);
     } else {
