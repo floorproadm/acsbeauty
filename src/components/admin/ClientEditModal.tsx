@@ -64,7 +64,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
         name: client.name || "",
         email: client.email || "",
         phone: client.phone || "",
-        instagram: client.instagram || "",
+        
         birthday: client.birthday ? parseISO(client.birthday) : null
       });
     }
