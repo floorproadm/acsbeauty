@@ -1222,7 +1222,7 @@ export default function Book() {
                             <button
                           type="button"
                           onClick={() => {
-                            setStep("time");
+                            setStep("date");
                             setHoldId(null);
                             setHoldExpiresAt(null);
                             setSelectedSlot(null);
