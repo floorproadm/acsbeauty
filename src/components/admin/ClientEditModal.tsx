@@ -33,18 +33,21 @@ import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
+interface ClientData {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  instagram: string | null;
+  birthday?: string | null;
+}
+
 interface ClientEditModalProps {
-  client: {
-    id: string;
-    name: string;
-    email: string | null;
-    phone: string | null;
-    instagram: string | null;
-    birthday?: string | null;
-  } | null;
+  client: ClientData | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDeleted?: () => void;
+  mode?: "edit" | "create";
 }
 
 export function ClientEditModal({ client, open, onOpenChange, onDeleted }: ClientEditModalProps) {
