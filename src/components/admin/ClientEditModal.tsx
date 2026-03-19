@@ -39,12 +39,13 @@ interface ClientEditModalProps {
     name: string;
     email: string | null;
     phone: string | null;
-    instagram: string | null;
+    
     birthday?: string | null;
   } | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDeleted?: () => void;
+  mode?: "edit" | "create";
 }
 
 export function ClientEditModal({ client, open, onOpenChange, onDeleted }: ClientEditModalProps) {
@@ -52,7 +53,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
     name: "",
     email: "",
     phone: "",
-    instagram: "",
+    
     birthday: null as Date | null
   });
   const { toast } = useToast();
@@ -64,7 +65,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
         name: client.name || "",
         email: client.email || "",
         phone: client.phone || "",
-        instagram: client.instagram || "",
+        
         birthday: client.birthday ? parseISO(client.birthday) : null
       });
     }
@@ -79,7 +80,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
         name: data.name,
         email: data.email || null,
         phone: data.phone || null,
-        instagram: data.instagram || null,
+        
         birthday: data.birthday ? format(data.birthday, "yyyy-MM-dd") : null
       }).
       eq("id", client.id);
@@ -184,15 +185,6 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
             
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="instagram">Instagram</Label>
-            <Input
-              id="instagram"
-              value={formData.instagram}
-              onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-              placeholder="@usuario" />
-            
-          </div>
 
           <div className="space-y-2">
             <Label>Aniversário</Label>
