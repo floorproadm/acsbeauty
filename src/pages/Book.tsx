@@ -683,7 +683,6 @@ export default function Book() {
     setSelectedDate(date);
     setSelectedSlot(null);
     setHoldId(null);
-    if (date) setStep("time");
   };
 
   const handleSlotSelect = (slot: TimeSlot) => {
