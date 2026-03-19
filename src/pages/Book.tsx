@@ -654,7 +654,7 @@ export default function Book() {
       setCountdown(remaining);
       if (remaining <= 0) {
         toast.error(language === "pt" ? "Tempo expirado. Por favor, selecione um novo horário." : "Time expired. Please select a new time.");
-        setStep("time");
+        setStep("date");
         setHoldId(null);
         setHoldExpiresAt(null);
         setSelectedSlot(null);
