@@ -487,7 +487,7 @@ export default function Book() {
         navigate(`/confirm/${data.booking.id}`, { state: { bookingData: data.booking } });
       } else {
         toast.error(data.error || "Failed to confirm booking");
-        setStep("time");
+        setStep("date");
         setHoldId(null);
         setSelectedSlot(null);
         refetchSlots();
