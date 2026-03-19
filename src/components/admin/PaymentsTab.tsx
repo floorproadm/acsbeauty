@@ -22,6 +22,8 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { motion } from "framer-motion";
 import { PaymentExportSheet } from "./PaymentExportSheet";
+import { ManualPaymentSheet } from "./ManualPaymentSheet";
+import { Plus } from "lucide-react";
 
 type PaymentFilter = "all" | "pending" | "paid" | "no_show";
 type PeriodFilter = "week" | "month" | "quarter" | "year" | "all";
