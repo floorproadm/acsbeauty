@@ -39,7 +39,7 @@ interface ClientEditModalProps {
     name: string;
     email: string | null;
     phone: string | null;
-    instagram: string | null;
+    
     birthday?: string | null;
   } | null;
   open: boolean;
