@@ -375,7 +375,7 @@ export default function Book() {
       if (response.error) throw new Error(response.error.message);
       return response.data;
     },
-    enabled: !!selectedDate && step === "time",
+    enabled: !!selectedDate && step === "date",
     staleTime: 30000
   });
 
