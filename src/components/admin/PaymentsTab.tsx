@@ -22,6 +22,8 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { motion } from "framer-motion";
 import { PaymentExportSheet } from "./PaymentExportSheet";
+import { ManualPaymentSheet } from "./ManualPaymentSheet";
+import { Plus } from "lucide-react";
 
 type PaymentFilter = "all" | "pending" | "paid" | "no_show";
 type PeriodFilter = "week" | "month" | "quarter" | "year" | "all";
@@ -81,6 +83,7 @@ export function PaymentsTab() {
   const [filter, setFilter] = useState<PaymentFilter>("all");
   const [period, setPeriod] = useState<PeriodFilter>("month");
   const [exportOpen, setExportOpen] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
   const [popoverOpenId, setPopoverOpenId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -180,13 +183,22 @@ export function PaymentsTab() {
             Controle de recebimentos e pendências
           </p>
         </div>
-        <button
-          onClick={() => setExportOpen(true)}
-          className="p-2.5 rounded-xl bg-muted hover:bg-muted/80 transition"
-          title="Exportar relatório"
-        >
-          <Download className="w-4.5 h-4.5 text-foreground" />
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setManualOpen(true)}
+            className="p-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition"
+            title="Registrar pagamento manual"
+          >
+            <Plus className="w-4.5 h-4.5" />
+          </button>
+          <button
+            onClick={() => setExportOpen(true)}
+            className="p-2.5 rounded-xl bg-muted hover:bg-muted/80 transition"
+            title="Exportar relatório"
+          >
+            <Download className="w-4.5 h-4.5 text-foreground" />
+          </button>
+        </div>
       </div>
 
       {/* Period pills */}
@@ -439,6 +451,9 @@ export function PaymentsTab() {
         totalReceived={totalReceived}
         totalPending={totalPending}
       />
+
+      {/* Manual Payment Sheet */}
+      <ManualPaymentSheet open={manualOpen} onOpenChange={setManualOpen} />
     </div>
   );
 }
