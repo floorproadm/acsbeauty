@@ -40,8 +40,7 @@ function extractPaymentMethod(notes: string | null): string | null {
 }
 
 function isPaid(booking: any): boolean {
-  // Considera pago se: tem payment_method explícito, ou status completed com método detectado
-  if (booking.payment_method) return true;
+  if ((booking as any).payment_method) return true;
   if (booking.status === "completed" && extractPaymentMethod(booking.notes)) return true;
   return false;
 }
