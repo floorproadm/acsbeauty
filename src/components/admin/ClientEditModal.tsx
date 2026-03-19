@@ -28,7 +28,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Trash2, Save, Loader2, CalendarIcon } from "lucide-react";
+import { Trash2, Save, Loader2, CalendarIcon, MessageCircle, CheckCircle2, X } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -59,6 +59,9 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
     instagram: "",
     birthday: null as Date | null,
   });
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [createdName, setCreatedName] = useState("");
+  const [createdPhone, setCreatedPhone] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -74,23 +77,27 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
     } else if (isCreateMode) {
       setFormData({ name: "", email: "", phone: "", instagram: "", birthday: null });
     }
-  }, [client, isCreateMode]);
+    setShowSuccess(false);
+  }, [client, isCreateMode, open]);
 
   const saveClient = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const payload = {
-        name: data.name,
-        email: data.email || null,
-        phone: data.phone || null,
-        instagram: data.instagram || null,
-        birthday: data.birthday ? format(data.birthday, "yyyy-MM-dd") : null,
-      };
-
       if (isCreateMode) {
+        const payload = {
+          name: data.name,
+          phone: data.phone || null,
+        };
         const { error } = await supabase.from("clients").insert(payload);
         if (error) throw error;
       } else {
         if (!client) return;
+        const payload = {
+          name: data.name,
+          email: data.email || null,
+          phone: data.phone || null,
+          instagram: data.instagram || null,
+          birthday: data.birthday ? format(data.birthday, "yyyy-MM-dd") : null,
+        };
         const { error } = await supabase.from("clients").update(payload).eq("id", client.id);
         if (error) throw error;
       }
@@ -98,8 +105,14 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-clients"] });
       queryClient.invalidateQueries({ queryKey: ["admin-client-detail"] });
-      toast({ title: isCreateMode ? "Cliente criado!" : "Cliente atualizado!" });
-      onOpenChange(false);
+      if (isCreateMode) {
+        setCreatedName(formData.name);
+        setCreatedPhone(formData.phone);
+        setShowSuccess(true);
+      } else {
+        toast({ title: "Cliente atualizado!" });
+        onOpenChange(false);
+      }
     },
     onError: () => {
       toast({ title: isCreateMode ? "Erro ao criar" : "Erro ao atualizar", variant: "destructive" });
@@ -109,21 +122,15 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
   const deleteClient = useMutation({
     mutationFn: async () => {
       if (!client) return;
-      
-      // First delete associated bookings
       const { error: bookingsError } = await supabase
         .from("bookings")
         .delete()
         .eq("client_id", client.id);
-      
       if (bookingsError) throw bookingsError;
-
-      // Then delete the client
       const { error } = await supabase
         .from("clients")
         .delete()
         .eq("id", client.id);
-      
       if (error) throw error;
     },
     onSuccess: () => {
@@ -149,10 +156,64 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
       toast({ title: "Nome é obrigatório", variant: "destructive" });
       return;
     }
+    if (isCreateMode && !formData.phone.trim()) {
+      toast({ title: "Telefone é obrigatório", variant: "destructive" });
+      return;
+    }
     saveClient.mutate(formData);
   };
 
+  const handleClose = () => {
+    setShowSuccess(false);
+    setFormData({ name: "", email: "", phone: "", instagram: "", birthday: null });
+    onOpenChange(false);
+  };
+
+  const handleSendWhatsApp = () => {
+    const cleanPhone = createdPhone.replace(/\D/g, "");
+    const phoneWithCountry = cleanPhone.startsWith("55") ? cleanPhone : `55${cleanPhone}`;
+    const message = `Olá ${createdName}! 👋 Seu cadastro na ACS Beauty foi iniciado. Complete seu perfil para agendar online e acumular ACS Points: https://acsbeauty.lovable.app/auth`;
+    const waUrl = `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, "_blank");
+  };
+
   if (!isCreateMode && !client) return null;
+
+  // Success screen after creation
+  if (showSuccess) {
+    return (
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-md">
+          <div className="flex flex-col items-center gap-4 py-6 text-center">
+            <div className="rounded-full bg-green-100 p-3">
+              <CheckCircle2 className="h-8 w-8 text-green-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Cliente criado!</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                <strong>{createdName}</strong> foi adicionado com sucesso.
+              </p>
+            </div>
+
+            {createdPhone && (
+              <Button
+                onClick={handleSendWhatsApp}
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Enviar convite via WhatsApp
+              </Button>
+            )}
+
+            <Button variant="outline" className="w-full" onClick={handleClose}>
+              <X className="w-4 h-4 mr-2" />
+              Fechar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -173,18 +234,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="email@exemplo.com"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">Telefone</Label>
+            <Label htmlFor="phone">Telefone {isCreateMode ? "*" : ""}</Label>
             <Input
               id="phone"
               value={formData.phone}
@@ -193,50 +243,66 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="instagram">Instagram</Label>
-            <Input
-              id="instagram"
-              value={formData.instagram}
-              onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-              placeholder="@usuario"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Aniversário</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !formData.birthday && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.birthday
-                    ? format(formData.birthday, "dd/MM/yyyy", { locale: ptBR })
-                    : "Selecionar data"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={formData.birthday || undefined}
-                  onSelect={(date) =>
-                    setFormData({ ...formData, birthday: date || null })
-                  }
-                  locale={ptBR}
-                  className="pointer-events-auto"
-                  captionLayout="dropdown-buttons"
-                  fromYear={1940}
-                  toYear={new Date().getFullYear()}
+          {/* Fields only shown in edit mode */}
+          {!isCreateMode && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="email@exemplo.com"
                 />
-              </PopoverContent>
-            </Popover>
-          </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="instagram">Instagram</Label>
+                <Input
+                  id="instagram"
+                  value={formData.instagram}
+                  onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                  placeholder="@usuario"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Aniversário</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.birthday && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.birthday
+                        ? format(formData.birthday, "dd/MM/yyyy", { locale: ptBR })
+                        : "Selecionar data"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.birthday || undefined}
+                      onSelect={(date) =>
+                        setFormData({ ...formData, birthday: date || null })
+                      }
+                      locale={ptBR}
+                      className="pointer-events-auto"
+                      captionLayout="dropdown-buttons"
+                      fromYear={1940}
+                      toYear={new Date().getFullYear()}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </>
+          )}
 
           <div className="flex gap-2 pt-4">
             <Button type="submit" className="flex-1" disabled={saveClient.isPending}>
