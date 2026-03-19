@@ -476,7 +476,7 @@ export function QuizzesTab() {
                         📞 {selectedResponse.client_phone}
                       </a>
                       <a 
-                        href={`https://wa.me/${selectedResponse.client_phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${selectedResponse.client_name || ""}! Vi que você respondeu nosso quiz e gostaria de falar sobre seu resultado.`)}`}
+                        href={`https://wa.me/1${selectedResponse.client_phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${selectedResponse.client_name || ""}! Vi que você respondeu nosso quiz e gostaria de falar sobre seu resultado.`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 p-2 rounded-md bg-green-100 hover:bg-green-200 text-green-800 transition-colors text-sm font-medium"

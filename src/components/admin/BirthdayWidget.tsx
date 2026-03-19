@@ -56,9 +56,9 @@ export function BirthdayWidget({ onNavigateToClients }: BirthdayWidgetProps) {
       `Olá ${name}! 🎂 A equipe ACS Beauty deseja um Feliz Aniversário! Temos uma surpresa especial para você. Quando podemos agendar seu próximo atendimento?`
     );
     const cleanPhone = phone.replace(/\D/g, "");
-    const formattedPhone = cleanPhone.startsWith("55")
+    const formattedPhone = cleanPhone.startsWith("1")
       ? cleanPhone
-      : `55${cleanPhone}`;
+      : `1${cleanPhone}`;
     window.open(`https://wa.me/${formattedPhone}?text=${message}`, "_blank");
   };
 
