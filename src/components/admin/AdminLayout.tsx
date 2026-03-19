@@ -13,7 +13,7 @@ import {
   Sparkles,
   Tag,
   Megaphone,
-  HelpCircle,
+  
   ClipboardList,
   DollarSign,
   Layers,
