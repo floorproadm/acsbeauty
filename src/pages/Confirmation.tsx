@@ -9,7 +9,8 @@ import {
   CalendarPlus,
   RefreshCw,
   Sparkles,
-  ArrowLeft
+  ArrowLeft,
+  MessageCircle
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -201,7 +202,7 @@ export default function Confirmation() {
               </button>
             </div>
 
-            {/* Prep Instructions */}
+            {/* Prep - arrive early */}
             <div className="border-t border-border pt-6 mb-8">
               <h3 className="font-semibold mb-3">{t("confirm.prep_title")}</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
@@ -209,31 +210,31 @@ export default function Confirmation() {
                   <span className="text-rose-gold">•</span>
                   {t("confirm.prep_1")}
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-rose-gold">•</span>
-                  {t("confirm.prep_2")}
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-rose-gold">•</span>
-                  {t("confirm.prep_3")}
-                </li>
               </ul>
             </div>
 
-            {/* Contact for add-ons */}
+            {/* WhatsApp support */}
             <div className="border-t border-border pt-6">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-4 h-4 text-rose-gold" />
-                <h3 className="font-semibold">{t("confirm.addon_title")}</h3>
+              <div className="flex items-center gap-2 mb-2">
+                <MessageCircle className="w-4 h-4 text-[#25D366]" />
+                <h3 className="font-semibold">Alguma dúvida?</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                {t("confirm.addon_note")}
+              <p className="text-sm text-muted-foreground mb-4">
+                Fale diretamente conosco pelo WhatsApp.
               </p>
-              <Link to="/services">
-                <Button variant="outline" size="sm" className="w-full">
-                  {t("confirm.view_services") || "View Our Services"}
+              <a
+                href={(() => {
+                  const msg = `Olá! Tenho uma dúvida sobre meu agendamento:\n\n• Serviço: ${serviceName}\n• Data: ${format(appointmentDate, "dd/MM/yyyy")}\n• Horário: ${format(appointmentDate, "HH:mm")}\n• Nome: ${bookingData.client_name}\n\nPoderia me ajudar?`;
+                  return `https://wa.me/17329153430?text=${encodeURIComponent(msg)}`;
+                })()}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button className="w-full gap-2 bg-[#25D366] hover:bg-[#20BD5A] text-white">
+                  <MessageCircle className="w-4 h-4" />
+                  Falar no WhatsApp
                 </Button>
-              </Link>
+              </a>
             </div>
           </motion.div>
         </div>
