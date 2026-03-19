@@ -232,12 +232,14 @@ export function ClientsTab() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <p className="text-sm text-muted-foreground">{totalCount} clientes cadastrados</p>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">Clientes</h2>
+          <p className="text-xs text-muted-foreground">{totalCount} cadastrados</p>
+        </div>
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={() => setIsImportOpen(true)}>
-            <Upload className="w-4 h-4 mr-1" />
-            Importar
+          <Button size="icon" variant="outline" className="h-9 w-9" onClick={() => setIsImportOpen(true)}>
+            <Upload className="w-4 h-4" />
           </Button>
           <Button size="sm" onClick={() => setIsCreateModalOpen(true)}>
             <Plus className="w-4 h-4 mr-1" />
