@@ -152,13 +152,13 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
     saveClient.mutate(formData);
   };
 
-  if (!client) return null;
+  if (!isCreateMode && !client) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Editar Cliente</DialogTitle>
+          <DialogTitle>{isCreateMode ? "Novo Cliente" : "Editar Cliente"}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
