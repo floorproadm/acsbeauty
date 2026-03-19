@@ -183,13 +183,22 @@ export function PaymentsTab() {
             Controle de recebimentos e pendências
           </p>
         </div>
-        <button
-          onClick={() => setExportOpen(true)}
-          className="p-2.5 rounded-xl bg-muted hover:bg-muted/80 transition"
-          title="Exportar relatório"
-        >
-          <Download className="w-4.5 h-4.5 text-foreground" />
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setManualOpen(true)}
+            className="p-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition"
+            title="Registrar pagamento manual"
+          >
+            <Plus className="w-4.5 h-4.5" />
+          </button>
+          <button
+            onClick={() => setExportOpen(true)}
+            className="p-2.5 rounded-xl bg-muted hover:bg-muted/80 transition"
+            title="Exportar relatório"
+          >
+            <Download className="w-4.5 h-4.5 text-foreground" />
+          </button>
+        </div>
       </div>
 
       {/* Period pills */}
