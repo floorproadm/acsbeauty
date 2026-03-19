@@ -17,7 +17,7 @@ export function CRMTab() {
       </div>
 
       <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
-        <TabsList className="grid w-full max-w-xs grid-cols-2">
+        <TabsList className="grid w-full grid-cols-2 sm:w-auto sm:max-w-xs mx-auto sm:mx-0">
           <TabsTrigger value="clients" className="gap-2">
             <Users className="w-4 h-4" />
             Clientes
