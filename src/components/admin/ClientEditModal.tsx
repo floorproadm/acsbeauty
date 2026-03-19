@@ -149,7 +149,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
       toast({ title: "Nome é obrigatório", variant: "destructive" });
       return;
     }
-    updateClient.mutate(formData);
+    saveClient.mutate(formData);
   };
 
   if (!client) return null;
