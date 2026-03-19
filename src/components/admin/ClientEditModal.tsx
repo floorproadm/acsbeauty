@@ -79,7 +79,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
         name: data.name,
         email: data.email || null,
         phone: data.phone || null,
-        instagram: data.instagram || null,
+        
         birthday: data.birthday ? format(data.birthday, "yyyy-MM-dd") : null
       }).
       eq("id", client.id);
