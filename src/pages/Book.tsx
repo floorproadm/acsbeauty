@@ -775,9 +775,6 @@ export default function Book() {
             {/* Header */}
             <div className="text-center mb-8">
               <h1 className="font-serif text-3xl font-bold mb-2">{t("booking.title")}</h1>
-              <p className="text-muted-foreground">
-                {t("booking.for")}: <span className="font-medium text-foreground">{itemName}</span>
-              </p>
             </div>
 
             {/* Step indicator */}
