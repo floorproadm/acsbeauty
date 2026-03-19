@@ -221,7 +221,7 @@ export function PaymentsTab() {
             const isRequested = booking.status === "requested";
             const startTime = new Date(booking.start_time);
             const detectedMethod = extractPaymentMethod(booking.notes);
-            const displayMethod = booking.payment_method || detectedMethod;
+            const displayMethod = (booking as any).payment_method || detectedMethod;
 
             return (
               <div
