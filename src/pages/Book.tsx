@@ -80,7 +80,13 @@ export default function Book() {
   const navigate = useNavigate();
   const offerId = searchParams.get("offer_id");
   const packageId = searchParams.get("package_id");
-  const serviceParam = searchParams.get("service_id") || searchParams.get("service");
+  const serviceParamRaw = searchParams.get("service_id") || searchParams.get("service");
+  const servicesParam = searchParams.get("services");
+  const preselectedServiceFromList = servicesParam
+    ?.split(",")
+    .map((id) => id.trim())
+    .filter(Boolean)[0] ?? null;
+  const serviceParam = serviceParamRaw || preselectedServiceFromList;
   const skuParam = searchParams.get("sku");
   const flowMode = searchParams.get("flow");
   const isPortalSource = searchParams.get("source") === "portal";
