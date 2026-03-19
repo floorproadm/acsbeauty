@@ -176,7 +176,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
   const handleSendWhatsApp = () => {
     const cleanPhone = createdPhone.replace(/\D/g, "");
     const phoneWithCountry = cleanPhone.startsWith("1") ? cleanPhone : `1${cleanPhone}`;
-    const message = `Olá ${createdName}! 👋 Seu cadastro na ACS Beauty foi iniciado. Complete seu perfil para agendar online e acumular ACS Points: ${window.location.origin}/auth`;
+    const message = `Olá ${createdName}! 👋 Seu cadastro na ACS Beauty foi iniciado. Complete seu perfil para agendar online e acumular ACS Points: ${window.location.origin}/onboarding`;
     const waUrl = `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(message)}`;
     window.open(waUrl, "_blank");
   };
