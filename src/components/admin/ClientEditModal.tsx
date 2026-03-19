@@ -181,7 +181,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
               id="phone"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="(XX) XXXXX-XXXX" />
+              placeholder="(XXX) XXX-XXXX" />
             
           </div>
 
