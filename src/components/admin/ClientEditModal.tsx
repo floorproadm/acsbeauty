@@ -76,30 +76,33 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
     }
   }, [client, isCreateMode]);
 
-  const updateClient = useMutation({
+  const saveClient = useMutation({
     mutationFn: async (data: typeof formData) => {
-      if (!client) return;
-      const { error } = await supabase
-        .from("clients")
-        .update({
-          name: data.name,
-          email: data.email || null,
-          phone: data.phone || null,
-          instagram: data.instagram || null,
-          birthday: data.birthday ? format(data.birthday, "yyyy-MM-dd") : null,
-        })
-        .eq("id", client.id);
-      
-      if (error) throw error;
+      const payload = {
+        name: data.name,
+        email: data.email || null,
+        phone: data.phone || null,
+        instagram: data.instagram || null,
+        birthday: data.birthday ? format(data.birthday, "yyyy-MM-dd") : null,
+      };
+
+      if (isCreateMode) {
+        const { error } = await supabase.from("clients").insert(payload);
+        if (error) throw error;
+      } else {
+        if (!client) return;
+        const { error } = await supabase.from("clients").update(payload).eq("id", client.id);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-clients"] });
       queryClient.invalidateQueries({ queryKey: ["admin-client-detail"] });
-      toast({ title: "Cliente atualizado!" });
+      toast({ title: isCreateMode ? "Cliente criado!" : "Cliente atualizado!" });
       onOpenChange(false);
     },
     onError: () => {
-      toast({ title: "Erro ao atualizar", variant: "destructive" });
+      toast({ title: isCreateMode ? "Erro ao criar" : "Erro ao atualizar", variant: "destructive" });
     },
   });
 
