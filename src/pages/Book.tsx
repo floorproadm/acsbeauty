@@ -716,12 +716,9 @@ export default function Book() {
   // Handle back navigation
   const handleBack = () => {
     if (step === "form") {
-      setStep("time");
+      setStep("date");
       setHoldId(null);
       setHoldExpiresAt(null);
-    } else if (step === "time") {
-      setStep("date");
-      setSelectedDate(undefined);
     } else if (step === "date") {
       if (isPortalSource) {
         navigate("/portal");
