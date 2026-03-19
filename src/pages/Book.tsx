@@ -96,7 +96,7 @@ export default function Book() {
   const isCalendarFlow = flowMode === "calendar" && !offerId && !packageId && !serviceParam;
 
   // Booking flow state
-  const [step, setStep] = useState<"service" | "sku" | "date" | "time" | "form">(
+  const [step, setStep] = useState<"service" | "sku" | "date" | "form">(
     isCalendarFlow ? "date" : serviceParam ? "sku" : "service"
   );
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -375,7 +375,7 @@ export default function Book() {
       if (response.error) throw new Error(response.error.message);
       return response.data;
     },
-    enabled: !!selectedDate && step === "time",
+    enabled: !!selectedDate && step === "date",
     staleTime: 30000
   });
 
@@ -487,7 +487,7 @@ export default function Book() {
         navigate(`/confirm/${data.booking.id}`, { state: { bookingData: data.booking } });
       } else {
         toast.error(data.error || "Failed to confirm booking");
-        setStep("time");
+        setStep("date");
         setHoldId(null);
         setSelectedSlot(null);
         refetchSlots();
@@ -654,7 +654,7 @@ export default function Book() {
       setCountdown(remaining);
       if (remaining <= 0) {
         toast.error(language === "pt" ? "Tempo expirado. Por favor, selecione um novo horário." : "Time expired. Please select a new time.");
-        setStep("time");
+        setStep("date");
         setHoldId(null);
         setHoldExpiresAt(null);
         setSelectedSlot(null);
@@ -683,7 +683,6 @@ export default function Book() {
     setSelectedDate(date);
     setSelectedSlot(null);
     setHoldId(null);
-    if (date) setStep("time");
   };
 
   const handleSlotSelect = (slot: TimeSlot) => {
@@ -710,19 +709,16 @@ export default function Book() {
     const base: string[] = [];
     if (!serviceParam && !offerId && !packageId && !isPortalSource) base.push("service");
     if (activeServiceId && !isPortalSource) base.push("sku");
-    base.push("date", "time", "form");
+    base.push("date", "form");
     return base;
   })();
 
   // Handle back navigation
   const handleBack = () => {
     if (step === "form") {
-      setStep("time");
+      setStep("date");
       setHoldId(null);
       setHoldExpiresAt(null);
-    } else if (step === "time") {
-      setStep("date");
-      setSelectedDate(undefined);
     } else if (step === "date") {
       if (isPortalSource) {
         navigate("/portal");
@@ -1008,7 +1004,7 @@ export default function Book() {
                 </motion.div>
               }
 
-              {/* Step: Date Selection */}
+              {/* Step: Date & Time Selection (combined) */}
               {step === "date" &&
               <motion.div
                 key="date"
@@ -1018,9 +1014,11 @@ export default function Book() {
                 className="bg-card rounded-2xl p-6 shadow-soft">
                 
                   <h2 className="font-serif text-xl font-semibold mb-2 text-center">
-                    {language === "pt" ? "Escolha a data" : "Choose a date"}
+                    {language === "pt" ? "Escolha a data" : "Choose the date"}
                   </h2>
-
+                  {service?.name && (
+                    <p className="text-center text-sm text-muted-foreground mb-2">{service.name}</p>
+                  )}
 
                   <div className="flex justify-center">
                     <CalendarComponent
@@ -1032,83 +1030,141 @@ export default function Book() {
                     }
                     locale={language === "pt" ? ptBR : undefined}
                     className="rounded-md border" />
-                  
                   </div>
-                  <p className="text-center text-sm text-muted-foreground mt-4">
-                    {language === "pt" ?
-                  "Atendemos de terça a sábado, 9h às 18h" :
-                  "We're open Tuesday to Saturday, 9am to 6pm"}
-                  </p>
-                </motion.div>
-              }
 
-              {/* Step: Time Selection */}
-              {step === "time" &&
-              <motion.div
-                key="time"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                className="bg-card rounded-2xl p-6 shadow-soft">
-                
-                  <h2 className="font-serif text-xl font-semibold mb-2 text-center">
-                    {language === "pt" ? "Escolha o horário" : "Choose a time"}
-                  </h2>
-                  <p className="text-center text-sm text-muted-foreground mb-6">
-                    {selectedDate && format(selectedDate, "EEEE, d 'de' MMMM", { locale: language === "pt" ? ptBR : undefined })}
-                  </p>
-
-                  {isLoadingSlots ?
-                <div className="flex flex-col items-center justify-center py-12">
-                      <Loader2 className="w-8 h-8 animate-spin text-rose-gold mb-4" />
-                      <p className="text-muted-foreground">
-                        {language === "pt" ? "Carregando horários..." : "Loading available times..."}
+                  {/* Available times section — shown when a date is selected */}
+                  {selectedDate && (
+                    <div className="mt-6">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Clock className="w-4 h-4 text-muted-foreground" />
+                        <h3 className="font-medium text-foreground">
+                          {language === "pt" ? "Horários disponíveis" : "Available times"}
+                        </h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        {format(selectedDate, "EEEE, d 'de' MMMM", { locale: language === "pt" ? ptBR : undefined })}
                       </p>
-                    </div> :
-                availability?.error ?
-                <div className="text-center py-12">
-                      <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
-                      <p className="text-destructive">{availability.error}</p>
-                      <Button variant="outline" className="mt-4" onClick={() => refetchSlots()}>
-                        {language === "pt" ? "Tentar novamente" : "Try again"}
-                      </Button>
-                    </div> :
-                availability?.available_slots?.length === 0 ?
-                <div className="text-center py-12">
-                      <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">
-                        {language === "pt" ? "Nenhum horário disponível neste dia" : "No available times on this day"}
-                      </p>
-                      <Button variant="outline" className="mt-4" onClick={() => setStep("date")}>
-                        {language === "pt" ? "Escolher outra data" : "Choose another date"}
-                      </Button>
-                    </div> :
 
-                <div className="grid grid-cols-3 gap-3">
-                      {availability?.available_slots?.map((slot) => {
-                    const slotTime = parseISO(slot.start);
-                    const isSelected = selectedSlot?.start === slot.start;
-                    const displayTime = new Intl.DateTimeFormat('en-US', {
-                      hour: '2-digit', minute: '2-digit', hour12: false,
-                      timeZone: availability.timezone || 'America/New_York'
-                    }).format(slotTime);
+                      {isLoadingSlots ? (
+                        <div className="flex flex-col items-center justify-center py-8">
+                          <Loader2 className="w-6 h-6 animate-spin text-rose-gold mb-3" />
+                          <p className="text-sm text-muted-foreground">
+                            {language === "pt" ? "Carregando horários..." : "Loading available times..."}
+                          </p>
+                        </div>
+                      ) : availability?.error ? (
+                        <div className="text-center py-8">
+                          <AlertCircle className="w-10 h-10 text-destructive mx-auto mb-3" />
+                          <p className="text-sm text-destructive">{availability.error}</p>
+                          <Button variant="outline" size="sm" className="mt-3" onClick={() => refetchSlots()}>
+                            {language === "pt" ? "Tentar novamente" : "Try again"}
+                          </Button>
+                        </div>
+                      ) : availability?.available_slots?.length === 0 ? (
+                        <div className="text-center py-8">
+                          <Clock className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                          <p className="text-sm text-muted-foreground">
+                            {language === "pt" ? "Nenhum horário disponível neste dia" : "No available times on this day"}
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Group slots by morning/afternoon */}
+                          {(() => {
+                            const slots = availability?.available_slots || [];
+                            const morning: TimeSlot[] = [];
+                            const afternoon: TimeSlot[] = [];
 
-                    return (
-                      <Button
-                        key={slot.start}
-                        variant={isSelected ? "default" : "outline"}
-                        className={`h-12 ${isSelected ? "bg-rose-gold hover:bg-rose-gold/90" : ""}`}
-                        onClick={() => handleSlotSelect(slot)}
-                        disabled={createHold.isPending}>
-                        
-                            {createHold.isPending && selectedSlot?.start === slot.start ?
-                        <Loader2 className="w-4 h-4 animate-spin" /> :
-                        displayTime}
-                          </Button>);
+                            slots.forEach((slot) => {
+                              const hour = new Date(slot.start).getUTCHours();
+                              const localHour = parseInt(new Intl.DateTimeFormat('en-US', {
+                                hour: 'numeric', hour12: false,
+                                timeZone: availability?.timezone || 'America/New_York'
+                              }).format(parseISO(slot.start)));
+                              if (localHour < 12) {
+                                morning.push(slot);
+                              } else {
+                                afternoon.push(slot);
+                              }
+                            });
 
-                  })}
+                            return (
+                              <div className="space-y-4">
+                                {morning.length > 0 && (
+                                  <div>
+                                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                                      {language === "pt" ? "Manhã" : "Morning"}
+                                    </p>
+                                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                                      {morning.map((slot) => {
+                                        const slotTime = parseISO(slot.start);
+                                        const isSelected = selectedSlot?.start === slot.start;
+                                        const displayTime = new Intl.DateTimeFormat('en-US', {
+                                          hour: '2-digit', minute: '2-digit', hour12: true,
+                                          timeZone: availability?.timezone || 'America/New_York'
+                                        }).format(slotTime);
+                                        return (
+                                          <Button
+                                            key={slot.start}
+                                            variant={isSelected ? "default" : "outline"}
+                                            size="sm"
+                                            className={`h-10 text-xs ${isSelected ? "bg-rose-gold hover:bg-rose-gold/90" : ""}`}
+                                            onClick={() => handleSlotSelect(slot)}
+                                            disabled={createHold.isPending}>
+                                            {createHold.isPending && selectedSlot?.start === slot.start ?
+                                              <Loader2 className="w-4 h-4 animate-spin" /> :
+                                              displayTime}
+                                          </Button>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+                                {afternoon.length > 0 && (
+                                  <div>
+                                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                                      {language === "pt" ? "Tarde" : "Afternoon"}
+                                    </p>
+                                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                                      {afternoon.map((slot) => {
+                                        const slotTime = parseISO(slot.start);
+                                        const isSelected = selectedSlot?.start === slot.start;
+                                        const displayTime = new Intl.DateTimeFormat('en-US', {
+                                          hour: '2-digit', minute: '2-digit', hour12: true,
+                                          timeZone: availability?.timezone || 'America/New_York'
+                                        }).format(slotTime);
+                                        return (
+                                          <Button
+                                            key={slot.start}
+                                            variant={isSelected ? "default" : "outline"}
+                                            size="sm"
+                                            className={`h-10 text-xs ${isSelected ? "bg-rose-gold hover:bg-rose-gold/90" : ""}`}
+                                            onClick={() => handleSlotSelect(slot)}
+                                            disabled={createHold.isPending}>
+                                            {createHold.isPending && selectedSlot?.start === slot.start ?
+                                              <Loader2 className="w-4 h-4 animate-spin" /> :
+                                              displayTime}
+                                          </Button>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </>
+                      )}
                     </div>
-                }
+                  )}
+
+                  {!selectedDate && (
+                    <p className="text-center text-sm text-muted-foreground mt-4">
+                      {language === "pt" ?
+                    "Atendemos de terça a sábado, 9h às 18h" :
+                    "We're open Tuesday to Saturday, 9am to 6pm"}
+                    </p>
+                  )}
                 </motion.div>
               }
 
@@ -1166,7 +1222,7 @@ export default function Book() {
                             <button
                           type="button"
                           onClick={() => {
-                            setStep("time");
+                            setStep("date");
                             setHoldId(null);
                             setHoldExpiresAt(null);
                             setSelectedSlot(null);
