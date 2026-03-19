@@ -69,7 +69,7 @@ export function PaymentsTab() {
     mutationFn: async ({ id, method }: { id: string; method: string | null }) => {
       const { error } = await supabase
         .from("bookings")
-        .update({ payment_method: method })
+        .update({ payment_method: method } as any)
         .eq("id", id);
       if (error) throw error;
     },
