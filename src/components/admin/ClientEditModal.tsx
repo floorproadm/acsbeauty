@@ -10,8 +10,8 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  DialogTitle } from
+"@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,116 +21,100 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  AlertDialogTrigger } from
+"@/components/ui/alert-dialog";
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Trash2, Save, Loader2, CalendarIcon, MessageCircle, CheckCircle2, X } from "lucide-react";
+  PopoverTrigger } from
+"@/components/ui/popover";
+import { Trash2, Save, Loader2, CalendarIcon } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
-interface ClientData {
-  id: string;
-  name: string;
-  email: string | null;
-  phone: string | null;
-  instagram: string | null;
-  birthday?: string | null;
-}
-
 interface ClientEditModalProps {
-  client: ClientData | null;
+  client: {
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    instagram: string | null;
+    birthday?: string | null;
+  } | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDeleted?: () => void;
-  mode?: "edit" | "create";
 }
 
-export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = "edit" }: ClientEditModalProps) {
-  const isCreateMode = mode === "create";
+export function ClientEditModal({ client, open, onOpenChange, onDeleted }: ClientEditModalProps) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     instagram: "",
-    birthday: null as Date | null,
+    birthday: null as Date | null
   });
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [createdName, setCreatedName] = useState("");
-  const [createdPhone, setCreatedPhone] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (client && !isCreateMode) {
+    if (client) {
       setFormData({
         name: client.name || "",
         email: client.email || "",
         phone: client.phone || "",
         instagram: client.instagram || "",
-        birthday: client.birthday ? parseISO(client.birthday) : null,
+        birthday: client.birthday ? parseISO(client.birthday) : null
       });
-    } else if (isCreateMode) {
-      setFormData({ name: "", email: "", phone: "", instagram: "", birthday: null });
     }
-    setShowSuccess(false);
-  }, [client, isCreateMode, open]);
+  }, [client]);
 
-  const saveClient = useMutation({
+  const updateClient = useMutation({
     mutationFn: async (data: typeof formData) => {
-      if (isCreateMode) {
-        const payload = {
-          name: data.name,
-          phone: data.phone || null,
-        };
-        const { error } = await supabase.from("clients").insert(payload);
-        if (error) throw error;
-      } else {
-        if (!client) return;
-        const payload = {
-          name: data.name,
-          email: data.email || null,
-          phone: data.phone || null,
-          instagram: data.instagram || null,
-          birthday: data.birthday ? format(data.birthday, "yyyy-MM-dd") : null,
-        };
-        const { error } = await supabase.from("clients").update(payload).eq("id", client.id);
-        if (error) throw error;
-      }
+      if (!client) return;
+      const { error } = await supabase.
+      from("clients").
+      update({
+        name: data.name,
+        email: data.email || null,
+        phone: data.phone || null,
+        instagram: data.instagram || null,
+        birthday: data.birthday ? format(data.birthday, "yyyy-MM-dd") : null
+      }).
+      eq("id", client.id);
+
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-clients"] });
       queryClient.invalidateQueries({ queryKey: ["admin-client-detail"] });
-      if (isCreateMode) {
-        setCreatedName(formData.name);
-        setCreatedPhone(formData.phone);
-        setShowSuccess(true);
-      } else {
-        toast({ title: "Cliente atualizado!" });
-        onOpenChange(false);
-      }
+      toast({ title: "Cliente atualizado!" });
+      onOpenChange(false);
     },
     onError: () => {
-      toast({ title: isCreateMode ? "Erro ao criar" : "Erro ao atualizar", variant: "destructive" });
-    },
+      toast({ title: "Erro ao atualizar", variant: "destructive" });
+    }
   });
 
   const deleteClient = useMutation({
     mutationFn: async () => {
       if (!client) return;
-      const { error: bookingsError } = await supabase
-        .from("bookings")
-        .delete()
-        .eq("client_id", client.id);
+
+      // First delete associated bookings
+      const { error: bookingsError } = await supabase.
+      from("bookings").
+      delete().
+      eq("client_id", client.id);
+
       if (bookingsError) throw bookingsError;
-      const { error } = await supabase
-        .from("clients")
-        .delete()
-        .eq("id", client.id);
+
+      // Then delete the client
+      const { error } = await supabase.
+      from("clients").
+      delete().
+      eq("id", client.id);
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -142,12 +126,12 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
     },
     onError: (error) => {
       console.error("Delete error:", error);
-      toast({ 
-        title: "Erro ao excluir", 
+      toast({
+        title: "Erro ao excluir",
         description: "Apenas admins podem excluir clientes.",
-        variant: "destructive" 
+        variant: "destructive"
       });
-    },
+    }
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -156,70 +140,16 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
       toast({ title: "Nome é obrigatório", variant: "destructive" });
       return;
     }
-    if (isCreateMode && !formData.phone.trim()) {
-      toast({ title: "Telefone é obrigatório", variant: "destructive" });
-      return;
-    }
-    saveClient.mutate(formData);
+    updateClient.mutate(formData);
   };
 
-  const handleClose = () => {
-    setShowSuccess(false);
-    setFormData({ name: "", email: "", phone: "", instagram: "", birthday: null });
-    onOpenChange(false);
-  };
-
-  const handleSendWhatsApp = () => {
-    const cleanPhone = createdPhone.replace(/\D/g, "");
-    const phoneWithCountry = cleanPhone.startsWith("55") ? cleanPhone : `55${cleanPhone}`;
-    const message = `Olá ${createdName}! 👋 Seu cadastro na ACS Beauty foi iniciado. Complete seu perfil para agendar online e acumular ACS Points: https://acsbeauty.lovable.app/auth`;
-    const waUrl = `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(message)}`;
-    window.open(waUrl, "_blank");
-  };
-
-  if (!isCreateMode && !client) return null;
-
-  // Success screen after creation
-  if (showSuccess) {
-    return (
-      <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-md">
-          <div className="flex flex-col items-center gap-4 py-6 text-center">
-            <div className="rounded-full bg-green-100 p-3">
-              <CheckCircle2 className="h-8 w-8 text-green-600" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold">Cliente criado!</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                <strong>{createdName}</strong> foi adicionado com sucesso.
-              </p>
-            </div>
-
-            {createdPhone && (
-              <Button
-                onClick={handleSendWhatsApp}
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Enviar convite via WhatsApp
-              </Button>
-            )}
-
-            <Button variant="outline" className="w-full" onClick={handleClose}>
-              <X className="w-4 h-4 mr-2" />
-              Fechar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
+  if (!client) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isCreateMode ? "Novo Cliente" : "Editar Cliente"}</DialogTitle>
+          <DialogTitle>Editar Cliente</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -229,129 +159,122 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Nome do cliente"
-            />
+              placeholder="Nome do cliente" />
+            
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Telefone {isCreateMode ? "*" : ""}</Label>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="email@exemplo.com" />
+            
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phone">Telefone</Label>
             <Input
               id="phone"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="(XX) XXXXX-XXXX"
-            />
+              placeholder="(XX) XXXXX-XXXX" />
+            
           </div>
 
-          {/* Fields only shown in edit mode */}
-          {!isCreateMode && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="email@exemplo.com"
-                />
-              </div>
+          <div className="space-y-2">
+            <Label htmlFor="instagram">Instagram</Label>
+            <Input
+              id="instagram"
+              value={formData.instagram}
+              onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+              placeholder="@usuario" />
+            
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="instagram">Instagram</Label>
-                <Input
-                  id="instagram"
-                  value={formData.instagram}
-                  onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-                  placeholder="@usuario"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Aniversário</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !formData.birthday && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.birthday
-                        ? format(formData.birthday, "dd/MM/yyyy", { locale: ptBR })
-                        : "Selecionar data"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={formData.birthday || undefined}
-                      onSelect={(date) =>
-                        setFormData({ ...formData, birthday: date || null })
-                      }
-                      locale={ptBR}
-                      className="pointer-events-auto"
-                      captionLayout="dropdown-buttons"
-                      fromYear={1940}
-                      toYear={new Date().getFullYear()}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </>
-          )}
+          <div className="space-y-2">
+            <Label>Aniversário</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.birthday && "text-muted-foreground"
+                  )}>
+                  
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.birthday ?
+                  format(formData.birthday, "dd/MM/yyyy", { locale: ptBR }) :
+                  "Selecionar data"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={formData.birthday || undefined}
+                  onSelect={(date) =>
+                  setFormData({ ...formData, birthday: date || null })
+                  }
+                  locale={ptBR}
+                  className="pointer-events-auto"
+                  captionLayout="dropdown-buttons"
+                  fromYear={1940}
+                  toYear={new Date().getFullYear()} />
+                
+              </PopoverContent>
+            </Popover>
+          </div>
 
           <div className="flex gap-2 pt-4">
-            <Button type="submit" className="flex-1" disabled={saveClient.isPending}>
-              {saveClient.isPending ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4 mr-2" />
-              )}
-              {isCreateMode ? "Criar" : "Salvar"}
+            <Button type="submit" className="flex-1" disabled={updateClient.isPending}>
+              {updateClient.isPending ?
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" /> :
+
+              <Save className="w-4 h-4 mr-2" />
+              }
+              Salvar
             </Button>
           </div>
 
-          {/* Delete Section - only in edit mode */}
-          {!isCreateMode && client && (
-            <div className="pt-4 border-t">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button 
-                    type="button"
-                    variant="outline" 
-                    className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Excluir Cliente
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Tem certeza que deseja excluir <strong>{client.name}</strong>? 
-                      Esta ação não pode ser desfeita e irá remover todos os agendamentos associados.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => deleteClient.mutate()}
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      {deleteClient.isPending ? "Excluindo..." : "Excluir"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          )}
+          {/* Delete Section */}
+          <div className="pt-4 border-t">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700">
+                  
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Excluir Cliente
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tem certeza que deseja excluir ? 
+                    Esta ação não pode ser desfeita e irá remover todos os agendamentos associados.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => deleteClient.mutate()}
+                    className="bg-red-600 hover:bg-red-700">
+                    
+                    {deleteClient.isPending ? "Excluindo..." : "Excluir"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </form>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>);
+
 }
