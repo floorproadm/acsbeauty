@@ -451,6 +451,9 @@ export function PaymentsTab() {
         totalReceived={totalReceived}
         totalPending={totalPending}
       />
+
+      {/* Manual Payment Sheet */}
+      <ManualPaymentSheet open={manualOpen} onOpenChange={setManualOpen} />
     </div>
   );
 }
