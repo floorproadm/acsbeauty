@@ -1,98 +1,42 @@
 
-# ACS v2.0 — Progresso de Implementação
 
-## ✅ Fase 1: Rotas Dinâmicas de Serviços (CONCLUÍDA)
+## Plano: Melhorias UI/UX e Relatórios na Pagamentos Tab
 
-### Migration executada:
-- `services.slug` (text UNIQUE NOT NULL) — populado automaticamente
-- `services.category_slug` (text, indexed)
-- `service_skus.slug` (text, indexed)
-- `services.hero_image_url` (text)
-- `services.faq` (jsonb, default '[]') — usado para FAQs inline
+### O que muda
 
-### Tabela `service_faqs` criada (legado, não usada pelo frontend):
-- Frontend usa `services.faq` jsonb diretamente
+**1. Seletor de período (filtro por data)**
+- Adicionar pills de período no topo: "Semana", "Mês", "Trimestre", "Ano", "Todos"
+- As métricas (Esperado, Recebido, Pendente) passam a refletir apenas o período selecionado
+- A lista de bookings também filtra pelo período
 
-### Indexes adicionados:
-- `idx_services_slug`
-- `idx_services_category`
-- `idx_services_category_slug`
-- `idx_skus_slug`
+**2. Botão de exportar relatório (padrão AXO)**
+- Botão de download (ícone) ao lado do seletor de período
+- Abre um Sheet (bottom sheet) com preview do relatório:
+  - 3 cards: Receita Esperada, Recebido, Pendente
+  - Breakdown por método de pagamento (Presencial, Online, Zelle, etc.)
+  - Contagem de bookings no período
+  - Botão "Baixar CSV" que gera e faz download do arquivo
 
-### Páginas criadas/atualizadas:
-- `src/pages/Services.tsx` → dinâmico, query categorias do banco
-- `src/pages/servicos/CategoryPage.tsx` → query por `category_slug`
-- `src/pages/servicos/ServiceDetail.tsx` → variações, SKUs, FAQs (jsonb), JSON-LD geo
+**3. Escolha do método de pagamento ao marcar pago**
+- Em vez de sempre marcar como "at_location", abrir um mini dropdown/popover com opções: Presencial, Dinheiro, Zelle, Venmo, Cartão
+- Experiência mobile-first com botões grandes
 
-### RLS adicionado:
-- `service_skus` → "Anyone can view active skus"
-- `service_variations` → "Anyone can view active variations"
-- `service_faqs` → "Anyone can view service faqs" + "Admins can manage service faqs"
+**4. Melhorias visuais gerais**
+- Animação suave nos cards de métricas (fade-in staggered)
+- Contador animado nos valores das métricas
+- Separador visual entre métricas e lista
 
----
+### Arquivos modificados
 
-## ✅ Fase 1.5: SEO Local + Institucional + Shop (CONCLUÍDA)
+| Arquivo | Ação |
+|---|---|
+| `src/components/admin/PaymentsTab.tsx` | Adicionar período, export, método de pagamento |
+| `src/components/admin/PaymentExportSheet.tsx` | Criar (padrão AXO PerformanceExportSheet) |
 
-### Tabela `service_locations` criada
-### Rota hierárquica para geo-variants com canonical
-### Páginas institucionais: Studio, Team, LocationNewark, Shop
+### Detalhes técnicos
 
----
+- **Filtro de período**: usar `date-fns` (`subWeeks`, `subMonths`, `startOfWeek`, etc.) para calcular ranges — mesma abordagem do AXO
+- **Export Sheet**: componente separado usando `Sheet` (bottom, `max-h-[85vh]`), recebe bookings filtrados e período label, gera CSV com colunas: Cliente, Serviço, Data, Valor, Status, Método
+- **Método de pagamento**: usar `Popover` com lista de botões para cada método, ao clicar executa a mutation com o método escolhido
+- Nenhuma alteração de banco de dados necessária — `payment_method` já existe como `text`
 
-## ✅ Fase 2: Booking por SKU + Slug (CONCLUÍDA)
-
-### Migration executada:
-- `bookings.sku_id` (uuid, nullable, FK → service_skus)
-
-### Book.tsx — SKU selection flow:
-- Novo state: `pickedVariationId`, `pickedSkuId`
-- Step "sku" entre "service" e "date"
-- Auto-skip: sem variations → pular; 1 SKU → auto-selecionar
-- `serviceDuration` usa SKU duration com fallback
-- `sku_id` enviado no payload de hold/confirm
-
-### Book.tsx — Slug-based URL pre-selection:
-- Query params `?service=slug` e `?sku=slug`
-- UUID regex: `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`
-- UUID → WHERE id = param; Slug → WHERE slug = param
-- Pre-seleciona serviço e SKU, pula para date
-
-### ServiceDetail.tsx — Slug links:
-- CTA principal: `/book?service=${service.slug}`
-- SkuCard: `/book?service=${service.slug}&sku=${sku.slug}`
-
-### ServiceDetail.tsx — FAQs:
-- Renderiza `services.faq` (jsonb array `[{question, answer}]`)
-- Accordion shadcn com estilo ServiceFAQ
-
-### ServiceDetail.tsx — JSON-LD geo-cluster:
-- `<script type="application/ld+json">` com schema LocalBusiness quando locationData existe
-
-### Admin — BookingsTab:
-- Join `service_skus(name, price)` na query
-- Colunas SKU name e preço na listagem
-
-### Admin — DashboardTab:
-- Cards: "Receita do Mês" e "Bookings do Mês"
-- Bar chart (recharts): top 5 serviços por booking count
-
-### Edge function — Price lock:
-- `calendar-confirm-booking` aceita `sku_id`
-- Busca preço do SKU no banco (nunca confia no frontend)
-- `total_price = promo_price || price` salvo no booking
-
----
-
-## 🔲 Fase 3: Quiz como Funil Real
-- `/quiz` landing, `/quiz/:slug/resultado`
-- WhatsApp com contexto
-
-## 🔲 Fase 4: Páginas de Conteúdo e Legal
-- `/privacidade`, `/termos`, `/perguntas-frequentes`
-
-## 🔲 Fase 5: Admin — Rotas Nomeadas
-- Sub-rotas reais com Outlet
-
-## 🔲 Fase 6: Limpeza
-- Remover arquivos legados
-- Atualizar Header
