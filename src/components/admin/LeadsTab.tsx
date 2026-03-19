@@ -662,7 +662,7 @@ export function LeadsTab() {
                             onClick={(e) => {
                               e.stopPropagation();
                               window.open(
-                                `https://wa.me/${lead.client_phone?.replace(/\D/g, "")}?text=${encodeURIComponent(
+                                `https://wa.me/1${lead.client_phone?.replace(/\D/g, "")}?text=${encodeURIComponent(
                                   `Olá ${lead.client_name || ""}! Vi que você respondeu nosso quiz e gostaria de falar sobre seu resultado.`
                                 )}`,
                                 "_blank"
