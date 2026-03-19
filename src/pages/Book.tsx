@@ -509,35 +509,62 @@ export default function Book() {
 
   // Portal confirm mutation — inserts booking as "requested" (pending) without Google Calendar
   const portalConfirmBooking = useMutation({
-    mutationFn: async (formData: BookingFormData) => {
-      if (!holdId || !selectedSlot) throw new Error("Missing booking information");
+    mutationFn: async () => {
+      if (!selectedSlot) throw new Error("Missing booking information");
+      if (!portalUser) throw new Error("User not authenticated");
 
       const finalServiceId = offer?.service_id || activeServiceId || null;
 
-      // Upsert client by phone
-      const { data: existingClient } = await supabase.
-      from("clients").
-      select("id").
-      eq("phone", formData.phone).
-      maybeSingle();
+      // Use authenticated user data
+      const clientName = portalUser.name;
+      const clientPhone = portalUser.phone;
+      const clientEmail = portalUser.email;
+      const clientInstagram = portalUser.instagram;
+
+      // Upsert client by email
+      const { data: existingClient } = await supabase
+        .from("clients")
+        .select("id")
+        .eq("email", clientEmail)
+        .maybeSingle();
 
       let clientId: string;
       if (existingClient) {
         clientId = existingClient.id;
-        await supabase.from("clients").update({
-          name: formData.name,
-          instagram: formData.instagram || null
-        }).eq("id", clientId);
+      } else if (clientPhone) {
+        // Fallback: try by phone
+        const { data: phoneClient } = await supabase
+          .from("clients")
+          .select("id")
+          .eq("phone", clientPhone)
+          .maybeSingle();
+        if (phoneClient) {
+          clientId = phoneClient.id;
+          await supabase.from("clients").update({ email: clientEmail }).eq("id", clientId);
+        } else {
+          const { data: newClient, error: clientError } = await supabase
+            .from("clients")
+            .insert({
+              name: clientName,
+              phone: clientPhone,
+              email: clientEmail,
+              instagram: clientInstagram || null,
+            })
+            .select()
+            .single();
+          if (clientError) throw clientError;
+          clientId = newClient.id;
+        }
       } else {
-        const { data: newClient, error: clientError } = await supabase.
-        from("clients").
-        insert({
-          name: formData.name,
-          phone: formData.phone,
-          instagram: formData.instagram || null
-        }).
-        select().
-        single();
+        const { data: newClient, error: clientError } = await supabase
+          .from("clients")
+          .insert({
+            name: clientName,
+            email: clientEmail,
+            instagram: clientInstagram || null,
+          })
+          .select()
+          .single();
         if (clientError) throw clientError;
         clientId = newClient.id;
       }
@@ -545,43 +572,45 @@ export default function Book() {
       // Fetch SKU price (price lock)
       let totalPrice: number | null = null;
       if (pickedSkuId) {
-        const { data: skuData } = await supabase.
-        from("service_skus").
-        select("price, promo_price").
-        eq("id", pickedSkuId).
-        single();
+        const { data: skuData } = await supabase
+          .from("service_skus")
+          .select("price, promo_price")
+          .eq("id", pickedSkuId)
+          .single();
         if (skuData) {
-          totalPrice = skuData.promo_price != null && Number(skuData.promo_price) < Number(skuData.price) ?
-          Number(skuData.promo_price) :
-          Number(skuData.price);
+          totalPrice = skuData.promo_price != null && Number(skuData.promo_price) < Number(skuData.price)
+            ? Number(skuData.promo_price)
+            : Number(skuData.price);
         }
       }
 
       // Insert booking as "requested" (pending approval)
-      const { data: booking, error: bookingError } = await supabase.
-      from("bookings").
-      insert({
-        client_id: clientId,
-        client_name: formData.name,
-        client_phone: formData.phone,
-        client_email: `${formData.phone.replace(/\D/g, "")}@placeholder.com`,
-        service_id: finalServiceId,
-        package_id: packageId || null,
-        sku_id: pickedSkuId || null,
-        total_price: totalPrice,
-        start_time: selectedSlot.start,
-        end_time: selectedSlot.end,
-        timezone: "America/New_York",
-        status: "requested",
-        notes: null
-      }).
-      select("*, services(id, name, duration_minutes, price, promo_price), packages(id, name, total_price, sessions_qty)").
-      single();
+      const { data: booking, error: bookingError } = await supabase
+        .from("bookings")
+        .insert({
+          client_id: clientId,
+          client_name: clientName,
+          client_phone: clientPhone || null,
+          client_email: clientEmail,
+          service_id: finalServiceId,
+          package_id: packageId || null,
+          sku_id: pickedSkuId || null,
+          total_price: totalPrice,
+          start_time: selectedSlot.start,
+          end_time: selectedSlot.end,
+          timezone: "America/New_York",
+          status: "requested",
+          notes: paymentMethod === "at_location" ? "Payment: At Location (Cash/Zelle/Venmo)" : "Payment: By App",
+        })
+        .select("*, services(id, name, duration_minutes, price, promo_price), packages(id, name, total_price, sessions_qty)")
+        .single();
 
       if (bookingError) throw bookingError;
 
-      // Delete hold
-      await supabase.from("booking_holds").delete().eq("id", holdId);
+      // Delete hold if exists
+      if (holdId) {
+        await supabase.from("booking_holds").delete().eq("id", holdId);
+      }
 
       return booking;
     },
