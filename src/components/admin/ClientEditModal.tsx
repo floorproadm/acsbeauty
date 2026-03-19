@@ -52,7 +52,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
     name: "",
     email: "",
     phone: "",
-    instagram: "",
+    
     birthday: null as Date | null
   });
   const { toast } = useToast();
