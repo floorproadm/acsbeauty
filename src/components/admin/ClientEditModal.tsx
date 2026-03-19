@@ -184,15 +184,6 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
             
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="instagram">Instagram</Label>
-            <Input
-              id="instagram"
-              value={formData.instagram}
-              onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-              placeholder="@usuario" />
-            
-          </div>
 
           <div className="space-y-2">
             <Label>Aniversário</Label>
