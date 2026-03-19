@@ -1082,7 +1082,7 @@ export default function ClientPortal() {
 
       {/* Bottom Navigation — hidden during service selection */}
       {tab !== "select-service" && (
-        <nav className="shrink-0 border-t border-border bg-background backdrop-blur-sm px-2" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+        <nav className="shrink-0 border-t border-border bg-background px-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom, 8px), 8px)" }}>
           <div className="flex items-center justify-around py-2">
             {navItems.map(({ id, icon: Icon, labelPt, labelEn }) => {
               const active = tab === id || (id === "book" && tab === ("select-service" as Tab));
