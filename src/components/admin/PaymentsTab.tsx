@@ -12,14 +12,19 @@ import {
   Banknote,
   CreditCard,
   XCircle,
+  Download,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, subWeeks, subMonths, subDays, startOfWeek, startOfMonth, startOfQuarter, startOfYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { motion } from "framer-motion";
+import { PaymentExportSheet } from "./PaymentExportSheet";
 
 type PaymentFilter = "all" | "pending" | "paid" | "no_show";
+type PeriodFilter = "week" | "month" | "quarter" | "year" | "all";
 
 const METHOD_LABELS: Record<string, string> = {
   local: "Local",
@@ -28,10 +33,25 @@ const METHOD_LABELS: Record<string, string> = {
   venmo: "Venmo",
   online: "Online",
   card: "Cartão",
-  "at_location": "Presencial",
+  at_location: "Presencial",
 };
 
-// Detecta método a partir das notes do booking (padrão do portal flow)
+const PERIOD_LABELS: Record<PeriodFilter, string> = {
+  week: "Esta Semana",
+  month: "Este Mês",
+  quarter: "Trimestre",
+  year: "Este Ano",
+  all: "Todos",
+};
+
+const PAYMENT_METHODS = [
+  { value: "at_location", label: "Presencial", icon: Banknote },
+  { value: "cash", label: "Dinheiro", icon: Banknote },
+  { value: "zelle", label: "Zelle", icon: CreditCard },
+  { value: "venmo", label: "Venmo", icon: CreditCard },
+  { value: "card", label: "Cartão", icon: CreditCard },
+];
+
 function extractPaymentMethod(notes: string | null): string | null {
   if (!notes) return null;
   if (notes.includes("At Location") || notes.includes("at_location")) return "at_location";
@@ -40,14 +60,28 @@ function extractPaymentMethod(notes: string | null): string | null {
 }
 
 function isPaid(booking: any): boolean {
-  if ((booking as any).payment_method) return true;
+  if (booking.payment_method) return true;
   if (booking.status === "completed" && extractPaymentMethod(booking.notes)) return true;
   return false;
+}
+
+function getPeriodStart(period: PeriodFilter): Date | null {
+  const now = new Date();
+  switch (period) {
+    case "week": return startOfWeek(now, { weekStartsOn: 1 });
+    case "month": return startOfMonth(now);
+    case "quarter": return startOfQuarter(now);
+    case "year": return startOfYear(now);
+    case "all": return null;
+  }
 }
 
 export function PaymentsTab() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<PaymentFilter>("all");
+  const [period, setPeriod] = useState<PeriodFilter>("month");
+  const [exportOpen, setExportOpen] = useState(false);
+  const [popoverOpenId, setPopoverOpenId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -76,12 +110,20 @@ export function PaymentsTab() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-payments"] });
       toast({ title: "Pagamento atualizado!" });
+      setPopoverOpenId(null);
     },
     onError: () => toast({ title: "Erro ao atualizar", variant: "destructive" }),
   });
 
-  // Filtro + busca
-  const filtered = bookings.filter((b) => {
+  // Period filter
+  const periodStart = getPeriodStart(period);
+  const periodFiltered = bookings.filter((b) => {
+    if (!periodStart) return true;
+    return new Date(b.start_time) >= periodStart;
+  });
+
+  // Status + search filter
+  const filtered = periodFiltered.filter((b) => {
     const q = search.toLowerCase();
     const matchSearch =
       !q ||
@@ -99,8 +141,8 @@ export function PaymentsTab() {
     return matchSearch && matchFilter;
   });
 
-  // Métricas — exclui requested (ainda não aprovado) do esperado
-  const approvedBookings = bookings.filter(
+  // Metrics from period-filtered data
+  const approvedBookings = periodFiltered.filter(
     (b) => b.status === "confirmed" || b.status === "completed" || b.status === "no_show"
   );
   const totalExpected = approvedBookings
@@ -110,9 +152,7 @@ export function PaymentsTab() {
     .filter((b) => isPaid(b))
     .reduce((acc, b) => acc + (b.total_price ?? 0), 0);
   const totalPending = totalExpected - totalReceived;
-  const pendingCount = bookings.filter(
-    (b) => b.status === "requested"
-  ).length;
+  const pendingCount = periodFiltered.filter((b) => b.status === "requested").length;
 
   const handleWhatsApp = (phone: string, name: string) => {
     const clean = phone.replace(/\D/g, "");
@@ -122,50 +162,78 @@ export function PaymentsTab() {
     window.open(`https://wa.me/1${clean}?text=${msg}`, "_blank");
   };
 
+  const cardVariants = {
+    hidden: { opacity: 0, y: 12 },
+    visible: (i: number) => ({
+      opacity: 1, y: 0,
+      transition: { delay: i * 0.08, duration: 0.35, ease: "easeOut" as const },
+    }),
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="font-serif text-xl sm:text-2xl font-bold">Pagamentos</h1>
-        <p className="text-muted-foreground text-sm mt-0.5">
-          Controle de recebimentos e pendências
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-serif text-xl sm:text-2xl font-bold">Pagamentos</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">
+            Controle de recebimentos e pendências
+          </p>
+        </div>
+        <button
+          onClick={() => setExportOpen(true)}
+          className="p-2.5 rounded-xl bg-muted hover:bg-muted/80 transition"
+          title="Exportar relatório"
+        >
+          <Download className="w-4.5 h-4.5 text-foreground" />
+        </button>
       </div>
 
-      {/* Métricas */}
+      {/* Period pills */}
+      <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+        {(Object.keys(PERIOD_LABELS) as PeriodFilter[]).map((p) => (
+          <button
+            key={p}
+            onClick={() => setPeriod(p)}
+            className={cn(
+              "shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+              period === p
+                ? "bg-foreground text-background"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
+            )}
+          >
+            {PERIOD_LABELS[p]}
+          </button>
+        ))}
+      </div>
+
+      {/* Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="flex items-center gap-1.5 mb-1">
-            <TrendingUp className="w-3.5 h-3.5 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Esperado</span>
-          </div>
-          <p className="text-xl font-bold">${totalExpected.toFixed(0)}</p>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="flex items-center gap-1.5 mb-1">
-            <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
-            <span className="text-xs text-muted-foreground">Recebido</span>
-          </div>
-          <p className="text-xl font-bold text-green-600">${totalReceived.toFixed(0)}</p>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="flex items-center gap-1.5 mb-1">
-            <Clock className="w-3.5 h-3.5 text-amber-500" />
-            <span className="text-xs text-muted-foreground">Pendente</span>
-          </div>
-          <p className="text-xl font-bold text-amber-600">${totalPending.toFixed(0)}</p>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="flex items-center gap-1.5 mb-1">
-            <Clock className="w-3.5 h-3.5 text-yellow-500" />
-            <span className="text-xs text-muted-foreground">Aguardando</span>
-          </div>
-          <p className="text-xl font-bold text-yellow-600">{pendingCount}</p>
-          <p className="text-xs text-muted-foreground">a aprovar</p>
-        </div>
+        {[
+          { icon: TrendingUp, label: "Esperado", value: `$${totalExpected.toFixed(0)}`, iconClass: "text-muted-foreground", valueClass: "" },
+          { icon: CheckCircle2, label: "Recebido", value: `$${totalReceived.toFixed(0)}`, iconClass: "text-green-500", valueClass: "text-green-600" },
+          { icon: Clock, label: "Pendente", value: `$${totalPending.toFixed(0)}`, iconClass: "text-amber-500", valueClass: "text-amber-600" },
+          { icon: Clock, label: "Aguardando", value: String(pendingCount), iconClass: "text-yellow-500", valueClass: "text-yellow-600", sub: "a aprovar" },
+        ].map((card, i) => (
+          <motion.div
+            key={card.label}
+            custom={i}
+            initial="hidden"
+            animate="visible"
+            variants={cardVariants}
+            className="bg-card border border-border rounded-xl p-4"
+          >
+            <div className="flex items-center gap-1.5 mb-1">
+              <card.icon className={cn("w-3.5 h-3.5", card.iconClass)} />
+              <span className="text-xs text-muted-foreground">{card.label}</span>
+            </div>
+            <p className={cn("text-xl font-bold", card.valueClass)}>{card.value}</p>
+            {card.sub && <p className="text-xs text-muted-foreground">{card.sub}</p>}
+          </motion.div>
+        ))}
       </div>
 
-      {/* Filtros */}
+      {/* Filters */}
       <div className="flex flex-col gap-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -177,14 +245,12 @@ export function PaymentsTab() {
           />
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {(
-            [
-              { value: "all", label: "Todos" },
-              { value: "pending", label: "A receber" },
-              { value: "paid", label: "Recebido" },
-              { value: "no_show", label: "No-show" },
-            ] as { value: PaymentFilter; label: string }[]
-          ).map(({ value, label }) => (
+          {([
+            { value: "all", label: "Todos" },
+            { value: "pending", label: "A receber" },
+            { value: "paid", label: "Recebido" },
+            { value: "no_show", label: "No-show" },
+          ] as { value: PaymentFilter; label: string }[]).map(({ value, label }) => (
             <button
               key={value}
               onClick={() => setFilter(value)}
@@ -201,7 +267,7 @@ export function PaymentsTab() {
         </div>
       </div>
 
-      {/* Lista */}
+      {/* List */}
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3, 4].map((i) => (
@@ -221,11 +287,14 @@ export function PaymentsTab() {
             const isRequested = booking.status === "requested";
             const startTime = new Date(booking.start_time);
             const detectedMethod = extractPaymentMethod(booking.notes);
-            const displayMethod = (booking as any).payment_method || detectedMethod;
+            const displayMethod = booking.payment_method || detectedMethod;
 
             return (
-              <div
+              <motion.div
                 key={booking.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25 }}
                 className={cn(
                   "bg-card border rounded-xl p-4 transition-colors",
                   isRequested
@@ -238,20 +307,18 @@ export function PaymentsTab() {
                 )}
               >
                 <div className="flex items-start gap-3">
-                  {/* Status icon */}
                   <div className="mt-0.5 shrink-0">
                     {isRequested ? (
                       <Clock className="w-4 h-4 text-yellow-500" />
                     ) : paid ? (
                       <CheckCircle2 className="w-4 h-4 text-green-500" />
                     ) : isNoShow ? (
-                      <XCircle className="w-4 h-4 text-gray-400" />
+                      <XCircle className="w-4 h-4 text-muted-foreground" />
                     ) : (
                       <Clock className="w-4 h-4 text-amber-500" />
                     )}
                   </div>
 
-                  {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div>
@@ -271,21 +338,18 @@ export function PaymentsTab() {
                       </p>
                     </div>
 
-                    {/* Tags + ações */}
                     <div className="flex items-center justify-between mt-2 gap-2 flex-wrap">
                       <div className="flex gap-1.5 flex-wrap">
-                        {/* Status badge */}
                         {isRequested && (
                           <Badge variant="outline" className="text-xs text-yellow-700 border-yellow-300 bg-yellow-50">
                             Aguardando aprovação
                           </Badge>
                         )}
                         {isNoShow && (
-                          <Badge variant="outline" className="text-xs text-gray-500">
+                          <Badge variant="outline" className="text-xs text-muted-foreground">
                             No-show
                           </Badge>
                         )}
-                        {/* Método de pagamento */}
                         {displayMethod && (
                           <Badge variant="outline" className={cn(
                             "text-xs gap-1",
@@ -301,7 +365,6 @@ export function PaymentsTab() {
                         )}
                       </div>
 
-                      {/* Ações */}
                       {!isNoShow && !isRequested && (
                         <div className="flex gap-1.5">
                           {!paid && booking.client_phone && (
@@ -313,33 +376,69 @@ export function PaymentsTab() {
                               <Phone className="w-3.5 h-3.5 text-green-700" />
                             </button>
                           )}
-                          <button
-                            onClick={() =>
-                              markPaidMutation.mutate({
-                                id: booking.id,
-                                method: paid ? null : "at_location",
-                              })
-                            }
-                            disabled={markPaidMutation.isPending}
-                            className={cn(
-                              "px-2.5 py-1 rounded-lg text-xs font-medium transition",
-                              paid
-                                ? "bg-muted text-muted-foreground hover:bg-red-50 hover:text-red-600"
-                                : "bg-green-600 text-white hover:bg-green-700"
-                            )}
-                          >
-                            {paid ? "Desmarcar" : "Marcar pago"}
-                          </button>
+                          {paid ? (
+                            <button
+                              onClick={() =>
+                                markPaidMutation.mutate({ id: booking.id, method: null })
+                              }
+                              disabled={markPaidMutation.isPending}
+                              className="px-2.5 py-1 rounded-lg text-xs font-medium transition bg-muted text-muted-foreground hover:bg-red-50 hover:text-red-600"
+                            >
+                              Desmarcar
+                            </button>
+                          ) : (
+                            <Popover
+                              open={popoverOpenId === booking.id}
+                              onOpenChange={(open) => setPopoverOpenId(open ? booking.id : null)}
+                            >
+                              <PopoverTrigger asChild>
+                                <button className="px-2.5 py-1 rounded-lg text-xs font-medium transition bg-green-600 text-white hover:bg-green-700">
+                                  Marcar pago
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent align="end" className="w-44 p-1.5">
+                                <div className="space-y-0.5">
+                                  {PAYMENT_METHODS.map((m) => (
+                                    <button
+                                      key={m.value}
+                                      onClick={() =>
+                                        markPaidMutation.mutate({
+                                          id: booking.id,
+                                          method: m.value,
+                                        })
+                                      }
+                                      disabled={markPaidMutation.isPending}
+                                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm hover:bg-muted transition text-left"
+                                    >
+                                      <m.icon className="w-3.5 h-3.5 text-muted-foreground" />
+                                      {m.label}
+                                    </button>
+                                  ))}
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          )}
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
       )}
+
+      {/* Export Sheet */}
+      <PaymentExportSheet
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        bookings={periodFiltered}
+        periodLabel={PERIOD_LABELS[period]}
+        totalExpected={totalExpected}
+        totalReceived={totalReceived}
+        totalPending={totalPending}
+      />
     </div>
   );
 }
