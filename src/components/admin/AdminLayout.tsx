@@ -15,6 +15,7 @@ import {
   Megaphone,
   HelpCircle,
   ClipboardList,
+  DollarSign,
   Layers,
   ShieldCheck,
   Gift,
