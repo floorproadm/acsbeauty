@@ -41,8 +41,6 @@ export default function Admin() {
         return <ServicesTab />;
       case "offers":
         return <OffersTab />;
-      case "quizzes":
-        return <QuizzesTab />;
       case "tasks":
         return <TasksTab />;
       case "gallery":
