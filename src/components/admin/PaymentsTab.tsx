@@ -83,6 +83,7 @@ export function PaymentsTab() {
   const [filter, setFilter] = useState<PaymentFilter>("all");
   const [period, setPeriod] = useState<PeriodFilter>("month");
   const [exportOpen, setExportOpen] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
   const [popoverOpenId, setPopoverOpenId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
