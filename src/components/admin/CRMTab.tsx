@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UnifiedLeadsTab } from "./UnifiedLeadsTab";
+import { ReengagementTab } from "./ReengagementTab";
 import { ClientsTab } from "./ClientsTab";
-import { Users, UserPlus } from "lucide-react";
+import { Users, Bell } from "lucide-react";
 
 export function CRMTab() {
   const [activeSubTab, setActiveSubTab] = useState("clients");
@@ -12,7 +12,7 @@ export function CRMTab() {
       <div>
         <h1 className="font-serif text-2xl font-bold">CRM</h1>
         <p className="text-sm text-muted-foreground">
-          Gerencie clientes e leads em um só lugar
+          Gerencie clientes e reengajamento em um só lugar
         </p>
       </div>
 
@@ -22,9 +22,9 @@ export function CRMTab() {
             <Users className="w-4 h-4" />
             Clientes
           </TabsTrigger>
-          <TabsTrigger value="captacao" className="gap-2">
-            <UserPlus className="w-4 h-4" />
-            Captação
+          <TabsTrigger value="reengajamento" className="gap-2">
+            <Bell className="w-4 h-4" />
+            Reengajamento
           </TabsTrigger>
         </TabsList>
 
@@ -32,8 +32,8 @@ export function CRMTab() {
           <ClientsTab />
         </TabsContent>
 
-        <TabsContent value="captacao" className="mt-6">
-          <UnifiedLeadsTab />
+        <TabsContent value="reengajamento" className="mt-6">
+          <ReengagementTab />
         </TabsContent>
       </Tabs>
     </div>
