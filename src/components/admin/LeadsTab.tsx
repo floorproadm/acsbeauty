@@ -775,7 +775,7 @@ export function LeadsTab() {
                         {selectedLead.client_phone}
                       </a>
                       <a
-                        href={`https://wa.me/${selectedLead.client_phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+                        href={`https://wa.me/1${selectedLead.client_phone.replace(/\D/g, "")}?text=${encodeURIComponent(
                           `Olá ${selectedLead.client_name || ""}! Vi que você respondeu nosso quiz e gostaria de falar sobre seu resultado.`
                         )}`}
                         target="_blank"
