@@ -63,7 +63,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (client) {
+    if (client && !isCreateMode) {
       setFormData({
         name: client.name || "",
         email: client.email || "",
@@ -71,8 +71,10 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
         instagram: client.instagram || "",
         birthday: client.birthday ? parseISO(client.birthday) : null,
       });
+    } else if (isCreateMode) {
+      setFormData({ name: "", email: "", phone: "", instagram: "", birthday: null });
     }
-  }, [client]);
+  }, [client, isCreateMode]);
 
   const updateClient = useMutation({
     mutationFn: async (data: typeof formData) => {
