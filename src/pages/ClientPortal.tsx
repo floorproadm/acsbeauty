@@ -1038,7 +1038,7 @@ export default function ClientPortal() {
   }
 
   return (
-    <div className="h-[100dvh] bg-background flex flex-col max-w-[480px] mx-auto overflow-hidden">
+    <div className="h-[100dvh] bg-background flex flex-col max-w-[480px] mx-auto overflow-hidden" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
       {/* Header — hidden on home and select-service tabs */}
       {tab !== "home" && tab !== "select-service" && (
         <header className="flex items-center justify-between px-5 pt-10 pb-2 shrink-0">
@@ -1047,7 +1047,7 @@ export default function ClientPortal() {
       )}
 
       {/* Content */}
-      <main className={`flex-1 overflow-y-auto px-5 ${tab === "home" || tab === "select-service" ? "pt-10" : "pt-2"}`}>
+      <main className={`flex-1 overflow-y-auto px-5 ${tab === "home" || tab === "select-service" ? "pt-[max(env(safe-area-inset-top,20px),20px)]" : "pt-2"}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={tab}
@@ -1082,7 +1082,7 @@ export default function ClientPortal() {
 
       {/* Bottom Navigation — hidden during service selection */}
       {tab !== "select-service" && (
-        <nav className="shrink-0 border-t border-border bg-background backdrop-blur-sm px-2" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+        <nav className="shrink-0 border-t border-border bg-background px-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom, 8px), 8px)" }}>
           <div className="flex items-center justify-around py-2">
             {navItems.map(({ id, icon: Icon, labelPt, labelEn }) => {
               const active = tab === id || (id === "book" && tab === ("select-service" as Tab));
