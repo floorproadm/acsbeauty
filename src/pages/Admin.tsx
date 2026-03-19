@@ -4,6 +4,7 @@ import { AdminLayout, AdminTab } from "@/components/admin/AdminLayout";
 import { DashboardTab } from "@/components/admin/DashboardTab";
 import { BookingsTab } from "@/components/admin/BookingsTab";
 import { CRMTab } from "@/components/admin/CRMTab";
+import { PaymentsTab } from "@/components/admin/PaymentsTab";
 import { ServicesTab } from "@/components/admin/ServicesTab";
 
 import { OffersTab } from "@/components/admin/OffersTab";
@@ -32,6 +33,8 @@ export default function Admin() {
         return <DashboardTab onNavigate={setActiveTab} />;
       case "bookings":
         return <BookingsTab />;
+      case "payments":
+        return <PaymentsTab />;
       case "crm":
         return <CRMTab />;
       case "services":

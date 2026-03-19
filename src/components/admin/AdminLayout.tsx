@@ -15,6 +15,7 @@ import {
   Megaphone,
   HelpCircle,
   ClipboardList,
+  DollarSign,
   Layers,
   ShieldCheck,
   Gift,
@@ -45,6 +46,7 @@ type AppRole = Database["public"]["Enums"]["app_role"];
 export type AdminTab =
   | "dashboard"
   | "bookings"
+  | "payments"
   | "crm"
   | "services"
   | "offers"
@@ -65,6 +67,7 @@ interface AdminLayoutProps {
 const allTabs: { id: AdminTab; label: string; icon: React.ElementType; roles: AppRole[] }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin_owner"] },
   { id: "bookings", label: "Agendamentos", icon: Calendar, roles: ["admin_owner", "staff"] },
+  { id: "payments", label: "Pagamentos", icon: DollarSign, roles: ["admin_owner"] },
   { id: "crm", label: "CRM", icon: Users, roles: ["admin_owner", "staff"] },
   { id: "tasks", label: "Tarefas", icon: ClipboardList, roles: ["admin_owner", "staff"] },
   { id: "services", label: "Serviços", icon: Sparkles, roles: ["admin_owner"] },
