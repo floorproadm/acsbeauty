@@ -4,11 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -135,13 +135,13 @@ export function ClientImportSheet({ open, onOpenChange }: ClientImportSheetProps
   };
 
   return (
-    <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
-      <SheetContent className="sm:max-w-lg overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>Importar Clientes</SheetTitle>
-        </SheetHeader>
+    <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Importar Clientes</DialogTitle>
+        </DialogHeader>
 
-        <div className="mt-6 space-y-4">
+        <div className="space-y-4">
           {!parsed ? (
             <>
               <div
@@ -183,14 +183,13 @@ export function ClientImportSheet({ open, onOpenChange }: ClientImportSheetProps
                 {fileName} — <strong>{parsed.length}</strong> clientes encontrados
               </div>
 
-              <div className="border rounded-lg overflow-hidden">
+              <div className="border rounded-lg overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Nome</TableHead>
                       <TableHead>Telefone</TableHead>
                       <TableHead>Email</TableHead>
-                      <TableHead>Instagram</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -198,8 +197,7 @@ export function ClientImportSheet({ open, onOpenChange }: ClientImportSheetProps
                       <TableRow key={i}>
                         <TableCell className="text-xs">{c.name}</TableCell>
                         <TableCell className="text-xs">{c.phone || "—"}</TableCell>
-                        <TableCell className="text-xs">{c.email || "—"}</TableCell>
-                        <TableCell className="text-xs">{c.instagram || "—"}</TableCell>
+                        <TableCell className="text-xs truncate max-w-[120px]">{c.email || "—"}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -226,13 +224,13 @@ export function ClientImportSheet({ open, onOpenChange }: ClientImportSheetProps
                   ) : (
                     <Upload className="w-4 h-4 mr-2" />
                   )}
-                  Importar {parsed.length} clientes
+                  Importar {parsed.length}
                 </Button>
               </div>
             </>
           )}
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
