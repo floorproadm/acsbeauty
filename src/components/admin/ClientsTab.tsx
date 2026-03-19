@@ -64,6 +64,8 @@ export function ClientsTab() {
   const [newTag, setNewTag] = useState("");
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
