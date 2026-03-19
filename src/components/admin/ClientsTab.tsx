@@ -651,6 +651,17 @@ export function ClientsTab() {
         onOpenChange={setIsEditModalOpen}
         onDeleted={() => setSelectedClientId(null)}
       />
+
+      {/* Create Modal */}
+      <ClientEditModal
+        client={null}
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        mode="create"
+      />
+
+      {/* Import Sheet */}
+      <ClientImportSheet open={isImportOpen} onOpenChange={setIsImportOpen} />
     </div>
   );
 }

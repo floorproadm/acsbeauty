@@ -239,49 +239,51 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
           </div>
 
           <div className="flex gap-2 pt-4">
-            <Button type="submit" className="flex-1" disabled={updateClient.isPending}>
-              {updateClient.isPending ? (
+            <Button type="submit" className="flex-1" disabled={saveClient.isPending}>
+              {saveClient.isPending ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
                 <Save className="w-4 h-4 mr-2" />
               )}
-              Salvar
+              {isCreateMode ? "Criar" : "Salvar"}
             </Button>
           </div>
 
-          {/* Delete Section */}
-          <div className="pt-4 border-t">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Excluir Cliente
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tem certeza que deseja excluir <strong>{client.name}</strong>? 
-                    Esta ação não pode ser desfeita e irá remover todos os agendamentos associados.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => deleteClient.mutate()}
-                    className="bg-red-600 hover:bg-red-700"
+          {/* Delete Section - only in edit mode */}
+          {!isCreateMode && client && (
+            <div className="pt-4 border-t">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
                   >
-                    {deleteClient.isPending ? "Excluindo..." : "Excluir"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Excluir Cliente
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Tem certeza que deseja excluir <strong>{client.name}</strong>? 
+                      Esta ação não pode ser desfeita e irá remover todos os agendamentos associados.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteClient.mutate()}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      {deleteClient.isPending ? "Excluindo..." : "Excluir"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
         </form>
       </DialogContent>
     </Dialog>
