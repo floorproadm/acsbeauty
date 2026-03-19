@@ -45,6 +45,7 @@ interface ClientEditModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDeleted?: () => void;
+  mode?: "edit" | "create";
 }
 
 export function ClientEditModal({ client, open, onOpenChange, onDeleted }: ClientEditModalProps) {
