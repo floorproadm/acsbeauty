@@ -141,7 +141,7 @@ export function ClientImportSheet({ open, onOpenChange }: ClientImportSheetProps
           <SheetTitle>Importar Clientes</SheetTitle>
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
+        <div className="mt-6 space-y-4">
           {!parsed ? (
             <>
               <div
@@ -152,16 +152,11 @@ export function ClientImportSheet({ open, onOpenChange }: ClientImportSheetProps
                   const file = e.dataTransfer.files[0];
                   if (file) handleFile(file);
                 }}
-                className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
+                className="border-2 border-dashed border-border rounded-xl p-10 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
               >
-                <Upload className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
-                <p className="text-sm font-medium">Arraste um arquivo CSV aqui</p>
-                <p className="text-xs text-muted-foreground mt-1">ou clique para selecionar</p>
-                {fileName && (
-                  <p className="text-xs text-primary mt-2 flex items-center justify-center gap-1">
-                    <FileSpreadsheet className="w-3 h-3" /> {fileName}
-                  </p>
-                )}
+                <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-sm font-medium">Selecionar arquivo CSV</p>
+                <p className="text-xs text-muted-foreground mt-1">nome, telefone, email, instagram</p>
               </div>
               <input
                 ref={fileRef}
@@ -180,12 +175,6 @@ export function ClientImportSheet({ open, onOpenChange }: ClientImportSheetProps
                   {error}
                 </div>
               )}
-
-              <div className="text-xs text-muted-foreground space-y-1">
-                <p className="font-medium">Formato esperado:</p>
-                <p>Colunas: <code>nome</code>, <code>telefone</code>, <code>email</code>, <code>instagram</code></p>
-                <p>Separador: vírgula (,) ou ponto e vírgula (;)</p>
-              </div>
             </>
           ) : (
             <>
