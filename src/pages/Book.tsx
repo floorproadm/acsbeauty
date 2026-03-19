@@ -109,6 +109,34 @@ export default function Book() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [slugResolved, setSlugResolved] = useState(false);
 
+  // Payment method state (portal flow)
+  const [paymentMethod, setPaymentMethod] = useState<"at_location" | "by_app">("at_location");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  // Fetch authenticated user data for portal flow
+  const { data: portalUser } = useQuery({
+    queryKey: ["portal-user-for-booking"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      // Try to find matching client by email
+      const { data: client } = await supabase
+        .from("clients")
+        .select("*")
+        .eq("email", user.email!)
+        .maybeSingle();
+      return {
+        authUser: user,
+        client,
+        name: client?.name || user.user_metadata?.full_name || user.email?.split("@")[0] || "",
+        phone: client?.phone || user.phone || "",
+        instagram: client?.instagram || "",
+        email: user.email || "",
+      };
+    },
+    enabled: isPortalSource,
+  });
+
   const bookingSchema = z.object({
     name: z.string().trim().min(2, t("booking.name_min_error")).max(100),
     phone: z.string().trim().min(8, t("booking.phone_error")).max(20),
