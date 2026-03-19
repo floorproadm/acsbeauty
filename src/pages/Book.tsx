@@ -709,7 +709,7 @@ export default function Book() {
     const base: string[] = [];
     if (!serviceParam && !offerId && !packageId && !isPortalSource) base.push("service");
     if (activeServiceId && !isPortalSource) base.push("sku");
-    base.push("date", "time", "form");
+    base.push("date", "form");
     return base;
   })();
 
