@@ -33,6 +33,8 @@ export default function Admin() {
         return <DashboardTab onNavigate={setActiveTab} />;
       case "bookings":
         return <BookingsTab />;
+      case "payments":
+        return <PaymentsTab />;
       case "crm":
         return <CRMTab />;
       case "services":
