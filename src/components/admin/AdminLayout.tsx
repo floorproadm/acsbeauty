@@ -168,7 +168,7 @@ function AdminSidebar({
                       isActive={activeTab === tab.id}
                       tooltip={tab.label}
                       className={cn(
-                        "transition-all relative",
+                        "transition-all relative text-[15px] sm:text-sm",
                         activeTab === tab.id &&
                           "bg-rose-light text-rose-gold hover:bg-rose-light hover:text-rose-gold"
                       )}
