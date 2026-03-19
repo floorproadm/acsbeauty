@@ -8,7 +8,7 @@ import { PaymentsTab } from "@/components/admin/PaymentsTab";
 import { ServicesTab } from "@/components/admin/ServicesTab";
 
 import { OffersTab } from "@/components/admin/OffersTab";
-import { QuizzesTab } from "@/components/admin/QuizzesTab";
+
 import { TasksTab } from "@/components/admin/TasksTab";
 import { AllowedEmailsTab } from "@/components/admin/AllowedEmailsTab";
 import { GiftCardsTab } from "@/components/admin/GiftCardsTab";
@@ -41,8 +41,6 @@ export default function Admin() {
         return <ServicesTab />;
       case "offers":
         return <OffersTab />;
-      case "quizzes":
-        return <QuizzesTab />;
       case "tasks":
         return <TasksTab />;
       case "gallery":
