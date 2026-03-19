@@ -33,6 +33,7 @@ import {
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ClientEditModal } from "./ClientEditModal";
+import { ClientImportSheet } from "./ClientImportSheet";
 
 interface ClientWithRelations {
   id: string;
