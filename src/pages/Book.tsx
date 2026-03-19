@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Calendar, Check, Loader2, Clock, AlertCircle } from "lucide-react";
+import { ArrowLeft, Calendar, Check, Loader2, Clock, AlertCircle, CreditCard, MapPin } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -108,6 +108,34 @@ export default function Book() {
   const [pickedSkuId, setPickedSkuId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [slugResolved, setSlugResolved] = useState(false);
+
+  // Payment method state (portal flow)
+  const [paymentMethod, setPaymentMethod] = useState<"at_location" | "by_app">("at_location");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  // Fetch authenticated user data for portal flow
+  const { data: portalUser } = useQuery({
+    queryKey: ["portal-user-for-booking"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      // Try to find matching client by email
+      const { data: client } = await supabase
+        .from("clients")
+        .select("*")
+        .eq("email", user.email!)
+        .maybeSingle();
+      return {
+        authUser: user,
+        client,
+        name: client?.name || user.user_metadata?.full_name || user.email?.split("@")[0] || "",
+        phone: client?.phone || user.phone || "",
+        instagram: client?.instagram || "",
+        email: user.email || "",
+      };
+    },
+    enabled: isPortalSource,
+  });
 
   const bookingSchema = z.object({
     name: z.string().trim().min(2, t("booking.name_min_error")).max(100),
@@ -481,35 +509,62 @@ export default function Book() {
 
   // Portal confirm mutation — inserts booking as "requested" (pending) without Google Calendar
   const portalConfirmBooking = useMutation({
-    mutationFn: async (formData: BookingFormData) => {
-      if (!holdId || !selectedSlot) throw new Error("Missing booking information");
+    mutationFn: async () => {
+      if (!selectedSlot) throw new Error("Missing booking information");
+      if (!portalUser) throw new Error("User not authenticated");
 
       const finalServiceId = offer?.service_id || activeServiceId || null;
 
-      // Upsert client by phone
-      const { data: existingClient } = await supabase.
-      from("clients").
-      select("id").
-      eq("phone", formData.phone).
-      maybeSingle();
+      // Use authenticated user data
+      const clientName = portalUser.name;
+      const clientPhone = portalUser.phone;
+      const clientEmail = portalUser.email;
+      const clientInstagram = portalUser.instagram;
+
+      // Upsert client by email
+      const { data: existingClient } = await supabase
+        .from("clients")
+        .select("id")
+        .eq("email", clientEmail)
+        .maybeSingle();
 
       let clientId: string;
       if (existingClient) {
         clientId = existingClient.id;
-        await supabase.from("clients").update({
-          name: formData.name,
-          instagram: formData.instagram || null
-        }).eq("id", clientId);
+      } else if (clientPhone) {
+        // Fallback: try by phone
+        const { data: phoneClient } = await supabase
+          .from("clients")
+          .select("id")
+          .eq("phone", clientPhone)
+          .maybeSingle();
+        if (phoneClient) {
+          clientId = phoneClient.id;
+          await supabase.from("clients").update({ email: clientEmail }).eq("id", clientId);
+        } else {
+          const { data: newClient, error: clientError } = await supabase
+            .from("clients")
+            .insert({
+              name: clientName,
+              phone: clientPhone,
+              email: clientEmail,
+              instagram: clientInstagram || null,
+            })
+            .select()
+            .single();
+          if (clientError) throw clientError;
+          clientId = newClient.id;
+        }
       } else {
-        const { data: newClient, error: clientError } = await supabase.
-        from("clients").
-        insert({
-          name: formData.name,
-          phone: formData.phone,
-          instagram: formData.instagram || null
-        }).
-        select().
-        single();
+        const { data: newClient, error: clientError } = await supabase
+          .from("clients")
+          .insert({
+            name: clientName,
+            email: clientEmail,
+            instagram: clientInstagram || null,
+          })
+          .select()
+          .single();
         if (clientError) throw clientError;
         clientId = newClient.id;
       }
@@ -517,43 +572,45 @@ export default function Book() {
       // Fetch SKU price (price lock)
       let totalPrice: number | null = null;
       if (pickedSkuId) {
-        const { data: skuData } = await supabase.
-        from("service_skus").
-        select("price, promo_price").
-        eq("id", pickedSkuId).
-        single();
+        const { data: skuData } = await supabase
+          .from("service_skus")
+          .select("price, promo_price")
+          .eq("id", pickedSkuId)
+          .single();
         if (skuData) {
-          totalPrice = skuData.promo_price != null && Number(skuData.promo_price) < Number(skuData.price) ?
-          Number(skuData.promo_price) :
-          Number(skuData.price);
+          totalPrice = skuData.promo_price != null && Number(skuData.promo_price) < Number(skuData.price)
+            ? Number(skuData.promo_price)
+            : Number(skuData.price);
         }
       }
 
       // Insert booking as "requested" (pending approval)
-      const { data: booking, error: bookingError } = await supabase.
-      from("bookings").
-      insert({
-        client_id: clientId,
-        client_name: formData.name,
-        client_phone: formData.phone,
-        client_email: `${formData.phone.replace(/\D/g, "")}@placeholder.com`,
-        service_id: finalServiceId,
-        package_id: packageId || null,
-        sku_id: pickedSkuId || null,
-        total_price: totalPrice,
-        start_time: selectedSlot.start,
-        end_time: selectedSlot.end,
-        timezone: "America/New_York",
-        status: "requested",
-        notes: null
-      }).
-      select("*, services(id, name, duration_minutes, price, promo_price), packages(id, name, total_price, sessions_qty)").
-      single();
+      const { data: booking, error: bookingError } = await supabase
+        .from("bookings")
+        .insert({
+          client_id: clientId,
+          client_name: clientName,
+          client_phone: clientPhone || null,
+          client_email: clientEmail,
+          service_id: finalServiceId,
+          package_id: packageId || null,
+          sku_id: pickedSkuId || null,
+          total_price: totalPrice,
+          start_time: selectedSlot.start,
+          end_time: selectedSlot.end,
+          timezone: "America/New_York",
+          status: "requested",
+          notes: paymentMethod === "at_location" ? "Payment: At Location (Cash/Zelle/Venmo)" : "Payment: By App",
+        })
+        .select("*, services(id, name, duration_minutes, price, promo_price), packages(id, name, total_price, sessions_qty)")
+        .single();
 
       if (bookingError) throw bookingError;
 
-      // Delete hold
-      await supabase.from("booking_holds").delete().eq("id", holdId);
+      // Delete hold if exists
+      if (holdId) {
+        await supabase.from("booking_holds").delete().eq("id", holdId);
+      }
 
       return booking;
     },
@@ -1166,59 +1223,176 @@ export default function Book() {
                       </div>
                   }
 
-                    <h3 className="font-serif text-lg font-semibold mb-4">
-                      {language === "pt" ? "Seus dados" : "Your information"}
-                    </h3>
-
-                    <form onSubmit={handleSubmit((data) => isPortalSource ? portalConfirmBooking.mutate(data) : confirmBooking.mutate(data))} className="space-y-5">
-                      <div className="space-y-1.5">
-                        <Label htmlFor="name">{t("booking.full_name")} *</Label>
-                        <Input
-                        id="name"
-                        placeholder={t("booking.full_name_placeholder")}
-                        {...register("name")}
-                        className={errors.name ? "border-destructive" : ""} />
-                      
-                        {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <Label htmlFor="phone">{t("booking.phone")} *</Label>
-                        <Input
-                        id="phone"
-                        type="tel"
-                        placeholder="+1 (555) 123-4567"
-                        {...register("phone")}
-                        className={errors.phone ? "border-destructive" : ""} />
-                      
-                        {errors.phone && <p className="text-sm text-destructive">{errors.phone.message}</p>}
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <Label htmlFor="instagram">{t("booking.instagram")}</Label>
-                        <Input id="instagram" placeholder="@yourusername" {...register("instagram")} />
-                      </div>
-
-                      <Button
-                      type="submit"
-                      variant="hero"
-                      size="xl"
-                      className="w-full"
-                      disabled={confirmBooking.isPending || portalConfirmBooking.isPending || !isPortalSource && countdown <= 0}>
-                      
-                        {confirmBooking.isPending || portalConfirmBooking.isPending ?
+                    {isPortalSource ? (
                       <>
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            {t("global.processing")}
-                          </> :
+                        <h3 className="font-serif text-lg font-semibold mb-4">
+                          {language === "pt" ? "Método de pagamento" : "Payment method"}
+                        </h3>
 
+                        <div className="space-y-3 mb-5">
+                          {/* Pay at Location */}
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod("at_location")}
+                            className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
+                              paymentMethod === "at_location"
+                                ? "border-rose-gold bg-rose-light/30"
+                                : "border-border hover:border-rose-gold/50"
+                            }`}
+                          >
+                            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+                              paymentMethod === "at_location" ? "bg-rose-gold" : "bg-muted"
+                            }`}>
+                              <MapPin className={`w-5 h-5 ${paymentMethod === "at_location" ? "text-white" : "text-muted-foreground"}`} />
+                            </div>
+                            <div className="flex-1 text-left">
+                              <p className="font-medium text-foreground">
+                                {language === "pt" ? "Pagar no local" : "Pay at Location"}
+                              </p>
+                              <p className="text-sm text-muted-foreground">Cash, Zelle or Venmo</p>
+                            </div>
+                            {paymentMethod === "at_location" && (
+                              <div className="w-6 h-6 rounded-full border-2 border-rose-gold flex items-center justify-center">
+                                <Check className="w-3.5 h-3.5 text-rose-gold" />
+                              </div>
+                            )}
+                          </button>
+
+                          {/* Pay by App (disabled for now) */}
+                          <button
+                            type="button"
+                            disabled
+                            className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-border opacity-50 cursor-not-allowed"
+                          >
+                            <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                              <CreditCard className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                            <div className="flex-1 text-left">
+                              <p className="font-medium text-foreground">
+                                {language === "pt" ? "Pagar pelo App" : "Pay by App"}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {language === "pt" ? "Em breve" : "Coming soon"}
+                              </p>
+                            </div>
+                          </button>
+                        </div>
+
+                        {/* Cancellation terms */}
+                        <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all mb-5 ${
+                          acceptedTerms ? "border-rose-gold bg-rose-light/20" : "border-border"
+                        }`}>
+                          <input
+                            type="checkbox"
+                            checked={acceptedTerms}
+                            onChange={(e) => setAcceptedTerms(e.target.checked)}
+                            className="mt-0.5 w-4 h-4 rounded border-border text-rose-gold focus:ring-rose-gold"
+                          />
+                          <span className="text-sm text-foreground">
+                            {language === "pt" ? (
+                              <>Li e aceito os <a href="/termos" target="_blank" className="text-rose-gold font-medium hover:underline">termos de cancelamento</a></>
+                            ) : (
+                              <>I have read and accept the <a href="/termos" target="_blank" className="text-rose-gold font-medium hover:underline">cancellation terms</a></>
+                            )}
+                          </span>
+                        </label>
+
+                        {/* Total */}
+                        {(() => {
+                          const skuPrice = selectedSkuData?.price ? Number(selectedSkuData.price) : null;
+                          const skuPromo = selectedSkuData?.promo_price ? Number(selectedSkuData.promo_price) : null;
+                          const hasPromo = skuPromo != null && skuPrice != null && skuPromo < skuPrice;
+                          const displayPrice = hasPromo ? skuPromo : skuPrice || (service?.promo_price ? Number(service.promo_price) : null) || service?.price;
+
+                          if (!displayPrice) return null;
+                          return (
+                            <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50 mb-5">
+                              <span className="font-semibold text-foreground">Total</span>
+                              <span className="font-bold text-xl text-rose-gold">
+                                ${Number(displayPrice).toFixed(2)}
+                              </span>
+                            </div>
+                          );
+                        })()}
+
+                        <Button
+                          type="button"
+                          variant="hero"
+                          size="xl"
+                          className="w-full"
+                          disabled={!acceptedTerms || portalConfirmBooking.isPending}
+                          onClick={() => portalConfirmBooking.mutate()}
+                        >
+                          {portalConfirmBooking.isPending ? (
+                            <>
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                              {t("global.processing")}
+                            </>
+                          ) : (
+                            <>
+                              <Check className="w-5 h-5" />
+                              {language === "pt" ? "Enviar solicitação" : "Submit request"}
+                            </>
+                          )}
+                        </Button>
+                      </>
+                    ) : (
                       <>
-                            <Check className="w-5 h-5" />
-                            {isPortalSource ? language === "pt" ? "Enviar solicitação" : "Submit request" : t("booking.confirm")}
-                          </>
-                      }
-                      </Button>
-                    </form>
+                        <h3 className="font-serif text-lg font-semibold mb-4">
+                          {language === "pt" ? "Seus dados" : "Your information"}
+                        </h3>
+
+                        <form onSubmit={handleSubmit((data) => confirmBooking.mutate(data))} className="space-y-5">
+                          <div className="space-y-1.5">
+                            <Label htmlFor="name">{t("booking.full_name")} *</Label>
+                            <Input
+                              id="name"
+                              placeholder={t("booking.full_name_placeholder")}
+                              {...register("name")}
+                              className={errors.name ? "border-destructive" : ""}
+                            />
+                            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <Label htmlFor="phone">{t("booking.phone")} *</Label>
+                            <Input
+                              id="phone"
+                              type="tel"
+                              placeholder="+1 (555) 123-4567"
+                              {...register("phone")}
+                              className={errors.phone ? "border-destructive" : ""}
+                            />
+                            {errors.phone && <p className="text-sm text-destructive">{errors.phone.message}</p>}
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <Label htmlFor="instagram">{t("booking.instagram")}</Label>
+                            <Input id="instagram" placeholder="@yourusername" {...register("instagram")} />
+                          </div>
+
+                          <Button
+                            type="submit"
+                            variant="hero"
+                            size="xl"
+                            className="w-full"
+                            disabled={confirmBooking.isPending || countdown <= 0}
+                          >
+                            {confirmBooking.isPending ? (
+                              <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                {t("global.processing")}
+                              </>
+                            ) : (
+                              <>
+                                <Check className="w-5 h-5" />
+                                {t("booking.confirm")}
+                              </>
+                            )}
+                          </Button>
+                        </form>
+                      </>
+                    )}
                   </div>
                 </motion.div>
               }
