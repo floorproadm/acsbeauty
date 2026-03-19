@@ -671,7 +671,7 @@ export default function Book() {
       setSelectedDate(undefined);
     } else if (step === "date") {
       if (isPortalSource) {
-        navigate(-1);
+        navigate("/portal");
       } else if (pickedSkuId || activeServiceId) {
         setStep("sku");
       } else if (isCalendarFlow) {
@@ -681,7 +681,7 @@ export default function Book() {
       }
     } else if (step === "sku") {
       if (isPortalSource) {
-        navigate(-1);
+        navigate("/portal");
       } else {
         setPickedVariationId(null);
         setPickedSkuId(null);
