@@ -1,98 +1,44 @@
 
-# ACS v2.0 — Progresso de Implementação
 
-## ✅ Fase 1: Rotas Dinâmicas de Serviços (CONCLUÍDA)
+## Plano: Reengajamento de Inativos (substituir aba Captação)
 
-### Migration executada:
-- `services.slug` (text UNIQUE NOT NULL) — populado automaticamente
-- `services.category_slug` (text, indexed)
-- `service_skus.slug` (text, indexed)
-- `services.hero_image_url` (text)
-- `services.faq` (jsonb, default '[]') — usado para FAQs inline
+### O que muda
 
-### Tabela `service_faqs` criada (legado, não usada pelo frontend):
-- Frontend usa `services.faq` jsonb diretamente
+A sub-aba "Captação" dentro do CRM será substituída por "Reengajamento" — uma lista automática de clientes que precisam de atenção, segmentada pelos mesmos critérios de frequência que já existem no sistema (Ocasional 31-60d, Ausente 61-90d, Inativo 90d+).
 
-### Indexes adicionados:
-- `idx_services_slug`
-- `idx_services_category`
-- `idx_services_category_slug`
-- `idx_skus_slug`
+### Funcionalidades
 
-### Páginas criadas/atualizadas:
-- `src/pages/Services.tsx` → dinâmico, query categorias do banco
-- `src/pages/servicos/CategoryPage.tsx` → query por `category_slug`
-- `src/pages/servicos/ServiceDetail.tsx` → variações, SKUs, FAQs (jsonb), JSON-LD geo
+**1. Lista segmentada por urgência**
+- 3 filtros por pill: Ocasional (31-60d), Ausente (61-90d), Inativo (90d+)
+- Default: mostrar todos, ordenados por dias sem visita (mais urgentes primeiro)
+- Cards com: nome, telefone, último serviço, dias sem visita, badge de status com cor
 
-### RLS adicionado:
-- `service_skus` → "Anyone can view active skus"
-- `service_variations` → "Anyone can view active variations"
-- `service_faqs` → "Anyone can view service faqs" + "Admins can manage service faqs"
+**2. Ações rápidas por cliente**
+- Botão WhatsApp: abre WhatsApp com mensagem pré-preenchida de reengajamento (ex: "Oi [nome], sentimos sua falta! Que tal agendar seu próximo horário?")
+- Botão "Marcar contatado": adiciona tag `reengajamento-contatado` + data no cliente, removendo da lista ativa (ou movendo para seção "Contatados")
+- Botão "Agendar": redireciona para criar booking manual
 
----
+**3. Métricas no topo**
+- 3 cards: total Ocasionais, total Ausentes, total Inativos
+- Contagem atualizada automaticamente com base em `last_visit_at`
 
-## ✅ Fase 1.5: SEO Local + Institucional + Shop (CONCLUÍDA)
+**4. Remoção do Quiz**
+- Remover referências a `quiz_responses` do UnifiedLeadsTab
+- A sub-aba passa a ser "Reengajamento" com ícone de sino/alerta
+- Leads do WhatsApp (contact_submissions) continuam existindo na base mas não aparecem mais nesta aba — ficam acessíveis apenas se necessário futuramente
 
-### Tabela `service_locations` criada
-### Rota hierárquica para geo-variants com canonical
-### Páginas institucionais: Studio, Team, LocationNewark, Shop
+### Arquivos
 
----
+| Arquivo | Ação |
+|---|---|
+| `src/components/admin/ReengagementTab.tsx` | Criar — novo componente com lista de clientes inativos |
+| `src/components/admin/CRMTab.tsx` | Trocar UnifiedLeadsTab por ReengagementTab, renomear aba |
 
-## ✅ Fase 2: Booking por SKU + Slug (CONCLUÍDA)
+### Detalhes técnicos
 
-### Migration executada:
-- `bookings.sku_id` (uuid, nullable, FK → service_skus)
+- Query na tabela `clients` com `last_visit_at` not null, calculando `differenceInDays` no frontend (mesma lógica de `ClientsTab.tsx` linhas 168-174)
+- Buscar último booking de cada cliente via join: `clients` + `bookings` (último por `start_time` com status `confirmed` ou `completed`) para mostrar "último serviço"
+- Mensagem WhatsApp montada com template: `https://wa.me/1${phone}?text=...`
+- Tag `reengajamento-contatado` usa o campo `tags[]` que já existe na tabela clients
+- Sem alterações de banco de dados necessárias
 
-### Book.tsx — SKU selection flow:
-- Novo state: `pickedVariationId`, `pickedSkuId`
-- Step "sku" entre "service" e "date"
-- Auto-skip: sem variations → pular; 1 SKU → auto-selecionar
-- `serviceDuration` usa SKU duration com fallback
-- `sku_id` enviado no payload de hold/confirm
-
-### Book.tsx — Slug-based URL pre-selection:
-- Query params `?service=slug` e `?sku=slug`
-- UUID regex: `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`
-- UUID → WHERE id = param; Slug → WHERE slug = param
-- Pre-seleciona serviço e SKU, pula para date
-
-### ServiceDetail.tsx — Slug links:
-- CTA principal: `/book?service=${service.slug}`
-- SkuCard: `/book?service=${service.slug}&sku=${sku.slug}`
-
-### ServiceDetail.tsx — FAQs:
-- Renderiza `services.faq` (jsonb array `[{question, answer}]`)
-- Accordion shadcn com estilo ServiceFAQ
-
-### ServiceDetail.tsx — JSON-LD geo-cluster:
-- `<script type="application/ld+json">` com schema LocalBusiness quando locationData existe
-
-### Admin — BookingsTab:
-- Join `service_skus(name, price)` na query
-- Colunas SKU name e preço na listagem
-
-### Admin — DashboardTab:
-- Cards: "Receita do Mês" e "Bookings do Mês"
-- Bar chart (recharts): top 5 serviços por booking count
-
-### Edge function — Price lock:
-- `calendar-confirm-booking` aceita `sku_id`
-- Busca preço do SKU no banco (nunca confia no frontend)
-- `total_price = promo_price || price` salvo no booking
-
----
-
-## 🔲 Fase 3: Quiz como Funil Real
-- `/quiz` landing, `/quiz/:slug/resultado`
-- WhatsApp com contexto
-
-## 🔲 Fase 4: Páginas de Conteúdo e Legal
-- `/privacidade`, `/termos`, `/perguntas-frequentes`
-
-## 🔲 Fase 5: Admin — Rotas Nomeadas
-- Sub-rotas reais com Outlet
-
-## 🔲 Fase 6: Limpeza
-- Remover arquivos legados
-- Atualizar Header
