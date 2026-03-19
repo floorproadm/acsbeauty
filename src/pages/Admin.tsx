@@ -4,6 +4,7 @@ import { AdminLayout, AdminTab } from "@/components/admin/AdminLayout";
 import { DashboardTab } from "@/components/admin/DashboardTab";
 import { BookingsTab } from "@/components/admin/BookingsTab";
 import { CRMTab } from "@/components/admin/CRMTab";
+import { PaymentsTab } from "@/components/admin/PaymentsTab";
 import { ServicesTab } from "@/components/admin/ServicesTab";
 
 import { OffersTab } from "@/components/admin/OffersTab";
