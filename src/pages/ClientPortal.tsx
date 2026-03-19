@@ -1047,7 +1047,7 @@ export default function ClientPortal() {
       )}
 
       {/* Content */}
-      <main className={`flex-1 overflow-y-auto px-5 ${tab === "home" || tab === "select-service" ? "pt-10" : "pt-2"}`}>
+      <main className={`flex-1 overflow-y-auto px-5 ${tab === "home" || tab === "select-service" ? "pt-[max(env(safe-area-inset-top,20px),20px)]" : "pt-2"}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={tab}
