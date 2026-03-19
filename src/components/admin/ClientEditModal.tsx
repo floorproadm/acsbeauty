@@ -50,7 +50,8 @@ interface ClientEditModalProps {
   mode?: "edit" | "create";
 }
 
-export function ClientEditModal({ client, open, onOpenChange, onDeleted }: ClientEditModalProps) {
+export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = "edit" }: ClientEditModalProps) {
+  const isCreateMode = mode === "create";
   const [formData, setFormData] = useState({
     name: "",
     email: "",
