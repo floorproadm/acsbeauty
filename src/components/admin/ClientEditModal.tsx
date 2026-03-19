@@ -33,21 +33,25 @@ import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
+interface ClientData {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  instagram: string | null;
+  birthday?: string | null;
+}
+
 interface ClientEditModalProps {
-  client: {
-    id: string;
-    name: string;
-    email: string | null;
-    phone: string | null;
-    instagram: string | null;
-    birthday?: string | null;
-  } | null;
+  client: ClientData | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDeleted?: () => void;
+  mode?: "edit" | "create";
 }
 
-export function ClientEditModal({ client, open, onOpenChange, onDeleted }: ClientEditModalProps) {
+export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = "edit" }: ClientEditModalProps) {
+  const isCreateMode = mode === "create";
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -59,7 +63,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (client) {
+    if (client && !isCreateMode) {
       setFormData({
         name: client.name || "",
         email: client.email || "",
@@ -67,33 +71,38 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
         instagram: client.instagram || "",
         birthday: client.birthday ? parseISO(client.birthday) : null,
       });
+    } else if (isCreateMode) {
+      setFormData({ name: "", email: "", phone: "", instagram: "", birthday: null });
     }
-  }, [client]);
+  }, [client, isCreateMode]);
 
-  const updateClient = useMutation({
+  const saveClient = useMutation({
     mutationFn: async (data: typeof formData) => {
-      if (!client) return;
-      const { error } = await supabase
-        .from("clients")
-        .update({
-          name: data.name,
-          email: data.email || null,
-          phone: data.phone || null,
-          instagram: data.instagram || null,
-          birthday: data.birthday ? format(data.birthday, "yyyy-MM-dd") : null,
-        })
-        .eq("id", client.id);
-      
-      if (error) throw error;
+      const payload = {
+        name: data.name,
+        email: data.email || null,
+        phone: data.phone || null,
+        instagram: data.instagram || null,
+        birthday: data.birthday ? format(data.birthday, "yyyy-MM-dd") : null,
+      };
+
+      if (isCreateMode) {
+        const { error } = await supabase.from("clients").insert(payload);
+        if (error) throw error;
+      } else {
+        if (!client) return;
+        const { error } = await supabase.from("clients").update(payload).eq("id", client.id);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-clients"] });
       queryClient.invalidateQueries({ queryKey: ["admin-client-detail"] });
-      toast({ title: "Cliente atualizado!" });
+      toast({ title: isCreateMode ? "Cliente criado!" : "Cliente atualizado!" });
       onOpenChange(false);
     },
     onError: () => {
-      toast({ title: "Erro ao atualizar", variant: "destructive" });
+      toast({ title: isCreateMode ? "Erro ao criar" : "Erro ao atualizar", variant: "destructive" });
     },
   });
 
@@ -140,16 +149,16 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
       toast({ title: "Nome é obrigatório", variant: "destructive" });
       return;
     }
-    updateClient.mutate(formData);
+    saveClient.mutate(formData);
   };
 
-  if (!client) return null;
+  if (!isCreateMode && !client) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Editar Cliente</DialogTitle>
+          <DialogTitle>{isCreateMode ? "Novo Cliente" : "Editar Cliente"}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -230,49 +239,51 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted }: Clien
           </div>
 
           <div className="flex gap-2 pt-4">
-            <Button type="submit" className="flex-1" disabled={updateClient.isPending}>
-              {updateClient.isPending ? (
+            <Button type="submit" className="flex-1" disabled={saveClient.isPending}>
+              {saveClient.isPending ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
                 <Save className="w-4 h-4 mr-2" />
               )}
-              Salvar
+              {isCreateMode ? "Criar" : "Salvar"}
             </Button>
           </div>
 
-          {/* Delete Section */}
-          <div className="pt-4 border-t">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Excluir Cliente
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tem certeza que deseja excluir <strong>{client.name}</strong>? 
-                    Esta ação não pode ser desfeita e irá remover todos os agendamentos associados.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => deleteClient.mutate()}
-                    className="bg-red-600 hover:bg-red-700"
+          {/* Delete Section - only in edit mode */}
+          {!isCreateMode && client && (
+            <div className="pt-4 border-t">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
                   >
-                    {deleteClient.isPending ? "Excluindo..." : "Excluir"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Excluir Cliente
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Tem certeza que deseja excluir <strong>{client.name}</strong>? 
+                      Esta ação não pode ser desfeita e irá remover todos os agendamentos associados.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteClient.mutate()}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      {deleteClient.isPending ? "Excluindo..." : "Excluir"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
         </form>
       </DialogContent>
     </Dialog>

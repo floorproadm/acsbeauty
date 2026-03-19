@@ -29,10 +29,12 @@ import {
   ChevronRight,
   Sparkles,
   Pencil,
+  Upload,
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ClientEditModal } from "./ClientEditModal";
+import { ClientImportSheet } from "./ClientImportSheet";
 
 interface ClientWithRelations {
   id: string;
@@ -63,6 +65,8 @@ export function ClientsTab() {
   const [newTag, setNewTag] = useState("");
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -230,6 +234,16 @@ export function ClientsTab() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <p className="text-sm text-muted-foreground">{totalCount} clientes cadastrados</p>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={() => setIsImportOpen(true)}>
+            <Upload className="w-4 h-4 mr-1" />
+            Importar
+          </Button>
+          <Button size="sm" onClick={() => setIsCreateModalOpen(true)}>
+            <Plus className="w-4 h-4 mr-1" />
+            Novo
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
@@ -638,6 +652,17 @@ export function ClientsTab() {
         onOpenChange={setIsEditModalOpen}
         onDeleted={() => setSelectedClientId(null)}
       />
+
+      {/* Create Modal */}
+      <ClientEditModal
+        client={null}
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        mode="create"
+      />
+
+      {/* Import Sheet */}
+      <ClientImportSheet open={isImportOpen} onOpenChange={setIsImportOpen} />
     </div>
   );
 }
