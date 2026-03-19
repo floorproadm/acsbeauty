@@ -1,98 +1,38 @@
 
-# ACS v2.0 — Progresso de Implementação
 
-## ✅ Fase 1: Rotas Dinâmicas de Serviços (CONCLUÍDA)
+## Plano: Adicionar botão de criar cliente + importação de lista
 
-### Migration executada:
-- `services.slug` (text UNIQUE NOT NULL) — populado automaticamente
-- `services.category_slug` (text, indexed)
-- `service_skus.slug` (text, indexed)
-- `services.hero_image_url` (text)
-- `services.faq` (jsonb, default '[]') — usado para FAQs inline
+### O que muda
 
-### Tabela `service_faqs` criada (legado, não usada pelo frontend):
-- Frontend usa `services.faq` jsonb diretamente
+1. **Botão "Novo Cliente"** no header da aba Clientes — abre o `ClientEditModal` existente em modo criação (sem `client` preenchido), inserindo diretamente na tabela `clients`.
 
-### Indexes adicionados:
-- `idx_services_slug`
-- `idx_services_category`
-- `idx_services_category_slug`
-- `idx_skus_slug`
+2. **Botão "Importar"** — abre um Sheet/Dialog com upload de CSV. O admin faz upload de um arquivo `.csv` com colunas (nome, telefone, email, instagram) e o sistema insere em lote na tabela `clients`.
 
-### Páginas criadas/atualizadas:
-- `src/pages/Services.tsx` → dinâmico, query categorias do banco
-- `src/pages/servicos/CategoryPage.tsx` → query por `category_slug`
-- `src/pages/servicos/ServiceDetail.tsx` → variações, SKUs, FAQs (jsonb), JSON-LD geo
+### Arquivos
 
-### RLS adicionado:
-- `service_skus` → "Anyone can view active skus"
-- `service_variations` → "Anyone can view active variations"
-- `service_faqs` → "Anyone can view service faqs" + "Admins can manage service faqs"
+| Arquivo | Ação |
+|---|---|
+| `src/components/admin/ClientsTab.tsx` | Adicionar botões "+ Novo" e "Importar" no header; estado para modal de criação e sheet de importação |
+| `src/components/admin/ClientEditModal.tsx` | Ajustar para aceitar `client: null` como modo criação (INSERT ao invés de UPDATE) |
+| `src/components/admin/ClientImportSheet.tsx` | Criar — Sheet com upload CSV, preview da tabela, validação e inserção em lote |
 
----
+### Detalhes
 
-## ✅ Fase 1.5: SEO Local + Institucional + Shop (CONCLUÍDA)
+**Novo Cliente**
+- Reutiliza o `ClientEditModal` passando `client={null}` 
+- Modal detecta `client === null` → muda título para "Novo Cliente", esconde botão deletar, faz `INSERT` ao invés de `UPDATE`
+- Campos: nome (obrigatório), telefone, email, instagram, aniversário
 
-### Tabela `service_locations` criada
-### Rota hierárquica para geo-variants com canonical
-### Páginas institucionais: Studio, Team, LocationNewark, Shop
+**Importação CSV**
+- Sheet lateral com área de drag-and-drop ou botão de upload
+- Aceita `.csv` com separador `,` ou `;`
+- Colunas esperadas: `nome`, `telefone`, `email`, `instagram` (mapeamento flexível por header)
+- Preview com tabela mostrando primeiras 5 linhas antes de confirmar
+- Inserção em lote via `supabase.from("clients").insert([...])` 
+- Feedback: "X clientes importados com sucesso"
+- Tratamento de duplicatas: skip se telefone já existe (opcional)
 
----
+**UI no header (mobile-first)**
+- Dois botões compactos ao lado do contador: ícone `+` (novo) e ícone `Upload` (importar)
+- Padrão visual igual ao botão `+` da aba Pagamentos
 
-## ✅ Fase 2: Booking por SKU + Slug (CONCLUÍDA)
-
-### Migration executada:
-- `bookings.sku_id` (uuid, nullable, FK → service_skus)
-
-### Book.tsx — SKU selection flow:
-- Novo state: `pickedVariationId`, `pickedSkuId`
-- Step "sku" entre "service" e "date"
-- Auto-skip: sem variations → pular; 1 SKU → auto-selecionar
-- `serviceDuration` usa SKU duration com fallback
-- `sku_id` enviado no payload de hold/confirm
-
-### Book.tsx — Slug-based URL pre-selection:
-- Query params `?service=slug` e `?sku=slug`
-- UUID regex: `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`
-- UUID → WHERE id = param; Slug → WHERE slug = param
-- Pre-seleciona serviço e SKU, pula para date
-
-### ServiceDetail.tsx — Slug links:
-- CTA principal: `/book?service=${service.slug}`
-- SkuCard: `/book?service=${service.slug}&sku=${sku.slug}`
-
-### ServiceDetail.tsx — FAQs:
-- Renderiza `services.faq` (jsonb array `[{question, answer}]`)
-- Accordion shadcn com estilo ServiceFAQ
-
-### ServiceDetail.tsx — JSON-LD geo-cluster:
-- `<script type="application/ld+json">` com schema LocalBusiness quando locationData existe
-
-### Admin — BookingsTab:
-- Join `service_skus(name, price)` na query
-- Colunas SKU name e preço na listagem
-
-### Admin — DashboardTab:
-- Cards: "Receita do Mês" e "Bookings do Mês"
-- Bar chart (recharts): top 5 serviços por booking count
-
-### Edge function — Price lock:
-- `calendar-confirm-booking` aceita `sku_id`
-- Busca preço do SKU no banco (nunca confia no frontend)
-- `total_price = promo_price || price` salvo no booking
-
----
-
-## 🔲 Fase 3: Quiz como Funil Real
-- `/quiz` landing, `/quiz/:slug/resultado`
-- WhatsApp com contexto
-
-## 🔲 Fase 4: Páginas de Conteúdo e Legal
-- `/privacidade`, `/termos`, `/perguntas-frequentes`
-
-## 🔲 Fase 5: Admin — Rotas Nomeadas
-- Sub-rotas reais com Outlet
-
-## 🔲 Fase 6: Limpeza
-- Remover arquivos legados
-- Atualizar Header
