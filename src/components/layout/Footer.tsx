@@ -19,6 +19,7 @@ const GPS_OPTIONS = [
 
 export function Footer() {
   const { t } = useLanguage();
+  const [gpsOpen, setGpsOpen] = useState(false);
 
   return (
     <footer className="bg-[#f5f0eb] text-foreground">
