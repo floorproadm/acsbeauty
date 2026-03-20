@@ -182,6 +182,34 @@ export function Footer() {
           </div>
         </div>
       </div>
+      {/* GPS Picker Dialog */}
+      <Dialog open={gpsOpen} onOpenChange={setGpsOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <Navigation className="w-5 h-5 text-primary" />
+              {t("contact.navigate_title")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            {GPS_OPTIONS.map((opt) => (
+              <a
+                key={opt.name}
+                href={opt.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setGpsOpen(false)}
+                className="flex items-center gap-3 p-3 rounded-lg bg-champagne/20 hover:bg-champagne/40 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Navigation className="w-4 h-4 text-primary" />
+                </div>
+                <span className="font-medium text-sm text-foreground">{opt.name}</span>
+              </a>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </footer>
   );
 }
