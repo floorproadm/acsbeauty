@@ -92,7 +92,7 @@ export default function Contact() {
       <Header />
 
       {/* Hero Section */}
-      <section className="pt-24 md:pt-32 pb-12 md:pb-20 px-5 md:px-6 bg-gradient-to-b from-champagne/30 to-background">
+      <section className="pt-24 md:pt-32 pb-4 md:pb-20 px-5 md:px-6 bg-gradient-to-b from-champagne/30 to-background">
         <div className="container mx-auto max-w-4xl text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <span className="inline-block px-3 md:px-4 py-1.5 bg-rose-gold/10 text-rose-gold text-xs md:text-sm font-medium rounded-full mb-4 md:mb-6">{t("contact.badge")}</span>
