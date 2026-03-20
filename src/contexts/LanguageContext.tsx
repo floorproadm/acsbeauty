@@ -626,6 +626,10 @@ const translations: Record<Language, Record<string, string>> = {
     "contact.map_placeholder": "Integração com mapa em breve",
     "contact.cta_title": "Pronta para Agendar?",
     "contact.cta_description": "Marque seu tratamento hoje e dê o primeiro passo para uma pele radiante.",
+    "contact.team_title": "Fale com Nossa Equipe",
+    "contact.team_subtitle": "Toque nos ícones para interagir.",
+    "contact.navigate_title": "Como deseja navegar?",
+    "contact.find_us": "Encontre-nos",
 
     // ========== CONFIRMATION PAGE ==========
     "confirm.title": "Agendamento Confirmado!",
