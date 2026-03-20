@@ -219,25 +219,7 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* Embedded Google Map */}
-      <section className="py-12 md:py-20 px-5 md:px-6 bg-champagne/10">
-        <div className="container mx-auto max-w-5xl">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-            <div className="aspect-[4/3] md:aspect-[21/9] rounded-xl md:rounded-2xl overflow-hidden border border-rose-gold/20">
-              <iframe
-                src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.8!2d${STUDIO_COORDS.lng}!3d${STUDIO_COORDS.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25370b3e8a2e7%3A0x1!2s375+Chestnut+St%2C+Newark%2C+NJ!5e0!3m2!1sen!2sus!4v1`}
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="ACS Beauty Studio Location"
-              />
-            </div>
-          </motion.div>
-        </div>
-      </section>
+
 
       {/* CTA Section */}
       <section className="py-12 md:py-20 px-5 md:px-6 bg-primary text-primary-foreground">
