@@ -1,7 +1,21 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Instagram, Facebook, Mail, Phone, MapPin } from "lucide-react";
+import { Instagram, Facebook, Mail, Phone, MapPin, Navigation } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import acsLogo from "@/assets/acs-logo.png";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+const STUDIO_COORDS = { lat: 40.7357, lng: -74.1724 };
+const GPS_OPTIONS = [
+  { name: "Google Maps", url: `https://www.google.com/maps/dir/?api=1&destination=${STUDIO_COORDS.lat},${STUDIO_COORDS.lng}` },
+  { name: "Apple Maps", url: `https://maps.apple.com/?daddr=${STUDIO_COORDS.lat},${STUDIO_COORDS.lng}&dirflg=d` },
+  { name: "Waze", url: `https://waze.com/ul?ll=${STUDIO_COORDS.lat},${STUDIO_COORDS.lng}&navigate=yes` },
+];
 
 export function Footer() {
   const { t } = useLanguage();
