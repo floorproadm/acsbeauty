@@ -263,6 +263,10 @@ const translations: Record<Language, Record<string, string>> = {
     "contact.map_placeholder": "Map integration coming soon",
     "contact.cta_title": "Ready to Book Your Appointment?",
     "contact.cta_description": "Schedule your treatment today and take the first step towards radiant skin.",
+    "contact.team_title": "Talk to Our Team",
+    "contact.team_subtitle": "Tap the icons to interact.",
+    "contact.navigate_title": "How would you like to navigate?",
+    "contact.find_us": "Find Us",
 
     // ========== CONFIRMATION PAGE ==========
     "confirm.title": "Booking Confirmed!",
