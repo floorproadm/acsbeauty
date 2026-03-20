@@ -1,10 +1,25 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Instagram, Facebook, Mail, Phone, MapPin } from "lucide-react";
+import { Instagram, Facebook, Mail, Phone, MapPin, Navigation } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import acsLogo from "@/assets/acs-logo.png";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+const STUDIO_COORDS = { lat: 40.7357, lng: -74.1724 };
+const GPS_OPTIONS = [
+  { name: "Google Maps", url: `https://www.google.com/maps/dir/?api=1&destination=${STUDIO_COORDS.lat},${STUDIO_COORDS.lng}` },
+  { name: "Apple Maps", url: `https://maps.apple.com/?daddr=${STUDIO_COORDS.lat},${STUDIO_COORDS.lng}&dirflg=d` },
+  { name: "Waze", url: `https://waze.com/ul?ll=${STUDIO_COORDS.lat},${STUDIO_COORDS.lng}&navigate=yes` },
+];
 
 export function Footer() {
   const { t } = useLanguage();
+  const [gpsOpen, setGpsOpen] = useState(false);
 
   return (
     <footer className="bg-[#f5f0eb] text-foreground">
@@ -135,15 +150,13 @@ export function Footer() {
                 <Mail className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
                 Acsbeautystudio@gmail.com
               </a>
-              <a 
-                href="https://www.google.com/maps/search/?api=1&query=375+Chestnut+St+Newark+NJ"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-start gap-2 md:gap-3 text-foreground/70 text-xs md:text-sm hover:text-primary transition-colors font-light"
+              <button 
+                onClick={() => setGpsOpen(true)}
+                className="flex items-start gap-2 md:gap-3 text-foreground/70 text-xs md:text-sm hover:text-primary transition-colors font-light text-left"
               >
                 <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 mt-0.5 shrink-0" />
                 <span>375 Chestnut St<br />3rd Floor, Suite 3B<br />Newark, NJ</span>
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -169,6 +182,34 @@ export function Footer() {
           </div>
         </div>
       </div>
+      {/* GPS Picker Dialog */}
+      <Dialog open={gpsOpen} onOpenChange={setGpsOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <Navigation className="w-5 h-5 text-primary" />
+              {t("contact.navigate_title")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            {GPS_OPTIONS.map((opt) => (
+              <a
+                key={opt.name}
+                href={opt.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setGpsOpen(false)}
+                className="flex items-center gap-3 p-3 rounded-lg bg-champagne/20 hover:bg-champagne/40 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Navigation className="w-4 h-4 text-primary" />
+                </div>
+                <span className="font-medium text-sm text-foreground">{opt.name}</span>
+              </a>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </footer>
   );
 }
