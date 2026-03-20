@@ -84,9 +84,7 @@ export default function Contact() {
   ];
 
   const hours = [
-    { dayKey: "contact.hours_mon_fri", time: "9:00 AM - 7:00 PM" },
-    { dayKey: "contact.hours_saturday", time: "10:00 AM - 6:00 PM" },
-    { dayKey: "contact.hours_sunday", time: "11:00 AM - 5:00 PM" },
+    { dayKey: "contact.hours_tue_sat", time: "9:00 AM – 6:00 PM" },
   ];
 
   return (
