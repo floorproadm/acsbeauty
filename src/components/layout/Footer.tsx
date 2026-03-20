@@ -150,15 +150,13 @@ export function Footer() {
                 <Mail className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
                 Acsbeautystudio@gmail.com
               </a>
-              <a 
-                href="https://www.google.com/maps/search/?api=1&query=375+Chestnut+St+Newark+NJ"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-start gap-2 md:gap-3 text-foreground/70 text-xs md:text-sm hover:text-primary transition-colors font-light"
+              <button 
+                onClick={() => setGpsOpen(true)}
+                className="flex items-start gap-2 md:gap-3 text-foreground/70 text-xs md:text-sm hover:text-primary transition-colors font-light text-left"
               >
                 <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 mt-0.5 shrink-0" />
                 <span>375 Chestnut St<br />3rd Floor, Suite 3B<br />Newark, NJ</span>
-              </a>
+              </button>
             </div>
           </div>
         </div>
