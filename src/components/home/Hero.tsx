@@ -9,6 +9,19 @@ import founderImg from "@/assets/founder.jpg";
 
 export function Hero() {
   const { t } = useLanguage();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const ctaHref = isLoggedIn ? "/portal" : "/onboarding";
 
   const stats = [
     { value: "10+", label: t("home.hero.stat_years") },
