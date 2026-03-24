@@ -67,7 +67,7 @@ export function Hero() {
               className="flex flex-col sm:flex-row gap-3 md:gap-4"
             >
               {/* Primary CTA - Direct to calendar */}
-              <Link to="/portal" className="w-full sm:w-auto">
+              <Link to={ctaHref} className="w-full sm:w-auto">
                 <Button
                   variant="hero"
                   size="lg"
