@@ -21,7 +21,8 @@ export function Hero() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const ctaHref = isLoggedIn ? "/portal" : "/onboarding";
+  const onboardingDone = typeof window !== "undefined" && localStorage.getItem("acs_onboarding_done") === "1";
+  const ctaHref = isLoggedIn ? "/portal" : onboardingDone ? "/auth" : "/onboarding";
 
   const stats = [
     { value: "10+", label: t("home.hero.stat_years") },
