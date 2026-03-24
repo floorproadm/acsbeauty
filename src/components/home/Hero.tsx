@@ -1,12 +1,27 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 import founderImg from "@/assets/founder.jpg";
 
 export function Hero() {
   const { t } = useLanguage();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const ctaHref = isLoggedIn ? "/portal" : "/onboarding";
 
   const stats = [
     { value: "10+", label: t("home.hero.stat_years") },
@@ -52,7 +67,7 @@ export function Hero() {
               className="flex flex-col sm:flex-row gap-3 md:gap-4"
             >
               {/* Primary CTA - Direct to calendar */}
-              <Link to="/portal" className="w-full sm:w-auto">
+              <Link to={ctaHref} className="w-full sm:w-auto">
                 <Button
                   variant="hero"
                   size="lg"
