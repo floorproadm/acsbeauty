@@ -1,36 +1,24 @@
 
 
-# Gift Cards -- Detail Modal + Delete
+# Fix GPS Picker -- Correct Address for All Navigation Apps
 
-## What changes
+## Problem
+The GPS coordinates (`40.7357, -74.1724`) used in both the Contact page and Footer are incorrect, sending users to the wrong location.
 
-### 1. Gift Card Detail Sheet (new component)
-Create a `Sheet` (bottom drawer on mobile) that opens when clicking any gift card row. Shows all gift card info in a readable layout:
-- Code, amount, balance, status
-- Buyer info (name, email)
-- Recipient info (name, email)
-- Occasion, personal message
-- Payment method, dates (created, delivered, expires)
-- Status change dropdown (pending/paid/delivered/redeemed)
-- Delete button with confirmation dialog
+## Solution
+Replace coordinate-based URLs with **address-based URLs** using `375+Chestnut+St+Newark+NJ` as the destination. This lets each GPS app resolve the exact address itself, which is more reliable than hardcoded lat/lng.
 
-### 2. Update GiftCardsTab
-- Make each row/card clickable to open the detail sheet
-- On mobile (390px viewport), switch from table to a card-based list for better usability
-- Add delete mutation with `AlertDialog` confirmation
-- Add status update mutation from the detail sheet
+## Changes
 
-### 3. Delete with confirmation
-- `AlertDialog` asking "Tem certeza que deseja excluir este gift card?"
-- Calls `supabase.from("gift_cards").delete().eq("id", id)`
-- Invalidates query cache and closes the sheet
+**Files:** `src/pages/Contact.tsx` and `src/components/layout/Footer.tsx`
 
-## Technical details
+Replace the GPS URLs in both files:
 
-**Files modified:**
-- `src/components/admin/GiftCardsTab.tsx` -- add click handler, mobile card layout, detail sheet inline or as separate component
+| App | Current (wrong coords) | New (address-based) |
+|-----|----------------------|---------------------|
+| Google Maps | `destination=40.7357,-74.1724` | `destination=375+Chestnut+St+Newark+NJ` |
+| Apple Maps | `daddr=40.7357,-74.1724` | `daddr=375+Chestnut+St,+Newark,+NJ` |
+| Waze | `ll=40.7357,-74.1724` | `q=375+Chestnut+St,+Newark,+NJ` |
 
-**No database changes needed** -- RLS already allows admin_owner full access (ALL command) on `gift_cards`.
-
-**UI pattern:** Reuse `Sheet` from `@/components/ui/sheet` and `AlertDialog` from `@/components/ui/alert-dialog`, consistent with other admin tabs.
+Remove the `STUDIO_COORDS` constant from both files since it's no longer needed.
 
