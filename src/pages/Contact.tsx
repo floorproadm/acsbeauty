@@ -15,24 +15,21 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const STUDIO_ADDRESS = "375 Chestnut St, 3rd Floor, Suite 3B, Newark, NJ";
-const STUDIO_COORDS = { lat: 40.7357, lng: -74.1724 };
-
 const GPS_OPTIONS = [
   {
     name: "Google Maps",
     icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Google_Maps_icon_%282020%29.svg/120px-Google_Maps_icon_%282020%29.svg.png",
-    url: `https://www.google.com/maps/dir/?api=1&destination=${STUDIO_COORDS.lat},${STUDIO_COORDS.lng}`,
+    url: "https://www.google.com/maps/dir/?api=1&destination=375+Chestnut+St+Newark+NJ",
   },
   {
     name: "Apple Maps",
     icon: null,
-    url: `https://maps.apple.com/?daddr=${STUDIO_COORDS.lat},${STUDIO_COORDS.lng}&dirflg=d`,
+    url: "https://maps.apple.com/?daddr=375+Chestnut+St,+Newark,+NJ&dirflg=d",
   },
   {
     name: "Waze",
     icon: null,
-    url: `https://waze.com/ul?ll=${STUDIO_COORDS.lat},${STUDIO_COORDS.lng}&navigate=yes`,
+    url: "https://waze.com/ul?q=375+Chestnut+St,+Newark,+NJ&navigate=yes",
   },
 ];
 
