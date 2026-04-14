@@ -157,7 +157,7 @@ export default function Links() {
             src={aneHero}
             alt="ACS Beauty Studio"
             className="w-full h-full object-cover"
-            style={{ objectPosition: "center 30%" }}
+            style={{ objectPosition: "center 15%" }}
           />
           {/* Bottom gradient blend */}
           <div
