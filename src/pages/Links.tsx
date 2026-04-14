@@ -156,7 +156,8 @@ export default function Links() {
           <img
             src={aneHero}
             alt="ACS Beauty Studio"
-            className="w-full h-full object-cover object-top"
+            className="w-full h-full object-cover"
+            style={{ objectPosition: "center 30%" }}
           />
           {/* Bottom gradient blend */}
           <div
