@@ -20,7 +20,7 @@ function useOGMeta() {
       "og:type": "profile",
       "og:locale": "pt_BR",
       "og:site_name": "ACS Beauty",
-      "og:url": "https://acsbeauty.lovable.app/links",
+      "og:url": "https://acsbeauty.lovable.app/hub",
       "twitter:card": "summary",
       "twitter:title": "ACS Beauty · Hair & Beauty Studio",
       "twitter:description": "Beauty Studio em Newark, NJ. Agende seu horário, conheça nossos serviços e pacotes exclusivos.",
