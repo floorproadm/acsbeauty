@@ -156,7 +156,8 @@ export default function Links() {
           <img
             src={aneHero}
             alt="ACS Beauty Studio"
-            className="w-full h-full object-cover object-top"
+            className="w-full h-full object-cover"
+            style={{ objectPosition: "center 30%" }}
           />
           {/* Bottom gradient blend */}
           <div
@@ -173,7 +174,7 @@ export default function Links() {
           <motion.img
             src={acsLogo}
             alt="ACS Beauty"
-            className="h-14 mx-auto"
+            className="h-20 mx-auto"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
