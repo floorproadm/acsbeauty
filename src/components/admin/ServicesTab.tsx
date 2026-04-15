@@ -1,8 +1,5 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wrench, Layers } from "lucide-react";
-import { SkusTab } from "./SkusTab";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -15,17 +12,34 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle } from
-"@/components/ui/dialog";
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue } from
-"@/components/ui/select";
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, Clock, DollarSign, Pencil, Plus } from "lucide-react";
+import {
+  Sparkles,
+  Clock,
+  DollarSign,
+  Pencil,
+  Plus,
+  ChevronDown,
+  ChevronRight,
+  Layers,
+  Package,
+} from "lucide-react";
+import { VariationsModal } from "./VariationsModal";
+import { SkusModal } from "./SkusModal";
 
 type ServiceStatus = "entry" | "upsell" | "premium" | "inactive";
 
@@ -40,15 +54,17 @@ interface Service {
   base_price: number | null;
   status: ServiceStatus | null;
   is_active: boolean | null;
+  variations_count: number;
+  skus_count: number;
 }
 
 const CATEGORIES = ["Cabelo", "Sobrancelhas", "Unhas"];
 
-const statusConfig: Record<ServiceStatus, {label: string;color: string;description: string;}> = {
-  entry: { label: "Entrada", color: "bg-green-100 text-green-700", description: "Disponível para novos clientes" },
-  upsell: { label: "Upsell", color: "bg-blue-100 text-blue-700", description: "Oferecido após serviços de entrada" },
-  premium: { label: "Premium", color: "bg-purple-100 text-purple-700", description: "Requer desbloqueio admin" },
-  inactive: { label: "Inativo", color: "bg-gray-100 text-gray-500", description: "Não visível para clientes" }
+const statusConfig: Record<ServiceStatus, { label: string; color: string }> = {
+  entry: { label: "Entrada", color: "bg-green-100 text-green-700" },
+  upsell: { label: "Upsell", color: "bg-blue-100 text-blue-700" },
+  premium: { label: "Premium", color: "bg-purple-100 text-purple-700" },
+  inactive: { label: "Inativo", color: "bg-gray-100 text-gray-500" },
 };
 
 const defaultFormData = {
@@ -58,81 +74,102 @@ const defaultFormData = {
   duration_minutes: 60,
   price: 0,
   promo_price: "",
-  status: "entry" as ServiceStatus
+  status: "entry" as ServiceStatus,
 };
 
-function ServicesListTab() {
+export function ServicesTab() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState(defaultFormData);
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(
+    () => CATEGORIES.reduce((acc, c) => ({ ...acc, [c]: true }), {})
+  );
+  const [expandedService, setExpandedService] = useState<string | null>(null);
+  const [variationsService, setVariationsService] = useState<Service | null>(null);
+  const [skusService, setSkusService] = useState<Service | null>(null);
 
   const { data: services, isLoading } = useQuery({
-    queryKey: ["admin-services"],
+    queryKey: ["admin-services-unified"],
     queryFn: async () => {
-      const { data, error } = await supabase.
-      from("services").
-      select("*").
-      order("category", { ascending: true }).
-      order("name", { ascending: true });
+      const [servicesRes, variationsRes, skusRes] = await Promise.all([
+        supabase
+          .from("services")
+          .select("*")
+          .order("category", { ascending: true })
+          .order("name", { ascending: true }),
+        supabase.from("service_variations").select("service_id"),
+        supabase.from("service_skus").select("service_id"),
+      ]);
 
-      if (error) throw error;
-      return data as Service[];
-    }
+      if (servicesRes.error) throw servicesRes.error;
+      if (variationsRes.error) throw variationsRes.error;
+      if (skusRes.error) throw skusRes.error;
+
+      const varCounts: Record<string, number> = {};
+      variationsRes.data?.forEach((v) => {
+        varCounts[v.service_id] = (varCounts[v.service_id] || 0) + 1;
+      });
+      const skuCounts: Record<string, number> = {};
+      skusRes.data?.forEach((s) => {
+        skuCounts[s.service_id] = (skuCounts[s.service_id] || 0) + 1;
+      });
+
+      return servicesRes.data.map((s) => ({
+        ...s,
+        variations_count: varCounts[s.id] || 0,
+        skus_count: skuCounts[s.id] || 0,
+      })) as Service[];
+    },
   });
 
   const updateService = useMutation({
-    mutationFn: async ({ id, updates }: {id: string;updates: Partial<Service>;}) => {
-      const { error } = await supabase.
-      from("services").
-      update(updates).
-      eq("id", id);
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Service> }) => {
+      const { error } = await supabase.from("services").update(updates).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-services"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-services-unified"] });
       toast({ title: "Serviço atualizado!" });
       setEditingService(null);
     },
     onError: () => {
       toast({ title: "Erro ao atualizar", variant: "destructive" });
-    }
+    },
   });
 
   const createService = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const { error } = await supabase.
-      from("services").
-      insert({
+      const { error } = await supabase.from("services").insert({
         name: data.name,
-        slug: data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+        slug: data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
         description: data.description || null,
         category: data.category,
-        category_slug: data.category ? data.category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : null,
+        category_slug: data.category?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || null,
         duration_minutes: data.duration_minutes,
         price: data.price,
         promo_price: data.promo_price ? Number(data.promo_price) : null,
         status: data.status,
-        is_active: true
+        is_active: true,
       });
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-services"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-services-unified"] });
       toast({ title: "Serviço criado!" });
       setIsCreating(false);
       setFormData(defaultFormData);
     },
     onError: () => {
       toast({ title: "Erro ao criar", variant: "destructive" });
-    }
+    },
   });
 
   const cycleStatus = (currentStatus: ServiceStatus | null) => {
     const order: ServiceStatus[] = ["entry", "upsell", "premium", "inactive"];
-    const currentIndex = order.indexOf(currentStatus || "entry");
-    return order[(currentIndex + 1) % order.length];
+    const idx = order.indexOf(currentStatus || "entry");
+    return order[(idx + 1) % order.length];
   };
 
   const openEditModal = (service: Service) => {
@@ -143,7 +180,7 @@ function ServicesListTab() {
       duration_minutes: service.duration_minutes,
       price: service.price,
       promo_price: service.promo_price?.toString() || "",
-      status: service.status || "entry"
+      status: service.status || "entry",
     });
     setEditingService(service);
   };
@@ -164,8 +201,8 @@ function ServicesListTab() {
         duration_minutes: formData.duration_minutes,
         price: formData.price,
         promo_price: formData.promo_price ? Number(formData.promo_price) : null,
-        status: formData.status
-      }
+        status: formData.status,
+      },
     });
   };
 
@@ -184,14 +221,267 @@ function ServicesListTab() {
     return acc;
   }, {} as Record<string, Service[]>);
 
-  const ServiceFormModal = ({ isOpen, onClose, title, onSave, isPending
+  const toggleCategory = (cat: string) => {
+    setOpenCategories((prev) => ({ ...prev, [cat]: !prev[cat] }));
+  };
 
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-serif text-2xl font-bold">Serviços</h1>
+          <p className="text-sm text-muted-foreground">
+            {services?.filter((s) => s.is_active).length || 0} ativos
+          </p>
+        </div>
+        <Button size="sm" onClick={() => openCreateModal()}>
+          <Plus className="w-4 h-4 mr-1" />
+          Novo
+        </Button>
+      </div>
 
+      {/* Modals */}
+      <ServiceFormModal
+        isOpen={!!editingService}
+        onClose={() => setEditingService(null)}
+        title="Editar Serviço"
+        onSave={handleSaveEdit}
+        isPending={updateService.isPending}
+        formData={formData}
+        setFormData={setFormData}
+      />
+      <ServiceFormModal
+        isOpen={isCreating}
+        onClose={() => setIsCreating(false)}
+        title="Novo Serviço"
+        onSave={handleCreate}
+        isPending={createService.isPending}
+        formData={formData}
+        setFormData={setFormData}
+      />
 
+      {/* Content */}
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-xl" />
+          ))}
+        </div>
+      ) : !services?.length ? (
+        <div className="text-center py-12 bg-card rounded-xl border border-border">
+          <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground mb-4">Nenhum serviço cadastrado</p>
+          <Button onClick={() => openCreateModal()}>
+            <Plus className="w-4 h-4 mr-2" />
+            Criar primeiro serviço
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {CATEGORIES.map((category) => {
+            const categoryServices = groupedServices?.[category] || [];
+            const isOpen = openCategories[category] ?? true;
 
+            return (
+              <Collapsible
+                key={category}
+                open={isOpen}
+                onOpenChange={() => toggleCategory(category)}
+              >
+                <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                  <span className="font-semibold flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-rose-gold" />
+                    {category}
+                    <span className="text-sm font-normal text-muted-foreground">
+                      ({categoryServices.length})
+                    </span>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openCreateModal(category);
+                      }}
+                    >
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${isOpen ? "" : "-rotate-90"}`}
+                    />
+                  </div>
+                </CollapsibleTrigger>
 
-  }: {isOpen: boolean;onClose: () => void;title: string;onSave: () => void;isPending: boolean;}) =>
-  <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+                <CollapsibleContent className="mt-2 space-y-2">
+                  {categoryServices.length === 0 ? (
+                    <div className="text-center py-4 bg-muted/30 rounded-lg border border-dashed">
+                      <p className="text-sm text-muted-foreground">Nenhum serviço</p>
+                    </div>
+                  ) : (
+                    categoryServices.map((service) => {
+                      const status = statusConfig[service.status as ServiceStatus] || statusConfig.entry;
+                      const isExpanded = expandedService === service.id;
+                      const hasTechniques = service.variations_count > 0 || service.skus_count > 0;
+
+                      return (
+                        <div
+                          key={service.id}
+                          className={`bg-card rounded-xl border border-border shadow-soft ${
+                            !service.is_active ? "opacity-60" : ""
+                          }`}
+                        >
+                          {/* Main row */}
+                          <div className="p-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <h3 className="font-semibold text-sm truncate">{service.name}</h3>
+                                  <Badge
+                                    variant="outline"
+                                    className={`${status.color} text-[10px] px-1.5 py-0 cursor-pointer hover:opacity-80 shrink-0`}
+                                    onClick={() =>
+                                      updateService.mutate({
+                                        id: service.id,
+                                        updates: { status: cycleStatus(service.status as ServiceStatus) },
+                                      })
+                                    }
+                                  >
+                                    {status.label}
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                                  <span className="flex items-center gap-0.5">
+                                    <Clock className="w-3 h-3" />
+                                    {service.duration_minutes}min
+                                  </span>
+                                  <span className="flex items-center gap-0.5">
+                                    <DollarSign className="w-3 h-3" />
+                                    {service.price}
+                                    {service.promo_price && (
+                                      <span className="text-rose-gold ml-0.5">→{service.promo_price}</span>
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-7 w-7"
+                                  onClick={() => openEditModal(service)}
+                                >
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </Button>
+                                <Switch
+                                  checked={service.is_active || false}
+                                  onCheckedChange={(checked) =>
+                                    updateService.mutate({ id: service.id, updates: { is_active: checked } })
+                                  }
+                                  className="scale-75"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Expandable techniques/options row */}
+                            <button
+                              onClick={() => setExpandedService(isExpanded ? null : service.id)}
+                              className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
+                            >
+                              {isExpanded ? (
+                                <ChevronDown className="w-3 h-3" />
+                              ) : (
+                                <ChevronRight className="w-3 h-3" />
+                              )}
+                              <span>
+                                {service.variations_count} técnica{service.variations_count !== 1 ? "s" : ""} ·{" "}
+                                {service.skus_count} opç{service.skus_count !== 1 ? "ões" : "ão"}
+                              </span>
+                            </button>
+                          </div>
+
+                          {/* Expanded content */}
+                          {isExpanded && (
+                            <div className="border-t border-border px-3 py-2 bg-muted/30 rounded-b-xl">
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="flex-1 h-8 text-xs"
+                                  onClick={() => setVariationsService(service)}
+                                >
+                                  <Layers className="w-3 h-3 mr-1" />
+                                  Técnicas ({service.variations_count})
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="flex-1 h-8 text-xs"
+                                  onClick={() => setSkusService(service)}
+                                >
+                                  <Package className="w-3 h-3 mr-1" />
+                                  Opções ({service.skus_count})
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Variations Modal */}
+      {variationsService && (
+        <VariationsModal
+          open={!!variationsService}
+          onOpenChange={(open) => !open && setVariationsService(null)}
+          serviceId={variationsService.id}
+          serviceName={variationsService.name}
+        />
+      )}
+
+      {/* SKUs Modal */}
+      {skusService && (
+        <SkusModal
+          open={!!skusService}
+          onOpenChange={(open) => !open && setSkusService(null)}
+          serviceId={skusService.id}
+          serviceName={skusService.name}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ---------- Form Modal ---------- */
+function ServiceFormModal({
+  isOpen,
+  onClose,
+  title,
+  onSave,
+  isPending,
+  formData,
+  setFormData,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  onSave: () => void;
+  isPending: boolean;
+  formData: typeof defaultFormData;
+  setFormData: React.Dispatch<React.SetStateAction<typeof defaultFormData>>;
+}) {
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -200,59 +490,63 @@ function ServicesListTab() {
           <div className="space-y-2">
             <Label htmlFor="name">Nome</Label>
             <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
-          
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="category">Categoria</Label>
             <Select
-            value={formData.category}
-            onValueChange={(value) => setFormData({ ...formData, category: value })}>
-            
+              value={formData.category}
+              onValueChange={(value) => setFormData({ ...formData, category: value })}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {CATEGORIES.map((cat) =>
-              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-              )}
+                {CATEGORIES.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="description">Descrição</Label>
             <Textarea
-            id="description"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            rows={2} />
-          
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              rows={2}
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="duration">Duração (min)</Label>
               <Input
-              id="duration"
-              type="number"
-              value={formData.duration_minutes}
-              onChange={(e) => setFormData({ ...formData, duration_minutes: Number(e.target.value) })} />
-            
+                id="duration"
+                type="number"
+                value={formData.duration_minutes}
+                onChange={(e) => setFormData({ ...formData, duration_minutes: Number(e.target.value) })}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
               <Select
-              value={formData.status}
-              onValueChange={(value) => setFormData({ ...formData, status: value as ServiceStatus })}>
-              
+                value={formData.status}
+                onValueChange={(value) => setFormData({ ...formData, status: value as ServiceStatus })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(statusConfig).map(([key, config]) =>
-                <SelectItem key={key} value={key}>{config.label}</SelectItem>
-                )}
+                  {Object.entries(statusConfig).map(([key, config]) => (
+                    <SelectItem key={key} value={key}>
+                      {config.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -261,224 +555,33 @@ function ServicesListTab() {
             <div className="space-y-2">
               <Label htmlFor="price">Preço ($)</Label>
               <Input
-              id="price"
-              type="number"
-              value={formData.price}
-              onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })} />
-            
+                id="price"
+                type="number"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="promo_price">Preço Promo ($)</Label>
               <Input
-              id="promo_price"
-              type="number"
-              placeholder="Opcional"
-              value={formData.promo_price}
-              onChange={(e) => setFormData({ ...formData, promo_price: e.target.value })} />
-            
+                id="promo_price"
+                type="number"
+                placeholder="Opcional"
+                value={formData.promo_price}
+                onChange={(e) => setFormData({ ...formData, promo_price: e.target.value })}
+              />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={onClose}>Cancelar</Button>
-            <Button onClick={onSave} disabled={isPending}>Salvar</Button>
+            <Button variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button onClick={onSave} disabled={isPending}>
+              Salvar
+            </Button>
           </div>
         </div>
       </DialogContent>
-    </Dialog>;
-
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <p className="text-sm text-muted-foreground">
-          {services?.filter((s) => s.is_active).length || 0} serviços ativos
-        </p>
-        <Button onClick={() => openCreateModal()}>
-          <Plus className="w-4 h-4 mr-2" />
-          Novo Serviço
-        </Button>
-      </div>
-
-      {/* Edit Modal */}
-      <ServiceFormModal
-        isOpen={!!editingService}
-        onClose={() => setEditingService(null)}
-        title="Editar Serviço"
-        onSave={handleSaveEdit}
-        isPending={updateService.isPending} />
-      
-
-      {/* Create Modal */}
-      <ServiceFormModal
-        isOpen={isCreating}
-        onClose={() => setIsCreating(false)}
-        title="Novo Serviço"
-        onSave={handleCreate}
-        isPending={createService.isPending} />
-      
-
-      {/* Status Legend */}
-      
-
-
-
-
-
-
-
-
-      
-
-      {/* Services List by Category */}
-      {isLoading ?
-      <div className="space-y-3">
-          {[1, 2, 3, 4, 5].map((i) =>
-        <Skeleton key={i} className="h-20 w-full rounded-xl" />
-        )}
-        </div> :
-      !services?.length ?
-      <div className="text-center py-12 bg-card rounded-xl border border-border">
-          <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground mb-4">Nenhum serviço cadastrado</p>
-          <Button onClick={() => openCreateModal()}>
-            <Plus className="w-4 h-4 mr-2" />
-            Criar primeiro serviço
-          </Button>
-        </div> :
-
-      <div className="space-y-6">
-          {CATEGORIES.map((category) => {
-          const categoryServices = groupedServices?.[category] || [];
-
-          return (
-            <div key={category}>
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="font-semibold text-lg flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-rose-gold" />
-                    {category}
-                    <span className="text-sm font-normal text-muted-foreground">
-                      ({categoryServices.length})
-                    </span>
-                  </h2>
-                  <Button size="sm" variant="ghost" onClick={() => openCreateModal(category)}>
-                    <Plus className="w-4 h-4 mr-1" />
-                    Adicionar
-                  </Button>
-                </div>
-                
-                {categoryServices.length === 0 ?
-              <div className="text-center py-6 bg-muted/30 rounded-lg border border-dashed">
-                    <p className="text-sm text-muted-foreground">Nenhum serviço nesta categoria</p>
-                  </div> :
-
-              <div className="space-y-3">
-                    {categoryServices.map((service) => {
-                  const status = statusConfig[service.status as ServiceStatus] || statusConfig.entry;
-
-                  return (
-                    <div
-                      key={service.id}
-                      className={`bg-card rounded-xl border border-border p-4 shadow-soft ${
-                      !service.is_active ? "opacity-60" : ""}`
-                      }>
-                      
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            {/* Service Info */}
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <h3 className="font-semibold">{service.name}</h3>
-                                <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-6 px-0"
-                              onClick={() => updateService.mutate({
-                                id: service.id,
-                                updates: { status: cycleStatus(service.status as ServiceStatus) }
-                              })}>
-                              
-                                  <Badge variant="outline" className={`${status.color} text-xs cursor-pointer hover:opacity-80`}>
-                                    {status.label}
-                                  </Badge>
-                                </Button>
-                              </div>
-                              
-                              {service.description &&
-                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                                  {service.description}
-                                </p>
-                          }
-
-                              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                                <span className="flex items-center gap-1">
-                                  <Clock className="w-3 h-3" />
-                                  {service.duration_minutes} min
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <DollarSign className="w-3 h-3" />
-                                  ${service.price}
-                                  {service.promo_price &&
-                              <span className="text-rose-gold ml-1">(promo: ${service.promo_price})</span>
-                              }
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex items-center gap-3">
-                              <Button size="sm" variant="outline" onClick={() => openEditModal(service)}>
-                                <Pencil className="w-4 h-4 mr-1" />
-                                Editar
-                              </Button>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm text-muted-foreground">
-                                  {service.is_active ? "Ativo" : "Inativo"}
-                                </span>
-                                <Switch
-                              checked={service.is_active || false}
-                              onCheckedChange={(checked) =>
-                              updateService.mutate({ id: service.id, updates: { is_active: checked } })
-                              } />
-                            
-                              </div>
-                            </div>
-                          </div>
-                        </div>);
-
-                })}
-                  </div>
-              }
-              </div>);
-
-        })}
-        </div>
-      }
-    </div>);
-
-}
-
-export function ServicesTab() {
-  return (
-    <div className="space-y-6">
-      <h1 className="font-serif text-2xl font-bold">Serviços</h1>
-      <Tabs defaultValue="services" className="w-full">
-        <TabsList className="w-full max-w-sm mx-auto grid grid-cols-2">
-          <TabsTrigger value="services" className="flex items-center gap-2">
-            <Wrench className="w-4 h-4" />
-            Serviços
-          </TabsTrigger>
-          <TabsTrigger value="options" className="flex items-center gap-2">
-            <Layers className="w-4 h-4" />
-            Opções
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="services">
-          <ServicesListTab />
-        </TabsContent>
-        <TabsContent value="options">
-          <SkusTab />
-        </TabsContent>
-      </Tabs>
-    </div>);
-
+    </Dialog>
+  );
 }
