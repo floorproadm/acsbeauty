@@ -40,6 +40,8 @@ interface ClientEditModalProps {
     email: string | null;
     phone: string | null;
     birthday?: string | null;
+    notes?: string | null;
+    acquisition_source?: string | null;
   } | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -54,6 +56,8 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
     email: "",
     phone: "",
     birthday: null as Date | null,
+    notes: "",
+    acquisition_source: "",
   });
   const [showSuccess, setShowSuccess] = useState(false);
   const [createdName, setCreatedName] = useState("");
@@ -68,6 +72,8 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
         email: client.email || "",
         phone: client.phone || "",
         birthday: client.birthday ? parseISO(client.birthday) : null,
+        notes: (client as any).notes || "",
+        acquisition_source: (client as any).acquisition_source || "",
       });
     }
   }, [client, isCreateMode]);
@@ -77,7 +83,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
     if (!open) {
       setShowSuccess(false);
       if (isCreateMode) {
-        setFormData({ name: "", email: "", phone: "", birthday: null });
+        setFormData({ name: "", email: "", phone: "", birthday: null, notes: "", acquisition_source: "" });
       }
     }
   }, [open, isCreateMode]);
@@ -92,6 +98,8 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
           email: data.email || null,
           phone: data.phone || null,
           birthday: data.birthday ? format(data.birthday, "yyyy-MM-dd") : null,
+          notes: data.notes || null,
+          acquisition_source: data.acquisition_source || null,
         })
         .eq("id", client.id);
       if (error) throw error;
@@ -183,7 +191,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
 
   const handleClose = () => {
     setShowSuccess(false);
-    setFormData({ name: "", email: "", phone: "", birthday: null });
+    setFormData({ name: "", email: "", phone: "", birthday: null, notes: "", acquisition_source: "" });
     onOpenChange(false);
   };
 
