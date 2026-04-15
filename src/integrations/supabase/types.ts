@@ -99,6 +99,38 @@ export type Database = {
           },
         ]
       }
+      booking_reminders: {
+        Row: {
+          booking_id: string
+          channel: string
+          id: string
+          reminder_type: string
+          sent_at: string
+        }
+        Insert: {
+          booking_id: string
+          channel: string
+          id?: string
+          reminder_type?: string
+          sent_at?: string
+        }
+        Update: {
+          booking_id?: string
+          channel?: string
+          id?: string
+          reminder_type?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_reminders_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           client_email: string
