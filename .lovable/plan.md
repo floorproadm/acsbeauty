@@ -1,44 +1,32 @@
 
 
-## Simplificar a Seção de Serviços no Admin
+## Importar Serviços do TopStudios para o ACS Beauty OS
 
-### Problema Atual
-A seção tem duas abas (Serviços + Opções) com informações duplicadas e uma tabela complexa na aba Opções. No mobile (390px), a tabela de Técnicas/Opções fica apertada e difícil de usar. A separação entre as duas abas força o admin a alternar constantemente.
+### Serviços a adicionar
 
-### Proposta: Layout Unificado com Accordion
+Da imagem do TopStudios, estes são os serviços listados. "Corte Feminino" já existe no banco.
 
-Remover as duas abas e usar um layout único com **Collapsible/Accordion por categoria**. Cada serviço vira um card compacto que expande para mostrar técnicas e opções inline.
+| Serviço | Categoria | Slug | Duração (default) | Preço (default) |
+|---|---|---|---|---|
+| Botox Capilar | Cabelo | botox-capilar | 120min | 0 |
+| Escova | Cabelo | escova | 45min | 0 |
+| Highlights | Cabelo | highlights | 180min | 0 |
+| Manutenção Mega Hair | Cabelo | manutencao-mega-hair | 180min | 0 |
+| Maquiagem | Cabelo | maquiagem | 60min | 0 |
+| Penteado | Cabelo | penteado | 60min | 0 |
+| Progressiva | Cabelo | progressiva | 120min | 0 |
+| Tintura | Cabelo | tintura | 120min | 0 |
+| Tratamento Capilar | Cabelo | tratamento-capilar | 90min | 0 |
 
-```text
-┌─────────────────────────────┐
-│ Serviços          [+ Novo]  │
-│ 12 serviços ativos          │
-├─────────────────────────────┤
-│ ▼ Cabelo (5)                │
-│ ┌─────────────────────────┐ │
-│ │ Corte Feminino    [Ativo]│ │
-│ │ 60min · $80       [Edit] │ │
-│ │ ► 2 técnicas · 3 opções  │ │ ← tap expande
-│ └─────────────────────────┘ │
-│ ┌─────────────────────────┐ │
-│ │ Coloração         [Ativo]│ │
-│ │ 120min · $150     [Edit] │ │
-│ └─────────────────────────┘ │
-│                             │
-│ ▼ Sobrancelhas (3)          │
-│ ...                         │
-└─────────────────────────────┘
-```
+**Nota:** Preços ficam em $0 (placeholder) pois são ocultos no frontend público. A Ane ajusta depois no admin. Durações são estimativas razoáveis que também podem ser ajustadas.
 
-### Mudanças
+### Como funciona
 
-1. **Remover as sub-abas** (Serviços/Opções) — tudo fica em uma tela só
-2. **Cards compactos por serviço** — nome, duração, preço, status badge e switch ativo/inativo em uma linha
-3. **Linha clicável "Técnicas & Opções"** — ao clicar, expande inline mostrando as técnicas e opções daquele serviço (sem navegar para outra aba)
-4. **Categorias colapsáveis** — cada categoria (Cabelo, Sobrancelhas, Unhas) pode ser expandida/recolhida
-5. **Botões de ação simplificados** — apenas ícone de editar (sem texto) para economizar espaço no mobile
-6. **Remover banner informativo** e header duplicado da SkusTab
+1. **Migration SQL** — INSERT dos 9 novos serviços na tabela `services` com `category = 'Cabelo'`, `category_slug = 'cabelo'`, `status = 'entry'`, `is_active = true`
+2. Cada serviço recebe um `slug` único para roteamento SEO
+3. Após inserir, os serviços aparecem automaticamente na aba Serviços do admin, agrupados sob "Cabelo"
+4. A Ane pode então editar preços, durações e adicionar Técnicas/Opções via o admin
 
-### Arquivos Alterados
-- `src/components/admin/ServicesTab.tsx` — reescrever com layout unificado usando Collapsible + inline técnicas/opções
+### Arquivos alterados
+- **Database migration** — INSERT de 9 serviços novos
 
