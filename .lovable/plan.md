@@ -1,24 +1,38 @@
 
+Objetivo: fazer a hero da página `/hub` realmente parecer mais próxima da mulher.
 
-# Fix GPS Picker -- Correct Address for All Navigation Apps
+Diagnóstico rápido:
+- Hoje a imagem só está sendo reposicionada com `objectPosition`, mas isso não “aproxima” de verdade.
+- Para o efeito que você pediu, precisa aplicar zoom/crop real na imagem, não só mudar o enquadramento.
 
-## Problem
-The GPS coordinates (`40.7357, -74.1724`) used in both the Contact page and Footer are incorrect, sending users to the wrong location.
+Implementação proposta:
+1. Ajustar `src/pages/Links.tsx` na hero image.
+2. Manter o container atual, mas aumentar visualmente a foto com escala (`transform: scale(...)`) para aproximar mais o rosto/corpo.
+3. Refinar junto o `object-position` para centralizar melhor a mulher depois do zoom e evitar:
+   - espaço vazio excessivo no topo
+   - corte ruim na cabeça
+   - logo cobrindo áreas importantes
+4. Preservar o restante do layout do `/hub` como está hoje: logo, gradiente, botões e animações.
 
-## Solution
-Replace coordinate-based URLs with **address-based URLs** using `375+Chestnut+St+Newark+NJ` as the destination. This lets each GPS app resolve the exact address itself, which is more reliable than hardcoded lat/lng.
+Ajuste técnico que pretendo fazer:
+- Trocar a abordagem de “só mexer no `objectPosition`” por uma combinação de:
+  - `object-cover`
+  - escala maior na imagem
+  - novo `objectPosition` calibrado para mobile
+- O ajuste será feito no bloco:
+  - `src/pages/Links.tsx`
+  - seção da hero (`aneHero`)
 
-## Changes
+Resultado esperado:
+- a mulher fica visualmente mais próxima
+- menos “respiro” vazio no topo
+- enquadramento mais parecido com o que você vem marcando nos prints
+- página continua elegante, sem exagerar no zoom
 
-**Files:** `src/pages/Contact.tsx` and `src/components/layout/Footer.tsx`
+Validação depois da implementação:
+- conferir no viewport mobile do `/hub`
+- confirmar que a mulher ocupa mais da área visível
+- confirmar que o rosto não foi cortado e que o logo continua equilibrado
 
-Replace the GPS URLs in both files:
-
-| App | Current (wrong coords) | New (address-based) |
-|-----|----------------------|---------------------|
-| Google Maps | `destination=40.7357,-74.1724` | `destination=375+Chestnut+St+Newark+NJ` |
-| Apple Maps | `daddr=40.7357,-74.1724` | `daddr=375+Chestnut+St,+Newark,+NJ` |
-| Waze | `ll=40.7357,-74.1724` | `q=375+Chestnut+St,+Newark,+NJ` |
-
-Remove the `STUDIO_COORDS` constant from both files since it's no longer needed.
-
+Arquivo a alterar:
+- `src/pages/Links.tsx`
