@@ -531,51 +531,6 @@ export function ClientsTab() {
                 );
               })()}
 
-              {/* Tags Section */}
-              <div className="py-4 border-b">
-                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
-                  <Tag className="w-4 h-4" />
-                  Tags
-                </h4>
-                <div className="flex flex-wrap items-center gap-2">
-                  {selectedClient.tags?.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="outline"
-                      className={`${getTagColor(tag)} pr-1`}
-                    >
-                      {tag}
-                      <button
-                        onClick={() => handleRemoveTag(selectedClient.id, selectedClient.tags || [], tag)}
-                        className="ml-1 hover:text-red-600"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                  <div className="flex items-center gap-2">
-                    <Input
-                      value={newTag}
-                      onChange={(e) => setNewTag(e.target.value)}
-                      placeholder="Nova tag"
-                      className="h-7 text-xs w-24"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          handleAddTag(selectedClient.id, selectedClient.tags || []);
-                        }
-                      }}
-                    />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 px-2"
-                      onClick={() => handleAddTag(selectedClient.id, selectedClient.tags || [])}
-                    >
-                      <Plus className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
 
               {/* Booking History */}
               <div className="py-4">
