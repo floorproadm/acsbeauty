@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, MapPin, Clock, X, ChevronRight, Scissors, Gift, MessageCircle, User } from "lucide-react";
+import { Calendar, MapPin, Clock, X, ChevronRight, Scissors, Gift, MessageCircle, User, Share2, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import acsLogo from "@/assets/acs-logo.png";
 import aneHero from "@/assets/ane-hero.jpg";
