@@ -201,7 +201,7 @@ export default function Links() {
           const Icon = link.icon;
           const isPrimary = link.primary;
 
-          const cls = `group flex items-center gap-3 w-full rounded-full px-5 py-3.5 font-medium text-sm transition-all duration-300 ${
+          const cls = `group flex items-center gap-3 w-full rounded-full px-5 py-4 font-medium text-base transition-all duration-300 ${
             isPrimary
               ? "bg-primary text-primary-foreground shadow-[0_0_20px_hsl(var(--primary)/0.25)] hover:shadow-[0_0_30px_hsl(var(--primary)/0.45)] hover:scale-[1.02]"
               : "border border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 hover:scale-[1.02]"
