@@ -362,6 +362,7 @@ export type Database = {
       }
       clients: {
         Row: {
+          acquisition_source: string | null
           avatar_url: string | null
           birthday: string | null
           created_at: string
@@ -370,11 +371,13 @@ export type Database = {
           instagram: string | null
           last_visit_at: string | null
           name: string
+          notes: string | null
           phone: string | null
           tags: string[] | null
           updated_at: string
         }
         Insert: {
+          acquisition_source?: string | null
           avatar_url?: string | null
           birthday?: string | null
           created_at?: string
@@ -383,11 +386,13 @@ export type Database = {
           instagram?: string | null
           last_visit_at?: string | null
           name: string
+          notes?: string | null
           phone?: string | null
           tags?: string[] | null
           updated_at?: string
         }
         Update: {
+          acquisition_source?: string | null
           avatar_url?: string | null
           birthday?: string | null
           created_at?: string
@@ -396,6 +401,7 @@ export type Database = {
           instagram?: string | null
           last_visit_at?: string | null
           name?: string
+          notes?: string | null
           phone?: string | null
           tags?: string[] | null
           updated_at?: string
