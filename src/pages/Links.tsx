@@ -62,7 +62,12 @@ function useOGMeta() {
 }
 
 const WHATSAPP_NUMBER = "17329153430";
-const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Olá! Vi o perfil da ACS Beauty e gostaria de saber mais!")}`;
+const whatsappMsg = (isPt: boolean) =>
+  isPt
+    ? "Olá! Vi o perfil da ACS Beauty e gostaria de saber mais!"
+    : "Hi! I saw ACS Beauty's profile and would like to know more!";
+const whatsappUrl = (isPt: boolean) =>
+  `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMsg(isPt))}`;
 
 const ADDRESS = "375 Chestnut St, 3rd Floor, Suite 3B, Newark, NJ";
 const MAPS_LINKS = {
