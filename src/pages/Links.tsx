@@ -267,7 +267,7 @@ export default function Links() {
         className="flex items-center gap-4 mt-6"
       >
         <a
-          href="https://www.instagram.com/acsbeautystudio"
+          href="https://www.instagram.com/acsbeautynj"
           target="_blank"
           rel="noopener noreferrer"
           className="w-11 h-11 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 transition-all duration-300"
