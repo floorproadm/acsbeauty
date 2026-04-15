@@ -87,7 +87,7 @@ const linkItems = (isPt: boolean) => [
   { label: isPt ? "Nossos Serviços" : "Our Services", to: "/services", icon: Scissors, external: false },
   { label: isPt ? "Sobre a Ane" : "About Ane", to: "/ane-caroline", icon: User, external: false },
   { label: "Gift Cards", to: "/gift-cards", icon: Gift, external: false },
-  { label: "WhatsApp", to: whatsappUrl, icon: MessageCircle, external: true },
+  { label: "WhatsApp", to: whatsappUrl(isPt), icon: MessageCircle, external: true },
 ];
 
 function GPSChooser({ onClose }: { onClose: () => void }) {
