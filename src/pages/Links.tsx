@@ -62,7 +62,12 @@ function useOGMeta() {
 }
 
 const WHATSAPP_NUMBER = "17329153430";
-const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Olá! Vi o perfil da ACS Beauty e gostaria de saber mais!")}`;
+const whatsappMsg = (isPt: boolean) =>
+  isPt
+    ? "Olá! Vi o perfil da ACS Beauty e gostaria de saber mais!"
+    : "Hi! I saw ACS Beauty's profile and would like to know more!";
+const whatsappUrl = (isPt: boolean) =>
+  `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMsg(isPt))}`;
 
 const ADDRESS = "375 Chestnut St, 3rd Floor, Suite 3B, Newark, NJ";
 const MAPS_LINKS = {
@@ -82,7 +87,7 @@ const linkItems = (isPt: boolean) => [
   { label: isPt ? "Nossos Serviços" : "Our Services", to: "/services", icon: Scissors, external: false },
   { label: isPt ? "Sobre a Ane" : "About Ane", to: "/ane-caroline", icon: User, external: false },
   { label: "Gift Cards", to: "/gift-cards", icon: Gift, external: false },
-  { label: "WhatsApp", to: whatsappUrl, icon: MessageCircle, external: true },
+  { label: "WhatsApp", to: whatsappUrl(isPt), icon: MessageCircle, external: true },
 ];
 
 function GPSChooser({ onClose }: { onClose: () => void }) {
