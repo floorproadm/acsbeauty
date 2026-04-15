@@ -139,14 +139,42 @@ function GPSChooser({ onClose }: { onClose: () => void }) {
 export default function Links() {
   useOGMeta();
   const [showGPS, setShowGPS] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { language } = useLanguage();
   const isPt = language === "pt";
   const links = linkItems(isPt);
 
+  const handleShare = async () => {
+    const shareData = {
+      title: "ACS Beauty · Hair & Beauty Studio",
+      text: isPt
+        ? "Conheça a ACS Beauty Studio em Newark, NJ!"
+        : "Check out ACS Beauty Studio in Newark, NJ!",
+      url: "https://acsbeauty.lovable.app/hub",
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch {}
+    } else {
+      await navigator.clipboard.writeText(shareData.url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col items-center">
-      {/* Language toggle */}
-      <div className="fixed top-4 right-4 z-40">
+      {/* Top bar */}
+      <div className="fixed top-4 right-4 z-40 flex items-center gap-2">
+        <button
+          onClick={handleShare}
+          className="w-9 h-9 rounded-full border border-border bg-card/80 backdrop-blur flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 transition-all duration-300"
+          aria-label={isPt ? "Compartilhar" : "Share"}
+        >
+          {copied ? <Check className="w-4 h-4 text-green-500" /> : <Share2 className="w-4 h-4" />}
+        </button>
         <LanguageToggle />
       </div>
 
