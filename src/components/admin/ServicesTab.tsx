@@ -499,6 +499,8 @@ function ServiceFormModal({
   isPending,
   formData,
   setFormData,
+  onDelete,
+  isDeleting,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -507,6 +509,8 @@ function ServiceFormModal({
   isPending: boolean;
   formData: typeof defaultFormData;
   setFormData: React.Dispatch<React.SetStateAction<typeof defaultFormData>>;
+  onDelete?: () => void;
+  isDeleting?: boolean;
 }) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -600,13 +604,40 @@ function ServiceFormModal({
               />
             </div>
           </div>
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button onClick={onSave} disabled={isPending}>
-              Salvar
-            </Button>
+          <div className="flex items-center justify-between pt-4">
+            {onDelete ? (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm" disabled={isDeleting}>
+                    Excluir
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Excluir serviço?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Isso removerá permanentemente "{formData.name}" e todas as técnicas e opções associadas. Esta ação não pode ser desfeita.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={onDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      Sim, excluir
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : (
+              <div />
+            )}
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={onClose}>
+                Cancelar
+              </Button>
+              <Button onClick={onSave} disabled={isPending}>
+                Salvar
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>
