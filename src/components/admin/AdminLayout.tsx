@@ -69,8 +69,8 @@ const allTabs: { id: AdminTab; label: string; icon: React.ElementType; roles: Ap
   { id: "crm", label: "CRM", icon: Users, roles: ["admin_owner", "staff"] },
   { id: "bookings", label: "Agendamentos", icon: Calendar, roles: ["admin_owner", "staff"] },
   { id: "payments", label: "Pagamentos", icon: DollarSign, roles: ["admin_owner"] },
-  { id: "tasks", label: "Tarefas", icon: ClipboardList, roles: ["admin_owner", "staff"] },
   { id: "services", label: "Serviços", icon: Sparkles, roles: ["admin_owner"] },
+  { id: "tasks", label: "Tarefas", icon: ClipboardList, roles: ["admin_owner", "staff"] },
   
   { id: "gallery", label: "Galeria", icon: ImageIcon, roles: ["admin_owner"] },
   { id: "gift-cards", label: "Gift Cards", icon: Gift, roles: ["admin_owner"] },
