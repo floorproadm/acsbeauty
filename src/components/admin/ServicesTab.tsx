@@ -276,6 +276,8 @@ export function ServicesTab() {
         isPending={updateService.isPending}
         formData={formData}
         setFormData={setFormData}
+        onDelete={() => editingService && deleteService.mutate(editingService.id)}
+        isDeleting={deleteService.isPending}
       />
       <ServiceFormModal
         isOpen={isCreating}
