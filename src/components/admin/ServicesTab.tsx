@@ -150,6 +150,21 @@ export function ServicesTab() {
     },
   });
 
+  const deleteService = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("services").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-services-unified"] });
+      toast({ title: "Serviço excluído!" });
+      setEditingService(null);
+    },
+    onError: () => {
+      toast({ title: "Erro ao excluir", variant: "destructive" });
+    },
+  });
+
   const createService = useMutation({
     mutationFn: async (data: typeof formData) => {
       const { error } = await supabase.from("services").insert({
