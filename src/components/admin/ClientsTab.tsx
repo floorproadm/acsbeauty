@@ -533,6 +533,26 @@ export function ClientsTab() {
                 );
               })()}
 
+              {/* Notes & Source */}
+              {(selectedClient.notes || selectedClient.acquisition_source) && (
+                <div className="py-4 border-b space-y-3">
+                  {selectedClient.acquisition_source && (
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="capitalize">
+                        {selectedClient.acquisition_source === "indicacao" ? "Indicação" : selectedClient.acquisition_source === "walk_in" ? "Walk-in" : selectedClient.acquisition_source}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">Fonte</span>
+                    </div>
+                  )}
+                  {selectedClient.notes && (
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Notas internas</p>
+                      <p className="text-sm bg-muted/50 rounded-lg p-3">{selectedClient.notes}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
 
               {/* Booking History */}
               <div className="py-4">
