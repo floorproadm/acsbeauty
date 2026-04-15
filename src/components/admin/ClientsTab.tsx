@@ -45,6 +45,8 @@ interface ClientWithRelations {
   tags: string[] | null;
   created_at: string;
   last_visit_at: string | null;
+  notes?: string | null;
+  acquisition_source?: string | null;
   bookings?: {
     id: string;
     start_time: string;
