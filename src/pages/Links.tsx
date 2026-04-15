@@ -151,7 +151,7 @@ export default function Links() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
-          className="relative aspect-[4/5] overflow-hidden"
+          className="relative aspect-[3/4] overflow-hidden"
         >
           <img
             src={aneHero}
