@@ -314,6 +314,41 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
                 </>
               )}
 
+              {!isCreateMode && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Fonte de Aquisição</Label>
+                    <Select
+                      value={formData.acquisition_source || ""}
+                      onValueChange={(val) => setFormData({ ...formData, acquisition_source: val })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Como conheceu?" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="instagram">Instagram</SelectItem>
+                        <SelectItem value="indicacao">Indicação</SelectItem>
+                        <SelectItem value="google">Google</SelectItem>
+                        <SelectItem value="walk_in">Walk-in</SelectItem>
+                        <SelectItem value="facebook">Facebook</SelectItem>
+                        <SelectItem value="outro">Outro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="notes">Notas Internas</Label>
+                    <Textarea
+                      id="notes"
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      placeholder="Ex: alérgica a henna, prefere horário da manhã..."
+                      rows={3}
+                    />
+                  </div>
+                </>
+              )}
+
               <div className="flex gap-2 pt-4">
                 <Button
                   type="submit"
