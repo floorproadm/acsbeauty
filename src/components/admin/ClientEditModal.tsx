@@ -4,6 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -40,6 +48,8 @@ interface ClientEditModalProps {
     email: string | null;
     phone: string | null;
     birthday?: string | null;
+    notes?: string | null;
+    acquisition_source?: string | null;
   } | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -54,6 +64,8 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
     email: "",
     phone: "",
     birthday: null as Date | null,
+    notes: "",
+    acquisition_source: "",
   });
   const [showSuccess, setShowSuccess] = useState(false);
   const [createdName, setCreatedName] = useState("");
@@ -68,6 +80,8 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
         email: client.email || "",
         phone: client.phone || "",
         birthday: client.birthday ? parseISO(client.birthday) : null,
+        notes: (client as any).notes || "",
+        acquisition_source: (client as any).acquisition_source || "",
       });
     }
   }, [client, isCreateMode]);
@@ -77,7 +91,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
     if (!open) {
       setShowSuccess(false);
       if (isCreateMode) {
-        setFormData({ name: "", email: "", phone: "", birthday: null });
+        setFormData({ name: "", email: "", phone: "", birthday: null, notes: "", acquisition_source: "" });
       }
     }
   }, [open, isCreateMode]);
@@ -92,6 +106,8 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
           email: data.email || null,
           phone: data.phone || null,
           birthday: data.birthday ? format(data.birthday, "yyyy-MM-dd") : null,
+          notes: data.notes || null,
+          acquisition_source: data.acquisition_source || null,
         })
         .eq("id", client.id);
       if (error) throw error;
@@ -183,7 +199,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
 
   const handleClose = () => {
     setShowSuccess(false);
-    setFormData({ name: "", email: "", phone: "", birthday: null });
+    setFormData({ name: "", email: "", phone: "", birthday: null, notes: "", acquisition_source: "" });
     onOpenChange(false);
   };
 
@@ -294,6 +310,41 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
                         />
                       </PopoverContent>
                     </Popover>
+                  </div>
+                </>
+              )}
+
+              {!isCreateMode && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Fonte de Aquisição</Label>
+                    <Select
+                      value={formData.acquisition_source || ""}
+                      onValueChange={(val) => setFormData({ ...formData, acquisition_source: val })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Como conheceu?" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="instagram">Instagram</SelectItem>
+                        <SelectItem value="indicacao">Indicação</SelectItem>
+                        <SelectItem value="google">Google</SelectItem>
+                        <SelectItem value="walk_in">Walk-in</SelectItem>
+                        <SelectItem value="facebook">Facebook</SelectItem>
+                        <SelectItem value="outro">Outro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="notes">Notas Internas</Label>
+                    <Textarea
+                      id="notes"
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      placeholder="Ex: alérgica a henna, prefere horário da manhã..."
+                      rows={3}
+                    />
                   </div>
                 </>
               )}
