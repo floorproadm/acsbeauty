@@ -185,7 +185,7 @@ export default function Links() {
             transition={{ duration: 0.5, delay: 0.45 }}
             className="text-primary text-sm font-medium mt-2"
           >
-            {isPt ? "Hair & Beauty Studio · Newark, NJ" : "Hair & Beauty Studio · Newark, NJ"}
+            {isPt ? "Sua próxima transformação de beleza começa aqui" : "Your next beauty transformation starts here"}
           </motion.p>
         </div>
       </section>
