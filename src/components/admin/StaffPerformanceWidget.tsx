@@ -44,8 +44,8 @@ export function StaffPerformanceWidget() {
       }> = {};
 
       for (const b of bookings) {
-        const staffId = b.staff_id || "unassigned";
-        const staffName = (b.staff_profiles as any)?.name || "Sem profissional";
+        const staffId = b.staff_id || "general";
+        const staffName = (b.staff_profiles as any)?.name || "Geral (sem profissional)";
 
         if (!staffMap[staffId]) {
           staffMap[staffId] = {
@@ -72,7 +72,7 @@ export function StaffPerformanceWidget() {
       }
 
       const result: StaffMetrics[] = Object.entries(staffMap)
-        .filter(([id]) => id !== "unassigned")
+        .map(([, data]) => {
         .map(([, data]) => {
           const totalRevenue = data.bookings.reduce((s, b) => s + (Number(b.total_price) || 0), 0);
           const totalBookings = data.bookings.length;
@@ -109,7 +109,7 @@ export function StaffPerformanceWidget() {
     );
   }
 
-  if (!metrics?.length) return null;
+  const isEmpty = !metrics?.length;
 
   return (
     <motion.div
@@ -127,7 +127,18 @@ export function StaffPerformanceWidget() {
       </div>
 
       <div className="p-4 space-y-4">
-        {metrics.map((staff, idx) => (
+        {isEmpty ? (
+          <div className="text-center py-8">
+            <UserCheck className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">
+              Nenhum booking confirmado/concluído nos últimos 3 meses.
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Os relatórios aparecerão automaticamente quando houver dados.
+            </p>
+          </div>
+        ) : (
+        metrics.map((staff, idx) => (
           <motion.div
             key={staff.staffName}
             initial={{ opacity: 0, x: -8 }}
