@@ -400,7 +400,7 @@ export default function Book() {
     const filteredSkus = serviceSkus.filter((s) => s.variation_id === pickedVariationId);
     if (filteredSkus.length === 1) {
       setPickedSkuId(filteredSkus[0].id);
-      setStep("date");
+      setStep("staff");
     }
   }, [step, pickedVariationId, serviceSkus]);
 
