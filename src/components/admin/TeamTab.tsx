@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { StaffPerformanceWidget } from "./StaffPerformanceWidget";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -180,6 +181,8 @@ export function TeamTab() {
 
   return (
     <div className="space-y-6">
+      {/* Staff Performance Reports */}
+      <StaffPerformanceWidget />
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-foreground">Equipe</h2>
