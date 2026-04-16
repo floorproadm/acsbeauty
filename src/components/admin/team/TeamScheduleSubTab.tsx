@@ -34,6 +34,7 @@ interface TeamMember {
   name: string;
   role: string;
   is_active: boolean;
+  staff_profile_id: string | null;
 }
 
 export function TeamScheduleSubTab() {
@@ -42,13 +43,12 @@ export function TeamScheduleSubTab() {
   const [editingMember, setEditingMember] = useState<string | null>(null);
   const [editHours, setEditHours] = useState<BusinessHour[]>([]);
 
-  // Use team_members as primary source instead of staff_profiles
   const { data: teamMembers = [], isLoading: loadingTeam } = useQuery({
     queryKey: ["team-members-schedule"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("team_members")
-        .select("id, name, role, is_active")
+        .select("id, name, role, is_active, staff_profile_id")
         .eq("is_active", true)
         .order("sort_order");
       if (error) throw error;
@@ -69,16 +69,16 @@ export function TeamScheduleSubTab() {
   });
 
   const saveMutation = useMutation({
-    mutationFn: async ({ memberId, hours }: { memberId: string; hours: BusinessHour[] }) => {
-      // Delete existing hours for this member (stored as staff_id)
+    mutationFn: async ({ staffProfileId, hours }: { staffProfileId: string; hours: BusinessHour[] }) => {
+      // Delete existing hours for this staff_profile_id
       const { error: delError } = await supabase
         .from("business_hours")
         .delete()
-        .eq("staff_id", memberId);
+        .eq("staff_id", staffProfileId);
       if (delError) throw delError;
 
       const inserts = hours.map((h) => ({
-        staff_id: memberId,
+        staff_id: staffProfileId,
         day_of_week: h.day_of_week,
         open_time: h.open_time,
         close_time: h.close_time,
@@ -101,32 +101,48 @@ export function TeamScheduleSubTab() {
   // General hours (staff_id is null)
   const generalHours = allHours.filter((h) => !h.staff_id);
 
-  const getMemberHours = (memberId: string) => {
-    const memberHours = allHours.filter((h) => h.staff_id === memberId);
+  const getMemberHours = (member: TeamMember) => {
+    if (!member.staff_profile_id) return generalHours;
+    const memberHours = allHours.filter((h) => h.staff_id === member.staff_profile_id);
     return memberHours.length > 0 ? memberHours : generalHours;
+  };
+
+  const hasCustomHours = (member: TeamMember) => {
+    if (!member.staff_profile_id) return false;
+    return allHours.some((h) => h.staff_id === member.staff_profile_id);
   };
 
   const today = new Date().getDay();
 
-  const openEditModal = (memberId: string) => {
-    const existing = allHours.filter((h) => h.staff_id === memberId);
+  const openEditModal = (member: TeamMember) => {
+    if (!member.staff_profile_id) {
+      toast({
+        title: "Vínculo necessário",
+        description: "Vincule esta profissional a um perfil do sistema na aba Membros para personalizar horários.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const staffId = member.staff_profile_id;
+    const existing = allHours.filter((h) => h.staff_id === staffId);
     if (existing.length > 0) {
       setEditHours(existing.map((h) => ({ ...h })));
     } else {
       setEditHours(
         generalHours.length > 0
-          ? generalHours.map((h) => ({ ...h, id: crypto.randomUUID(), staff_id: memberId }))
+          ? generalHours.map((h) => ({ ...h, id: crypto.randomUUID(), staff_id: staffId }))
           : Array.from({ length: 7 }, (_, i) => ({
               id: crypto.randomUUID(),
               day_of_week: i,
               open_time: "09:00",
               close_time: "18:00",
               is_open: i >= 2 && i <= 6,
-              staff_id: memberId,
+              staff_id: staffId,
             }))
       );
     }
-    setEditingMember(memberId);
+    setEditingMember(member.id);
   };
 
   const updateEditHour = (dayIndex: number, field: keyof BusinessHour, value: any) => {
@@ -166,7 +182,7 @@ export function TeamScheduleSubTab() {
           <p className="text-sm font-medium text-muted-foreground mb-3">Disponíveis Hoje</p>
           <div className="flex flex-wrap gap-2">
             {teamMembers.map((member) => {
-              const hours = getMemberHours(member.id);
+              const hours = getMemberHours(member);
               const todayHour = hours.find((h) => h.day_of_week === today);
               const isAvailable = todayHour?.is_open ?? false;
 
@@ -200,8 +216,9 @@ export function TeamScheduleSubTab() {
       {/* Team Member Schedule Cards */}
       <div className="grid gap-4">
         {teamMembers.map((member) => {
-          const hours = getMemberHours(member.id);
-          const hasCustom = allHours.some((h) => h.staff_id === member.id);
+          const hours = getMemberHours(member);
+          const hasCustom = hasCustomHours(member);
+          const isLinked = !!member.staff_profile_id;
 
           return (
             <Card key={member.id}>
@@ -215,8 +232,18 @@ export function TeamScheduleSubTab() {
                     ) : (
                       <Badge variant="secondary" className="text-[10px]">Padrão geral</Badge>
                     )}
+                    {!isLinked && (
+                      <Badge variant="secondary" className="text-[10px] text-amber-700 dark:text-amber-400">
+                        Sem vínculo
+                      </Badge>
+                    )}
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => openEditModal(member.id)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openEditModal(member)}
+                    disabled={!isLinked}
+                  >
                     Editar
                   </Button>
                 </div>
@@ -297,9 +324,14 @@ export function TeamScheduleSubTab() {
               Cancelar
             </Button>
             <Button
-              onClick={() =>
-                editingMember && saveMutation.mutate({ memberId: editingMember, hours: editHours })
-              }
+              onClick={() => {
+                if (editingMemberData?.staff_profile_id) {
+                  saveMutation.mutate({
+                    staffProfileId: editingMemberData.staff_profile_id,
+                    hours: editHours,
+                  });
+                }
+              }}
               disabled={saveMutation.isPending}
             >
               {saveMutation.isPending ? "Salvando..." : "Salvar"}

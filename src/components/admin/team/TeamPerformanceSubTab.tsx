@@ -40,13 +40,27 @@ export function TeamPerformanceSubTab() {
   const periodStart = startOfMonth(subMonths(today, monthsBack)).toISOString();
   const periodEnd = endOfMonth(today).toISOString();
 
-  const { data: metrics, isLoading } = useQuery({
-    queryKey: ["staff-performance", periodStart],
+  // Fetch team_members with staff_profile_id to map bookings
+  const { data: teamMembers = [] } = useQuery({
+    queryKey: ["team-members-perf"],
     queryFn: async () => {
-      // Fetch ALL bookings (any status except cancelled)
+      const { data, error } = await supabase
+        .from("team_members")
+        .select("id, name, staff_profile_id")
+        .eq("is_active", true)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: metrics, isLoading } = useQuery({
+    queryKey: ["staff-performance", periodStart, teamMembers.length],
+    enabled: teamMembers.length > 0,
+    queryFn: async () => {
       const { data: bookings, error } = await supabase
         .from("bookings")
-        .select("id, total_price, status, client_id, staff_id, service_id, start_time, services(name), staff_profiles(name)")
+        .select("id, total_price, status, client_id, staff_id, service_id, start_time, services(name)")
         .gte("start_time", periodStart)
         .lte("start_time", periodEnd)
         .in("status", ["requested", "confirmed", "completed"]);
@@ -55,6 +69,14 @@ export function TeamPerformanceSubTab() {
       if (!bookings?.length) return [];
 
       const now = new Date().toISOString();
+
+      // Build a map from staff_profile_id -> team_member name
+      const staffToMember: Record<string, string> = {};
+      for (const tm of teamMembers) {
+        if (tm.staff_profile_id) {
+          staffToMember[tm.staff_profile_id] = tm.name;
+        }
+      }
 
       const staffMap: Record<string, {
         name: string;
@@ -67,7 +89,8 @@ export function TeamPerformanceSubTab() {
 
       for (const b of bookings) {
         const staffId = b.staff_id || "unassigned";
-        const staffName = (b.staff_profiles as any)?.name || "Sem profissional atribuído";
+        // Resolve name: first try team_member link, fallback to "Sem profissional"
+        const staffName = staffToMember[staffId] || (staffId === "unassigned" ? "Sem profissional" : "Profissional não vinculado");
 
         if (!staffMap[staffId]) {
           staffMap[staffId] = {
@@ -253,7 +276,7 @@ export function TeamPerformanceSubTab() {
 
                       <div className="text-center">
                         <div className="flex items-center justify-center gap-1 mb-1">
-                          <DollarSign className="w-3 h-3 text-rose-gold" />
+                          <DollarSign className="w-3 h-3 text-muted-foreground" />
                           <span className="text-[10px] text-muted-foreground uppercase tracking-wide">Ticket</span>
                         </div>
                         <p className="text-lg font-bold">${staff.avgTicket.toFixed(0)}</p>
