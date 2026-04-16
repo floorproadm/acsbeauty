@@ -1057,6 +1057,72 @@ export default function Book() {
                 </motion.div>
               }
 
+              {/* Step: Staff Selection */}
+              {step === "staff" &&
+              <motion.div
+                key="staff"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="bg-card rounded-2xl p-6 shadow-soft">
+                
+                  <h2 className="font-serif text-xl font-semibold mb-2 text-center">
+                    {language === "pt" ? "Escolha a profissional" : "Choose a professional"}
+                  </h2>
+                  <p className="text-center text-sm text-muted-foreground mb-6">
+                    {language === "pt"
+                      ? "Selecione quem irá atendê-lo(a)"
+                      : "Select who will serve you"}
+                  </p>
+
+                  {isLoadingStaff ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-rose-gold mb-4" />
+                    </div>
+                  ) : !eligibleStaff || eligibleStaff.length === 0 ? (
+                    <div className="text-center py-8">
+                      <User className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        {language === "pt" ? "Carregando profissionais..." : "Loading professionals..."}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {eligibleStaff.map((member) => (
+                        <button
+                          key={member.id}
+                          onClick={() => {
+                            setPickedStaffId(member.staff_profile_id);
+                            setStep("date");
+                          }}
+                          className={`w-full p-4 rounded-xl border-2 text-left transition-all hover:border-rose-gold/50 flex items-center gap-4 ${
+                            pickedStaffId === member.staff_profile_id ? "border-rose-gold bg-rose-light/30" : "border-muted"
+                          }`}
+                        >
+                          {member.image_url ? (
+                            <img
+                              src={member.image_url}
+                              alt={member.name}
+                              className="w-12 h-12 rounded-full object-cover shrink-0"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0">
+                              <User className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-medium text-foreground">{member.name}</p>
+                            {member.role && (
+                              <p className="text-sm text-muted-foreground">{member.role}</p>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              }
+
               {/* Step: Date & Time Selection (combined) */}
               {step === "date" &&
               <motion.div
