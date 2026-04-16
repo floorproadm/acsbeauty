@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Star, Copy, ExternalLink, MessageCircle, Camera, Phone, CheckCircle2, Heart, Instagram } from "lucide-react";
+import { Star, Copy, ExternalLink, MessageCircle, Camera, Phone, CheckCircle2, Heart, Instagram, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 // ── Configurable Links ──
@@ -18,7 +17,7 @@ const INSTAGRAM_URL = "https://www.instagram.com/acsbeautystudio";
 const PHONE = "(732) 915-3430";
 const WHATSAPP_NUMBER = "17329153430";
 
-// ── Draft Templates (EN — US Market) ──
+// ── Service & Highlight Options ──
 const SERVICE_OPTIONS = [
   { value: "hair", labelEn: "Hair Services", labelPt: "Cabelo" },
   { value: "brows", labelEn: "Brow Design", labelPt: "Sobrancelhas" },
@@ -90,8 +89,8 @@ export default function ReviewRequest() {
 
   const whatsappMsg = encodeURIComponent(
     language === "pt"
-      ? "Oi Ane! Gostaria de compartilhar minhas fotos do antes & depois!"
-      : "Hi Ane! I'd like to share my before & after photos!"
+      ? "Oi Ane! Pode me enviar as fotos da minha transformação? 💇‍♀️✨"
+      : "Hi Ane! Can you send me my transformation photos? 💇‍♀️✨"
   );
 
   return (
@@ -99,8 +98,8 @@ export default function ReviewRequest() {
       <Header />
 
       {/* ── Hero ── */}
-      <section className="relative py-20 md:py-28 bg-[#3d3d38] text-white overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(36_40%_60%/0.12),transparent_60%)]" />
+      <section className="relative py-20 md:py-28 bg-primary text-primary-foreground overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--gold)/0.12),transparent_60%)]" />
         <div className="container mx-auto px-4 relative z-10 text-center max-w-3xl">
           <ScrollReveal>
             <Badge className="bg-gold/20 text-gold border-gold/30 mb-6 text-sm">
@@ -110,20 +109,20 @@ export default function ReviewRequest() {
               {t("review.hero_title_1")}<br />
               <span className="text-gold">{t("review.hero_title_2")}</span>
             </h1>
-            <p className="text-lg md:text-xl text-white/80 mb-8 leading-relaxed">
+            <p className="text-lg md:text-xl text-primary-foreground/80 mb-8 leading-relaxed">
               {t("review.hero_subtitle")}
             </p>
           </ScrollReveal>
 
           {/* Ane Caroline personal note */}
           <ScrollReveal>
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 text-left max-w-2xl mx-auto">
+            <div className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-2xl p-6 md:p-8 text-left max-w-2xl mx-auto">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0">
                   <Heart className="w-6 h-6 text-gold" />
                 </div>
                 <div>
-                  <p className="text-white/90 text-sm md:text-base leading-relaxed italic">
+                  <p className="text-primary-foreground/90 text-sm md:text-base leading-relaxed italic">
                     "{t("review.ane_quote")}"
                   </p>
                   <p className="text-gold font-semibold mt-3 text-sm">— Ane Caroline, {t("review.ane_title")}</p>
@@ -151,17 +150,17 @@ export default function ReviewRequest() {
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {/* Google — Preferred */}
             <ScrollReveal>
-              <Card className="border-2 border-gold/40 relative overflow-hidden hover:shadow-lg transition-shadow">
+              <Card className="border-2 border-gold/40 relative overflow-hidden hover:shadow-lg transition-shadow h-full">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gold-light via-gold to-gold-dark" />
                 <Badge className="absolute top-3 right-3 bg-gold text-white text-xs">
                   <Star className="w-3 h-3 mr-1" /> Preferred
                 </Badge>
-                <CardContent className="p-6 pt-8 text-center">
+                <CardContent className="p-6 pt-8 text-center flex flex-col h-full">
                   <div className="w-14 h-14 rounded-xl bg-gold/10 flex items-center justify-center mx-auto mb-4">
                     <Star className="w-7 h-7 text-gold" />
                   </div>
                   <h3 className="font-editorial font-bold text-lg mb-2">Google</h3>
-                  <p className="text-muted-foreground text-sm mb-4">{t("review.google_desc")}</p>
+                  <p className="text-muted-foreground text-sm mb-4 flex-1">{t("review.google_desc")}</p>
                   <Button asChild variant="hero" className="w-full">
                     <a href={GOOGLE_REVIEW_URL} target="_blank" rel="noopener noreferrer">
                       {t("review.google_cta")} <ExternalLink className="w-4 h-4 ml-1" />
@@ -173,13 +172,13 @@ export default function ReviewRequest() {
 
             {/* Instagram */}
             <ScrollReveal>
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6 pt-8 text-center">
-                  <div className="w-14 h-14 rounded-xl bg-pink-100 flex items-center justify-center mx-auto mb-4">
-                    <Instagram className="w-7 h-7 text-pink-600" />
+              <Card className="hover:shadow-lg transition-shadow h-full">
+                <CardContent className="p-6 pt-8 text-center flex flex-col h-full">
+                  <div className="w-14 h-14 rounded-xl bg-accent/40 flex items-center justify-center mx-auto mb-4">
+                    <Instagram className="w-7 h-7 text-accent-foreground" />
                   </div>
                   <h3 className="font-editorial font-bold text-lg mb-2">Instagram</h3>
-                  <p className="text-muted-foreground text-sm mb-4">{t("review.instagram_desc")}</p>
+                  <p className="text-muted-foreground text-sm mb-4 flex-1">{t("review.instagram_desc")}</p>
                   <Button asChild variant="outline" className="w-full">
                     <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
                       {t("review.instagram_cta")} <ExternalLink className="w-4 h-4 ml-1" />
@@ -204,8 +203,8 @@ export default function ReviewRequest() {
           <div className="space-y-4">
             {[1, 2, 3, 4].map((step) => (
               <ScrollReveal key={step}>
-                <div className="flex items-start gap-4 p-4 rounded-xl bg-nude-light/50 border border-border">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-gold-light to-gold-dark text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/50 border border-border">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-gold-light to-gold-dark text-primary-foreground flex items-center justify-center font-bold text-sm flex-shrink-0">
                     {step}
                   </div>
                   <div>
@@ -278,7 +277,7 @@ export default function ReviewRequest() {
                 </div>
 
                 {/* Preview */}
-                <div className="bg-nude-light/70 rounded-xl p-5 mb-5 border border-border">
+                <div className="bg-muted/50 rounded-xl p-5 mb-5 border border-border">
                   <div className="flex items-center gap-1 mb-3">
                     {[1, 2, 3, 4, 5].map(i => (
                       <Star key={i} className="w-5 h-5 fill-gold text-gold" />
@@ -303,14 +302,18 @@ export default function ReviewRequest() {
         </div>
       </section>
 
-      {/* ── Share Photos ── */}
+      {/* ── Share Your Transformation ── */}
       <section className="py-16 md:py-20 bg-background">
         <div className="container mx-auto px-4 max-w-4xl">
           <ScrollReveal>
             <div className="text-center mb-10">
-              <h2 className="text-2xl md:text-3xl font-editorial font-bold text-foreground mb-3">
-                {t("review.photos_title")}
-              </h2>
+              <div className="inline-flex items-center gap-2 mb-4">
+                <Sparkles className="w-5 h-5 text-gold" />
+                <h2 className="text-2xl md:text-3xl font-editorial font-bold text-foreground">
+                  {t("review.photos_title")}
+                </h2>
+                <Sparkles className="w-5 h-5 text-gold" />
+              </div>
               <p className="text-muted-foreground max-w-xl mx-auto">
                 {t("review.photos_subtitle")}
               </p>
@@ -319,13 +322,13 @@ export default function ReviewRequest() {
 
           <div className="grid md:grid-cols-2 gap-6">
             <ScrollReveal>
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6 text-center">
-                  <div className="w-14 h-14 rounded-xl bg-green-100 flex items-center justify-center mx-auto mb-4">
-                    <MessageCircle className="w-7 h-7 text-green-600" />
+              <Card className="hover:shadow-lg transition-shadow h-full">
+                <CardContent className="p-6 text-center flex flex-col h-full">
+                  <div className="w-14 h-14 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-4">
+                    <MessageCircle className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <h3 className="font-editorial font-bold text-lg mb-2">WhatsApp</h3>
-                  <p className="text-muted-foreground text-sm mb-4">
+                  <p className="text-muted-foreground text-sm mb-4 flex-1">
                     {t("review.whatsapp_desc")}
                   </p>
                   <Button asChild variant="outline" className="w-full">
@@ -338,13 +341,13 @@ export default function ReviewRequest() {
             </ScrollReveal>
 
             <ScrollReveal>
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6 text-center">
-                  <div className="w-14 h-14 rounded-xl bg-pink-100 flex items-center justify-center mx-auto mb-4">
-                    <Instagram className="w-7 h-7 text-pink-600" />
+              <Card className="hover:shadow-lg transition-shadow h-full">
+                <CardContent className="p-6 text-center flex flex-col h-full">
+                  <div className="w-14 h-14 rounded-xl bg-accent/40 flex items-center justify-center mx-auto mb-4">
+                    <Instagram className="w-7 h-7 text-accent-foreground" />
                   </div>
                   <h3 className="font-editorial font-bold text-lg mb-2">{t("review.tag_instagram")}</h3>
-                  <p className="text-muted-foreground text-sm mb-4">
+                  <p className="text-muted-foreground text-sm mb-4 flex-1">
                     {t("review.tag_desc")} <span className="font-semibold text-foreground">{INSTAGRAM_HANDLE}</span>
                   </p>
                   <Button asChild variant="outline" className="w-full">
@@ -360,13 +363,13 @@ export default function ReviewRequest() {
       </section>
 
       {/* ── Contact Ane ── */}
-      <section className="py-16 md:py-20 bg-[#3d3d38] text-white">
+      <section className="py-16 md:py-20 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 max-w-2xl text-center">
           <ScrollReveal>
             <h2 className="text-2xl md:text-3xl font-editorial font-bold mb-4">
               {t("review.contact_title")}
             </h2>
-            <p className="text-white/70 mb-8">
+            <p className="text-primary-foreground/70 mb-8">
               {t("review.contact_subtitle")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
