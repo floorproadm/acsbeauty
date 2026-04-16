@@ -26,7 +26,7 @@ import AneCaroline from "./pages/AneCaroline";
 import Links from "./pages/Links";
 import ClientPortal from "./pages/ClientPortal";
 import NotFound from "./pages/NotFound";
-
+import ReviewRequest from "./pages/ReviewRequest";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +60,7 @@ const App = () => (
           <Route path="/ane-caroline" element={<AneCaroline />} />
           <Route path="/hub" element={<Links />} />
           <Route path="/portal" element={<ClientPortal />} />
+          <Route path="/review" element={<ReviewRequest />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
