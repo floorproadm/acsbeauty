@@ -116,13 +116,13 @@ export default function ReviewRequest() {
 
           {/* Ane Caroline personal note */}
           <ScrollReveal>
-            <div className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-2xl p-6 md:p-8 text-left max-w-2xl mx-auto">
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 md:p-8 text-left max-w-2xl mx-auto">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0">
-                  <Heart className="w-6 h-6 text-gold" />
+                <div className="w-12 h-12 rounded-full bg-gold flex items-center justify-center flex-shrink-0">
+                  <Heart className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-primary-foreground/90 text-sm md:text-base leading-relaxed italic">
+                  <p className="text-white text-sm md:text-base leading-relaxed italic">
                     "{t("review.ane_quote")}"
                   </p>
                   <p className="text-gold font-semibold mt-3 text-sm">— Ane Caroline, {t("review.ane_title")}</p>
