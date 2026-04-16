@@ -153,6 +153,7 @@ export function TeamMembersSubTab() {
         sort_order: member.sort_order,
         is_active: member.is_active,
         staff_profile_id: member.staff_profile_id,
+        image_url: imageUrl,
       };
 
       if (memberId) {
