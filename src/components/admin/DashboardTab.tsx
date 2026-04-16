@@ -8,6 +8,7 @@ import { format, startOfDay, endOfDay, startOfMonth, endOfMonth } from "date-fns
 import { ptBR } from "date-fns/locale";
 import { AdminTab } from "./AdminLayout";
 import { BirthdayWidget } from "./BirthdayWidget";
+import { StaffPerformanceWidget } from "./StaffPerformanceWidget";
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
