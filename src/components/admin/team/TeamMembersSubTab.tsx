@@ -390,6 +390,38 @@ export function TeamMembersSubTab() {
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* Photo Upload */}
+            <div className="flex flex-col items-center gap-3">
+              <div className="relative group">
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt="Foto"
+                    className="w-24 h-24 rounded-full object-cover border-2 border-border"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border">
+                    <Camera className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                )}
+                <label className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                  {uploading ? (
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  ) : (
+                    <Camera className="w-5 h-5 text-white" />
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePhotoUpload}
+                    disabled={uploading}
+                  />
+                </label>
+              </div>
+              <p className="text-[11px] text-muted-foreground">Clique para {imageUrl ? "alterar" : "adicionar"} foto</p>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Nome *</Label>
