@@ -1035,7 +1035,7 @@ export default function Book() {
                               key={sku.id}
                               onClick={() => {
                                 setPickedSkuId(sku.id);
-                                setStep("date");
+                                setStep("staff");
                               }}
                               className={`w-full p-4 rounded-xl border-2 text-left transition-all hover:border-rose-gold/50 ${
                               pickedSkuId === sku.id ? "border-rose-gold bg-rose-light/30" : "border-muted"}`
