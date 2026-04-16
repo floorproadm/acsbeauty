@@ -12,8 +12,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 // ── Configurable Links ──
 const GOOGLE_REVIEW_URL = "https://g.page/r/CYourACSReviewLink/review"; // TODO: replace with real link
-const INSTAGRAM_HANDLE = "@acsbeautystudio";
-const INSTAGRAM_URL = "https://www.instagram.com/acsbeautystudio";
+const INSTAGRAM_HANDLE = "@acsbeautynj";
+const INSTAGRAM_URL = "https://www.instagram.com/acsbeautynj";
 const PHONE = "(732) 915-3430";
 const WHATSAPP_NUMBER = "17329153430";
 
