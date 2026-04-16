@@ -111,6 +111,7 @@ export default function Book() {
   const [pickedSkuId, setPickedSkuId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [slugResolved, setSlugResolved] = useState(false);
+  const [pickedStaffId, setPickedStaffId] = useState<string | null>(null);
 
   // Payment method state (portal flow)
   const [paymentMethod, setPaymentMethod] = useState<"at_location" | "by_app">("at_location");
