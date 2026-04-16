@@ -437,6 +437,9 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
         </motion.div>
       </div>
 
+      {/* Staff Performance */}
+      <StaffPerformanceWidget />
+
       {/* Birthday Widget */}
       <BirthdayWidget onNavigateToClients={() => onNavigate("crm")} />
     </div>
