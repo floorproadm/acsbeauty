@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { UserCheck, DollarSign, RefreshCw, Star, Users, Trophy } from "lucide-react";
+import { UserCheck, DollarSign, RefreshCw, Star, Users, Trophy, CalendarClock } from "lucide-react";
 import { startOfMonth, endOfMonth, subMonths, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -19,6 +19,7 @@ interface StaffMetrics {
   avgTicket: number;
   returnRate: number;
   uniqueClients: number;
+  upcomingBookings: number;
   topServices: { name: string; count: number }[];
 }
 
@@ -42,15 +43,18 @@ export function TeamPerformanceSubTab() {
   const { data: metrics, isLoading } = useQuery({
     queryKey: ["staff-performance", periodStart],
     queryFn: async () => {
+      // Fetch ALL bookings (any status except cancelled)
       const { data: bookings, error } = await supabase
         .from("bookings")
-        .select("id, total_price, status, client_id, staff_id, service_id, services(name), staff_profiles(name)")
+        .select("id, total_price, status, client_id, staff_id, service_id, start_time, services(name), staff_profiles(name)")
         .gte("start_time", periodStart)
         .lte("start_time", periodEnd)
-        .in("status", ["confirmed", "completed"]);
+        .in("status", ["requested", "confirmed", "completed"]);
 
       if (error) throw error;
       if (!bookings?.length) return [];
+
+      const now = new Date().toISOString();
 
       const staffMap: Record<string, {
         name: string;
@@ -58,11 +62,12 @@ export function TeamPerformanceSubTab() {
         clientIds: Set<string>;
         repeatClientIds: Set<string>;
         serviceCounts: Record<string, number>;
+        upcomingCount: number;
       }> = {};
 
       for (const b of bookings) {
-        const staffId = b.staff_id || "general";
-        const staffName = (b.staff_profiles as any)?.name || "Geral (sem profissional)";
+        const staffId = b.staff_id || "unassigned";
+        const staffName = (b.staff_profiles as any)?.name || "Sem profissional atribuído";
 
         if (!staffMap[staffId]) {
           staffMap[staffId] = {
@@ -71,11 +76,16 @@ export function TeamPerformanceSubTab() {
             clientIds: new Set(),
             repeatClientIds: new Set(),
             serviceCounts: {},
+            upcomingCount: 0,
           };
         }
 
         const entry = staffMap[staffId];
         entry.bookings.push(b);
+
+        if (b.start_time > now && (b.status === "requested" || b.status === "confirmed")) {
+          entry.upcomingCount++;
+        }
 
         if (b.client_id) {
           if (entry.clientIds.has(b.client_id)) {
@@ -90,7 +100,8 @@ export function TeamPerformanceSubTab() {
 
       return Object.entries(staffMap)
         .map(([, data]) => {
-          const totalRevenue = data.bookings.reduce((s, b) => s + (Number(b.total_price) || 0), 0);
+          const completedOrConfirmed = data.bookings.filter(b => b.status === "confirmed" || b.status === "completed");
+          const totalRevenue = completedOrConfirmed.reduce((s, b) => s + (Number(b.total_price) || 0), 0);
           const totalBookings = data.bookings.length;
           const uniqueClients = data.clientIds.size;
           const returnRate = uniqueClients > 0 ? (data.repeatClientIds.size / uniqueClients) * 100 : 0;
@@ -103,13 +114,14 @@ export function TeamPerformanceSubTab() {
             staffName: data.name,
             totalBookings,
             totalRevenue,
-            avgTicket: totalBookings > 0 ? totalRevenue / totalBookings : 0,
+            avgTicket: completedOrConfirmed.length > 0 ? totalRevenue / completedOrConfirmed.length : 0,
             returnRate,
             uniqueClients,
+            upcomingBookings: data.upcomingCount,
             topServices,
           } as StaffMetrics;
         })
-        .sort((a, b) => b.totalRevenue - a.totalRevenue);
+        .sort((a, b) => b.totalBookings - a.totalBookings);
     },
   });
 
@@ -166,10 +178,10 @@ export function TeamPerformanceSubTab() {
           <CardContent className="text-center py-12">
             <UserCheck className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
             <p className="text-sm text-muted-foreground">
-              Nenhum booking confirmado/concluído neste período.
+              Nenhum agendamento neste período.
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Os relatórios aparecerão automaticamente quando houver dados.
+              Os relatórios aparecerão automaticamente quando houver bookings.
             </p>
           </CardContent>
         </Card>
@@ -219,7 +231,15 @@ export function TeamPerformanceSubTab() {
                         {idx < 3 && <span className="text-lg">{MEDALS[idx]}</span>}
                         {staff.staffName}
                       </h4>
-                      <span className="text-xs text-muted-foreground">{staff.totalBookings} bookings</span>
+                      <div className="flex items-center gap-2">
+                        {staff.upcomingBookings > 0 && (
+                          <span className="text-[10px] bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <CalendarClock className="w-3 h-3" />
+                            {staff.upcomingBookings} agendados
+                          </span>
+                        )}
+                        <span className="text-xs text-muted-foreground">{staff.totalBookings} total</span>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-4 gap-3">

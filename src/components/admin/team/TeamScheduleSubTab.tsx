@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Clock, CheckCircle2, XCircle } from "lucide-react";
@@ -30,28 +29,30 @@ interface BusinessHour {
   staff_id: string | null;
 }
 
-interface StaffProfile {
-  user_id: string;
-  name: string | null;
-  active: boolean;
+interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  is_active: boolean;
 }
 
 export function TeamScheduleSubTab() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [editingStaff, setEditingStaff] = useState<string | null>(null);
+  const [editingMember, setEditingMember] = useState<string | null>(null);
   const [editHours, setEditHours] = useState<BusinessHour[]>([]);
 
-  const { data: staffProfiles = [], isLoading: loadingStaff } = useQuery({
-    queryKey: ["staff-profiles-schedule"],
+  // Use team_members as primary source instead of staff_profiles
+  const { data: teamMembers = [], isLoading: loadingTeam } = useQuery({
+    queryKey: ["team-members-schedule"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("staff_profiles")
-        .select("user_id, name, active")
-        .eq("active", true)
-        .order("name");
+        .from("team_members")
+        .select("id, name, role, is_active")
+        .eq("is_active", true)
+        .order("sort_order");
       if (error) throw error;
-      return data as StaffProfile[];
+      return data as TeamMember[];
     },
   });
 
@@ -68,17 +69,16 @@ export function TeamScheduleSubTab() {
   });
 
   const saveMutation = useMutation({
-    mutationFn: async ({ staffId, hours }: { staffId: string; hours: BusinessHour[] }) => {
-      // Delete existing hours for this staff
+    mutationFn: async ({ memberId, hours }: { memberId: string; hours: BusinessHour[] }) => {
+      // Delete existing hours for this member (stored as staff_id)
       const { error: delError } = await supabase
         .from("business_hours")
         .delete()
-        .eq("staff_id", staffId);
+        .eq("staff_id", memberId);
       if (delError) throw delError;
 
-      // Insert new hours
       const inserts = hours.map((h) => ({
-        staff_id: staffId,
+        staff_id: memberId,
         day_of_week: h.day_of_week,
         open_time: h.open_time,
         close_time: h.close_time,
@@ -90,7 +90,7 @@ export function TeamScheduleSubTab() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["business-hours-all"] });
-      setEditingStaff(null);
+      setEditingMember(null);
       toast({ title: "Horários atualizados!" });
     },
     onError: (err: any) => {
@@ -101,34 +101,32 @@ export function TeamScheduleSubTab() {
   // General hours (staff_id is null)
   const generalHours = allHours.filter((h) => !h.staff_id);
 
-  const getStaffHours = (staffId: string) => {
-    const staffHours = allHours.filter((h) => h.staff_id === staffId);
-    // If staff has custom hours, use those; otherwise fall back to general
-    return staffHours.length > 0 ? staffHours : generalHours;
+  const getMemberHours = (memberId: string) => {
+    const memberHours = allHours.filter((h) => h.staff_id === memberId);
+    return memberHours.length > 0 ? memberHours : generalHours;
   };
 
   const today = new Date().getDay();
 
-  const openEditModal = (staffId: string) => {
-    const existing = allHours.filter((h) => h.staff_id === staffId);
+  const openEditModal = (memberId: string) => {
+    const existing = allHours.filter((h) => h.staff_id === memberId);
     if (existing.length > 0) {
       setEditHours(existing.map((h) => ({ ...h })));
     } else {
-      // Pre-fill from general hours
       setEditHours(
         generalHours.length > 0
-          ? generalHours.map((h) => ({ ...h, id: crypto.randomUUID(), staff_id: staffId }))
+          ? generalHours.map((h) => ({ ...h, id: crypto.randomUUID(), staff_id: memberId }))
           : Array.from({ length: 7 }, (_, i) => ({
               id: crypto.randomUUID(),
               day_of_week: i,
               open_time: "09:00",
               close_time: "18:00",
-              is_open: i >= 2 && i <= 6, // Tue-Sat
-              staff_id: staffId,
+              is_open: i >= 2 && i <= 6,
+              staff_id: memberId,
             }))
       );
     }
-    setEditingStaff(staffId);
+    setEditingMember(memberId);
   };
 
   const updateEditHour = (dayIndex: number, field: keyof BusinessHour, value: any) => {
@@ -137,7 +135,7 @@ export function TeamScheduleSubTab() {
     );
   };
 
-  const isLoading = loadingStaff || loadingHours;
+  const isLoading = loadingTeam || loadingHours;
 
   if (isLoading) {
     return (
@@ -147,6 +145,8 @@ export function TeamScheduleSubTab() {
       </div>
     );
   }
+
+  const editingMemberData = teamMembers.find(m => m.id === editingMember);
 
   return (
     <div className="space-y-6">
@@ -165,14 +165,14 @@ export function TeamScheduleSubTab() {
         <CardContent className="py-4">
           <p className="text-sm font-medium text-muted-foreground mb-3">Disponíveis Hoje</p>
           <div className="flex flex-wrap gap-2">
-            {staffProfiles.map((sp) => {
-              const hours = getStaffHours(sp.user_id);
+            {teamMembers.map((member) => {
+              const hours = getMemberHours(member.id);
               const todayHour = hours.find((h) => h.day_of_week === today);
               const isAvailable = todayHour?.is_open ?? false;
 
               return (
                 <Badge
-                  key={sp.user_id}
+                  key={member.id}
                   variant={isAvailable ? "default" : "secondary"}
                   className="gap-1.5 py-1 px-2.5"
                 >
@@ -181,7 +181,7 @@ export function TeamScheduleSubTab() {
                   ) : (
                     <XCircle className="w-3 h-3" />
                   )}
-                  {sp.name || "Sem nome"}
+                  {member.name}
                   {isAvailable && todayHour && (
                     <span className="text-[10px] opacity-75 ml-1">
                       {todayHour.open_time.slice(0, 5)}–{todayHour.close_time.slice(0, 5)}
@@ -190,32 +190,33 @@ export function TeamScheduleSubTab() {
                 </Badge>
               );
             })}
-            {staffProfiles.length === 0 && (
-              <p className="text-xs text-muted-foreground">Nenhum profissional cadastrado.</p>
+            {teamMembers.length === 0 && (
+              <p className="text-xs text-muted-foreground">Nenhum membro da equipe cadastrado.</p>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Staff Schedule Cards */}
+      {/* Team Member Schedule Cards */}
       <div className="grid gap-4">
-        {staffProfiles.map((sp) => {
-          const hours = getStaffHours(sp.user_id);
-          const hasCustom = allHours.some((h) => h.staff_id === sp.user_id);
+        {teamMembers.map((member) => {
+          const hours = getMemberHours(member.id);
+          const hasCustom = allHours.some((h) => h.staff_id === member.id);
 
           return (
-            <Card key={sp.user_id}>
+            <Card key={member.id}>
               <CardContent className="py-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm">{sp.name || "Sem nome"}</span>
+                    <span className="font-medium text-sm">{member.name}</span>
+                    <span className="text-[10px] text-muted-foreground">{member.role}</span>
                     {hasCustom ? (
                       <Badge variant="outline" className="text-[10px]">Personalizado</Badge>
                     ) : (
                       <Badge variant="secondary" className="text-[10px]">Padrão geral</Badge>
                     )}
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => openEditModal(sp.user_id)}>
+                  <Button variant="outline" size="sm" onClick={() => openEditModal(member.id)}>
                     Editar
                   </Button>
                 </div>
@@ -252,11 +253,11 @@ export function TeamScheduleSubTab() {
       </div>
 
       {/* Edit Schedule Modal */}
-      <Dialog open={!!editingStaff} onOpenChange={() => setEditingStaff(null)}>
+      <Dialog open={!!editingMember} onOpenChange={() => setEditingMember(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              Editar Horários — {staffProfiles.find((s) => s.user_id === editingStaff)?.name}
+              Editar Horários — {editingMemberData?.name}
             </DialogTitle>
           </DialogHeader>
 
@@ -292,12 +293,12 @@ export function TeamScheduleSubTab() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingStaff(null)}>
+            <Button variant="outline" onClick={() => setEditingMember(null)}>
               Cancelar
             </Button>
             <Button
               onClick={() =>
-                editingStaff && saveMutation.mutate({ staffId: editingStaff, hours: editHours })
+                editingMember && saveMutation.mutate({ memberId: editingMember, hours: editHours })
               }
               disabled={saveMutation.isPending}
             >
