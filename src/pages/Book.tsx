@@ -377,13 +377,13 @@ export default function Book() {
     // If no variations, and only 1 SKU → auto-select
     if (serviceVariations.length === 0 && serviceSkus.length === 1) {
       setPickedSkuId(serviceSkus[0].id);
-      setStep("date");
+      setStep("staff");
       return;
     }
 
-    // If no variations and no SKUs → go to date (legacy mode)
+    // If no variations and no SKUs → go to staff selection
     if (serviceVariations.length === 0 && serviceSkus.length === 0) {
-      setStep("date");
+      setStep("staff");
       return;
     }
 
