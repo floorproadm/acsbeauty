@@ -306,11 +306,6 @@ export function TeamMembersSubTab() {
                           {svcCount} serviço{svcCount > 1 ? "s" : ""}
                         </Badge>
                       )}
-                      {m.specialties?.slice(0, 3).map((s) => (
-                        <Badge key={s} variant="outline" className="text-xs">
-                          {s}
-                        </Badge>
-                      ))}
                     </div>
                   </div>
                   <div className="flex gap-1 shrink-0">
