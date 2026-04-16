@@ -217,6 +217,7 @@ export function TeamMembersSubTab() {
     setEditing(null);
     setForm({ ...emptyForm, sort_order: members.length });
     setSelectedServiceIds([]);
+    setImageUrl(null);
     setModalOpen(true);
   };
 
@@ -229,7 +230,45 @@ export function TeamMembersSubTab() {
       is_active: m.is_active,
       staff_profile_id: m.staff_profile_id,
     });
+    setImageUrl(m.image_url);
     setModalOpen(true);
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Apenas imagens são permitidas", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Imagem deve ter no máximo 5MB", variant: "destructive" });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const fileName = `${crypto.randomUUID()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("team-photos")
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("team-photos")
+        .getPublicUrl(fileName);
+
+      setImageUrl(urlData.publicUrl);
+      toast({ title: "Foto enviada!" });
+    } catch (err: any) {
+      toast({ title: "Erro no upload", description: err.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const toggleService = (serviceId: string) => {
