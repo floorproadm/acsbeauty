@@ -718,10 +718,11 @@ export default function Book() {
     setPickedServiceId(serviceId);
     setPickedVariationId(null);
     setPickedSkuId(null);
+    setPickedStaffId(null);
 
     if (!serviceId) {
-      // Consultation — no SKU needed
-      setStep("date");
+      // Consultation — skip SKU, go to staff selection
+      setStep("staff");
     } else {
       // Go to SKU step (auto-skip will handle if no SKUs exist)
       setStep("sku");
