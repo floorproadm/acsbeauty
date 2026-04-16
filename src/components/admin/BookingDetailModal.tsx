@@ -1,9 +1,14 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Phone, Mail, Calendar, Clock, DollarSign, FileText, User, CheckCircle, XCircle, RefreshCw, UserX } from "lucide-react";
+import { Phone, Mail, Calendar, Clock, DollarSign, FileText, User, CheckCircle, XCircle, RefreshCw, UserX, UserCog } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
 
 interface BookingDetailModalProps {
   booking: {
@@ -16,6 +21,7 @@ interface BookingDetailModalProps {
     status: string;
     notes?: string | null;
     total_price?: number | null;
+    staff_id?: string | null;
     services?: { name: string; duration_minutes?: number } | null;
     packages?: { name: string } | null;
   } | null;
@@ -37,6 +43,48 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 };
 
 export function BookingDetailModal({ booking, open, onOpenChange, onConfirm, onCancel, onComplete, onNoShow, onReschedule }: BookingDetailModalProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (booking) {
+      setSelectedStaffId(booking.staff_id || null);
+    }
+  }, [booking]);
+
+  const { data: staffProfiles } = useQuery({
+    queryKey: ["staff-profiles-for-assignment"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("staff_profiles")
+        .select("user_id, name")
+        .eq("active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: open,
+  });
+
+  const assignStaffMutation = useMutation({
+    mutationFn: async ({ bookingId, staffId }: { bookingId: string; staffId: string | null }) => {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ staff_id: staffId })
+        .eq("id", bookingId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["staff-performance"] });
+      toast({ title: "Profissional atribuído!" });
+    },
+    onError: (err: any) => {
+      toast({ title: "Erro ao atribuir", description: err.message, variant: "destructive" });
+    },
+  });
+
   if (!booking) return null;
 
   const status = statusLabels[booking.status] || statusLabels.requested;
@@ -52,6 +100,12 @@ export function BookingDetailModal({ booking, open, onOpenChange, onConfirm, onC
     if (!action) return;
     action(arg ?? booking.id);
     onOpenChange(false);
+  };
+
+  const handleStaffChange = (value: string) => {
+    const staffId = value === "none" ? null : value;
+    setSelectedStaffId(staffId);
+    assignStaffMutation.mutate({ bookingId: booking.id, staffId });
   };
 
   return (
@@ -140,6 +194,30 @@ export function BookingDetailModal({ booking, open, onOpenChange, onConfirm, onC
                 </span>
               </div>
             )}
+
+            {/* Staff Assignment */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground flex items-center gap-2">
+                <UserCog className="w-4 h-4" />
+                Profissional
+              </span>
+              <Select
+                value={selectedStaffId || "none"}
+                onValueChange={handleStaffChange}
+              >
+                <SelectTrigger className="w-[180px] h-8 text-xs">
+                  <SelectValue placeholder="Atribuir profissional" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sem profissional</SelectItem>
+                  {staffProfiles?.map((sp) => (
+                    <SelectItem key={sp.user_id} value={sp.user_id}>
+                      {sp.name || "Sem nome"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Notes */}
