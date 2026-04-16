@@ -192,6 +192,7 @@ export function TeamMembersSubTab() {
       setEditing(null);
       setForm(emptyForm);
       setSelectedServiceIds([]);
+      setImageUrl(null);
       toast({ title: "Membro salvo com sucesso!" });
     },
     onError: (err: any) => {
