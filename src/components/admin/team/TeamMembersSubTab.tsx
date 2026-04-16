@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, GripVertical, X, Scissors } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, Scissors } from "lucide-react";
 
 interface TeamMember {
   id: string;
@@ -64,7 +64,7 @@ export function TeamMembersSubTab() {
   const [editing, setEditing] = useState<TeamMember | null>(null);
   const [form, setForm] = useState(emptyMember);
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
-  const [newSpecialty, setNewSpecialty] = useState("");
+  
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const { data: members = [], isLoading } = useQuery({
