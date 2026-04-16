@@ -759,7 +759,7 @@ export default function Book() {
     const base: string[] = [];
     if (!serviceParam && !offerId && !packageId && !isPortalSource) base.push("service");
     if (activeServiceId && !isPortalSource) base.push("sku");
-    base.push("date", "form");
+    base.push("staff", "date", "form");
     return base;
   })();
 
@@ -770,6 +770,9 @@ export default function Book() {
       setHoldId(null);
       setHoldExpiresAt(null);
     } else if (step === "date") {
+      setPickedStaffId(null);
+      setStep("staff");
+    } else if (step === "staff") {
       if (isPortalSource) {
         navigate("/portal");
       } else if (pickedSkuId || activeServiceId) {
@@ -777,7 +780,7 @@ export default function Book() {
       } else if (isCalendarFlow) {
         setStep("service");
       } else {
-        navigate(-1);
+        setStep("service");
       }
     } else if (step === "sku") {
       if (isPortalSource) {
