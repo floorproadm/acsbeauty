@@ -434,7 +434,8 @@ export default function Book() {
           start_time: slot.start,
           end_time: slot.end,
           service_id: finalServiceId,
-          package_id: packageId || null
+          package_id: packageId || null,
+          staff_id: pickedStaffId || null
         }
       });
       if (response.error) throw new Error(response.error.message);
