@@ -462,52 +462,6 @@ export function TeamMembersSubTab() {
                 </p>
               )}
             </div>
-
-            <Separator />
-
-            {/* Specialties */}
-            <div>
-              <Label>Especialidades (tags para exibição)</Label>
-              <div className="flex gap-2 mt-1">
-                <Input
-                  value={newSpecialty}
-                  onChange={(e) => setNewSpecialty(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSpecialty())}
-                  placeholder="Adicionar especialidade"
-                  className="flex-1"
-                />
-                <Button type="button" variant="outline" size="sm" onClick={addSpecialty}>
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {form.specialties.map((s) => (
-                  <Badge key={s} variant="secondary" className="gap-1">
-                    {s}
-                    <button onClick={() => removeSpecialty(s)}>
-                      <X className="w-3 h-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            {/* Badge */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Badge - Label</Label>
-                <Input
-                  value={form.badge_label || ""}
-                  onChange={(e) => setForm({ ...form, badge_label: e.target.value || null })}
-                  placeholder="Ex: Especialista em"
-                />
-              </div>
-              <div>
-                <Label>Badge - Valor</Label>
-                <Input
-                  value={form.badge_value || ""}
-                  onChange={(e) => setForm({ ...form, badge_value: e.target.value || null })}
-                  placeholder="Ex: Hair Styling"
                 />
               </div>
             </div>
