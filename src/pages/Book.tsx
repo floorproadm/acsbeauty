@@ -324,7 +324,52 @@ export default function Book() {
     enabled: !!pickedSkuId
   });
 
-  // Auto-skip logic for SKU step
+  // Fetch eligible staff for the selected service
+  const { data: eligibleStaff, isLoading: isLoadingStaff } = useQuery({
+    queryKey: ["eligible-staff", activeServiceId],
+    queryFn: async () => {
+      // Get team members that are active and linked to a staff profile
+      const { data: members, error: mErr } = await supabase
+        .from("team_members")
+        .select("id, name, role, image_url, staff_profile_id")
+        .eq("is_active", true)
+        .not("staff_profile_id", "is", null)
+        .order("sort_order");
+      if (mErr) throw mErr;
+      if (!members || members.length === 0) return [];
+
+      if (!activeServiceId) return members; // consultation — all staff available
+
+      // Get staff_services for this service
+      const { data: staffSvcs, error: ssErr } = await supabase
+        .from("staff_services")
+        .select("team_member_id")
+        .eq("service_id", activeServiceId);
+      if (ssErr) throw ssErr;
+
+      const enabledMemberIds = new Set((staffSvcs || []).map((s) => s.team_member_id));
+
+      // If no staff_services configured for this service, show all staff (backward compat)
+      if (enabledMemberIds.size === 0) return members;
+
+      return members.filter((m) => enabledMemberIds.has(m.id));
+    },
+    enabled: step === "staff",
+  });
+
+  // Auto-select staff if only one eligible
+  useEffect(() => {
+    if (step !== "staff" || !eligibleStaff) return;
+    if (eligibleStaff.length === 1) {
+      setPickedStaffId(eligibleStaff[0].staff_profile_id);
+      setStep("date");
+    } else if (eligibleStaff.length === 0) {
+      // No linked staff — skip step
+      setStep("date");
+    }
+  }, [step, eligibleStaff]);
+
+
   useEffect(() => {
     if (step !== "sku" || !activeServiceId) return;
     if (!serviceVariations || !serviceSkus) return;
