@@ -23,7 +23,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, GripVertical, Scissors, Link2 } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, Scissors, Link2, Camera, Loader2 } from "lucide-react";
 
 interface TeamMember {
   id: string;
