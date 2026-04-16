@@ -78,9 +78,12 @@ const translations: Record<Language, Record<string, string>> = {
     "home.packages.book_offer": "Book This Offer",
     "home.packages.view_all": "View All Offers",
 
-    "home.testimonials.badge": "Testimonials",
+    "home.testimonials.badge": "Google Reviews",
     "home.testimonials.title": "What Our Clients Say",
-    "home.testimonials.description": "Real stories from real clients who have experienced the ACS Beauty difference.",
+    "home.testimonials.description": "Real reviews from real clients — verified on Google.",
+    "home.testimonials.leave_review": "Leave a Review",
+    "home.testimonials.read_more": "Read more",
+    "home.testimonials.verified": "Verified",
 
     "home.cta.title_1": "Ready to see",
     "home.cta.title_2": "ACS's work?",
@@ -481,9 +484,12 @@ const translations: Record<Language, Record<string, string>> = {
     "home.packages.book_offer": "Agendar Esta Oferta",
     "home.packages.view_all": "Ver Todas as Ofertas",
 
-    "home.testimonials.badge": "Depoimentos",
+    "home.testimonials.badge": "Google Reviews",
     "home.testimonials.title": "O Que Nossas Clientes Dizem",
-    "home.testimonials.description": "Histórias reais de clientes que vivenciaram a diferença ACS Beauty.",
+    "home.testimonials.description": "Avaliações reais de clientes reais — verificadas no Google.",
+    "home.testimonials.leave_review": "Deixe sua Avaliação",
+    "home.testimonials.read_more": "Leia mais",
+    "home.testimonials.verified": "Verificado",
 
     "home.cta.title_1": "Pronta para conhecer",
     "home.cta.title_2": "o trabalho da ACS?",
