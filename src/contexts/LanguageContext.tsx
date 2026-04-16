@@ -81,7 +81,7 @@ const translations: Record<Language, Record<string, string>> = {
     "home.testimonials.badge": "Google Reviews",
     "home.testimonials.title": "What Our Clients Say",
     "home.testimonials.description": "Real reviews from real clients — verified on Google.",
-    "home.testimonials.leave_review": "Leave a Review",
+    "home.testimonials.leave_review": "See All Reviews",
     "home.testimonials.read_more": "Read more",
     "home.testimonials.verified": "Verified",
 
@@ -487,7 +487,7 @@ const translations: Record<Language, Record<string, string>> = {
     "home.testimonials.badge": "Google Reviews",
     "home.testimonials.title": "O Que Nossas Clientes Dizem",
     "home.testimonials.description": "Avaliações reais de clientes reais — verificadas no Google.",
-    "home.testimonials.leave_review": "Deixe sua Avaliação",
+    "home.testimonials.leave_review": "Ver Todas as Avaliações",
     "home.testimonials.read_more": "Leia mais",
     "home.testimonials.verified": "Verificado",
 
