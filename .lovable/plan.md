@@ -1,32 +1,45 @@
 
 
-## Importar Serviços do TopStudios para o ACS Beauty OS
+# Plano: Transformar a aba "Equipe" em um hub completo de gestão de staff
 
-### Serviços a adicionar
+## Problema
+A aba atual é apenas um CRUD básico de membros da página `/team` + um widget de performance que depende de bookings com `staff_id` (que geralmente são nulos). É superficial e não agrega valor operacional real.
 
-Da imagem do TopStudios, estes são os serviços listados. "Corte Feminino" já existe no banco.
+## Visão
+Transformar em uma **central de gestão de equipe** com 3 sub-abas internas:
 
-| Serviço | Categoria | Slug | Duração (default) | Preço (default) |
-|---|---|---|---|---|
-| Botox Capilar | Cabelo | botox-capilar | 120min | 0 |
-| Escova | Cabelo | escova | 45min | 0 |
-| Highlights | Cabelo | highlights | 180min | 0 |
-| Manutenção Mega Hair | Cabelo | manutencao-mega-hair | 180min | 0 |
-| Maquiagem | Cabelo | maquiagem | 60min | 0 |
-| Penteado | Cabelo | penteado | 60min | 0 |
-| Progressiva | Cabelo | progressiva | 120min | 0 |
-| Tintura | Cabelo | tintura | 120min | 0 |
-| Tratamento Capilar | Cabelo | tratamento-capilar | 90min | 0 |
+### 1. Membros (tab existente, refinada)
+- Manter o CRUD de `team_members` como está
+- Adicionar preview da foto inline no modal de edição
 
-**Nota:** Preços ficam em $0 (placeholder) pois são ocultos no frontend público. A Ane ajusta depois no admin. Durações são estimativas razoáveis que também podem ser ajustadas.
+### 2. Performance (tab dedicada)
+- Mover o `StaffPerformanceWidget` para uma sub-aba própria
+- Adicionar **filtro de período** (último mês, 3 meses, 6 meses, custom)
+- Adicionar **ranking visual** — medalha 🥇🥈🥉 para os top 3
+- Mostrar **gráfico de barras simples** (receita por profissional) usando Recharts (já disponível via shadcn chart)
+- Incluir contagem de **clientes únicos atendidos** por profissional
 
-### Como funciona
+### 3. Escalas / Disponibilidade
+- Visualizar as `business_hours` por profissional (já existe `staff_id` na tabela)
+- Permitir configurar horários individuais por membro da equipe
+- Mostrar quem está disponível hoje em um resumo rápido
 
-1. **Migration SQL** — INSERT dos 9 novos serviços na tabela `services` com `category = 'Cabelo'`, `category_slug = 'cabelo'`, `status = 'entry'`, `is_active = true`
-2. Cada serviço recebe um `slug` único para roteamento SEO
-3. Após inserir, os serviços aparecem automaticamente na aba Serviços do admin, agrupados sob "Cabelo"
-4. A Ane pode então editar preços, durações e adicionar Técnicas/Opções via o admin
+## Estrutura técnica
 
-### Arquivos alterados
-- **Database migration** — INSERT de 9 serviços novos
+```text
+TeamTab.tsx
+├── Tabs (Membros | Performance | Escalas)
+│   ├── TeamMembersSubTab.tsx   ← CRUD existente extraído
+│   ├── TeamPerformanceSubTab.tsx ← Widget expandido + charts
+│   └── TeamScheduleSubTab.tsx   ← business_hours por staff
+```
+
+## Arquivos modificados
+1. **`src/components/admin/TeamTab.tsx`** — Refatorar para usar sub-abas internas com `Tabs` do shadcn
+2. **`src/components/admin/team/TeamMembersSubTab.tsx`** — Extrair CRUD atual
+3. **`src/components/admin/team/TeamPerformanceSubTab.tsx`** — Widget expandido com filtros e chart
+4. **`src/components/admin/team/TeamScheduleSubTab.tsx`** — Grid de horários por profissional
+
+## Sem mudanças no banco
+Todas as tabelas necessárias já existem (`team_members`, `staff_profiles`, `bookings`, `business_hours`).
 
