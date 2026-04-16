@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Calendar, Check, Loader2, Clock, AlertCircle, CreditCard, MapPin } from "lucide-react";
+import { ArrowLeft, Calendar, Check, Loader2, Clock, AlertCircle, CreditCard, MapPin, User } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
