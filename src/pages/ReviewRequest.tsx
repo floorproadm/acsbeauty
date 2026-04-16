@@ -90,8 +90,8 @@ export default function ReviewRequest() {
 
   const whatsappMsg = encodeURIComponent(
     language === "pt"
-      ? "Oi Ane! Gostaria de compartilhar minhas fotos do antes & depois!"
-      : "Hi Ane! I'd like to share my before & after photos!"
+      ? "Oi Ane! Pode me enviar as fotos da minha transformação? 💇‍♀️✨"
+      : "Hi Ane! Can you send me my transformation photos? 💇‍♀️✨"
   );
 
   return (
