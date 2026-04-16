@@ -101,9 +101,7 @@ export default function ReviewRequest() {
       <section className="relative py-20 md:py-28 bg-[#2a2a26] text-white overflow-hidden">
         <div className="container mx-auto px-4 relative z-10 text-center max-w-3xl">
           <ScrollReveal>
-            <Badge className="bg-white/15 text-white border-white/30 mb-6 text-sm">
-              <CheckCircle2 className="w-4 h-4 mr-1" /> {t("review.badge")}
-            </Badge>
+            
             <h1 className="text-3xl md:text-5xl font-editorial font-bold mb-6 leading-tight text-white">
               {t("review.hero_title_1")}<br />
               {t("review.hero_title_2")}
@@ -361,27 +359,30 @@ export default function ReviewRequest() {
       </section>
 
       {/* ── Contact Ane ── */}
-      <section className="py-16 md:py-20 bg-primary text-primary-foreground">
+      <section className="py-16 md:py-20 bg-nude-light">
         <div className="container mx-auto px-4 max-w-2xl text-center">
           <ScrollReveal>
-            <h2 className="text-2xl md:text-3xl font-editorial font-bold mb-4">
-              {t("review.contact_title")}
+            <h2 className="text-2xl md:text-3xl font-editorial font-bold text-foreground mb-4">
+              {language === "pt" ? "Fale com a Ane" : "Message Ane"}
             </h2>
-            <p className="text-primary-foreground/70 mb-8">
-              {t("review.contact_subtitle")}
+            <p className="text-muted-foreground mb-8">
+              {language === "pt"
+                ? "Envie uma mensagem para a Ane — ela responde rapidinho! 💬"
+                : "Send Ane a message — she replies quickly! 💬"}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" variant="hero">
-                <a href={`tel:${PHONE}`}>
-                  <Phone className="w-4 h-4 mr-2" /> {t("review.call_ane")}
-                </a>
-              </Button>
-              <Button asChild size="lg" variant="hero-outline">
-                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
-                </a>
-              </Button>
-            </div>
+            <Button asChild size="lg" variant="hero" className="w-full sm:w-auto">
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                  language === "pt"
+                    ? "Oi Ane! Acabei de fazer meu review ⭐ Obrigada pelo atendimento incrível! 💇‍♀️✨"
+                    : "Hi Ane! Just left my review ⭐ Thank you for the amazing service! 💇‍♀️✨"
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="w-4 h-4 mr-2" /> {language === "pt" ? "Enviar Mensagem" : "Send Message"}
+              </a>
+            </Button>
           </ScrollReveal>
         </div>
       </section>
