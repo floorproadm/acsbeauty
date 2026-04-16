@@ -98,34 +98,32 @@ export default function ReviewRequest() {
       <Header />
 
       {/* ── Hero ── */}
-      <section className="relative py-20 md:py-28 bg-primary text-primary-foreground overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--gold)/0.12),transparent_60%)]" />
+      <section className="relative py-20 md:py-28 bg-[#2a2a26] text-white overflow-hidden">
         <div className="container mx-auto px-4 relative z-10 text-center max-w-3xl">
           <ScrollReveal>
-            <Badge className="bg-gold/20 text-gold border-gold/30 mb-6 text-sm">
+            <Badge className="bg-white/15 text-white border-white/30 mb-6 text-sm">
               <CheckCircle2 className="w-4 h-4 mr-1" /> {t("review.badge")}
             </Badge>
-            <h1 className="text-3xl md:text-5xl font-editorial font-bold mb-6 leading-tight">
+            <h1 className="text-3xl md:text-5xl font-editorial font-bold mb-6 leading-tight text-white">
               {t("review.hero_title_1")}<br />
-              <span className="text-gold">{t("review.hero_title_2")}</span>
+              {t("review.hero_title_2")}
             </h1>
-            <p className="text-lg md:text-xl text-primary-foreground/80 mb-8 leading-relaxed">
+            <p className="text-lg md:text-xl text-white/80 mb-8 leading-relaxed">
               {t("review.hero_subtitle")}
             </p>
           </ScrollReveal>
 
-          {/* Ane Caroline personal note */}
           <ScrollReveal>
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 md:p-8 text-left max-w-2xl mx-auto">
+            <div className="bg-white/15 backdrop-blur-sm border border-white/30 rounded-2xl p-6 md:p-8 text-left max-w-2xl mx-auto">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-gold flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
                   <Heart className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <p className="text-white text-sm md:text-base leading-relaxed italic">
                     "{t("review.ane_quote")}"
                   </p>
-                  <p className="text-gold font-semibold mt-3 text-sm">— Ane Caroline, {t("review.ane_title")}</p>
+                  <p className="text-white font-semibold mt-3 text-sm">— Ane Caroline, {t("review.ane_title")}</p>
                 </div>
               </div>
             </div>
