@@ -366,15 +366,6 @@ export function TeamMembersSubTab() {
               </div>
             </div>
 
-            <div>
-              <Label>Bio</Label>
-              <Textarea
-                value={form.bio}
-                onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                placeholder="Descrição profissional"
-                rows={3}
-              />
-            </div>
 
 
 
