@@ -490,6 +490,7 @@ export default function Book() {
         package_id: packageId || null,
         offer_id: offerId || null,
         sku_id: pickedSkuId || null,
+        staff_id: pickedStaffId || null,
         start_time: selectedSlot.start,
         end_time: selectedSlot.end
       };
