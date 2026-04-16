@@ -67,7 +67,7 @@ export function Testimonials() {
         >
           <div className="flex items-center justify-center gap-2 mb-4">
             <GoogleLogo />
-            <span className="text-xs font-medium tracking-wider text-white/60 uppercase">
+            <span className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
               {t("home.testimonials.badge")}
             </span>
           </div>
