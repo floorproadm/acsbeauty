@@ -3,13 +3,18 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -18,22 +23,16 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, GripVertical, Scissors } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, Scissors, Link2 } from "lucide-react";
 
 interface TeamMember {
   id: string;
   name: string;
   role: string;
-  bio: string;
-  specialties: string[];
   image_url: string | null;
-  instagram: string | null;
-  phone: string | null;
-  page_url: string | null;
-  badge_label: string | null;
-  badge_value: string | null;
   sort_order: number;
   is_active: boolean;
+  staff_profile_id: string | null;
 }
 
 interface ServiceOption {
@@ -42,19 +41,26 @@ interface ServiceOption {
   category: string | null;
 }
 
-const emptyMember: Omit<TeamMember, "id"> = {
+interface StaffProfile {
+  user_id: string;
+  name: string | null;
+  active: boolean;
+}
+
+interface FormState {
+  name: string;
+  role: string;
+  sort_order: number;
+  is_active: boolean;
+  staff_profile_id: string | null;
+}
+
+const emptyForm: FormState = {
   name: "",
   role: "",
-  bio: "",
-  specialties: [],
-  image_url: null,
-  instagram: null,
-  phone: null,
-  page_url: null,
-  badge_label: null,
-  badge_value: null,
   sort_order: 0,
   is_active: true,
+  staff_profile_id: null,
 };
 
 export function TeamMembersSubTab() {
@@ -62,9 +68,8 @@ export function TeamMembersSubTab() {
   const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<TeamMember | null>(null);
-  const [form, setForm] = useState(emptyMember);
+  const [form, setForm] = useState<FormState>(emptyForm);
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
-  
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const { data: members = [], isLoading } = useQuery({
@@ -72,10 +77,23 @@ export function TeamMembersSubTab() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("team_members")
-        .select("*")
+        .select("id, name, role, image_url, sort_order, is_active, staff_profile_id")
         .order("sort_order");
       if (error) throw error;
       return data as TeamMember[];
+    },
+  });
+
+  const { data: staffProfiles = [] } = useQuery({
+    queryKey: ["staff-profiles-for-link"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("staff_profiles")
+        .select("user_id, name, active")
+        .eq("active", true)
+        .order("name");
+      if (error) throw error;
+      return data as StaffProfile[];
     },
   });
 
@@ -103,7 +121,6 @@ export function TeamMembersSubTab() {
     },
   });
 
-  // Load service assignments when editing
   useEffect(() => {
     if (editing) {
       const memberServiceIds = allStaffServices
@@ -115,46 +132,37 @@ export function TeamMembersSubTab() {
     }
   }, [editing, allStaffServices]);
 
+  // Staff profiles already linked to other members (exclude current editing member)
+  const linkedStaffIds = members
+    .filter((m) => m.staff_profile_id && m.id !== editing?.id)
+    .map((m) => m.staff_profile_id!);
+
+  const availableStaffProfiles = staffProfiles.filter(
+    (sp) => !linkedStaffIds.includes(sp.user_id)
+  );
+
   const saveMutation = useMutation({
-    mutationFn: async (member: typeof form & { id?: string }) => {
+    mutationFn: async (member: FormState & { id?: string }) => {
       let memberId = member.id;
+
+      const payload = {
+        name: member.name,
+        role: member.role,
+        sort_order: member.sort_order,
+        is_active: member.is_active,
+        staff_profile_id: member.staff_profile_id,
+      };
 
       if (memberId) {
         const { error } = await supabase
           .from("team_members")
-          .update({
-            name: member.name,
-            role: member.role,
-            bio: member.bio,
-            specialties: member.specialties,
-            image_url: member.image_url,
-            instagram: member.instagram,
-            phone: member.phone,
-            page_url: member.page_url,
-            badge_label: member.badge_label,
-            badge_value: member.badge_value,
-            sort_order: member.sort_order,
-            is_active: member.is_active,
-          })
+          .update(payload)
           .eq("id", memberId);
         if (error) throw error;
       } else {
         const { data, error } = await supabase
           .from("team_members")
-          .insert({
-            name: member.name,
-            role: member.role,
-            bio: member.bio,
-            specialties: member.specialties,
-            image_url: member.image_url,
-            instagram: member.instagram,
-            phone: member.phone,
-            page_url: member.page_url,
-            badge_label: member.badge_label,
-            badge_value: member.badge_value,
-            sort_order: member.sort_order,
-            is_active: member.is_active,
-          })
+          .insert(payload)
           .select("id")
           .single();
         if (error) throw error;
@@ -179,7 +187,7 @@ export function TeamMembersSubTab() {
       queryClient.invalidateQueries({ queryKey: ["all-staff-services"] });
       setModalOpen(false);
       setEditing(null);
-      setForm(emptyMember);
+      setForm(emptyForm);
       setSelectedServiceIds([]);
       toast({ title: "Membro salvo com sucesso!" });
     },
@@ -203,7 +211,7 @@ export function TeamMembersSubTab() {
 
   const openNew = () => {
     setEditing(null);
-    setForm({ ...emptyMember, sort_order: members.length });
+    setForm({ ...emptyForm, sort_order: members.length });
     setSelectedServiceIds([]);
     setModalOpen(true);
   };
@@ -213,20 +221,12 @@ export function TeamMembersSubTab() {
     setForm({
       name: m.name,
       role: m.role,
-      bio: m.bio || "",
-      specialties: m.specialties || [],
-      image_url: m.image_url,
-      instagram: m.instagram,
-      phone: m.phone,
-      page_url: m.page_url,
-      badge_label: m.badge_label,
-      badge_value: m.badge_value,
       sort_order: m.sort_order,
       is_active: m.is_active,
+      staff_profile_id: m.staff_profile_id,
     });
     setModalOpen(true);
   };
-
 
   const toggleService = (serviceId: string) => {
     setSelectedServiceIds((prev) =>
@@ -244,7 +244,6 @@ export function TeamMembersSubTab() {
     saveMutation.mutate(editing ? { ...form, id: editing.id } : form);
   };
 
-  // Group services by category for display
   const servicesByCategory = services.reduce<Record<string, ServiceOption[]>>((acc, svc) => {
     const cat = svc.category || "Outros";
     if (!acc[cat]) acc[cat] = [];
@@ -256,13 +255,18 @@ export function TeamMembersSubTab() {
     return allStaffServices.filter((ss) => ss.team_member_id === memberId).length;
   };
 
+  const getStaffName = (staffProfileId: string | null) => {
+    if (!staffProfileId) return null;
+    return staffProfiles.find((sp) => sp.user_id === staffProfileId)?.name || null;
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-foreground">Profissionais</h3>
           <p className="text-sm text-muted-foreground">
-            Gerencie membros, serviços habilitados e informações da equipe
+            Gerencie membros, serviços e vínculos com perfis do sistema
           </p>
         </div>
         <Button onClick={openNew} size="sm">
@@ -278,6 +282,7 @@ export function TeamMembersSubTab() {
         <div className="grid gap-3">
           {members.map((m) => {
             const svcCount = getMemberServiceCount(m.id);
+            const linkedName = getStaffName(m.staff_profile_id);
             return (
               <Card key={m.id} className={!m.is_active ? "opacity-50" : ""}>
                 <CardContent className="flex items-center gap-4 py-4">
@@ -304,6 +309,12 @@ export function TeamMembersSubTab() {
                         <Badge variant="outline" className="text-[10px] gap-1">
                           <Scissors className="w-2.5 h-2.5" />
                           {svcCount} serviço{svcCount > 1 ? "s" : ""}
+                        </Badge>
+                      )}
+                      {m.staff_profile_id && (
+                        <Badge variant="outline" className="text-[10px] gap-1 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700">
+                          <Link2 className="w-2.5 h-2.5" />
+                          Vinculado{linkedName ? ` • ${linkedName}` : ""}
                         </Badge>
                       )}
                     </div>
@@ -336,17 +347,6 @@ export function TeamMembersSubTab() {
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Image Preview */}
-            {form.image_url && (
-              <div className="flex justify-center">
-                <img
-                  src={form.image_url}
-                  alt="Preview"
-                  className="w-24 h-24 rounded-full object-cover border-2 border-border"
-                />
-              </div>
-            )}
-
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Nome *</Label>
@@ -366,11 +366,34 @@ export function TeamMembersSubTab() {
               </div>
             </div>
 
-
-
+            {/* Staff Profile Link */}
+            <div>
+              <Label className="flex items-center gap-2 mb-2">
+                <Link2 className="w-4 h-4" />
+                Vincular ao Perfil do Sistema
+              </Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Vincula esta profissional a um login do sistema para conectar agendamentos, escalas e performance
+              </p>
+              <Select
+                value={form.staff_profile_id || "none"}
+                onValueChange={(v) => setForm({ ...form, staff_profile_id: v === "none" ? null : v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sem vínculo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sem vínculo</SelectItem>
+                  {availableStaffProfiles.map((sp) => (
+                    <SelectItem key={sp.user_id} value={sp.user_id}>
+                      {sp.name || sp.user_id.slice(0, 8)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
             {/* Services Matrix */}
-            
             <div>
               <Label className="flex items-center gap-2 mb-3">
                 <Scissors className="w-4 h-4" />
