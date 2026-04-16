@@ -71,6 +71,8 @@ export function TeamMembersSubTab() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const { data: members = [], isLoading } = useQuery({
     queryKey: ["admin-team-members"],
