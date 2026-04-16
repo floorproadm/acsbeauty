@@ -227,17 +227,6 @@ export function TeamMembersSubTab() {
     setModalOpen(true);
   };
 
-  const addSpecialty = () => {
-    const s = newSpecialty.trim();
-    if (s && !form.specialties.includes(s)) {
-      setForm({ ...form, specialties: [...form.specialties, s] });
-      setNewSpecialty("");
-    }
-  };
-
-  const removeSpecialty = (s: string) => {
-    setForm({ ...form, specialties: form.specialties.filter((x) => x !== s) });
-  };
 
   const toggleService = (serviceId: string) => {
     setSelectedServiceIds((prev) =>
@@ -421,7 +410,7 @@ export function TeamMembersSubTab() {
             </div>
 
             {/* Services Matrix */}
-            <Separator />
+            
             <div>
               <Label className="flex items-center gap-2 mb-3">
                 <Scissors className="w-4 h-4" />
