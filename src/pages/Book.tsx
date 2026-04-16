@@ -201,10 +201,10 @@ export default function Book() {
 
     if (isUUID(skuParam)) {
       setPickedSkuId(skuParam);
-      setStep("date");
+      setStep("staff");
     } else if (resolvedSkuBySlug) {
       setPickedSkuId(resolvedSkuBySlug.id);
-      setStep("date");
+      setStep("staff");
     }
   }, [pickedServiceId, skuParam, resolvedSkuBySlug, pickedSkuId]);
 
@@ -357,16 +357,14 @@ export default function Book() {
     enabled: step === "staff",
   });
 
-  // Auto-select staff if only one eligible
+  // Auto-select staff only if zero eligible (no linked staff — skip step)
   useEffect(() => {
     if (step !== "staff" || !eligibleStaff) return;
-    if (eligibleStaff.length === 1) {
-      setPickedStaffId(eligibleStaff[0].staff_profile_id);
-      setStep("date");
-    } else if (eligibleStaff.length === 0) {
+    if (eligibleStaff.length === 0) {
       // No linked staff — skip step
       setStep("date");
     }
+    // If 1 or more: always show the selection UI so the client confirms
   }, [step, eligibleStaff]);
 
 
@@ -758,7 +756,7 @@ export default function Book() {
   const allSteps = (() => {
     const base: string[] = [];
     if (!serviceParam && !offerId && !packageId && !isPortalSource) base.push("service");
-    if (activeServiceId && !isPortalSource) base.push("sku");
+    if (activeServiceId) base.push("sku");
     base.push("staff", "date", "form");
     return base;
   })();
