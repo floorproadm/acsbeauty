@@ -191,7 +191,9 @@ export function StaffPerformanceWidget() {
               </div>
             )}
           </motion.div>
-        ))}
+        ))
+        )}
+      </div>
       </div>
     </motion.div>
   );
