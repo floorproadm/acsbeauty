@@ -201,10 +201,10 @@ export default function Book() {
 
     if (isUUID(skuParam)) {
       setPickedSkuId(skuParam);
-      setStep("date");
+      setStep("staff");
     } else if (resolvedSkuBySlug) {
       setPickedSkuId(resolvedSkuBySlug.id);
-      setStep("date");
+      setStep("staff");
     }
   }, [pickedServiceId, skuParam, resolvedSkuBySlug, pickedSkuId]);
 
