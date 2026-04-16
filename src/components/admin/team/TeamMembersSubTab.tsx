@@ -182,9 +182,9 @@ export function TeamMembersSubTab() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Membros da Equipe</h3>
+          <h3 className="text-lg font-semibold text-foreground">Profissionais</h3>
           <p className="text-sm text-muted-foreground">
-            Gerencie os profissionais que aparecem na página /team
+            Adicione e gerencie os membros da equipe ACS Beauty
           </p>
         </div>
         <Button onClick={openNew} size="sm">
