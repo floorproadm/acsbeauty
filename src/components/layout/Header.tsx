@@ -5,13 +5,24 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { supabase } from "@/integrations/supabase/client";
 import acsLogo from "@/assets/acs-logo.png";
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
   const { t } = useLanguage();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setIsLoggedIn(!!session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setIsLoggedIn(!!session));
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const onboardingDone = typeof window !== "undefined" && localStorage.getItem("acs_onboarding_done") === "1";
+  const ctaHref = isLoggedIn ? "/portal" : onboardingDone ? "/auth" : "/onboarding";
 
   const navItems = [
     { label: t("nav.services"), href: "/services" },
@@ -73,7 +84,7 @@ export function Header() {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4 flex-shrink-0">
             <LanguageToggle />
-            <Link to="/services">
+            <Link to={ctaHref}>
               <Button variant="hero" size="default" className="gap-2">
                 <Calendar className="w-4 h-4" />
                 {t("global.book_now")}
@@ -138,7 +149,7 @@ export function Header() {
                   </Link>
                 ))}
                 <div className="flex flex-col gap-3 pt-4 border-t border-border">
-                  <Link to="/services" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link to={ctaHref} onClick={() => setIsMobileMenuOpen(false)}>
                     <Button variant="hero" className="w-full gap-2">
                       <Calendar className="w-4 h-4" />
                       {t("global.book_now")}
