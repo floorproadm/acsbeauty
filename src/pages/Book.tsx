@@ -756,7 +756,7 @@ export default function Book() {
   const allSteps = (() => {
     const base: string[] = [];
     if (!serviceParam && !offerId && !packageId && !isPortalSource) base.push("service");
-    if (activeServiceId && !isPortalSource) base.push("sku");
+    if (activeServiceId) base.push("sku");
     base.push("staff", "date", "form");
     return base;
   })();
