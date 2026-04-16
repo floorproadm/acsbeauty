@@ -98,7 +98,7 @@ export default function ReviewRequest() {
       <Header />
 
       {/* ── Hero ── */}
-      <section className="relative py-20 md:py-28 bg-[#2a2a26] text-white overflow-hidden">
+      <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 bg-[#2a2a26] text-white overflow-hidden">
         <div className="container mx-auto px-4 relative z-10 text-center max-w-3xl">
           <ScrollReveal>
             
