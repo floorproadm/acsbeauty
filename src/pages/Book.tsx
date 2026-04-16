@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Calendar, Check, Loader2, Clock, AlertCircle, CreditCard, MapPin } from "lucide-react";
+import { ArrowLeft, Calendar, Check, Loader2, Clock, AlertCircle, CreditCard, MapPin, User } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -96,7 +96,7 @@ export default function Book() {
   const isCalendarFlow = flowMode === "calendar" && !offerId && !packageId && !serviceParam;
 
   // Booking flow state
-  const [step, setStep] = useState<"service" | "sku" | "date" | "form">(
+  const [step, setStep] = useState<"service" | "sku" | "staff" | "date" | "form">(
     isCalendarFlow ? "date" : serviceParam ? "sku" : "service"
   );
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -111,6 +111,7 @@ export default function Book() {
   const [pickedSkuId, setPickedSkuId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [slugResolved, setSlugResolved] = useState(false);
+  const [pickedStaffId, setPickedStaffId] = useState<string | null>(null);
 
   // Payment method state (portal flow)
   const [paymentMethod, setPaymentMethod] = useState<"at_location" | "by_app">("at_location");
@@ -323,7 +324,52 @@ export default function Book() {
     enabled: !!pickedSkuId
   });
 
-  // Auto-skip logic for SKU step
+  // Fetch eligible staff for the selected service
+  const { data: eligibleStaff, isLoading: isLoadingStaff } = useQuery({
+    queryKey: ["eligible-staff", activeServiceId],
+    queryFn: async () => {
+      // Get team members that are active and linked to a staff profile
+      const { data: members, error: mErr } = await supabase
+        .from("team_members")
+        .select("id, name, role, image_url, staff_profile_id")
+        .eq("is_active", true)
+        .not("staff_profile_id", "is", null)
+        .order("sort_order");
+      if (mErr) throw mErr;
+      if (!members || members.length === 0) return [];
+
+      if (!activeServiceId) return members; // consultation — all staff available
+
+      // Get staff_services for this service
+      const { data: staffSvcs, error: ssErr } = await supabase
+        .from("staff_services")
+        .select("team_member_id")
+        .eq("service_id", activeServiceId);
+      if (ssErr) throw ssErr;
+
+      const enabledMemberIds = new Set((staffSvcs || []).map((s) => s.team_member_id));
+
+      // If no staff_services configured for this service, show all staff (backward compat)
+      if (enabledMemberIds.size === 0) return members;
+
+      return members.filter((m) => enabledMemberIds.has(m.id));
+    },
+    enabled: step === "staff",
+  });
+
+  // Auto-select staff if only one eligible
+  useEffect(() => {
+    if (step !== "staff" || !eligibleStaff) return;
+    if (eligibleStaff.length === 1) {
+      setPickedStaffId(eligibleStaff[0].staff_profile_id);
+      setStep("date");
+    } else if (eligibleStaff.length === 0) {
+      // No linked staff — skip step
+      setStep("date");
+    }
+  }, [step, eligibleStaff]);
+
+
   useEffect(() => {
     if (step !== "sku" || !activeServiceId) return;
     if (!serviceVariations || !serviceSkus) return;
@@ -331,13 +377,13 @@ export default function Book() {
     // If no variations, and only 1 SKU → auto-select
     if (serviceVariations.length === 0 && serviceSkus.length === 1) {
       setPickedSkuId(serviceSkus[0].id);
-      setStep("date");
+      setStep("staff");
       return;
     }
 
-    // If no variations and no SKUs → go to date (legacy mode)
+    // If no variations and no SKUs → go to staff selection
     if (serviceVariations.length === 0 && serviceSkus.length === 0) {
-      setStep("date");
+      setStep("staff");
       return;
     }
 
@@ -354,7 +400,7 @@ export default function Book() {
     const filteredSkus = serviceSkus.filter((s) => s.variation_id === pickedVariationId);
     if (filteredSkus.length === 1) {
       setPickedSkuId(filteredSkus[0].id);
-      setStep("date");
+      setStep("staff");
     }
   }, [step, pickedVariationId, serviceSkus]);
 
@@ -366,11 +412,11 @@ export default function Book() {
 
   // Fetch available slots for selected date
   const { data: availability, isLoading: isLoadingSlots, refetch: refetchSlots } = useQuery({
-    queryKey: ["availability", selectedDate?.toISOString(), serviceDuration],
+    queryKey: ["availability", selectedDate?.toISOString(), serviceDuration, pickedStaffId],
     queryFn: async (): Promise<AvailabilityResponse> => {
       const dateStr = format(selectedDate!, "yyyy-MM-dd");
       const response = await supabase.functions.invoke("calendar-availability", {
-        body: { date: dateStr, service_duration_minutes: serviceDuration }
+        body: { date: dateStr, service_duration_minutes: serviceDuration, staff_id: pickedStaffId || undefined }
       });
       if (response.error) throw new Error(response.error.message);
       return response.data;
@@ -388,7 +434,8 @@ export default function Book() {
           start_time: slot.start,
           end_time: slot.end,
           service_id: finalServiceId,
-          package_id: packageId || null
+          package_id: packageId || null,
+          staff_id: pickedStaffId || null
         }
       });
       if (response.error) throw new Error(response.error.message);
@@ -443,6 +490,7 @@ export default function Book() {
         package_id: packageId || null,
         offer_id: offerId || null,
         sku_id: pickedSkuId || null,
+        staff_id: pickedStaffId || null,
         start_time: selectedSlot.start,
         end_time: selectedSlot.end
       };
@@ -598,6 +646,7 @@ export default function Book() {
           service_id: finalServiceId,
           package_id: packageId || null,
           sku_id: pickedSkuId || null,
+          staff_id: pickedStaffId || null,
           total_price: totalPrice,
           start_time: selectedSlot.start,
           end_time: selectedSlot.end,
@@ -669,10 +718,11 @@ export default function Book() {
     setPickedServiceId(serviceId);
     setPickedVariationId(null);
     setPickedSkuId(null);
+    setPickedStaffId(null);
 
     if (!serviceId) {
-      // Consultation — no SKU needed
-      setStep("date");
+      // Consultation — skip SKU, go to staff selection
+      setStep("staff");
     } else {
       // Go to SKU step (auto-skip will handle if no SKUs exist)
       setStep("sku");
@@ -709,7 +759,7 @@ export default function Book() {
     const base: string[] = [];
     if (!serviceParam && !offerId && !packageId && !isPortalSource) base.push("service");
     if (activeServiceId && !isPortalSource) base.push("sku");
-    base.push("date", "form");
+    base.push("staff", "date", "form");
     return base;
   })();
 
@@ -720,6 +770,9 @@ export default function Book() {
       setHoldId(null);
       setHoldExpiresAt(null);
     } else if (step === "date") {
+      setPickedStaffId(null);
+      setStep("staff");
+    } else if (step === "staff") {
       if (isPortalSource) {
         navigate("/portal");
       } else if (pickedSkuId || activeServiceId) {
@@ -727,7 +780,7 @@ export default function Book() {
       } else if (isCalendarFlow) {
         setStep("service");
       } else {
-        navigate(-1);
+        setStep("service");
       }
     } else if (step === "sku") {
       if (isPortalSource) {
@@ -982,7 +1035,7 @@ export default function Book() {
                               key={sku.id}
                               onClick={() => {
                                 setPickedSkuId(sku.id);
-                                setStep("date");
+                                setStep("staff");
                               }}
                               className={`w-full p-4 rounded-xl border-2 text-left transition-all hover:border-rose-gold/50 ${
                               pickedSkuId === sku.id ? "border-rose-gold bg-rose-light/30" : "border-muted"}`
@@ -1001,6 +1054,72 @@ export default function Book() {
                   })()}
                     </div>
                 }
+                </motion.div>
+              }
+
+              {/* Step: Staff Selection */}
+              {step === "staff" &&
+              <motion.div
+                key="staff"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="bg-card rounded-2xl p-6 shadow-soft">
+                
+                  <h2 className="font-serif text-xl font-semibold mb-2 text-center">
+                    {language === "pt" ? "Escolha a profissional" : "Choose a professional"}
+                  </h2>
+                  <p className="text-center text-sm text-muted-foreground mb-6">
+                    {language === "pt"
+                      ? "Selecione quem irá atendê-lo(a)"
+                      : "Select who will serve you"}
+                  </p>
+
+                  {isLoadingStaff ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-rose-gold mb-4" />
+                    </div>
+                  ) : !eligibleStaff || eligibleStaff.length === 0 ? (
+                    <div className="text-center py-8">
+                      <User className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        {language === "pt" ? "Carregando profissionais..." : "Loading professionals..."}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {eligibleStaff.map((member) => (
+                        <button
+                          key={member.id}
+                          onClick={() => {
+                            setPickedStaffId(member.staff_profile_id);
+                            setStep("date");
+                          }}
+                          className={`w-full p-4 rounded-xl border-2 text-left transition-all hover:border-rose-gold/50 flex items-center gap-4 ${
+                            pickedStaffId === member.staff_profile_id ? "border-rose-gold bg-rose-light/30" : "border-muted"
+                          }`}
+                        >
+                          {member.image_url ? (
+                            <img
+                              src={member.image_url}
+                              alt={member.name}
+                              className="w-12 h-12 rounded-full object-cover shrink-0"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0">
+                              <User className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-medium text-foreground">{member.name}</p>
+                            {member.role && (
+                              <p className="text-sm text-muted-foreground">{member.role}</p>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
               }
 

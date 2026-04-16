@@ -11,6 +11,7 @@ interface HoldRequest {
   end_time: string;
   service_id?: string;
   package_id?: string;
+  staff_id?: string;
 }
 
 serve(async (req) => {
@@ -19,17 +20,15 @@ serve(async (req) => {
   }
 
   try {
-    // Initialize Supabase with service role
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // ── RATE LIMITING ──
+    // Rate limiting
     const forwarded = req.headers.get('x-forwarded-for');
     const clientIp = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
     const rateLimitKey = `${clientIp}:calendar-hold`;
 
-    // Cleanup old entries periodically (fire-and-forget)
     supabase.rpc('cleanup_old_rate_limits').then(() => {}).catch(() => {});
 
     const { data: allowed, error: rlError } = await supabase.rpc('check_rate_limit', {
@@ -40,7 +39,6 @@ serve(async (req) => {
 
     if (rlError) {
       console.error('Rate limit check error:', rlError);
-      // Don't block on rate limit errors - fail open
     } else if (allowed === false) {
       console.log(`Rate limited: ${rateLimitKey}`);
       return new Response(JSON.stringify({
@@ -53,24 +51,38 @@ serve(async (req) => {
       });
     }
 
-    // ── BUSINESS LOGIC (unchanged) ──
-    const { start_time, end_time, service_id, package_id } = await req.json() as HoldRequest;
+    const { start_time, end_time, service_id, package_id, staff_id } = await req.json() as HoldRequest;
 
     if (!start_time || !end_time) {
       throw new Error('Missing required parameters: start_time and end_time');
     }
 
-    console.log(`Creating hold for ${start_time} to ${end_time}`);
+    console.log(`Creating hold for ${start_time} to ${end_time}, staff: ${staff_id || 'global'}`);
 
-    // Get calendar configuration
-    const { data: calendarConfig } = await supabase
-      .from('calendar_integrations')
-      .select('calendar_id')
-      .eq('provider', 'google')
-      .eq('is_active', true)
-      .single();
+    // Get calendar configuration — staff-specific or global fallback
+    let calendarId = 'primary';
 
-    const calendarId = calendarConfig?.calendar_id || 'primary';
+    if (staff_id) {
+      const { data } = await supabase
+        .from('calendar_integrations')
+        .select('calendar_id')
+        .eq('staff_id', staff_id)
+        .eq('provider', 'google')
+        .eq('is_active', true)
+        .maybeSingle();
+      if (data?.calendar_id) calendarId = data.calendar_id;
+    }
+
+    if (calendarId === 'primary') {
+      const { data } = await supabase
+        .from('calendar_integrations')
+        .select('calendar_id')
+        .is('staff_id', null)
+        .eq('provider', 'google')
+        .eq('is_active', true)
+        .maybeSingle();
+      if (data?.calendar_id) calendarId = data.calendar_id;
+    }
 
     // Get hold duration from settings
     const { data: settings } = await supabase
@@ -80,14 +92,11 @@ serve(async (req) => {
 
     const holdDuration = settings?.hold_duration_minutes || 5;
 
-    // Clean up expired holds first
     await supabase.rpc('cleanup_expired_holds');
 
-    // Create unique hold key
     const holdKey = `${calendarId}:${start_time}:${end_time}`;
     const expiresAt = new Date(Date.now() + holdDuration * 60000).toISOString();
 
-    // Try to create the hold
     const { data: hold, error: holdError } = await supabase
       .from('booking_holds')
       .insert({
@@ -97,6 +106,7 @@ serve(async (req) => {
         expires_at: expiresAt,
         service_id: service_id || null,
         package_id: package_id || null,
+        staff_id: staff_id || null,
         calendar_id: calendarId,
       })
       .select()

@@ -16,6 +16,7 @@ interface ConfirmBookingRequest {
   package_id?: string;
   offer_id?: string;
   sku_id?: string;
+  staff_id?: string;
   start_time: string;
   end_time: string;
   notes?: string;
@@ -27,12 +28,11 @@ serve(async (req) => {
   }
 
   try {
-    // Initialize Supabase
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // ── RATE LIMITING ──
+    // Rate limiting
     const forwarded = req.headers.get('x-forwarded-for');
     const clientIp = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
     const rateLimitKey = `${clientIp}:calendar-confirm`;
@@ -59,18 +59,17 @@ serve(async (req) => {
       });
     }
 
-    // ── BUSINESS LOGIC ──
     const body = await req.json() as ConfirmBookingRequest;
     const { 
       hold_id, client_name, client_phone, client_email, client_instagram,
-      service_id, package_id, offer_id, sku_id, start_time, end_time, notes 
+      service_id, package_id, offer_id, sku_id, staff_id, start_time, end_time, notes 
     } = body;
 
     if (!hold_id || !client_name || !client_phone || !start_time || !end_time) {
       throw new Error('Missing required parameters');
     }
 
-    console.log(`Confirming booking for hold ${hold_id}`);
+    console.log(`Confirming booking for hold ${hold_id}, staff: ${staff_id || 'global'}`);
 
     // Get Google credentials
     const serviceAccountJson = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_JSON');
@@ -112,13 +111,30 @@ serve(async (req) => {
       });
     }
 
-    // Get calendar configuration
-    const { data: calendarConfig } = await supabase
-      .from('calendar_integrations')
-      .select('calendar_id, timezone')
-      .eq('provider', 'google')
-      .eq('is_active', true)
-      .single();
+    // Get calendar configuration — staff-specific or global fallback
+    let calendarConfig: { calendar_id: string; timezone: string } | null = null;
+
+    if (staff_id) {
+      const { data } = await supabase
+        .from('calendar_integrations')
+        .select('calendar_id, timezone')
+        .eq('staff_id', staff_id)
+        .eq('provider', 'google')
+        .eq('is_active', true)
+        .maybeSingle();
+      calendarConfig = data;
+    }
+
+    if (!calendarConfig) {
+      const { data } = await supabase
+        .from('calendar_integrations')
+        .select('calendar_id, timezone')
+        .is('staff_id', null)
+        .eq('provider', 'google')
+        .eq('is_active', true)
+        .maybeSingle();
+      calendarConfig = data;
+    }
 
     const calendarId = calendarConfig?.calendar_id || 'primary';
     const timezone = calendarConfig?.timezone || 'America/New_York';
@@ -160,7 +176,7 @@ serve(async (req) => {
       });
     }
 
-    // Get service name for calendar event
+    // Get service/staff name for calendar event
     let eventTitle = 'Booking';
     if (service_id) {
       const { data: service } = await supabase.from('services').select('name').eq('id', service_id).single();
@@ -170,10 +186,21 @@ serve(async (req) => {
       if (pkg) eventTitle = pkg.name;
     }
 
+    // Get staff name for event description
+    let staffName = '';
+    if (staff_id) {
+      const { data: tm } = await supabase
+        .from('team_members')
+        .select('name')
+        .eq('staff_profile_id', staff_id)
+        .maybeSingle();
+      staffName = tm?.name || '';
+    }
+
     // Create Google Calendar event
     const calendarEvent = {
       summary: `${eventTitle} - ${client_name}`,
-      description: `Cliente: ${client_name}\nTelefone: ${client_phone}${client_instagram ? `\nInstagram: ${client_instagram}` : ''}${notes ? `\nNotas: ${notes}` : ''}`,
+      description: `Cliente: ${client_name}\nTelefone: ${client_phone}${staffName ? `\nProfissional: ${staffName}` : ''}${client_instagram ? `\nInstagram: ${client_instagram}` : ''}${notes ? `\nNotas: ${notes}` : ''}`,
       start: { dateTime: start_time, timeZone: timezone },
       end: { dateTime: end_time, timeZone: timezone },
       reminders: {
@@ -229,7 +256,7 @@ serve(async (req) => {
       clientId = newClient.id;
     }
 
-    // Fetch SKU price from DB (price lock — never trust frontend)
+    // Fetch SKU price from DB (price lock)
     let skuTotalPrice: number | null = null;
     if (sku_id) {
       const { data: skuData, error: skuError } = await supabase
@@ -256,6 +283,7 @@ serve(async (req) => {
         service_id: service_id || null,
         package_id: package_id || null,
         sku_id: sku_id || null,
+        staff_id: staff_id || null,
         total_price: skuTotalPrice,
         start_time,
         end_time,
