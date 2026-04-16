@@ -376,24 +376,6 @@ export function TeamMembersSubTab() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>URL da Imagem</Label>
-                <Input
-                  value={form.image_url || ""}
-                  onChange={(e) => setForm({ ...form, image_url: e.target.value || null })}
-                  placeholder="https://..."
-                />
-              </div>
-              <div>
-                <Label>Instagram</Label>
-                <Input
-                  value={form.instagram || ""}
-                  onChange={(e) => setForm({ ...form, instagram: e.target.value || null })}
-                  placeholder="@handle"
-                />
-              </div>
-            </div>
 
             <div>
               <Label>Telefone</Label>
