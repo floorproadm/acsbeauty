@@ -23,7 +23,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, GripVertical, Scissors, Link2 } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, Scissors, Link2, Camera, Loader2 } from "lucide-react";
 
 interface TeamMember {
   id: string;
@@ -71,6 +71,8 @@ export function TeamMembersSubTab() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const { data: members = [], isLoading } = useQuery({
     queryKey: ["admin-team-members"],
@@ -151,6 +153,7 @@ export function TeamMembersSubTab() {
         sort_order: member.sort_order,
         is_active: member.is_active,
         staff_profile_id: member.staff_profile_id,
+        image_url: imageUrl,
       };
 
       if (memberId) {
@@ -189,6 +192,7 @@ export function TeamMembersSubTab() {
       setEditing(null);
       setForm(emptyForm);
       setSelectedServiceIds([]);
+      setImageUrl(null);
       toast({ title: "Membro salvo com sucesso!" });
     },
     onError: (err: any) => {
@@ -213,6 +217,7 @@ export function TeamMembersSubTab() {
     setEditing(null);
     setForm({ ...emptyForm, sort_order: members.length });
     setSelectedServiceIds([]);
+    setImageUrl(null);
     setModalOpen(true);
   };
 
@@ -225,7 +230,45 @@ export function TeamMembersSubTab() {
       is_active: m.is_active,
       staff_profile_id: m.staff_profile_id,
     });
+    setImageUrl(m.image_url);
     setModalOpen(true);
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Apenas imagens são permitidas", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Imagem deve ter no máximo 5MB", variant: "destructive" });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const fileName = `${crypto.randomUUID()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("team-photos")
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("team-photos")
+        .getPublicUrl(fileName);
+
+      setImageUrl(urlData.publicUrl);
+      toast({ title: "Foto enviada!" });
+    } catch (err: any) {
+      toast({ title: "Erro no upload", description: err.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const toggleService = (serviceId: string) => {
@@ -347,6 +390,38 @@ export function TeamMembersSubTab() {
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* Photo Upload */}
+            <div className="flex flex-col items-center gap-3">
+              <div className="relative group">
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt="Foto"
+                    className="w-24 h-24 rounded-full object-cover border-2 border-border"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border">
+                    <Camera className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                )}
+                <label className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                  {uploading ? (
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  ) : (
+                    <Camera className="w-5 h-5 text-white" />
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePhotoUpload}
+                    disabled={uploading}
+                  />
+                </label>
+              </div>
+              <p className="text-[11px] text-muted-foreground">Clique para {imageUrl ? "alterar" : "adicionar"} foto</p>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Nome *</Label>
