@@ -377,14 +377,6 @@ export function TeamMembersSubTab() {
             </div>
 
 
-            <div>
-              <Label>Telefone</Label>
-              <Input
-                value={form.phone || ""}
-                onChange={(e) => setForm({ ...form, phone: e.target.value || null })}
-                placeholder="(xxx) xxx-xxxx"
-              />
-            </div>
 
             {/* Services Matrix */}
             
