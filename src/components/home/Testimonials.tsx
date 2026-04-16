@@ -55,7 +55,7 @@ export function Testimonials() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <section className="py-16 md:py-24 bg-[#111110]">
+    <section className="py-16 md:py-24 bg-secondary">
       <div className="container mx-auto px-5 md:px-6">
         {/* Header */}
         <motion.div
@@ -67,14 +67,14 @@ export function Testimonials() {
         >
           <div className="flex items-center justify-center gap-2 mb-4">
             <GoogleLogo />
-            <span className="text-xs font-medium tracking-wider text-white/60 uppercase">
+            <span className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
               {t("home.testimonials.badge")}
             </span>
           </div>
-          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
             {t("home.testimonials.title")}
           </h2>
-          <p className="text-white/50 text-base md:text-lg">
+          <p className="text-muted-foreground text-base md:text-lg">
             {t("home.testimonials.description")}
           </p>
         </motion.div>
@@ -91,21 +91,21 @@ export function Testimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="min-w-[85vw] md:min-w-0 snap-center bg-[#1a1a1a] rounded-2xl p-6 border border-white/5 flex flex-col"
+              className="min-w-[85vw] md:min-w-0 snap-center bg-card rounded-2xl p-6 border border-border shadow-card flex flex-col"
             >
               {/* Top row: avatar + name | Google logo */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-10 h-10 rounded-full ${testimonial.color} flex items-center justify-center text-white font-bold text-sm`}
+                    className={`w-10 h-10 rounded-full ${testimonial.color} flex items-center justify-center text-primary-foreground font-bold text-sm`}
                   >
                     {testimonial.initial}
                   </div>
                   <div>
-                    <h4 className="text-white text-sm font-semibold leading-tight">
+                    <h4 className="text-foreground text-sm font-semibold leading-tight">
                       {testimonial.name}
                     </h4>
-                    <p className="text-white/40 text-xs">
+                    <p className="text-muted-foreground text-xs">
                       {testimonial.timeAgo[language]}
                     </p>
                   </div>
@@ -129,7 +129,7 @@ export function Testimonials() {
               </div>
 
               {/* Review text */}
-              <p className="text-white/60 text-sm leading-relaxed mb-4 flex-1">
+              <p className="text-muted-foreground text-sm leading-relaxed mb-4 flex-1">
                 "{testimonial.content[language]}"
               </p>
 
@@ -159,7 +159,7 @@ export function Testimonials() {
             href={GOOGLE_REVIEW_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-white/10 text-white/70 text-sm hover:bg-white/5 hover:text-white transition-all duration-300"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-border text-muted-foreground text-sm hover:bg-muted hover:text-foreground transition-all duration-300"
           >
             <GoogleLogo />
             {t("home.testimonials.leave_review")}
