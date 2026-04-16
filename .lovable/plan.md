@@ -1,45 +1,40 @@
 
 
-# Plano: Transformar a aba "Equipe" em um hub completo de gestão de staff
+# Diagnóstico: O código ESTÁ implementado — o problema é dados
 
-## Problema
-A aba atual é apenas um CRUD básico de membros da página `/team` + um widget de performance que depende de bookings com `staff_id` (que geralmente são nulos). É superficial e não agrega valor operacional real.
+## O que existe agora (já funcional)
+As 3 sub-abas estão implementadas e renderizando corretamente:
 
-## Visão
-Transformar em uma **central de gestão de equipe** com 3 sub-abas internas:
+1. **Membros** — CRUD funcionando (Ane Caroline aparece, modal de edição abre)
+2. **Performance** — Mostra estado vazio porque há **0 bookings confirmados/concluídos** no banco
+3. **Escalas** — Mostra "Padrão geral" para todos porque nenhum `business_hours` tem `staff_id` vinculado
 
-### 1. Membros (tab existente, refinada)
-- Manter o CRUD de `team_members` como está
-- Adicionar preview da foto inline no modal de edição
+## Problema real
+- **0 bookings** com status `confirmed` ou `completed` → Performance vazia
+- **7 business_hours** todas com `staff_id = null` → Escalas sem dados individuais
+- **3 staff_profiles** ativos mas sem bookings vinculados
 
-### 2. Performance (tab dedicada)
-- Mover o `StaffPerformanceWidget` para uma sub-aba própria
-- Adicionar **filtro de período** (último mês, 3 meses, 6 meses, custom)
-- Adicionar **ranking visual** — medalha 🥇🥈🥉 para os top 3
-- Mostrar **gráfico de barras simples** (receita por profissional) usando Recharts (já disponível via shadcn chart)
-- Incluir contagem de **clientes únicos atendidos** por profissional
+## Plano de ação imediata
 
-### 3. Escalas / Disponibilidade
-- Visualizar as `business_hours` por profissional (já existe `staff_id` na tabela)
-- Permitir configurar horários individuais por membro da equipe
-- Mostrar quem está disponível hoje em um resumo rápido
+### 1. Tornar Performance útil mesmo sem bookings históricos
+- Adicionar contadores de **bookings futuros agendados** por profissional (status `requested`)
+- Mostrar resumo geral mesmo quando `staff_id` é null nos bookings
+- Adicionar botão para **atribuir profissional a bookings existentes** diretamente da aba
 
-## Estrutura técnica
+### 2. Vincular Escalas aos team_members (não só staff_profiles)
+- Atualmente Escalas depende de `staff_profiles` (login de staff), mas o CRUD de membros usa `team_members`
+- Unificar: mostrar `team_members` na aba de Escalas quando não há `staff_profiles` correspondente
+- Permitir criar horários para qualquer membro da equipe, não só quem tem login
 
-```text
-TeamTab.tsx
-├── Tabs (Membros | Performance | Escalas)
-│   ├── TeamMembersSubTab.tsx   ← CRUD existente extraído
-│   ├── TeamPerformanceSubTab.tsx ← Widget expandido + charts
-│   └── TeamScheduleSubTab.tsx   ← business_hours por staff
-```
+### 3. Atribuição de staff_id nos bookings
+- No `BookingDetailModal` ou na lista de bookings, adicionar dropdown para atribuir profissional
+- Isso alimenta automaticamente os relatórios de Performance
 
-## Arquivos modificados
-1. **`src/components/admin/TeamTab.tsx`** — Refatorar para usar sub-abas internas com `Tabs` do shadcn
-2. **`src/components/admin/team/TeamMembersSubTab.tsx`** — Extrair CRUD atual
-3. **`src/components/admin/team/TeamPerformanceSubTab.tsx`** — Widget expandido com filtros e chart
-4. **`src/components/admin/team/TeamScheduleSubTab.tsx`** — Grid de horários por profissional
+## Arquivos a modificar
+1. **`TeamPerformanceSubTab.tsx`** — Incluir bookings com qualquer status (não só confirmed), mostrar dados mesmo sem staff_id
+2. **`TeamScheduleSubTab.tsx`** — Usar `team_members` como fonte principal em vez de `staff_profiles`
+3. **`BookingDetailModal.tsx`** — Adicionar seletor de profissional (staff assignment)
 
 ## Sem mudanças no banco
-Todas as tabelas necessárias já existem (`team_members`, `staff_profiles`, `bookings`, `business_hours`).
+Todas as colunas necessárias já existem (`bookings.staff_id`, `business_hours.staff_id`).
 
