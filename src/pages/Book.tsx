@@ -412,11 +412,11 @@ export default function Book() {
 
   // Fetch available slots for selected date
   const { data: availability, isLoading: isLoadingSlots, refetch: refetchSlots } = useQuery({
-    queryKey: ["availability", selectedDate?.toISOString(), serviceDuration],
+    queryKey: ["availability", selectedDate?.toISOString(), serviceDuration, pickedStaffId],
     queryFn: async (): Promise<AvailabilityResponse> => {
       const dateStr = format(selectedDate!, "yyyy-MM-dd");
       const response = await supabase.functions.invoke("calendar-availability", {
-        body: { date: dateStr, service_duration_minutes: serviceDuration }
+        body: { date: dateStr, service_duration_minutes: serviceDuration, staff_id: pickedStaffId || undefined }
       });
       if (response.error) throw new Error(response.error.message);
       return response.data;
