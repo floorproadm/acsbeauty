@@ -357,16 +357,14 @@ export default function Book() {
     enabled: step === "staff",
   });
 
-  // Auto-select staff if only one eligible
+  // Auto-select staff only if zero eligible (no linked staff — skip step)
   useEffect(() => {
     if (step !== "staff" || !eligibleStaff) return;
-    if (eligibleStaff.length === 1) {
-      setPickedStaffId(eligibleStaff[0].staff_profile_id);
-      setStep("date");
-    } else if (eligibleStaff.length === 0) {
+    if (eligibleStaff.length === 0) {
       // No linked staff — skip step
       setStep("date");
     }
+    // If 1 or more: always show the selection UI so the client confirms
   }, [step, eligibleStaff]);
 
 
