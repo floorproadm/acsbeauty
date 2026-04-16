@@ -646,6 +646,7 @@ export default function Book() {
           service_id: finalServiceId,
           package_id: packageId || null,
           sku_id: pickedSkuId || null,
+          staff_id: pickedStaffId || null,
           total_price: totalPrice,
           start_time: selectedSlot.start,
           end_time: selectedSlot.end,
