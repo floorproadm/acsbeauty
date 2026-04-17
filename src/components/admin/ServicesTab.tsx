@@ -51,6 +51,7 @@ import {
 } from "lucide-react";
 import { VariationsModal } from "./VariationsModal";
 import { SkusModal } from "./SkusModal";
+import { ServiceImageUpload } from "./ServiceImageUpload";
 
 type ServiceStatus = "entry" | "upsell" | "premium" | "inactive";
 
