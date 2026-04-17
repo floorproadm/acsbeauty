@@ -266,11 +266,21 @@ export function ServicesPreview() {
               className="max-w-4xl max-h-[85vh] mx-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <img
-                src={lightbox.images[lightbox.index].image_url}
-                alt={lightbox.images[lightbox.index].title || ""}
-                className="max-w-full max-h-[80vh] object-contain rounded-lg"
-              />
+              {lightbox.images[lightbox.index].media_type === "video" ? (
+                <video
+                  src={lightbox.images[lightbox.index].image_url}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="max-w-full max-h-[80vh] rounded-lg bg-black"
+                />
+              ) : (
+                <img
+                  src={lightbox.images[lightbox.index].image_url}
+                  alt={lightbox.images[lightbox.index].title || ""}
+                  className="max-w-full max-h-[80vh] object-contain rounded-lg"
+                />
+              )}
               {lightbox.images[lightbox.index].title && (
                 <p className="text-white/80 text-center mt-3 text-sm">
                   {lightbox.images[lightbox.index].title}
