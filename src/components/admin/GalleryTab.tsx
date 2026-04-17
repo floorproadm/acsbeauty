@@ -21,6 +21,7 @@ import {
   Square,
   FolderInput,
   Maximize2,
+  Play,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
