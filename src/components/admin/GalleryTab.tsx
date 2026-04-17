@@ -629,7 +629,7 @@ export function GalleryTab() {
           <input
             ref={inputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,video/mp4,video/quicktime,video/webm,video/*"
             multiple
             onChange={handleMultiUpload}
             className="hidden"
