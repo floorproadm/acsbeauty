@@ -353,7 +353,9 @@ export function ServicesTab() {
         <div className="space-y-3">
           {CATEGORIES.map((category) => {
             const categoryServices = groupedServices?.[category] || [];
-            const isOpen = openCategories[category] ?? true;
+            // Hide empty categories while searching to focus on matches
+            if (normalizedQuery && categoryServices.length === 0) return null;
+            const isOpen = normalizedQuery ? true : (openCategories[category] ?? true);
 
             return (
               <Collapsible
