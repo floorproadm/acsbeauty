@@ -67,6 +67,7 @@ interface Service {
   base_price: number | null;
   status: ServiceStatus | null;
   is_active: boolean | null;
+  hero_image_url: string | null;
   variations_count: number;
   skus_count: number;
 }
@@ -88,6 +89,7 @@ const defaultFormData = {
   price: 0,
   promo_price: "",
   status: "entry" as ServiceStatus,
+  hero_image_url: null as string | null,
 };
 
 export function ServicesTab() {
