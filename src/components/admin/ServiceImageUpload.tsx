@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import { Upload, X, Loader2, ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface ServiceImageUploadProps {
@@ -17,13 +16,11 @@ export function ServiceImageUpload({
 }: ServiceImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useRef(`service-img-${Math.random().toString(36).substring(7)}`);
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  async function uploadFile(file: File) {
     if (!file.type.startsWith("image/")) {
       setError("Selecione um arquivo de imagem.");
       return;
@@ -57,6 +54,32 @@ export function ServiceImageUpload({
     }
   }
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) uploadFile(file);
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isUploading) setIsDragging(true);
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (isUploading) return;
+    const file = e.dataTransfer.files?.[0];
+    if (file) uploadFile(file);
+  }
+
   return (
     <div className={cn("space-y-2", className)}>
       <input
@@ -68,12 +91,27 @@ export function ServiceImageUpload({
         id={inputId.current}
       />
       {value ? (
-        <div className="relative group">
+        <div
+          className={cn(
+            "relative group rounded-lg border border-border transition-all",
+            isDragging && "ring-2 ring-primary ring-offset-2"
+          )}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           <img
             src={value}
             alt="Service"
-            className="w-full h-32 object-cover rounded-lg border border-border"
+            className="w-full h-32 object-cover rounded-lg pointer-events-none"
           />
+          {isDragging && (
+            <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm rounded-lg flex items-center justify-center pointer-events-none">
+              <span className="text-sm font-medium text-primary-foreground bg-primary px-3 py-1 rounded-full">
+                Solte para substituir
+              </span>
+            </div>
+          )}
           <div className="absolute top-2 right-2 flex gap-1">
             <label
               htmlFor={inputId.current}
@@ -95,9 +133,15 @@ export function ServiceImageUpload({
       ) : (
         <label
           htmlFor={inputId.current}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
           className={cn(
-            "flex flex-col items-center justify-center gap-2 h-24 border-2 border-dashed rounded-lg cursor-pointer transition-colors",
-            "hover:border-primary hover:bg-primary/5 border-border",
+            "flex flex-col items-center justify-center gap-2 h-28 border-2 border-dashed rounded-lg cursor-pointer transition-all",
+            "hover:border-primary hover:bg-primary/5",
+            isDragging
+              ? "border-primary bg-primary/10 scale-[1.01]"
+              : "border-border",
             error && "border-destructive"
           )}
         >
@@ -106,10 +150,18 @@ export function ServiceImageUpload({
               <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
               <span className="text-xs text-muted-foreground">Enviando...</span>
             </>
+          ) : isDragging ? (
+            <>
+              <Upload className="h-6 w-6 text-primary" />
+              <span className="text-xs font-medium text-primary">Solte a imagem aqui</span>
+            </>
           ) : (
             <>
               <ImageIcon className="h-6 w-6 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Adicionar foto do serviço</span>
+              <span className="text-xs text-muted-foreground">
+                Arraste uma foto ou clique para selecionar
+              </span>
+              <span className="text-[10px] text-muted-foreground/70">PNG, JPG até 5MB</span>
             </>
           )}
         </label>
