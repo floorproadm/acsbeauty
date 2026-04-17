@@ -390,8 +390,7 @@ function SkuCard({ sku, index, serviceSlug }: { sku: any; index: number; service
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
     >
       <Card className="hover:shadow-card transition-shadow">
