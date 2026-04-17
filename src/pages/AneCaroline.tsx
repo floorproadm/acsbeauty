@@ -253,6 +253,18 @@ export default function AneCaroline() {
         </div>
       </section>
 
+      {/* ============ TEAM LINK ============ */}
+      <section className="px-8 pb-2 max-w-lg mx-auto text-center" style={{ backgroundColor: c.bg }}>
+        <Link
+          to="/team"
+          className="inline-flex items-center gap-1.5 text-[12px] tracking-wide transition-opacity hover:opacity-70"
+          style={{ color: c.accent }}
+        >
+          {language === "pt" ? "Conheça o restante da equipe" : "Meet the rest of the team"}
+          <ChevronRight className="w-3 h-3" />
+        </Link>
+      </section>
+
       {/* ============ FOOTER ============ */}
       <section className="pb-8 pt-4 max-w-lg mx-auto text-center" style={{ backgroundColor: c.bg }}>
         <p className="text-[11px]" style={{ color: c.mutedLight }}>
