@@ -409,13 +409,21 @@ export function GalleryTab() {
   // ----- Upload (shared by file input + drag-drop) -----
   const processFiles = useCallback(
     async (files: File[]) => {
-      const validFiles = files.filter(
-        (f) => f.type.startsWith("image/") && f.size <= 5 * 1024 * 1024,
-      );
+      const MAX_IMAGE = 5 * 1024 * 1024; // 5MB
+      const MAX_VIDEO = 50 * 1024 * 1024; // 50MB
+      const isVideoFile = (f: File) =>
+        f.type.startsWith("video/") || /\.(mp4|mov|webm|m4v)$/i.test(f.name);
+      const isImageFile = (f: File) => f.type.startsWith("image/");
+
+      const validFiles = files.filter((f) => {
+        if (isImageFile(f)) return f.size <= MAX_IMAGE;
+        if (isVideoFile(f)) return f.size <= MAX_VIDEO;
+        return false;
+      });
       if (validFiles.length !== files.length) {
         toast({
           title: `${files.length - validFiles.length} arquivo(s) ignorado(s)`,
-          description: "Máximo 5MB, formato de imagem.",
+          description: "Imagens até 5MB · vídeos até 50MB (MP4, MOV, WebM).",
           variant: "destructive",
         });
       }
@@ -427,13 +435,19 @@ export function GalleryTab() {
 
       for (const file of validFiles) {
         try {
+          const isVideo = !isImageFile(file) && isVideoFile(file);
           const ext = file.name.split(".").pop();
-          const fileName = `${uploadCategory}/${Date.now()}-${Math.random()
+          const subfolder = isVideo ? "videos/" : "";
+          const fileName = `${uploadCategory}/${subfolder}${Date.now()}-${Math.random()
             .toString(36)
             .substring(7)}.${ext}`;
           const { error: uploadError } = await supabase.storage
             .from("gallery")
-            .upload(fileName, file, { cacheControl: "3600", upsert: false });
+            .upload(fileName, file, {
+              cacheControl: "3600",
+              upsert: false,
+              contentType: file.type || (isVideo ? "video/mp4" : undefined),
+            });
           if (uploadError) throw uploadError;
           const { data: urlData } = supabase.storage.from("gallery").getPublicUrl(fileName);
           const currentImages = images.filter((i) => i.category === uploadCategory);
@@ -443,7 +457,8 @@ export function GalleryTab() {
             title: null,
             image_url: urlData.publicUrl,
             display_order: maxOrder,
-          });
+            media_type: isVideo ? "video" : "image",
+          } as any);
           if (insertError) throw insertError;
           uploaded++;
           setUploadProgress(Math.round((uploaded / validFiles.length) * 100));
@@ -455,7 +470,7 @@ export function GalleryTab() {
       queryClient.invalidateQueries({ queryKey: ["gallery-images-admin"] });
       queryClient.invalidateQueries({ queryKey: ["gallery-images-public"] });
       toast({
-        title: `${uploaded} foto${uploaded > 1 ? "s" : ""} adicionada${uploaded > 1 ? "s" : ""} ✓`,
+        title: `${uploaded} arquivo${uploaded > 1 ? "s" : ""} adicionado${uploaded > 1 ? "s" : ""} ✓`,
       });
       setUploading(false);
       setUploadProgress(0);
