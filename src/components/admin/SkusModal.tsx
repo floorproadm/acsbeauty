@@ -49,6 +49,7 @@ import { ServiceImageUpload } from "./ServiceImageUpload";
 interface Sku {
   id: string;
   name: string;
+  description: string | null;
   duration_minutes: number;
   price: number | null;
   promo_price: number | null;
@@ -65,6 +66,7 @@ interface Variation {
 
 interface SkuFormData {
   name: string;
+  description: string;
   duration_minutes: number;
   price: string;
   promo_price: string;
@@ -75,6 +77,7 @@ interface SkuFormData {
 
 const emptyForm: SkuFormData = {
   name: "",
+  description: "",
   duration_minutes: 30,
   price: "",
   promo_price: "",
