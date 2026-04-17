@@ -257,6 +257,7 @@ export function ServicesTab() {
   };
 
   return (
+    <TooltipProvider delayDuration={200}>
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -266,10 +267,23 @@ export function ServicesTab() {
             {services?.filter((s) => s.is_active).length || 0} ativos
           </p>
         </div>
-        <Button size="sm" onClick={() => openCreateModal()}>
-          <Plus className="w-4 h-4 mr-1" />
-          Novo
-        </Button>
+        <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <a href="/services" target="_blank" rel="noopener noreferrer">
+                <Button size="sm" variant="outline">
+                  <Eye className="w-4 h-4 mr-1" />
+                  Ver pública
+                </Button>
+              </a>
+            </TooltipTrigger>
+            <TooltipContent>Ver como cliente</TooltipContent>
+          </Tooltip>
+          <Button size="sm" onClick={() => openCreateModal()}>
+            <Plus className="w-4 h-4 mr-1" />
+            Novo
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
