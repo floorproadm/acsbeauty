@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Scissors, Eye, Sparkles, X, ChevronLeft, ChevronRight, Calendar, ArrowRight, Image as ImageIcon } from "lucide-react";
+import { Scissors, Eye, Sparkles, X, ChevronLeft, ChevronRight, Calendar, ArrowRight, Image as ImageIcon, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
@@ -19,6 +19,7 @@ interface GalleryImage {
   title: string | null;
   image_url: string;
   display_order: number;
+  media_type?: string | null;
 }
 
 interface GalleryCategoryRow {
@@ -134,7 +135,9 @@ export function ServicesPreview() {
           {/* Services Grid */}
           <div className={cn("grid gap-6 md:gap-8", gridCols)}>
             {imagesByCategory.map((cat, index) => {
-              const coverImage = cat.images.length > 0 ? cat.images[0].image_url : cat.fallback;
+              const coverItem = cat.images.length > 0 ? cat.images[0] : null;
+              const coverIsVideo = coverItem?.media_type === "video";
+              const coverImage = coverItem ? coverItem.image_url : cat.fallback;
               const photoCount = cat.images.length;
               if (!coverImage && photoCount === 0) return null;
 
@@ -148,14 +151,31 @@ export function ServicesPreview() {
                   className="group relative bg-card rounded-2xl overflow-hidden shadow-soft cursor-pointer"
                   onClick={() => openLightbox(cat.slug)}
                 >
-                  <div className="aspect-[4/3] overflow-hidden">
+                  <div className="aspect-[4/3] overflow-hidden relative">
                     {coverImage ? (
-                      <img
-                        src={coverImage}
-                        alt={cat.label}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                      />
+                      coverIsVideo ? (
+                        <>
+                          <video
+                            src={coverImage}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            preload="metadata"
+                            muted
+                            playsInline
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="h-12 w-12 rounded-full bg-background/85 flex items-center justify-center shadow-lg">
+                              <Play className="h-5 w-5 text-foreground fill-foreground translate-x-[1px]" />
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <img
+                          src={coverImage}
+                          alt={cat.label}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      )
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-rose-gold/20 to-foreground/40 flex items-center justify-center text-5xl">
                         {cat.emoji}
@@ -175,7 +195,7 @@ export function ServicesPreview() {
                     )}
                     {photoCount > 1 && (
                       <div className="mt-3 flex items-center gap-1 text-rose-gold text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                        Ver {photoCount} fotos
+                        Ver {photoCount} {photoCount === 1 ? "item" : "itens"}
                       </div>
                     )}
                   </div>
@@ -246,11 +266,21 @@ export function ServicesPreview() {
               className="max-w-4xl max-h-[85vh] mx-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <img
-                src={lightbox.images[lightbox.index].image_url}
-                alt={lightbox.images[lightbox.index].title || ""}
-                className="max-w-full max-h-[80vh] object-contain rounded-lg"
-              />
+              {lightbox.images[lightbox.index].media_type === "video" ? (
+                <video
+                  src={lightbox.images[lightbox.index].image_url}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="max-w-full max-h-[80vh] rounded-lg bg-black"
+                />
+              ) : (
+                <img
+                  src={lightbox.images[lightbox.index].image_url}
+                  alt={lightbox.images[lightbox.index].title || ""}
+                  className="max-w-full max-h-[80vh] object-contain rounded-lg"
+                />
+              )}
               {lightbox.images[lightbox.index].title && (
                 <p className="text-white/80 text-center mt-3 text-sm">
                   {lightbox.images[lightbox.index].title}

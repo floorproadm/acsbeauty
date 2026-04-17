@@ -21,6 +21,7 @@ import {
   Square,
   FolderInput,
   Maximize2,
+  Play,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -77,6 +78,7 @@ interface GalleryImage {
   display_order: number;
   is_active: boolean;
   created_at: string;
+  media_type?: string | null;
 }
 
 type StatusFilter = "all" | "visible" | "hidden";
@@ -142,14 +144,31 @@ function SortableCard({
         if (!selectionMode) onDoubleClick();
       }}
     >
-      <div className="aspect-square">
-        <img
-          src={image.image_url}
-          alt={image.title || ""}
-          className="w-full h-full object-cover pointer-events-none"
-          loading="lazy"
-          draggable={false}
-        />
+      <div className="aspect-square relative bg-muted">
+        {image.media_type === "video" ? (
+          <>
+            <video
+              src={image.image_url}
+              className="w-full h-full object-cover pointer-events-none"
+              preload="metadata"
+              muted
+              playsInline
+            />
+            <div className="absolute inset-0 flex items-center justify-center bg-foreground/20 pointer-events-none">
+              <div className="h-9 w-9 rounded-full bg-background/90 flex items-center justify-center shadow-md">
+                <Play className="h-4 w-4 text-foreground fill-foreground translate-x-[1px]" />
+              </div>
+            </div>
+          </>
+        ) : (
+          <img
+            src={image.image_url}
+            alt={image.title || ""}
+            className="w-full h-full object-cover pointer-events-none"
+            loading="lazy"
+            draggable={false}
+          />
+        )}
       </div>
       <div className="absolute top-1 left-1">
         <span className="text-[10px] font-medium bg-foreground/60 text-white px-1.5 py-0.5 rounded-full backdrop-blur-sm">
@@ -390,13 +409,21 @@ export function GalleryTab() {
   // ----- Upload (shared by file input + drag-drop) -----
   const processFiles = useCallback(
     async (files: File[]) => {
-      const validFiles = files.filter(
-        (f) => f.type.startsWith("image/") && f.size <= 5 * 1024 * 1024,
-      );
+      const MAX_IMAGE = 5 * 1024 * 1024; // 5MB
+      const MAX_VIDEO = 50 * 1024 * 1024; // 50MB
+      const isVideoFile = (f: File) =>
+        f.type.startsWith("video/") || /\.(mp4|mov|webm|m4v)$/i.test(f.name);
+      const isImageFile = (f: File) => f.type.startsWith("image/");
+
+      const validFiles = files.filter((f) => {
+        if (isImageFile(f)) return f.size <= MAX_IMAGE;
+        if (isVideoFile(f)) return f.size <= MAX_VIDEO;
+        return false;
+      });
       if (validFiles.length !== files.length) {
         toast({
           title: `${files.length - validFiles.length} arquivo(s) ignorado(s)`,
-          description: "Máximo 5MB, formato de imagem.",
+          description: "Imagens até 5MB · vídeos até 50MB (MP4, MOV, WebM).",
           variant: "destructive",
         });
       }
@@ -408,13 +435,19 @@ export function GalleryTab() {
 
       for (const file of validFiles) {
         try {
+          const isVideo = !isImageFile(file) && isVideoFile(file);
           const ext = file.name.split(".").pop();
-          const fileName = `${uploadCategory}/${Date.now()}-${Math.random()
+          const subfolder = isVideo ? "videos/" : "";
+          const fileName = `${uploadCategory}/${subfolder}${Date.now()}-${Math.random()
             .toString(36)
             .substring(7)}.${ext}`;
           const { error: uploadError } = await supabase.storage
             .from("gallery")
-            .upload(fileName, file, { cacheControl: "3600", upsert: false });
+            .upload(fileName, file, {
+              cacheControl: "3600",
+              upsert: false,
+              contentType: file.type || (isVideo ? "video/mp4" : undefined),
+            });
           if (uploadError) throw uploadError;
           const { data: urlData } = supabase.storage.from("gallery").getPublicUrl(fileName);
           const currentImages = images.filter((i) => i.category === uploadCategory);
@@ -424,7 +457,8 @@ export function GalleryTab() {
             title: null,
             image_url: urlData.publicUrl,
             display_order: maxOrder,
-          });
+            media_type: isVideo ? "video" : "image",
+          } as any);
           if (insertError) throw insertError;
           uploaded++;
           setUploadProgress(Math.round((uploaded / validFiles.length) * 100));
@@ -436,7 +470,7 @@ export function GalleryTab() {
       queryClient.invalidateQueries({ queryKey: ["gallery-images-admin"] });
       queryClient.invalidateQueries({ queryKey: ["gallery-images-public"] });
       toast({
-        title: `${uploaded} foto${uploaded > 1 ? "s" : ""} adicionada${uploaded > 1 ? "s" : ""} ✓`,
+        title: `${uploaded} arquivo${uploaded > 1 ? "s" : ""} adicionado${uploaded > 1 ? "s" : ""} ✓`,
       });
       setUploading(false);
       setUploadProgress(0);
@@ -595,7 +629,7 @@ export function GalleryTab() {
           <input
             ref={inputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,video/mp4,video/quicktime,video/webm,video/*"
             multiple
             onChange={handleMultiUpload}
             className="hidden"
@@ -628,10 +662,10 @@ export function GalleryTab() {
                   <Plus className="h-6 w-6 text-primary" />
                 </div>
                 <span className="text-sm font-medium text-foreground">
-                  Toque ou arraste fotos aqui
+                  Toque ou arraste fotos ou vídeos aqui
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Múltiplas fotos • Máx 5MB cada
+                  Imagens até 5MB · Vídeos MP4/MOV/WebM até 50MB
                 </span>
               </>
             )}
@@ -870,7 +904,7 @@ export function GalleryTab() {
       >
         <SheetContent side="right" className="w-full sm:max-w-md flex flex-col">
           <SheetHeader>
-            <SheetTitle>Editar foto</SheetTitle>
+            <SheetTitle>Editar {selectedImage?.media_type === "video" ? "vídeo" : "foto"}</SheetTitle>
             <SheetDescription>Altere legenda, categoria ou visibilidade.</SheetDescription>
           </SheetHeader>
 
@@ -883,11 +917,21 @@ export function GalleryTab() {
                   if (idx >= 0) setLightboxIndex(idx);
                 }}
               >
-                <img
-                  src={selectedImage.image_url}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
+                {selectedImage.media_type === "video" ? (
+                  <video
+                    src={selectedImage.image_url}
+                    className="w-full h-full object-cover"
+                    preload="metadata"
+                    muted
+                    playsInline
+                  />
+                ) : (
+                  <img
+                    src={selectedImage.image_url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                )}
                 <div className="absolute top-2 right-2 bg-foreground/60 text-white p-1.5 rounded-full">
                   <Maximize2 className="w-4 h-4" />
                 </div>
@@ -991,6 +1035,7 @@ export function GalleryTab() {
           id: i.id,
           image_url: i.image_url,
           title: i.title,
+          media_type: i.media_type ?? "image",
         }))}
         index={lightboxIndex}
         onClose={() => setLightboxIndex(null)}
