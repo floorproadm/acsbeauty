@@ -543,6 +543,13 @@ function ServiceFormModal({
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
+            <Label>Foto do Serviço</Label>
+            <ServiceImageUpload
+              value={formData.hero_image_url}
+              onChange={(url) => setFormData({ ...formData, hero_image_url: url })}
+            />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="name">Nome</Label>
             <Input
               id="name"
