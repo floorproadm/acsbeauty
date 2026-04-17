@@ -187,27 +187,6 @@ export function ServicesTab() {
       toast({ title: "Erro ao criar", variant: "destructive" });
     },
   });
-        hero_image_url: data.hero_image_url,
-        is_active: true,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-services-unified"] });
-      toast({ title: "Serviço criado!" });
-      setIsCreating(false);
-      setFormData(defaultFormData);
-    },
-    onError: () => {
-      toast({ title: "Erro ao criar", variant: "destructive" });
-    },
-  });
-
-  const cycleStatus = (currentStatus: ServiceStatus | null) => {
-    const order: ServiceStatus[] = ["entry", "upsell", "premium", "inactive"];
-    const idx = order.indexOf(currentStatus || "entry");
-    return order[(idx + 1) % order.length];
-  };
 
   const openEditModal = (service: Service) => {
     setFormData({
@@ -217,7 +196,7 @@ export function ServicesTab() {
       duration_minutes: service.duration_minutes,
       price: service.price,
       promo_price: service.promo_price?.toString() || "",
-      status: service.status || "entry",
+      hero_image_url: service.hero_image_url || null,
       hero_image_url: service.hero_image_url || null,
     });
     setEditingService(service);
