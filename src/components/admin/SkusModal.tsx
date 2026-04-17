@@ -54,6 +54,7 @@ interface Sku {
   variation_id: string | null;
   sort_order: number;
   is_active: boolean;
+  image_url: string | null;
 }
 
 interface Variation {
@@ -68,6 +69,7 @@ interface SkuFormData {
   promo_price: string;
   variation_id: string | null;
   is_active: boolean;
+  image_url: string | null;
 }
 
 const emptyForm: SkuFormData = {
@@ -77,6 +79,7 @@ const emptyForm: SkuFormData = {
   promo_price: "",
   variation_id: null,
   is_active: true,
+  image_url: null,
 };
 
 interface SkusModalProps {
