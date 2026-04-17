@@ -253,6 +253,7 @@ export function SkusModal({
     setEditingId(sku.id);
     setFormData({
       name: sku.name,
+      description: sku.description || "",
       duration_minutes: sku.duration_minutes,
       price: sku.price?.toString() || "",
       promo_price: sku.promo_price?.toString() || "",
