@@ -218,35 +218,47 @@ export default function ServiceDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="max-w-3xl"
+              className="grid md:grid-cols-2 gap-8 md:gap-12 items-center max-w-6xl"
             >
-              <Badge variant="secondary" className="mb-4 gap-1">
-                <Tag className="w-3 h-3" />
-                {service.category}
-                {locationData && (
-                  <span className="ml-1">• {locationData.location_name}</span>
+              <div>
+                <Badge variant="secondary" className="mb-4 gap-1">
+                  <Tag className="w-3 h-3" />
+                  {service.category}
+                  {locationData && (
+                    <span className="ml-1">• {locationData.location_name}</span>
+                  )}
+                </Badge>
+
+                <h1 className="font-serif text-3xl md:text-5xl font-bold mb-4 text-foreground">
+                  {locationData?.meta_title
+                    ? locationData.meta_title.split("—")[0]?.trim() || service.name
+                    : service.name}
+                </h1>
+
+                {(locationData?.body_text || service.description) && (
+                  <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
+                    {locationData?.body_text || service.description}
+                  </p>
                 )}
-              </Badge>
 
-              <h1 className="font-serif text-3xl md:text-5xl font-bold mb-4 text-foreground">
-                {locationData?.meta_title
-                  ? locationData.meta_title.split("—")[0]?.trim() || service.name
-                  : service.name}
-              </h1>
 
-              {(locationData?.body_text || service.description) && (
-                <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                  {locationData?.body_text || service.description}
-                </p>
+                <Link to={`/book?service=${service.slug}`}>
+                  <Button variant="hero" size="lg" className="group">
+                    {t("global.book_now")}
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </Button>
+                </Link>
+              </div>
+
+              {service.hero_image_url && (
+                <div className="order-first md:order-last">
+                  <img
+                    src={service.hero_image_url}
+                    alt={service.name}
+                    className="w-full aspect-[4/3] md:aspect-square object-cover rounded-2xl shadow-card"
+                  />
+                </div>
               )}
-
-
-              <Link to={`/book?service=${service.slug}`}>
-                <Button variant="hero" size="lg" className="group">
-                  {t("global.book_now")}
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
             </motion.div>
           </div>
         </section>
