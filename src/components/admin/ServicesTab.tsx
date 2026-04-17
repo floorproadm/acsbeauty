@@ -50,7 +50,10 @@ import {
   Package,
   Search,
   X,
+  ExternalLink,
+  Eye,
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { VariationsModal } from "./VariationsModal";
 import { SkusModal } from "./SkusModal";
 import { ServiceImageUpload } from "./ServiceImageUpload";
@@ -254,6 +257,7 @@ export function ServicesTab() {
   };
 
   return (
+    <TooltipProvider delayDuration={200}>
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -263,10 +267,23 @@ export function ServicesTab() {
             {services?.filter((s) => s.is_active).length || 0} ativos
           </p>
         </div>
-        <Button size="sm" onClick={() => openCreateModal()}>
-          <Plus className="w-4 h-4 mr-1" />
-          Novo
-        </Button>
+        <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <a href="/services" target="_blank" rel="noopener noreferrer">
+                <Button size="sm" variant="outline">
+                  <Eye className="w-4 h-4 mr-1" />
+                  Ver pública
+                </Button>
+              </a>
+            </TooltipTrigger>
+            <TooltipContent>Ver como cliente</TooltipContent>
+          </Tooltip>
+          <Button size="sm" onClick={() => openCreateModal()}>
+            <Plus className="w-4 h-4 mr-1" />
+            Novo
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
@@ -352,6 +369,27 @@ export function ServicesTab() {
                     </span>
                   </span>
                   <div className="flex items-center gap-2">
+                    {(() => {
+                      const catSlug = categoryServices[0]?.category_slug
+                        || category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+                      return (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <a
+                              href={`/servicos/${catSlug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center justify-center h-7 w-7 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                              aria-label="Ver categoria como cliente"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </a>
+                          </TooltipTrigger>
+                          <TooltipContent>Ver categoria como cliente</TooltipContent>
+                        </Tooltip>
+                      );
+                    })()}
                     <Button
                       size="sm"
                       variant="ghost"
@@ -420,6 +458,28 @@ export function ServicesTab() {
                               </div>
 
                               <div className="flex items-center gap-1.5 shrink-0">
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    {service.is_active ? (
+                                      <a
+                                        href={`/servicos/${service.category_slug || category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}/${(service as any).slug || ""}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center justify-center h-7 w-7 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                                        aria-label="Ver como cliente"
+                                      >
+                                        <Eye className="w-3.5 h-3.5" />
+                                      </a>
+                                    ) : (
+                                      <span className="inline-flex items-center justify-center h-7 w-7 rounded-md text-muted-foreground/40 cursor-not-allowed">
+                                        <Eye className="w-3.5 h-3.5" />
+                                      </span>
+                                    )}
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {service.is_active ? "Ver como cliente" : "Ative o serviço para visualizar"}
+                                  </TooltipContent>
+                                </Tooltip>
                                 <Button
                                   size="icon"
                                   variant="ghost"
@@ -511,6 +571,7 @@ export function ServicesTab() {
         />
       )}
     </div>
+    </TooltipProvider>
   );
 }
 
