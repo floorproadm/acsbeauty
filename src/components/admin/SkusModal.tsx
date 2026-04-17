@@ -182,6 +182,7 @@ export function SkusModal({
       if (data.promo_price !== undefined) updates.promo_price = data.promo_price ? parseFloat(data.promo_price) : null;
       if (data.variation_id !== undefined) updates.variation_id = data.variation_id || null;
       if (data.is_active !== undefined) updates.is_active = data.is_active;
+      if (data.image_url !== undefined) updates.image_url = data.image_url;
 
       const { error } = await supabase.from("service_skus").update(updates).eq("id", id);
       if (error) throw error;
