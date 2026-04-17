@@ -57,6 +57,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { VariationsModal } from "./VariationsModal";
 import { SkusModal } from "./SkusModal";
 import { ServiceImageUpload } from "./ServiceImageUpload";
+import { ServiceVideoUpload } from "./ServiceVideoUpload";
 
 interface Service {
   id: string;
@@ -70,6 +71,7 @@ interface Service {
   base_price: number | null;
   is_active: boolean | null;
   hero_image_url: string | null;
+  hero_video_url: string | null;
   variations_count: number;
   skus_count: number;
 }
@@ -84,6 +86,7 @@ const defaultFormData = {
   price: 0,
   promo_price: "",
   hero_image_url: null as string | null,
+  hero_video_url: null as string | null,
 };
 
 export function ServicesTab() {
@@ -176,6 +179,7 @@ export function ServicesTab() {
         price: data.price,
         promo_price: data.promo_price ? Number(data.promo_price) : null,
         hero_image_url: data.hero_image_url,
+        hero_video_url: data.hero_video_url,
         is_active: true,
       });
       if (error) throw error;
@@ -200,6 +204,7 @@ export function ServicesTab() {
       price: service.price,
       promo_price: service.promo_price?.toString() || "",
       hero_image_url: service.hero_image_url || null,
+      hero_video_url: service.hero_video_url || null,
     });
     setEditingService(service);
   };
@@ -224,6 +229,7 @@ export function ServicesTab() {
         price: formData.price,
         promo_price: formData.promo_price ? Number(formData.promo_price) : null,
         hero_image_url: formData.hero_image_url,
+        hero_video_url: formData.hero_video_url,
       },
     });
   };
@@ -440,7 +446,14 @@ export function ServicesTab() {
                                   </div>
                                 )}
                                 <div className="flex-1 min-w-0">
-                                  <h3 className="font-semibold text-sm truncate">{service.name}</h3>
+                                  <h3 className="font-semibold text-sm truncate flex items-center gap-1.5">
+                                    <span className="truncate">{service.name}</span>
+                                    {service.hero_video_url && (
+                                      <span title="Possui vídeo" aria-label="Possui vídeo" className="shrink-0 text-[11px] leading-none">
+                                        🎬
+                                      </span>
+                                    )}
+                                  </h3>
                                   <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                                     <span className="flex items-center gap-0.5">
                                       <Clock className="w-3 h-3" />
@@ -610,6 +623,16 @@ function ServiceFormModal({
               value={formData.hero_image_url}
               onChange={(url) => setFormData({ ...formData, hero_image_url: url })}
             />
+          </div>
+          <div className="space-y-2">
+            <Label>Vídeo do Serviço (opcional)</Label>
+            <ServiceVideoUpload
+              value={formData.hero_video_url}
+              onChange={(url) => setFormData({ ...formData, hero_video_url: url })}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Quando definido, o vídeo aparece no lugar da foto na página pública do serviço.
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="name">Nome</Label>
