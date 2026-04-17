@@ -237,6 +237,7 @@ export function ServicesTab() {
         price: formData.price,
         promo_price: formData.promo_price ? Number(formData.promo_price) : null,
         status: formData.status,
+        hero_image_url: formData.hero_image_url,
       },
     });
   };
