@@ -43,6 +43,7 @@ import {
   Clock,
   DollarSign,
 } from "lucide-react";
+import { ServiceImageUpload } from "./ServiceImageUpload";
 
 interface Sku {
   id: string;
