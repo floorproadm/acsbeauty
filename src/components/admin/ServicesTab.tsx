@@ -197,7 +197,6 @@ export function ServicesTab() {
       price: service.price,
       promo_price: service.promo_price?.toString() || "",
       hero_image_url: service.hero_image_url || null,
-      hero_image_url: service.hero_image_url || null,
     });
     setEditingService(service);
   };
