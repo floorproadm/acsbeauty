@@ -1408,6 +1408,7 @@ export type Database = {
           duration_minutes: number
           faq: Json | null
           hero_image_url: string | null
+          hero_video_url: string | null
           id: string
           is_active: boolean | null
           name: string
@@ -1426,6 +1427,7 @@ export type Database = {
           duration_minutes?: number
           faq?: Json | null
           hero_image_url?: string | null
+          hero_video_url?: string | null
           id?: string
           is_active?: boolean | null
           name: string
@@ -1444,6 +1446,7 @@ export type Database = {
           duration_minutes?: number
           faq?: Json | null
           hero_image_url?: string | null
+          hero_video_url?: string | null
           id?: string
           is_active?: boolean | null
           name?: string
