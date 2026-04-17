@@ -182,6 +182,7 @@ export function SkusModal({
       const updates: Record<string, unknown> = {};
       
       if (data.name !== undefined) updates.name = data.name.trim();
+      if (data.description !== undefined) updates.description = data.description.trim() || null;
       if (data.duration_minutes !== undefined) updates.duration_minutes = data.duration_minutes;
       if (data.price !== undefined) updates.price = data.price ? parseFloat(data.price) : null;
       if (data.promo_price !== undefined) updates.promo_price = data.promo_price ? parseFloat(data.promo_price) : null;
