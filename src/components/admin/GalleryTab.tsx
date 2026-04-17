@@ -78,6 +78,7 @@ interface GalleryImage {
   display_order: number;
   is_active: boolean;
   created_at: string;
+  media_type?: string | null;
 }
 
 type StatusFilter = "all" | "visible" | "hidden";
