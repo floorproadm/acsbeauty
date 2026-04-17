@@ -904,7 +904,7 @@ export function GalleryTab() {
       >
         <SheetContent side="right" className="w-full sm:max-w-md flex flex-col">
           <SheetHeader>
-            <SheetTitle>Editar foto</SheetTitle>
+            <SheetTitle>Editar {selectedImage?.media_type === "video" ? "vídeo" : "foto"}</SheetTitle>
             <SheetDescription>Altere legenda, categoria ou visibilidade.</SheetDescription>
           </SheetHeader>
 
@@ -917,11 +917,21 @@ export function GalleryTab() {
                   if (idx >= 0) setLightboxIndex(idx);
                 }}
               >
-                <img
-                  src={selectedImage.image_url}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
+                {selectedImage.media_type === "video" ? (
+                  <video
+                    src={selectedImage.image_url}
+                    className="w-full h-full object-cover"
+                    preload="metadata"
+                    muted
+                    playsInline
+                  />
+                ) : (
+                  <img
+                    src={selectedImage.image_url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                )}
                 <div className="absolute top-2 right-2 bg-foreground/60 text-white p-1.5 rounded-full">
                   <Maximize2 className="w-4 h-4" />
                 </div>
