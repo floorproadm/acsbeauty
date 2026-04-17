@@ -662,10 +662,10 @@ export function GalleryTab() {
                   <Plus className="h-6 w-6 text-primary" />
                 </div>
                 <span className="text-sm font-medium text-foreground">
-                  Toque ou arraste fotos aqui
+                  Toque ou arraste fotos ou vídeos aqui
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Múltiplas fotos • Máx 5MB cada
+                  Imagens até 5MB · Vídeos MP4/MOV/WebM até 50MB
                 </span>
               </>
             )}
