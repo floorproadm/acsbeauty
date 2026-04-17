@@ -48,6 +48,8 @@ import {
   ChevronRight,
   Layers,
   Package,
+  Search,
+  X,
 } from "lucide-react";
 import { VariationsModal } from "./VariationsModal";
 import { SkusModal } from "./SkusModal";
@@ -104,6 +106,7 @@ export function ServicesTab() {
   const [expandedService, setExpandedService] = useState<string | null>(null);
   const [variationsService, setVariationsService] = useState<Service | null>(null);
   const [skusService, setSkusService] = useState<Service | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: services, isLoading } = useQuery({
     queryKey: ["admin-services-unified"],
@@ -250,7 +253,16 @@ export function ServicesTab() {
     createService.mutate(formData);
   };
 
-  const groupedServices = services?.reduce((acc, service) => {
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredServices = normalizedQuery
+    ? services?.filter((s) =>
+        [s.name, s.description, s.category]
+          .filter(Boolean)
+          .some((field) => field!.toLowerCase().includes(normalizedQuery))
+      )
+    : services;
+
+  const groupedServices = filteredServices?.reduce((acc, service) => {
     const category = service.category || "Outros";
     if (!acc[category]) acc[category] = [];
     acc[category].push(service);
@@ -275,6 +287,28 @@ export function ServicesTab() {
           <Plus className="w-4 h-4 mr-1" />
           Novo
         </Button>
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        <Input
+          type="search"
+          placeholder="Buscar serviços por nome, descrição ou categoria..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9 pr-9 h-10"
+        />
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={() => setSearchQuery("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            aria-label="Limpar busca"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Modals */}
@@ -319,7 +353,9 @@ export function ServicesTab() {
         <div className="space-y-3">
           {CATEGORIES.map((category) => {
             const categoryServices = groupedServices?.[category] || [];
-            const isOpen = openCategories[category] ?? true;
+            // Hide empty categories while searching to focus on matches
+            if (normalizedQuery && categoryServices.length === 0) return null;
+            const isOpen = normalizedQuery ? true : (openCategories[category] ?? true);
 
             return (
               <Collapsible
