@@ -571,6 +571,7 @@ export function ServicesTab() {
         />
       )}
     </div>
+    </TooltipProvider>
   );
 }
 
