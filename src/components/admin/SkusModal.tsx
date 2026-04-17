@@ -155,6 +155,7 @@ export function SkusModal({
         variation_id: data.variation_id || null,
         sort_order: maxOrder + 1,
         is_active: data.is_active,
+        image_url: data.image_url,
       });
 
       if (error) throw error;
