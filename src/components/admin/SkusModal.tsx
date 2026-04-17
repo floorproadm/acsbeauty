@@ -153,6 +153,7 @@ export function SkusModal({
       const { error } = await supabase.from("service_skus").insert({
         service_id: serviceId,
         name: data.name.trim(),
+        description: data.description.trim() || null,
         duration_minutes: data.duration_minutes,
         price: data.price ? parseFloat(data.price) : null,
         promo_price: data.promo_price ? parseFloat(data.promo_price) : null,
