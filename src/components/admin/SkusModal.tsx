@@ -446,6 +446,19 @@ export function SkusModal({
                       </Button>
                     </div>
 
+                    {/* Thumbnail */}
+                    {sku.image_url ? (
+                      <img
+                        src={sku.image_url}
+                        alt={sku.name}
+                        className="h-10 w-10 rounded-md object-cover border border-border shrink-0"
+                      />
+                    ) : (
+                      <div className="h-10 w-10 rounded-md bg-muted border border-border flex items-center justify-center shrink-0">
+                        <Package className="w-3.5 h-3.5 text-muted-foreground/50" />
+                      </div>
+                    )}
+
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
