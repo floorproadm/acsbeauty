@@ -59,6 +59,7 @@ interface Service {
   name: string;
   description: string | null;
   category: string | null;
+  category_slug: string | null;
   duration_minutes: number;
   price: number;
   promo_price: number | null;
@@ -69,7 +70,7 @@ interface Service {
   skus_count: number;
 }
 
-const CATEGORIES = ["Cabelo", "Sobrancelhas", "Unhas"];
+const CATEGORIES = ["Cabelo", "Sobrancelhas", "Unhas", "Maquiagem", "Tratamentos"];
 
 const statusConfig: Record<ServiceStatus, { label: string; color: string }> = {
   entry: { label: "Entrada", color: "bg-green-100 text-green-700" },
@@ -224,6 +225,9 @@ export function ServicesTab() {
         name: formData.name,
         description: formData.description || null,
         category: formData.category,
+        category_slug: formData.category
+          ? formData.category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+          : null,
         duration_minutes: formData.duration_minutes,
         price: formData.price,
         promo_price: formData.promo_price ? Number(formData.promo_price) : null,
