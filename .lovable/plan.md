@@ -1,40 +1,50 @@
 
-## Consolidar serviços duplicados de Highlights
 
-Encontrei dois serviços que parecem ser o mesmo:
+## Botão "Ver como cliente" em Admin → Serviços
 
-| Serviço | Técnicas | Opções (SKUs) | Agendamentos |
-|---|---|---|---|
-| **Highlights** (`highlights`) | 0 | 0 | 0 |
-| **Highlights Técnicas** (`highlights-tecnicas`) | 0 | 3 (Clássico, Balayage, Money Piece) | 0 |
+Adicionar atalhos no admin para a Ane visualizar rapidamente como cada serviço/categoria aparece na página pública, sem precisar sair e navegar manualmente.
 
-Como nenhum tem agendamentos vinculados, é seguro consolidar.
+### O que adicionar
 
-### Plano
+**1. Botão global no topo da aba Serviços**
+Um botão "Ver página pública" ao lado do "+ Novo Serviço" que abre `/services` em nova aba.
 
-**1. Mover as 3 opções para o serviço "Highlights"**
-Reatribuir os SKUs (Clássico, Balayage, Money Piece) do serviço duplicado para o serviço principal `Highlights`.
+**2. Ícone de olho (👁) em cada card de serviço**
+Um botão pequeno ao lado do "Editar" / "Excluir" em cada card que abre a página pública daquele serviço específico em nova aba:
+- Rota: `/servicos/{category_slug}/{service_slug}`
+- Ex: `/servicos/cabelo/highlights`
 
-**2. Excluir o serviço duplicado "Highlights Técnicas"**
-Após mover as opções, remover o serviço `highlights-tecnicas` do banco.
+**3. Ícone de olho por categoria (no header de cada grupo)**
+No cabeçalho de cada categoria agrupada (Cabelo, Sobrancelhas, Unhas), um botão para abrir a página da categoria:
+- Rota: `/servicos/{category_slug}`
 
-**Resultado final:**
-```text
-Highlights (180min)
-├─ Highlights Clássico (180min)
-├─ Balayage (240min)
-└─ Money Piece (120min)
-```
+### Comportamento
+
+- Sempre abre em **nova aba** (`target="_blank"`) para Ane não perder o contexto do admin.
+- Usa ícone `ExternalLink` ou `Eye` do lucide-react (consistente com o padrão visual).
+- Tooltip "Ver como cliente" para clareza.
+- Se o serviço estiver `is_active = false`, o botão fica desabilitado com tooltip "Ative o serviço para visualizar".
 
 ### Detalhes técnicos
 
-- Migration SQL única e additiva:
-  - `UPDATE service_skus SET service_id = 'ef3be501...' WHERE service_id = '0f234a0d...'`
-  - `DELETE FROM services WHERE id = '0f234a0d...'`
-- Nenhuma alteração de UI necessária — `ServicesTab` já agrupa SKUs corretamente.
-- Sem impacto em bookings (0 registros).
-- Slug `highlights-tecnicas` libera o caminho público duplicado em `/servicos/cabelo/`.
+- Arquivo único editado: `src/components/admin/ServicesTab.tsx`
+- Sem mudanças de DB, sem novas rotas (todas já existem: `/services`, `/servicos/:categoria`, `/servicos/:categoria/:slug`)
+- Usa `<a href={url} target="_blank" rel="noopener noreferrer">` envolvendo um `<Button variant="ghost" size="icon">`
+- Slug da categoria já vem do agrupamento existente; slug do serviço já está no objeto `Service`
 
-### Confirmação antes de aplicar
+### Resultado visual
 
-Quer também que eu **consolide outros serviços duplicados** que possam existir (ex: outros pares "X" + "X Técnicas")? Posso verificar e incluir no mesmo plano se quiser.
+```text
+[Aba Serviços]
+┌─────────────────────────────────────────────┐
+│ Buscar serviços...    [👁 Ver pública] [+ Novo]│
+├─────────────────────────────────────────────┤
+│ ▼ Cabelo                              [👁]  │
+│   ┌─────────────────────────────────────┐   │
+│   │ Highlights              [👁][✏][🗑] │   │
+│   │ 3 opções • 180min                   │   │
+│   └─────────────────────────────────────┘   │
+│ ▼ Sobrancelhas                        [👁]  │
+└─────────────────────────────────────────────┘
+```
+
