@@ -395,9 +395,20 @@ function SkuCard({ sku, index, serviceSlug }: { sku: any; index: number; service
       transition={{ duration: 0.3, delay: index * 0.05 }}
     >
       <Card className="hover:shadow-card transition-shadow">
-        <CardContent className="flex items-center justify-between p-4 md:p-5">
+        <CardContent className="flex items-center gap-3 p-3 md:p-4">
+          {sku.image_url ? (
+            <img
+              src={sku.image_url}
+              alt={sku.name}
+              loading="lazy"
+              className="w-14 h-14 md:w-16 md:h-16 rounded-md object-cover shrink-0 border border-border"
+            />
+          ) : null}
           <div className="flex-1 min-w-0">
             <h4 className="font-medium text-foreground">{sku.name}</h4>
+            {sku.description && (
+              <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{sku.description}</p>
+            )}
           </div>
           <Link to={`/book?service=${serviceSlug}${skuSlugParam}`}>
             <Button variant="outline" size="sm" className="shrink-0 gap-1">
