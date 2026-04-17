@@ -126,7 +126,7 @@ export function SkusModal({
         .from("service_skus")
         .select(`
           id, name, duration_minutes, price, promo_price, 
-          variation_id, sort_order, is_active,
+          variation_id, sort_order, is_active, image_url,
           service_variations (name)
         `)
         .eq("service_id", serviceId)
