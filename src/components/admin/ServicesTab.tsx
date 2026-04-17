@@ -59,6 +59,7 @@ interface Service {
   name: string;
   description: string | null;
   category: string | null;
+  category_slug: string | null;
   duration_minutes: number;
   price: number;
   promo_price: number | null;
