@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 // ── Configurable Links ──
-const GOOGLE_REVIEW_URL = "https://g.page/r/CYourACSReviewLink/review"; // TODO: replace with real link
+const GOOGLE_REVIEW_URL = "https://g.page/r/CfNBURIJhU51EAE/review";
 const INSTAGRAM_HANDLE = "@acsbeautynj";
 const INSTAGRAM_URL = "https://www.instagram.com/acsbeautynj";
 const PHONE = "(732) 915-3430";
