@@ -1,0 +1,1 @@
+ALTER TABLE public.service_skus ADD COLUMN IF NOT EXISTS image_url text;

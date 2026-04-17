@@ -43,6 +43,7 @@ import {
   Clock,
   DollarSign,
 } from "lucide-react";
+import { ServiceImageUpload } from "./ServiceImageUpload";
 
 interface Sku {
   id: string;
@@ -53,6 +54,7 @@ interface Sku {
   variation_id: string | null;
   sort_order: number;
   is_active: boolean;
+  image_url: string | null;
 }
 
 interface Variation {
@@ -67,6 +69,7 @@ interface SkuFormData {
   promo_price: string;
   variation_id: string | null;
   is_active: boolean;
+  image_url: string | null;
 }
 
 const emptyForm: SkuFormData = {
@@ -76,6 +79,7 @@ const emptyForm: SkuFormData = {
   promo_price: "",
   variation_id: null,
   is_active: true,
+  image_url: null,
 };
 
 interface SkusModalProps {
@@ -122,7 +126,7 @@ export function SkusModal({
         .from("service_skus")
         .select(`
           id, name, duration_minutes, price, promo_price, 
-          variation_id, sort_order, is_active,
+          variation_id, sort_order, is_active, image_url,
           service_variations (name)
         `)
         .eq("service_id", serviceId)
@@ -151,6 +155,7 @@ export function SkusModal({
         variation_id: data.variation_id || null,
         sort_order: maxOrder + 1,
         is_active: data.is_active,
+        image_url: data.image_url,
       });
 
       if (error) throw error;
@@ -177,6 +182,7 @@ export function SkusModal({
       if (data.promo_price !== undefined) updates.promo_price = data.promo_price ? parseFloat(data.promo_price) : null;
       if (data.variation_id !== undefined) updates.variation_id = data.variation_id || null;
       if (data.is_active !== undefined) updates.is_active = data.is_active;
+      if (data.image_url !== undefined) updates.image_url = data.image_url;
 
       const { error } = await supabase.from("service_skus").update(updates).eq("id", id);
       if (error) throw error;
@@ -246,6 +252,7 @@ export function SkusModal({
       promo_price: sku.promo_price?.toString() || "",
       variation_id: sku.variation_id,
       is_active: sku.is_active,
+      image_url: sku.image_url,
     });
     setShowForm(true);
   };
@@ -292,6 +299,14 @@ export function SkusModal({
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <Label className="mb-1.5 block">Foto (opcional)</Label>
+                    <ServiceImageUpload
+                      value={formData.image_url}
+                      onChange={(url) => setFormData({ ...formData, image_url: url })}
+                    />
+                  </div>
+
                   <div className="col-span-2">
                     <Label>Nome da Opção *</Label>
                     <Input
@@ -430,6 +445,19 @@ export function SkusModal({
                         <ArrowDown className="w-3 h-3" />
                       </Button>
                     </div>
+
+                    {/* Thumbnail */}
+                    {sku.image_url ? (
+                      <img
+                        src={sku.image_url}
+                        alt={sku.name}
+                        className="h-10 w-10 rounded-md object-cover border border-border shrink-0"
+                      />
+                    ) : (
+                      <div className="h-10 w-10 rounded-md bg-muted border border-border flex items-center justify-center shrink-0">
+                        <Package className="w-3.5 h-3.5 text-muted-foreground/50" />
+                      </div>
+                    )}
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
