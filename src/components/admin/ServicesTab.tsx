@@ -55,8 +55,6 @@ import { VariationsModal } from "./VariationsModal";
 import { SkusModal } from "./SkusModal";
 import { ServiceImageUpload } from "./ServiceImageUpload";
 
-type ServiceStatus = "entry" | "upsell" | "premium" | "inactive";
-
 interface Service {
   id: string;
   name: string;
@@ -67,7 +65,6 @@ interface Service {
   price: number;
   promo_price: number | null;
   base_price: number | null;
-  status: ServiceStatus | null;
   is_active: boolean | null;
   hero_image_url: string | null;
   variations_count: number;
@@ -76,13 +73,6 @@ interface Service {
 
 const CATEGORIES = ["Cabelo", "Sobrancelhas", "Unhas", "Maquiagem", "Tratamentos"];
 
-const statusConfig: Record<ServiceStatus, { label: string; color: string }> = {
-  entry: { label: "Entrada", color: "bg-green-100 text-green-700" },
-  upsell: { label: "Upsell", color: "bg-blue-100 text-blue-700" },
-  premium: { label: "Premium", color: "bg-purple-100 text-purple-700" },
-  inactive: { label: "Inativo", color: "bg-gray-100 text-gray-500" },
-};
-
 const defaultFormData = {
   name: "",
   description: "",
@@ -90,7 +80,6 @@ const defaultFormData = {
   duration_minutes: 60,
   price: 0,
   promo_price: "",
-  status: "entry" as ServiceStatus,
   hero_image_url: null as string | null,
 };
 
@@ -183,7 +172,6 @@ export function ServicesTab() {
         duration_minutes: data.duration_minutes,
         price: data.price,
         promo_price: data.promo_price ? Number(data.promo_price) : null,
-        status: data.status,
         hero_image_url: data.hero_image_url,
         is_active: true,
       });
@@ -200,12 +188,6 @@ export function ServicesTab() {
     },
   });
 
-  const cycleStatus = (currentStatus: ServiceStatus | null) => {
-    const order: ServiceStatus[] = ["entry", "upsell", "premium", "inactive"];
-    const idx = order.indexOf(currentStatus || "entry");
-    return order[(idx + 1) % order.length];
-  };
-
   const openEditModal = (service: Service) => {
     setFormData({
       name: service.name,
@@ -214,7 +196,6 @@ export function ServicesTab() {
       duration_minutes: service.duration_minutes,
       price: service.price,
       promo_price: service.promo_price?.toString() || "",
-      status: service.status || "entry",
       hero_image_url: service.hero_image_url || null,
     });
     setEditingService(service);
@@ -239,7 +220,6 @@ export function ServicesTab() {
         duration_minutes: formData.duration_minutes,
         price: formData.price,
         promo_price: formData.promo_price ? Number(formData.promo_price) : null,
-        status: formData.status,
         hero_image_url: formData.hero_image_url,
       },
     });
@@ -396,7 +376,6 @@ export function ServicesTab() {
                     </div>
                   ) : (
                     categoryServices.map((service) => {
-                      const status = statusConfig[service.status as ServiceStatus] || statusConfig.entry;
                       const isExpanded = expandedService === service.id;
                       const hasTechniques = service.variations_count > 0 || service.skus_count > 0;
 
@@ -423,21 +402,7 @@ export function ServicesTab() {
                                   </div>
                                 )}
                                 <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <h3 className="font-semibold text-sm truncate">{service.name}</h3>
-                                    <Badge
-                                      variant="outline"
-                                      className={`${status.color} text-[10px] px-1.5 py-0 cursor-pointer hover:opacity-80 shrink-0`}
-                                      onClick={() =>
-                                        updateService.mutate({
-                                          id: service.id,
-                                          updates: { status: cycleStatus(service.status as ServiceStatus) },
-                                        })
-                                      }
-                                    >
-                                      {status.label}
-                                    </Badge>
-                                  </div>
+                                  <h3 className="font-semibold text-sm truncate">{service.name}</h3>
                                   <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                                     <span className="flex items-center gap-0.5">
                                       <Clock className="w-3 h-3" />
@@ -629,24 +594,6 @@ function ServiceFormModal({
                 value={formData.duration_minutes}
                 onChange={(e) => setFormData({ ...formData, duration_minutes: Number(e.target.value) })}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) => setFormData({ ...formData, status: value as ServiceStatus })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(statusConfig).map(([key, config]) => (
-                    <SelectItem key={key} value={key}>
-                      {config.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
