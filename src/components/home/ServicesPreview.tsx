@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Scissors, Eye, Sparkles, X, ChevronLeft, ChevronRight, Calendar, ArrowRight } from "lucide-react";
+import { Scissors, Eye, Sparkles, X, ChevronLeft, ChevronRight, Calendar, ArrowRight, Image as ImageIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
@@ -21,11 +21,21 @@ interface GalleryImage {
   display_order: number;
 }
 
-const CATEGORIES = [
-  { key: "cabelo", icon: Scissors, titleKey: "home.services.hair", descKey: "home.services.hair_desc", fallback: hairServiceImg },
-  { key: "sobrancelhas", icon: Eye, titleKey: "home.services.brows", descKey: "home.services.brows_desc", fallback: browsServiceImg },
-  { key: "unhas", icon: Sparkles, titleKey: "home.services.nails", descKey: "home.services.nails_desc", fallback: nailsServiceImg },
-];
+interface GalleryCategoryRow {
+  slug: string;
+  label: string;
+  emoji: string | null;
+  show_on_home: boolean;
+  is_active: boolean;
+  sort_order: number;
+}
+
+// Built-in fallback assets/icons/copy keyed by slug
+const PRESETS: Record<string, { icon: any; titleKey?: string; descKey?: string; fallback?: string }> = {
+  cabelo: { icon: Scissors, titleKey: "home.services.hair", descKey: "home.services.hair_desc", fallback: hairServiceImg },
+  sobrancelhas: { icon: Eye, titleKey: "home.services.brows", descKey: "home.services.brows_desc", fallback: browsServiceImg },
+  unhas: { icon: Sparkles, titleKey: "home.services.nails", descKey: "home.services.nails_desc", fallback: nailsServiceImg },
+};
 
 export function ServicesPreview() {
   const { t } = useLanguage();
