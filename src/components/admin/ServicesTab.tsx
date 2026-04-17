@@ -458,6 +458,28 @@ export function ServicesTab() {
                               </div>
 
                               <div className="flex items-center gap-1.5 shrink-0">
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    {service.is_active ? (
+                                      <a
+                                        href={`/servicos/${service.category_slug || category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}/${(service as any).slug || ""}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center justify-center h-7 w-7 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                                        aria-label="Ver como cliente"
+                                      >
+                                        <Eye className="w-3.5 h-3.5" />
+                                      </a>
+                                    ) : (
+                                      <span className="inline-flex items-center justify-center h-7 w-7 rounded-md text-muted-foreground/40 cursor-not-allowed">
+                                        <Eye className="w-3.5 h-3.5" />
+                                      </span>
+                                    )}
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {service.is_active ? "Ver como cliente" : "Ative o serviço para visualizar"}
+                                  </TooltipContent>
+                                </Tooltip>
                                 <Button
                                   size="icon"
                                   variant="ghost"
