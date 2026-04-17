@@ -172,7 +172,21 @@ export function ServicesTab() {
         duration_minutes: data.duration_minutes,
         price: data.price,
         promo_price: data.promo_price ? Number(data.promo_price) : null,
-        status: data.status,
+        hero_image_url: data.hero_image_url,
+        is_active: true,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-services-unified"] });
+      toast({ title: "Serviço criado!" });
+      setIsCreating(false);
+      setFormData(defaultFormData);
+    },
+    onError: () => {
+      toast({ title: "Erro ao criar", variant: "destructive" });
+    },
+  });
         hero_image_url: data.hero_image_url,
         is_active: true,
       });
