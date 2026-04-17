@@ -50,7 +50,10 @@ import {
   Package,
   Search,
   X,
+  ExternalLink,
+  Eye,
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { VariationsModal } from "./VariationsModal";
 import { SkusModal } from "./SkusModal";
 import { ServiceImageUpload } from "./ServiceImageUpload";
