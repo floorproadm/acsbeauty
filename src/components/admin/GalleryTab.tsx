@@ -1035,6 +1035,7 @@ export function GalleryTab() {
           id: i.id,
           image_url: i.image_url,
           title: i.title,
+          media_type: i.media_type ?? "image",
         }))}
         index={lightboxIndex}
         onClose={() => setLightboxIndex(null)}
