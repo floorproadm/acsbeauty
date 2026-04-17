@@ -48,6 +48,8 @@ import {
   ChevronRight,
   Layers,
   Package,
+  Search,
+  X,
 } from "lucide-react";
 import { VariationsModal } from "./VariationsModal";
 import { SkusModal } from "./SkusModal";
