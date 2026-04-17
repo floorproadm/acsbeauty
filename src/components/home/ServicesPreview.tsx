@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Scissors, Eye, Sparkles, X, ChevronLeft, ChevronRight, Calendar, ArrowRight } from "lucide-react";
+import { Scissors, Eye, Sparkles, X, ChevronLeft, ChevronRight, Calendar, ArrowRight, Image as ImageIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
@@ -21,11 +21,21 @@ interface GalleryImage {
   display_order: number;
 }
 
-const CATEGORIES = [
-  { key: "cabelo", icon: Scissors, titleKey: "home.services.hair", descKey: "home.services.hair_desc", fallback: hairServiceImg },
-  { key: "sobrancelhas", icon: Eye, titleKey: "home.services.brows", descKey: "home.services.brows_desc", fallback: browsServiceImg },
-  { key: "unhas", icon: Sparkles, titleKey: "home.services.nails", descKey: "home.services.nails_desc", fallback: nailsServiceImg },
-];
+interface GalleryCategoryRow {
+  slug: string;
+  label: string;
+  emoji: string | null;
+  show_on_home: boolean;
+  is_active: boolean;
+  sort_order: number;
+}
+
+// Built-in fallback assets/icons/copy keyed by slug
+const PRESETS: Record<string, { icon: any; titleKey?: string; descKey?: string; fallback?: string }> = {
+  cabelo: { icon: Scissors, titleKey: "home.services.hair", descKey: "home.services.hair_desc", fallback: hairServiceImg },
+  sobrancelhas: { icon: Eye, titleKey: "home.services.brows", descKey: "home.services.brows_desc", fallback: browsServiceImg },
+  unhas: { icon: Sparkles, titleKey: "home.services.nails", descKey: "home.services.nails_desc", fallback: nailsServiceImg },
+};
 
 export function ServicesPreview() {
   const { t } = useLanguage();
@@ -44,10 +54,41 @@ export function ServicesPreview() {
     },
   });
 
-  const imagesByCategory = CATEGORIES.map((cat) => ({
-    ...cat,
-    images: galleryImages.filter((img) => img.category === cat.key),
-  }));
+  const { data: dynamicCategories = [] } = useQuery({
+    queryKey: ["gallery-categories-home"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gallery_categories" as any)
+        .select("slug,label,emoji,show_on_home,is_active,sort_order")
+        .eq("is_active", true)
+        .eq("show_on_home", true)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data as unknown as GalleryCategoryRow[];
+    },
+  });
+
+  const homeCategories = dynamicCategories.length > 0
+    ? dynamicCategories
+    : [
+        { slug: "cabelo", label: "Cabelo", emoji: "💇‍♀️", show_on_home: true, is_active: true, sort_order: 1 },
+        { slug: "sobrancelhas", label: "Sobrancelhas", emoji: "👁️", show_on_home: true, is_active: true, sort_order: 2 },
+        { slug: "unhas", label: "Unhas", emoji: "💅", show_on_home: true, is_active: true, sort_order: 3 },
+      ];
+
+  const imagesByCategory = homeCategories.map((cat) => {
+    const preset = PRESETS[cat.slug];
+    const images = galleryImages.filter((img) => img.category === cat.slug);
+    return {
+      slug: cat.slug,
+      label: preset?.titleKey ? t(preset.titleKey) : cat.label,
+      description: preset?.descKey ? t(preset.descKey) : "",
+      icon: preset?.icon ?? ImageIcon,
+      emoji: cat.emoji,
+      fallback: preset?.fallback,
+      images,
+    };
+  });
 
   function openLightbox(categoryKey: string, startIndex = 0) {
     const images = galleryImages.filter((img) => img.category === categoryKey);
@@ -60,6 +101,12 @@ export function ServicesPreview() {
     const newIndex = (lightbox.index + dir + lightbox.images.length) % lightbox.images.length;
     setLightbox({ ...lightbox, index: newIndex });
   }
+
+  const gridCols = imagesByCategory.length <= 3
+    ? "md:grid-cols-3"
+    : imagesByCategory.length === 4
+    ? "md:grid-cols-2 lg:grid-cols-4"
+    : "md:grid-cols-2 lg:grid-cols-3";
 
   return (
     <>
@@ -85,38 +132,47 @@ export function ServicesPreview() {
           </motion.div>
 
           {/* Services Grid */}
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+          <div className={cn("grid gap-6 md:gap-8", gridCols)}>
             {imagesByCategory.map((cat, index) => {
               const coverImage = cat.images.length > 0 ? cat.images[0].image_url : cat.fallback;
               const photoCount = cat.images.length;
+              if (!coverImage && photoCount === 0) return null;
 
               return (
                 <motion.div
-                  key={cat.key}
+                  key={cat.slug}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="group relative bg-card rounded-2xl overflow-hidden shadow-soft cursor-pointer"
-                  onClick={() => openLightbox(cat.key)}
+                  onClick={() => openLightbox(cat.slug)}
                 >
                   <div className="aspect-[4/3] overflow-hidden">
-                    <img
-                      src={coverImage}
-                      alt={t(cat.titleKey)}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    />
+                    {coverImage ? (
+                      <img
+                        src={coverImage}
+                        alt={cat.label}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-rose-gold/20 to-foreground/40 flex items-center justify-center text-5xl">
+                        {cat.emoji}
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
                   </div>
                   <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-6 text-primary-foreground">
                     <div className="flex items-center gap-2 mb-2">
                       <cat.icon className="w-5 h-5 text-rose-gold" />
-                      <h3 className="font-serif text-xl md:text-2xl font-semibold">{t(cat.titleKey)}</h3>
+                      <h3 className="font-serif text-xl md:text-2xl font-semibold">{cat.label}</h3>
                     </div>
-                    <p className="text-primary-foreground/80 text-sm leading-relaxed line-clamp-2">
-                      {t(cat.descKey)}
-                    </p>
+                    {cat.description && (
+                      <p className="text-primary-foreground/80 text-sm leading-relaxed line-clamp-2">
+                        {cat.description}
+                      </p>
+                    )}
                     {photoCount > 1 && (
                       <div className="mt-3 flex items-center gap-1 text-rose-gold text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                         Ver {photoCount} fotos
