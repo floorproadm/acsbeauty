@@ -369,6 +369,27 @@ export function ServicesTab() {
                     </span>
                   </span>
                   <div className="flex items-center gap-2">
+                    {(() => {
+                      const catSlug = categoryServices[0]?.category_slug
+                        || category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+                      return (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <a
+                              href={`/servicos/${catSlug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center justify-center h-7 w-7 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                              aria-label="Ver categoria como cliente"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </a>
+                          </TooltipTrigger>
+                          <TooltipContent>Ver categoria como cliente</TooltipContent>
+                        </Tooltip>
+                      );
+                    })()}
                     <Button
                       size="sm"
                       variant="ghost"
