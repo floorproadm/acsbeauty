@@ -252,6 +252,7 @@ export function SkusModal({
       promo_price: sku.promo_price?.toString() || "",
       variation_id: sku.variation_id,
       is_active: sku.is_active,
+      image_url: sku.image_url,
     });
     setShowForm(true);
   };
