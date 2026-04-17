@@ -1,27 +1,36 @@
 
+The user wants to seed the database with services and SKUs. This is a database-only operation, no code changes. I'll execute the two SQL files via migrations after approval.
 
-# Google Reviews Style — Testimonials Section
+Validation:
+- `acs_services_seed.sql`: Inserts services in 3 categories. No `ON CONFLICT` clause — re-running would create duplicates. Need to check if `slug` is unique in `services` table.
+- `acs_highlights_skus.sql`: Uses `ON CONFLICT (service_id, name)` — requires unique constraint on those columns. Need to verify it exists.
 
-## What changes
-Redesign the `Testimonials` section on the home page to look like authentic Google Reviews, matching the reference image style (dark cards, Google logo, avatar initials, star ratings, "Verified" badge, time ago, "Read more" link).
+Let me note both risks and proceed with the plan. The user has stated they will run via SQL Editor themselves, but I can run them as migrations from Lovable side too (cleaner, tracked).
 
-## Design details
-- **Section header**: Playfair Display heading with gold color, subtitle "Real reviews from real clients — verified on Google."
-- **Cards**: Dark background (`bg-[#1a1a1a]`), rounded corners, horizontal scroll on mobile (single card visible), grid on desktop
-- **Each card contains**:
-  - Colored circle avatar with initial letter (no stock photos — more authentic)
-  - Name + "X months ago" subtitle
-  - Google "G" logo icon (SVG) top-right
-  - 5 gold stars + green "Verified" text
-  - Review quote text in light gray
-  - Gold "Read more" link at bottom (links to Google Review page)
-- **Reviews**: Replace fake names/content with realistic beauty-specific reviews mentioning Ane, hair, brows, nails
-- **CTA**: Below cards, small "Leave a Review" button linking to Google Review URL
+## Plan: Seed Services + Highlights SKUs
 
-## Files to edit
-1. **`src/components/home/Testimonials.tsx`** — Full redesign with Google Review card style
-2. **`src/contexts/LanguageContext.tsx`** — Update description strings for both languages
+### What I'll do
+Run both SQL files as Supabase migrations (in order), then verify counts.
 
-## No database changes needed
-Static content only.
+### Execution order
+1. **Migration 1** — `acs_services_seed.sql`: Insert 10 services across Cabelo, Sobrancelhas, Unhas with placeholder prices (0.00) for Ane to fill via admin.
+2. **Migration 2** — `acs_highlights_skus.sql`: Insert 3 SKUs (Highlights Clássico, Balayage, Money Piece) for the `highlights-tecnicas` service.
+3. **Verification** — Run SELECT queries to confirm row counts and category distribution.
 
+### Pre-flight checks (will validate before running)
+- Confirm `services.slug` uniqueness handling — seed has no `ON CONFLICT`, so re-running would fail/duplicate. Will check existing rows first and skip insert if `slug` already exists.
+- Confirm `service_skus` has unique constraint on `(service_id, name)` for the SKU seed's `ON CONFLICT` to work; if missing, will adapt the SQL.
+
+### What I won't touch
+- No code changes (Book.tsx, Confirmation.tsx, edge functions remain intact).
+- No price values — Ane fills via `/admin → Serviços`.
+- No frontend price exposure (margin protection rule preserved).
+
+### After seeding
+You'll be able to:
+- Visit `/services` and see the 3 category cards.
+- Visit `/servicos/cabelo` and see Cortes, Tratamentos Capilares, Highlights Técnicas.
+- Visit `/servicos/cabelo/highlights-tecnicas` and see the 3 SKUs (Clássico, Balayage, Money Piece) without prices.
+- Use the `acs_services_flow_checklist.md` for manual QA.
+
+Approve and I'll run both migrations + verification.
