@@ -67,9 +67,29 @@ export default function Services() {
         descPt: "Nail art, alongamento e esmaltação em gel para mãos impecáveis.",
         descEn: "Nail art, extensions and gel polish for flawless hands.",
       },
+      maquiagem: {
+        namePt: "Maquiagem",
+        nameEn: "Makeup",
+        descPt: "Maquiagem profissional para eventos, noivas e produções especiais.",
+        descEn: "Professional makeup for events, brides and special productions.",
+      },
+      tratamentos: {
+        namePt: "Tratamentos",
+        nameEn: "Treatments",
+        descPt: "Tratamentos capilares personalizados para restaurar a saúde e o brilho do cabelo.",
+        descEn: "Customized hair treatments to restore health and shine.",
+      },
     };
     const meta = keyMap[slug];
-    if (!meta) return { name: category, description: "" };
+    if (!meta) {
+      return {
+        name: category,
+        description:
+          language === "pt"
+            ? "Conheça nossos serviços especializados."
+            : "Discover our specialized services.",
+      };
+    }
     return {
       name: language === "pt" ? meta.namePt : meta.nameEn,
       description: language === "pt" ? meta.descPt : meta.descEn,
