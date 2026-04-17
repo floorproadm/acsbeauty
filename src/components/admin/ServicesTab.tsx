@@ -374,34 +374,47 @@ export function ServicesTab() {
                           {/* Main row */}
                           <div className="p-3">
                             <div className="flex items-center justify-between gap-2">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <h3 className="font-semibold text-sm truncate">{service.name}</h3>
-                                  <Badge
-                                    variant="outline"
-                                    className={`${status.color} text-[10px] px-1.5 py-0 cursor-pointer hover:opacity-80 shrink-0`}
-                                    onClick={() =>
-                                      updateService.mutate({
-                                        id: service.id,
-                                        updates: { status: cycleStatus(service.status as ServiceStatus) },
-                                      })
-                                    }
-                                  >
-                                    {status.label}
-                                  </Badge>
-                                </div>
-                                <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                                  <span className="flex items-center gap-0.5">
-                                    <Clock className="w-3 h-3" />
-                                    {service.duration_minutes}min
-                                  </span>
-                                  <span className="flex items-center gap-0.5">
-                                    <DollarSign className="w-3 h-3" />
-                                    {service.price}
-                                    {service.promo_price && (
-                                      <span className="text-rose-gold ml-0.5">→{service.promo_price}</span>
-                                    )}
-                                  </span>
+                              <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                                {service.hero_image_url ? (
+                                  <img
+                                    src={service.hero_image_url}
+                                    alt={service.name}
+                                    className="h-12 w-12 rounded-lg object-cover border border-border shrink-0"
+                                  />
+                                ) : (
+                                  <div className="h-12 w-12 rounded-lg bg-muted border border-border flex items-center justify-center shrink-0">
+                                    <Sparkles className="w-4 h-4 text-muted-foreground/50" />
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="font-semibold text-sm truncate">{service.name}</h3>
+                                    <Badge
+                                      variant="outline"
+                                      className={`${status.color} text-[10px] px-1.5 py-0 cursor-pointer hover:opacity-80 shrink-0`}
+                                      onClick={() =>
+                                        updateService.mutate({
+                                          id: service.id,
+                                          updates: { status: cycleStatus(service.status as ServiceStatus) },
+                                        })
+                                      }
+                                    >
+                                      {status.label}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                                    <span className="flex items-center gap-0.5">
+                                      <Clock className="w-3 h-3" />
+                                      {service.duration_minutes}min
+                                    </span>
+                                    <span className="flex items-center gap-0.5">
+                                      <DollarSign className="w-3 h-3" />
+                                      {service.price}
+                                      {service.promo_price && (
+                                        <span className="text-rose-gold ml-0.5">→{service.promo_price}</span>
+                                      )}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
 
