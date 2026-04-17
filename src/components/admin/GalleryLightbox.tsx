@@ -6,6 +6,7 @@ interface LightboxImage {
   id: string;
   image_url: string;
   title: string | null;
+  media_type?: string | null;
 }
 
 interface GalleryLightboxProps {
@@ -79,11 +80,21 @@ export function GalleryLightbox({ images, index, onClose, onNavigate }: GalleryL
             className="max-w-5xl max-h-[90vh] mx-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <img
-              src={images[index].image_url}
-              alt={images[index].title || ""}
-              className="max-w-full max-h-[82vh] object-contain rounded-lg"
-            />
+            {images[index].media_type === "video" ? (
+              <video
+                src={images[index].image_url}
+                controls
+                autoPlay
+                playsInline
+                className="max-w-full max-h-[82vh] rounded-lg bg-black"
+              />
+            ) : (
+              <img
+                src={images[index].image_url}
+                alt={images[index].title || ""}
+                className="max-w-full max-h-[82vh] object-contain rounded-lg"
+              />
+            )}
             {images[index].title && (
               <p className="text-white/80 text-center mt-3 text-sm">{images[index].title}</p>
             )}
