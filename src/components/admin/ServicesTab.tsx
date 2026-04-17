@@ -253,7 +253,16 @@ export function ServicesTab() {
     createService.mutate(formData);
   };
 
-  const groupedServices = services?.reduce((acc, service) => {
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredServices = normalizedQuery
+    ? services?.filter((s) =>
+        [s.name, s.description, s.category]
+          .filter(Boolean)
+          .some((field) => field!.toLowerCase().includes(normalizedQuery))
+      )
+    : services;
+
+  const groupedServices = filteredServices?.reduce((acc, service) => {
     const category = service.category || "Outros";
     if (!acc[category]) acc[category] = [];
     acc[category].push(service);
