@@ -181,6 +181,7 @@ export function ServicesTab() {
         price: data.price,
         promo_price: data.promo_price ? Number(data.promo_price) : null,
         status: data.status,
+        hero_image_url: data.hero_image_url,
         is_active: true,
       });
       if (error) throw error;
