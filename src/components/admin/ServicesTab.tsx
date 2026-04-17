@@ -106,6 +106,7 @@ export function ServicesTab() {
   const [expandedService, setExpandedService] = useState<string | null>(null);
   const [variationsService, setVariationsService] = useState<Service | null>(null);
   const [skusService, setSkusService] = useState<Service | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: services, isLoading } = useQuery({
     queryKey: ["admin-services-unified"],
