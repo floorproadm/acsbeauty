@@ -144,14 +144,31 @@ function SortableCard({
         if (!selectionMode) onDoubleClick();
       }}
     >
-      <div className="aspect-square">
-        <img
-          src={image.image_url}
-          alt={image.title || ""}
-          className="w-full h-full object-cover pointer-events-none"
-          loading="lazy"
-          draggable={false}
-        />
+      <div className="aspect-square relative bg-muted">
+        {image.media_type === "video" ? (
+          <>
+            <video
+              src={image.image_url}
+              className="w-full h-full object-cover pointer-events-none"
+              preload="metadata"
+              muted
+              playsInline
+            />
+            <div className="absolute inset-0 flex items-center justify-center bg-foreground/20 pointer-events-none">
+              <div className="h-9 w-9 rounded-full bg-background/90 flex items-center justify-center shadow-md">
+                <Play className="h-4 w-4 text-foreground fill-foreground translate-x-[1px]" />
+              </div>
+            </div>
+          </>
+        ) : (
+          <img
+            src={image.image_url}
+            alt={image.title || ""}
+            className="w-full h-full object-cover pointer-events-none"
+            loading="lazy"
+            draggable={false}
+          />
+        )}
       </div>
       <div className="absolute top-1 left-1">
         <span className="text-[10px] font-medium bg-foreground/60 text-white px-1.5 py-0.5 rounded-full backdrop-blur-sm">
