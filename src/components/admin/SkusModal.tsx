@@ -323,6 +323,16 @@ export function SkusModal({
                     />
                   </div>
 
+                  <div className="col-span-2">
+                    <Label>Descrição (opcional)</Label>
+                    <Textarea
+                      placeholder="Detalhes sobre esta opção, técnica, recomendações..."
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      rows={3}
+                    />
+                  </div>
+
                   <div>
                     <Label>Duração (min) *</Label>
                     <Input
