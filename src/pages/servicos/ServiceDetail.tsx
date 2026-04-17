@@ -406,7 +406,7 @@ function SkuCard({ sku, index, serviceSlug }: { sku: any; index: number; service
           <div className="flex-1 min-w-0">
             <h4 className="font-medium text-foreground">{sku.name}</h4>
             {sku.description && (
-              <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{sku.description}</p>
+              <p className="text-xs text-muted-foreground mt-0.5 whitespace-pre-line">{sku.description}</p>
             )}
           </div>
           <Link to={`/book?service=${serviceSlug}${skuSlugParam}`}>
