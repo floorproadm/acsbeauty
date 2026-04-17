@@ -250,13 +250,26 @@ export default function ServiceDetail() {
                 </Link>
               </div>
 
-              {service.hero_image_url && (
+              {(service.hero_video_url || service.hero_image_url) && (
                 <div className="order-first md:order-last">
-                  <img
-                    src={service.hero_image_url}
-                    alt={service.name}
-                    className="w-full aspect-[4/3] md:aspect-square object-cover rounded-2xl shadow-card"
-                  />
+                  {service.hero_video_url ? (
+                    <video
+                      src={service.hero_video_url}
+                      poster={service.hero_image_url || undefined}
+                      controls
+                      playsInline
+                      preload="metadata"
+                      className="w-full aspect-[4/3] md:aspect-square object-cover rounded-2xl shadow-card bg-black"
+                    >
+                      Seu navegador não suporta vídeo.
+                    </video>
+                  ) : (
+                    <img
+                      src={service.hero_image_url!}
+                      alt={service.name}
+                      className="w-full aspect-[4/3] md:aspect-square object-cover rounded-2xl shadow-card"
+                    />
+                  )}
                 </div>
               )}
             </motion.div>
