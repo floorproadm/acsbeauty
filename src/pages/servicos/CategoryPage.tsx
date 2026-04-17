@@ -166,10 +166,19 @@ export default function CategoryPage() {
                     const minPrice = skuPrices?.[service.id] ?? service.price;
                     return (
                       <motion.div key={service.id} initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: index * 0.05 }}>
-                        <Link to={`/servicos/${categorySlug}/${service.slug}`} className="flex items-center gap-3 p-4 bg-card rounded-lg shadow-soft hover:shadow-card transition-all group">
-                          <div className="p-1.5 rounded-full bg-rose-gold/10">
-                            <Check className="w-4 h-4 text-rose-gold" />
-                          </div>
+                        <Link to={`/servicos/${categorySlug}/${service.slug}`} className="flex items-center gap-3 p-3 bg-card rounded-lg shadow-soft hover:shadow-card transition-all group">
+                          {service.hero_image_url ? (
+                            <img
+                              src={service.hero_image_url}
+                              alt={service.name}
+                              loading="lazy"
+                              className="w-14 h-14 rounded-md object-cover shrink-0 border border-border"
+                            />
+                          ) : (
+                            <div className="p-1.5 rounded-full bg-rose-gold/10 shrink-0">
+                              <Check className="w-4 h-4 text-rose-gold" />
+                            </div>
+                          )}
                           <div className="flex-1 min-w-0">
                             <span className="text-foreground font-medium group-hover:text-rose-gold transition-colors">{service.name}</span>
                           </div>
