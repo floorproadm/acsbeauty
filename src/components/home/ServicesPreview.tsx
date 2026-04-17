@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Scissors, Eye, Sparkles, X, ChevronLeft, ChevronRight, Calendar, ArrowRight, Image as ImageIcon } from "lucide-react";
+import { Scissors, Eye, Sparkles, X, ChevronLeft, ChevronRight, Calendar, ArrowRight, Image as ImageIcon, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
@@ -19,6 +19,7 @@ interface GalleryImage {
   title: string | null;
   image_url: string;
   display_order: number;
+  media_type?: string | null;
 }
 
 interface GalleryCategoryRow {
