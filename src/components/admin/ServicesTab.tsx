@@ -220,7 +220,6 @@ export function ServicesTab() {
         duration_minutes: formData.duration_minutes,
         price: formData.price,
         promo_price: formData.promo_price ? Number(formData.promo_price) : null,
-        status: formData.status,
         hero_image_url: formData.hero_image_url,
       },
     });
@@ -377,7 +376,6 @@ export function ServicesTab() {
                     </div>
                   ) : (
                     categoryServices.map((service) => {
-                      const status = statusConfig[service.status as ServiceStatus] || statusConfig.entry;
                       const isExpanded = expandedService === service.id;
                       const hasTechniques = service.variations_count > 0 || service.skus_count > 0;
 
@@ -404,21 +402,7 @@ export function ServicesTab() {
                                   </div>
                                 )}
                                 <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <h3 className="font-semibold text-sm truncate">{service.name}</h3>
-                                    <Badge
-                                      variant="outline"
-                                      className={`${status.color} text-[10px] px-1.5 py-0 cursor-pointer hover:opacity-80 shrink-0`}
-                                      onClick={() =>
-                                        updateService.mutate({
-                                          id: service.id,
-                                          updates: { status: cycleStatus(service.status as ServiceStatus) },
-                                        })
-                                      }
-                                    >
-                                      {status.label}
-                                    </Badge>
-                                  </div>
+                                  <h3 className="font-semibold text-sm truncate">{service.name}</h3>
                                   <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                                     <span className="flex items-center gap-0.5">
                                       <Clock className="w-3 h-3" />
@@ -610,24 +594,6 @@ function ServiceFormModal({
                 value={formData.duration_minutes}
                 onChange={(e) => setFormData({ ...formData, duration_minutes: Number(e.target.value) })}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) => setFormData({ ...formData, status: value as ServiceStatus })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(statusConfig).map(([key, config]) => (
-                    <SelectItem key={key} value={key}>
-                      {config.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
