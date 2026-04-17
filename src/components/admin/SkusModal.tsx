@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -48,6 +49,7 @@ import { ServiceImageUpload } from "./ServiceImageUpload";
 interface Sku {
   id: string;
   name: string;
+  description: string | null;
   duration_minutes: number;
   price: number | null;
   promo_price: number | null;
@@ -64,6 +66,7 @@ interface Variation {
 
 interface SkuFormData {
   name: string;
+  description: string;
   duration_minutes: number;
   price: string;
   promo_price: string;
@@ -74,6 +77,7 @@ interface SkuFormData {
 
 const emptyForm: SkuFormData = {
   name: "",
+  description: "",
   duration_minutes: 30,
   price: "",
   promo_price: "",
@@ -125,7 +129,7 @@ export function SkusModal({
       const { data, error } = await supabase
         .from("service_skus")
         .select(`
-          id, name, duration_minutes, price, promo_price, 
+          id, name, description, duration_minutes, price, promo_price, 
           variation_id, sort_order, is_active, image_url,
           service_variations (name)
         `)
@@ -149,6 +153,7 @@ export function SkusModal({
       const { error } = await supabase.from("service_skus").insert({
         service_id: serviceId,
         name: data.name.trim(),
+        description: data.description.trim() || null,
         duration_minutes: data.duration_minutes,
         price: data.price ? parseFloat(data.price) : null,
         promo_price: data.promo_price ? parseFloat(data.promo_price) : null,
@@ -177,6 +182,7 @@ export function SkusModal({
       const updates: Record<string, unknown> = {};
       
       if (data.name !== undefined) updates.name = data.name.trim();
+      if (data.description !== undefined) updates.description = data.description.trim() || null;
       if (data.duration_minutes !== undefined) updates.duration_minutes = data.duration_minutes;
       if (data.price !== undefined) updates.price = data.price ? parseFloat(data.price) : null;
       if (data.promo_price !== undefined) updates.promo_price = data.promo_price ? parseFloat(data.promo_price) : null;
@@ -247,6 +253,7 @@ export function SkusModal({
     setEditingId(sku.id);
     setFormData({
       name: sku.name,
+      description: sku.description || "",
       duration_minutes: sku.duration_minutes,
       price: sku.price?.toString() || "",
       promo_price: sku.promo_price?.toString() || "",
@@ -313,6 +320,16 @@ export function SkusModal({
                       placeholder="Ex: 30 min, Cabelo Curto..."
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <Label>Descrição (opcional)</Label>
+                    <Textarea
+                      placeholder="Detalhes sobre esta opção, técnica, recomendações..."
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      rows={3}
                     />
                   </div>
 
