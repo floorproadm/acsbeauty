@@ -55,8 +55,6 @@ import { VariationsModal } from "./VariationsModal";
 import { SkusModal } from "./SkusModal";
 import { ServiceImageUpload } from "./ServiceImageUpload";
 
-type ServiceStatus = "entry" | "upsell" | "premium" | "inactive";
-
 interface Service {
   id: string;
   name: string;
@@ -67,7 +65,6 @@ interface Service {
   price: number;
   promo_price: number | null;
   base_price: number | null;
-  status: ServiceStatus | null;
   is_active: boolean | null;
   hero_image_url: string | null;
   variations_count: number;
@@ -76,13 +73,6 @@ interface Service {
 
 const CATEGORIES = ["Cabelo", "Sobrancelhas", "Unhas", "Maquiagem", "Tratamentos"];
 
-const statusConfig: Record<ServiceStatus, { label: string; color: string }> = {
-  entry: { label: "Entrada", color: "bg-green-100 text-green-700" },
-  upsell: { label: "Upsell", color: "bg-blue-100 text-blue-700" },
-  premium: { label: "Premium", color: "bg-purple-100 text-purple-700" },
-  inactive: { label: "Inativo", color: "bg-gray-100 text-gray-500" },
-};
-
 const defaultFormData = {
   name: "",
   description: "",
@@ -90,7 +80,6 @@ const defaultFormData = {
   duration_minutes: 60,
   price: 0,
   promo_price: "",
-  status: "entry" as ServiceStatus,
   hero_image_url: null as string | null,
 };
 
