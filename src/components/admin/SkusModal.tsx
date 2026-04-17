@@ -300,6 +300,14 @@ export function SkusModal({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
+                    <Label className="mb-1.5 block">Foto (opcional)</Label>
+                    <ServiceImageUpload
+                      value={formData.image_url}
+                      onChange={(url) => setFormData({ ...formData, image_url: url })}
+                    />
+                  </div>
+
+                  <div className="col-span-2">
                     <Label>Nome da Opção *</Label>
                     <Input
                       placeholder="Ex: 30 min, Cabelo Curto..."
