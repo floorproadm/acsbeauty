@@ -183,6 +183,20 @@ const translations: Record<Language, Record<string, string>> = {
     "servicos.unhas.faq_4_q": "Do you offer nail strengthening treatments?",
     "servicos.unhas.faq_4_a": "Yes! We offer various strengthening treatments for weak or damaged nails. During your consultation, we'll assess your nails and recommend the best treatment for your needs.",
 
+    // Makeup
+    "servicos.maquiagem.badge": "Makeup Services",
+    "servicos.maquiagem.title": "Makeup That Reveals Your Best Self",
+    "servicos.maquiagem.subtitle": "Professional makeup for brides, events, and special productions. Long-lasting finish with techniques tailored to your features.",
+    "servicos.maquiagem.about_title": "Our Approach to Makeup",
+    "servicos.maquiagem.about_text": "We believe great makeup enhances who you already are. Our team blends classic technique with modern trends, using premium products to deliver flawless, long-lasting looks for every occasion — from intimate moments to your most important days.",
+
+    // Treatments
+    "servicos.tratamentos.badge": "Hair Treatments",
+    "servicos.tratamentos.title": "Treatments That Restore Health and Shine",
+    "servicos.tratamentos.subtitle": "Personalized hair treatments to repair, hydrate, and strengthen — bringing your hair back to life with visible, lasting results.",
+    "servicos.tratamentos.about_title": "Our Approach to Treatments",
+    "servicos.tratamentos.about_text": "Each strand tells a story. We diagnose your hair's specific needs and design a treatment plan that restores integrity, shine, and softness — using high-performance products and techniques refined by years of expertise.",
+
     // Gallery
     "servicos.gallery.title": "Before & After Results",
     "servicos.gallery.subtitle": "See the transformations achieved by our specialists. Tap to toggle between before and after.",
@@ -587,7 +601,22 @@ const translations: Record<Language, Record<string, string>> = {
     "servicos.unhas.faq_3_q": "Quanto tempo leva uma sessão de manicure?",
     "servicos.unhas.faq_3_a": "Uma manicure clássica leva cerca de 45 minutos, enquanto uma manicure em gel leva aproximadamente 1 hora. Designs de nail art podem requerer tempo adicional dependendo da complexidade.",
     "servicos.unhas.faq_4_q": "Vocês oferecem tratamentos de fortalecimento?",
-    "servicos.unhas.faq_4_a": "Sim! Oferecemos vários tratamentos de fortalecimento para unhas fracas ou danificadas. Durante sua consulta, avaliaremos suas unhas e recomendaremos o melhor tratamento para suas necessidades.",
+    "servicos.unhas.faq_4_a": "Sim! Oferecemos diversos tratamentos de fortalecimento para unhas fracas ou danificadas. Durante sua consulta, avaliaremos suas unhas e recomendaremos o melhor tratamento para suas necessidades.",
+
+    // Maquiagem
+    "servicos.maquiagem.badge": "Serviços de Maquiagem",
+    "servicos.maquiagem.title": "Maquiagem que Revela Seu Melhor",
+    "servicos.maquiagem.subtitle": "Maquiagem profissional para noivas, eventos e produções especiais. Acabamento duradouro com técnicas adaptadas aos seus traços.",
+    "servicos.maquiagem.about_title": "Nossa Abordagem para Maquiagem",
+    "servicos.maquiagem.about_text": "Acreditamos que uma boa maquiagem realça quem você já é. Nossa equipe combina técnica clássica com tendências modernas, usando produtos premium para entregar visuais impecáveis e duradouros — dos momentos íntimos aos seus dias mais importantes.",
+
+    // Tratamentos
+    "servicos.tratamentos.badge": "Tratamentos Capilares",
+    "servicos.tratamentos.title": "Tratamentos que Devolvem Saúde e Brilho",
+    "servicos.tratamentos.subtitle": "Tratamentos capilares personalizados para reparar, hidratar e fortalecer — trazendo seu cabelo de volta à vida com resultados visíveis e duradouros.",
+    "servicos.tratamentos.about_title": "Nossa Abordagem para Tratamentos",
+    "servicos.tratamentos.about_text": "Cada fio conta uma história. Diagnosticamos as necessidades específicas do seu cabelo e desenhamos um plano de tratamento que restaura integridade, brilho e maciez — com produtos de alta performance e técnicas refinadas por anos de experiência.",
+
 
     // Gallery
     "servicos.gallery.title": "Resultados Antes e Depois",

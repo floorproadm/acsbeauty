@@ -1,7 +1,7 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowLeft, Check, Loader2, Scissors, Eye, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Loader2, Scissors, Eye, Sparkles, Brush, Droplet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -14,6 +14,7 @@ import browsImage from "@/assets/brows-service.jpg";
 import nailsImage from "@/assets/nails-service.jpg";
 
 // Category display metadata by category_slug
+// TODO: Replace makeup/treatments fallback images with dedicated assets
 const CATEGORY_CONFIG: Record<string, {
   icon: typeof Scissors;
   fallbackImage: string;
@@ -50,6 +51,24 @@ const CATEGORY_CONFIG: Record<string, {
     aboutTitleKey: "servicos.unhas.about_title",
     aboutTextKey: "servicos.unhas.about_text",
   },
+  maquiagem: {
+    icon: Brush,
+    fallbackImage: browsImage,
+    badgeKey: "servicos.maquiagem.badge",
+    titleKey: "servicos.maquiagem.title",
+    subtitleKey: "servicos.maquiagem.subtitle",
+    aboutTitleKey: "servicos.maquiagem.about_title",
+    aboutTextKey: "servicos.maquiagem.about_text",
+  },
+  tratamentos: {
+    icon: Droplet,
+    fallbackImage: hairImage,
+    badgeKey: "servicos.tratamentos.badge",
+    titleKey: "servicos.tratamentos.title",
+    subtitleKey: "servicos.tratamentos.subtitle",
+    aboutTitleKey: "servicos.tratamentos.about_title",
+    aboutTextKey: "servicos.tratamentos.about_text",
+  },
 };
 
 export default function CategoryPage() {
@@ -57,6 +76,11 @@ export default function CategoryPage() {
   const { t } = useLanguage();
   const categorySlug = categoria?.toLowerCase() || "";
   const config = CATEGORY_CONFIG[categorySlug];
+
+  // Defensive guard: redirect to /services if category isn't configured
+  if (!config) {
+    return <Navigate to="/services" replace />;
+  }
 
   // Fetch services by category_slug
   const { data: services, isLoading } = useQuery({

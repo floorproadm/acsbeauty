@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, ArrowRight, Scissors, Eye, Palette } from "lucide-react";
+import { Sparkles, ArrowRight, Scissors, Eye, Palette, Brush, Droplet } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -13,10 +13,13 @@ import browsServiceImg from "@/assets/brows-service.jpg";
 import nailsServiceImg from "@/assets/nails-service.jpg";
 
 // Fallback images and icons by category_slug
+// TODO: Replace makeup/treatments fallback images with dedicated assets
 const CATEGORY_META: Record<string, { icon: typeof Scissors; image: string }> = {
   cabelo: { icon: Scissors, image: hairServiceImg },
   sobrancelhas: { icon: Eye, image: browsServiceImg },
   unhas: { icon: Palette, image: nailsServiceImg },
+  maquiagem: { icon: Brush, image: browsServiceImg },
+  tratamentos: { icon: Droplet, image: hairServiceImg },
 };
 
 export default function Services() {
