@@ -52,16 +52,35 @@ import {
   X,
   ExternalLink,
   Eye,
+  GripVertical,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { VariationsModal } from "./VariationsModal";
 import { SkusModal } from "./SkusModal";
 import { ServiceImageUpload } from "./ServiceImageUpload";
 import { ServiceVideoUpload } from "./ServiceVideoUpload";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface Service {
   id: string;
   name: string;
+  slug?: string;
   description: string | null;
   category: string | null;
   category_slug: string | null;
@@ -72,6 +91,7 @@ interface Service {
   is_active: boolean | null;
   hero_image_url: string | null;
   hero_video_url: string | null;
+  sort_order: number;
   variations_count: number;
   skus_count: number;
 }
