@@ -178,28 +178,17 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
     },
   });
 
-  const selectedService = services?.find((s) => s.id === serviceId);
-  const selectedSku = skus?.find((s) => s.id === skuId);
-  const hasVariations = (variations?.length ?? 0) > 0;
-  const hasSkus = (skus?.length ?? 0) > 0;
-
-  // Effective duration & price (SKU > Service)
-  const effectiveDuration = selectedSku?.duration_minutes ?? selectedService?.duration_minutes ?? 0;
-  const effectivePrice = useMemo(() => {
-    if (selectedSku) {
-      return selectedSku.promo_price != null && Number(selectedSku.promo_price) < Number(selectedSku.price)
-        ? Number(selectedSku.promo_price)
-        : Number(selectedSku.price);
-    }
-    return selectedService?.price ?? null;
-  }, [selectedSku, selectedService]);
+  // Effective duration & price come from selected catalog entry
+  const effectiveDuration = selectedEntry?.duration ?? 0;
+  const effectivePrice = selectedEntry?.price ?? null;
+  const hasSelection = !!selectedEntry;
 
   // Reset slot when staff or service changes
   useEffect(() => {
     setSelectedDate(undefined);
     setSelectedSlot(null);
     setSlots([]);
-  }, [staffId, serviceId, variationId, skuId]);
+  }, [staffId, serviceId, skuId]);
 
   const handleClientSelect = (c: { id: string; name: string; phone: string | null; email: string | null }) => {
     setClientId(c.id);
