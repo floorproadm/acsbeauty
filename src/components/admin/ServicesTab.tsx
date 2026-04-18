@@ -131,6 +131,7 @@ export function ServicesTab() {
           .from("services")
           .select("*")
           .order("category", { ascending: true })
+          .order("sort_order", { ascending: true })
           .order("name", { ascending: true }),
         supabase.from("service_variations").select("service_id"),
         supabase.from("service_skus").select("service_id"),
@@ -154,6 +155,25 @@ export function ServicesTab() {
         variations_count: varCounts[s.id] || 0,
         skus_count: skuCounts[s.id] || 0,
       })) as Service[];
+    },
+  });
+
+  const reorderServices = useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      // Update sort_order one by one (small lists, fine for admin)
+      await Promise.all(
+        orderedIds.map((id, idx) =>
+          supabase.from("services").update({ sort_order: idx + 1 }).eq("id", id)
+        )
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-services-unified"] });
+      toast({ title: "Ordem salva" });
+    },
+    onError: () => {
+      toast({ title: "Erro ao salvar ordem", variant: "destructive" });
+      queryClient.invalidateQueries({ queryKey: ["admin-services-unified"] });
     },
   });
 
