@@ -438,16 +438,14 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
                     <CommandEmpty>Nenhum serviço encontrado.</CommandEmpty>
                     {catalog && Object.entries(
                       catalog.reduce<Record<string, typeof catalog>>((acc, e) => {
-                        (acc[e.serviceName] ||= []).push(e);
+                        (acc[e.category] ||= []).push(e);
                         return acc;
                       }, {})
-                    ).map(([groupName, items]) => (
-                      <CommandGroup key={groupName} heading={groupName}>
+                    ).map(([categoryName, items]) => (
+                      <CommandGroup key={categoryName} heading={categoryName}>
                         {items.map((entry) => {
                           const isSelected = selectedEntry?.key === entry.key;
-                          const label = entry.skuName
-                            ? `${entry.variationName ? `${entry.variationName} · ` : ""}${entry.skuName}`
-                            : "Padrão";
+                          const detail = [entry.variationName, entry.skuName].filter(Boolean).join(" · ");
                           return (
                             <CommandItem
                               key={entry.key}
@@ -460,7 +458,10 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
                               className="flex items-center gap-2"
                             >
                               <Check className={cn("h-4 w-4 shrink-0", isSelected ? "opacity-100" : "opacity-0")} />
-                              <span className="flex-1 truncate">{label}</span>
+                              <div className="flex-1 min-w-0">
+                                <div className="truncate font-medium">{entry.serviceName}</div>
+                                {detail && <div className="truncate text-xs text-muted-foreground">{detail}</div>}
+                              </div>
                               <span className="shrink-0 text-xs text-muted-foreground">
                                 {entry.duration}min{entry.price != null && ` · $${entry.price.toFixed(2)}`}
                               </span>
