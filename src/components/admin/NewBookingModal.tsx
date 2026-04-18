@@ -72,7 +72,7 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
     queryKey: ["admin-booking-catalog"],
     queryFn: async () => {
       const [servicesRes, skusRes, variationsRes] = await Promise.all([
-        supabase.from("services").select("id, name, duration_minutes, price").eq("is_active", true).order("sort_order").order("name"),
+        supabase.from("services").select("id, name, category, duration_minutes, price").eq("is_active", true).order("sort_order").order("name"),
         supabase.from("service_skus").select("id, name, duration_minutes, price, promo_price, variation_id, service_id").eq("is_active", true).order("sort_order"),
         supabase.from("service_variations").select("id, name, service_id").eq("is_active", true),
       ]);
@@ -85,11 +85,11 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
       const variationsData = variationsRes.data || [];
       const variationMap = new Map(variationsData.map((v) => [v.id, v.name]));
 
-      // Build flat entries: each SKU is one entry; services without SKUs become a single entry
       type Entry = {
-        key: string; // unique key (sku-<id> or service-<id>)
+        key: string;
         serviceId: string;
         skuId: string | null;
+        category: string;
         serviceName: string;
         variationName: string | null;
         skuName: string | null;
@@ -106,18 +106,20 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
       });
 
       servicesData.forEach((svc) => {
+        const category = svc.category || "Outros";
         const svcSkus = skusByService.get(svc.id) || [];
         if (svcSkus.length === 0) {
           entries.push({
             key: `service-${svc.id}`,
             serviceId: svc.id,
             skuId: null,
+            category,
             serviceName: svc.name,
             variationName: null,
             skuName: null,
             duration: svc.duration_minutes,
             price: svc.price != null ? Number(svc.price) : null,
-            searchText: svc.name.toLowerCase(),
+            searchText: `${category} ${svc.name}`.toLowerCase(),
           });
         } else {
           svcSkus.forEach((sk) => {
@@ -129,12 +131,13 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
               key: `sku-${sk.id}`,
               serviceId: svc.id,
               skuId: sk.id,
+              category,
               serviceName: svc.name,
               variationName,
               skuName: sk.name,
               duration: sk.duration_minutes,
               price,
-              searchText: `${svc.name} ${variationName || ""} ${sk.name}`.toLowerCase(),
+              searchText: `${category} ${svc.name} ${variationName || ""} ${sk.name}`.toLowerCase(),
             });
           });
         }
@@ -435,16 +438,14 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
                     <CommandEmpty>Nenhum serviço encontrado.</CommandEmpty>
                     {catalog && Object.entries(
                       catalog.reduce<Record<string, typeof catalog>>((acc, e) => {
-                        (acc[e.serviceName] ||= []).push(e);
+                        (acc[e.category] ||= []).push(e);
                         return acc;
                       }, {})
-                    ).map(([groupName, items]) => (
-                      <CommandGroup key={groupName} heading={groupName}>
+                    ).map(([categoryName, items]) => (
+                      <CommandGroup key={categoryName} heading={categoryName}>
                         {items.map((entry) => {
                           const isSelected = selectedEntry?.key === entry.key;
-                          const label = entry.skuName
-                            ? `${entry.variationName ? `${entry.variationName} · ` : ""}${entry.skuName}`
-                            : "Padrão";
+                          const detail = [entry.variationName, entry.skuName].filter(Boolean).join(" · ");
                           return (
                             <CommandItem
                               key={entry.key}
@@ -457,7 +458,10 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
                               className="flex items-center gap-2"
                             >
                               <Check className={cn("h-4 w-4 shrink-0", isSelected ? "opacity-100" : "opacity-0")} />
-                              <span className="flex-1 truncate">{label}</span>
+                              <div className="flex-1 min-w-0">
+                                <div className="truncate font-medium">{entry.serviceName}</div>
+                                {detail && <div className="truncate text-xs text-muted-foreground">{detail}</div>}
+                              </div>
                               <span className="shrink-0 text-xs text-muted-foreground">
                                 {entry.duration}min{entry.price != null && ` · $${entry.price.toFixed(2)}`}
                               </span>
