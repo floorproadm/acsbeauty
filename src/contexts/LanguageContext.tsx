@@ -617,7 +617,6 @@ const translations: Record<Language, Record<string, string>> = {
     "servicos.tratamentos.about_title": "Nossa Abordagem para Tratamentos",
     "servicos.tratamentos.about_text": "Cada fio conta uma história. Diagnosticamos as necessidades específicas do seu cabelo e desenhamos um plano de tratamento que restaura integridade, brilho e maciez — com produtos de alta performance e técnicas refinadas por anos de experiência.",
 
-    "servicos.unhas.faq_4_a": "Sim! Oferecemos vários tratamentos de fortalecimento para unhas fracas ou danificadas. Durante sua consulta, avaliaremos suas unhas e recomendaremos o melhor tratamento para suas necessidades.",
 
     // Gallery
     "servicos.gallery.title": "Resultados Antes e Depois",
