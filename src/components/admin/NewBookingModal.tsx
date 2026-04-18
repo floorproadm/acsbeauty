@@ -72,7 +72,7 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
     queryKey: ["admin-booking-catalog"],
     queryFn: async () => {
       const [servicesRes, skusRes, variationsRes] = await Promise.all([
-        supabase.from("services").select("id, name, category, duration_minutes, price").eq("is_active", true).order("sort_order").order("name"),
+        supabase.from("services").select("id, name, category, duration_minutes, price").eq("is_active", true).order("category", { ascending: true }).order("name", { ascending: true }),
         supabase.from("service_skus").select("id, name, duration_minutes, price, promo_price, variation_id, service_id").eq("is_active", true).order("sort_order"),
         supabase.from("service_variations").select("id, name, service_id").eq("is_active", true),
       ]);
