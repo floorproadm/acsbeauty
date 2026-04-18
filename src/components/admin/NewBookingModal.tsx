@@ -394,56 +394,84 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
             </Select>
           </div>
 
-          {/* Service */}
+          {/* Unified Service / Technique / Option search */}
           <div className="space-y-1.5">
             <Label>Serviço *</Label>
-            <Select value={serviceId} onValueChange={(v) => { setServiceId(v); setVariationId(""); setSkuId(""); }}>
-              <SelectTrigger><SelectValue placeholder="Selecione um serviço" /></SelectTrigger>
-              <SelectContent>
-                {services?.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.name} ({s.duration_minutes}min)
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={serviceSearchOpen} onOpenChange={setServiceSearchOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className="w-full justify-between font-normal"
+                  type="button"
+                >
+                  {selectedEntry ? (
+                    <span className="flex items-center gap-2 truncate text-left">
+                      <span className="truncate">
+                        {selectedEntry.serviceName}
+                        {selectedEntry.variationName && <span className="text-muted-foreground"> · {selectedEntry.variationName}</span>}
+                        {selectedEntry.skuName && <span className="text-muted-foreground"> · {selectedEntry.skuName}</span>}
+                      </span>
+                      <span className="ml-auto shrink-0 text-xs text-muted-foreground">
+                        {selectedEntry.duration}min{selectedEntry.price != null && ` · $${selectedEntry.price.toFixed(2)}`}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">Buscar serviço, técnica ou opção…</span>
+                  )}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command
+                  filter={(value, search) => {
+                    const entry = catalog?.find((e) => e.key === value);
+                    if (!entry) return 0;
+                    return entry.searchText.includes(search.toLowerCase()) ? 1 : 0;
+                  }}
+                >
+                  <CommandInput placeholder="Digite para filtrar…" />
+                  <CommandList className="max-h-[320px]">
+                    <CommandEmpty>Nenhum serviço encontrado.</CommandEmpty>
+                    {catalog && Object.entries(
+                      catalog.reduce<Record<string, typeof catalog>>((acc, e) => {
+                        (acc[e.serviceName] ||= []).push(e);
+                        return acc;
+                      }, {})
+                    ).map(([groupName, items]) => (
+                      <CommandGroup key={groupName} heading={groupName}>
+                        {items.map((entry) => {
+                          const isSelected = selectedEntry?.key === entry.key;
+                          const label = entry.skuName
+                            ? `${entry.variationName ? `${entry.variationName} · ` : ""}${entry.skuName}`
+                            : "Padrão";
+                          return (
+                            <CommandItem
+                              key={entry.key}
+                              value={entry.key}
+                              onSelect={() => {
+                                setServiceId(entry.serviceId);
+                                setSkuId(entry.skuId || "");
+                                setServiceSearchOpen(false);
+                              }}
+                              className="flex items-center gap-2"
+                            >
+                              <Check className={cn("h-4 w-4 shrink-0", isSelected ? "opacity-100" : "opacity-0")} />
+                              <span className="flex-1 truncate">{label}</span>
+                              <span className="shrink-0 text-xs text-muted-foreground">
+                                {entry.duration}min{entry.price != null && ` · $${entry.price.toFixed(2)}`}
+                              </span>
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+                    ))}
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
-          {/* Variation (Técnica) */}
-          {hasVariations && (
-            <div className="space-y-1.5">
-              <Label>Técnica</Label>
-              <Select value={variationId} onValueChange={(v) => { setVariationId(v); setSkuId(""); }}>
-                <SelectTrigger><SelectValue placeholder="Selecione a técnica" /></SelectTrigger>
-                <SelectContent>
-                  {variations?.map((v) => (
-                    <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {/* SKU (Opção) */}
-          {hasSkus && (
-            <div className="space-y-1.5">
-              <Label>Opção *</Label>
-              <Select value={skuId} onValueChange={setSkuId}>
-                <SelectTrigger><SelectValue placeholder="Selecione a opção" /></SelectTrigger>
-                <SelectContent>
-                  {skus?.map((s) => {
-                    const price = s.promo_price != null && Number(s.promo_price) < Number(s.price)
-                      ? Number(s.promo_price) : Number(s.price);
-                    return (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.name} — {s.duration_minutes}min · ${price?.toFixed(2)}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
 
           {/* Initial Status */}
           <div className="space-y-1.5">
