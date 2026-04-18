@@ -601,7 +601,8 @@ const translations: Record<Language, Record<string, string>> = {
     "servicos.unhas.faq_3_q": "Quanto tempo leva uma sessão de manicure?",
     "servicos.unhas.faq_3_a": "Uma manicure clássica leva cerca de 45 minutos, enquanto uma manicure em gel leva aproximadamente 1 hora. Designs de nail art podem requerer tempo adicional dependendo da complexidade.",
     "servicos.unhas.faq_4_q": "Vocês oferecem tratamentos de fortalecimento?",
-    "servicos.unhas.faq_4_a_pt_placeholder": "",
+    "servicos.unhas.faq_4_a": "Sim! Oferecemos diversos tratamentos de fortalecimento para unhas fracas ou danificadas. Durante sua consulta, avaliaremos suas unhas e recomendaremos o melhor tratamento para suas necessidades.",
+
     // Maquiagem
     "servicos.maquiagem.badge": "Serviços de Maquiagem",
     "servicos.maquiagem.title": "Maquiagem que Revela Seu Melhor",
