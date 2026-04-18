@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import hairImage from "@/assets/hair-service.png";
 import browsImage from "@/assets/brows-service.jpg";
 import nailsImage from "@/assets/nails-service.jpg";
+import makeupImage from "@/assets/makeup-service.jpg";
+import treatmentsImage from "@/assets/treatments-service.jpg";
 
 // Category display metadata by category_slug
 // TODO: Replace makeup/treatments fallback images with dedicated assets
@@ -53,7 +55,7 @@ const CATEGORY_CONFIG: Record<string, {
   },
   maquiagem: {
     icon: Brush,
-    fallbackImage: browsImage,
+    fallbackImage: makeupImage,
     badgeKey: "servicos.maquiagem.badge",
     titleKey: "servicos.maquiagem.title",
     subtitleKey: "servicos.maquiagem.subtitle",
@@ -62,7 +64,7 @@ const CATEGORY_CONFIG: Record<string, {
   },
   tratamentos: {
     icon: Droplet,
-    fallbackImage: hairImage,
+    fallbackImage: treatmentsImage,
     badgeKey: "servicos.tratamentos.badge",
     titleKey: "servicos.tratamentos.title",
     subtitleKey: "servicos.tratamentos.subtitle",
