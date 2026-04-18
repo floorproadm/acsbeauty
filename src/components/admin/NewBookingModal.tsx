@@ -272,7 +272,6 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
     setClientPhone("");
     setStaffId("none");
     setServiceId("");
-    setVariationId("");
     setSkuId("");
     setSelectedDate(undefined);
     setSelectedSlot(null);
