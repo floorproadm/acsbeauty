@@ -302,6 +302,25 @@ export function ServicesTab() {
     setOpenCategories((prev) => ({ ...prev, [cat]: !prev[cat] }));
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (category: string, event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    if (normalizedQuery) return; // disable reorder while filtering
+
+    const list = groupedServices?.[category] || [];
+    const oldIndex = list.findIndex((s) => s.id === active.id);
+    const newIndex = list.findIndex((s) => s.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = arrayMove(list, oldIndex, newIndex);
+    reorderServices.mutate(reordered.map((s) => s.id));
+  };
+
   return (
     <TooltipProvider delayDuration={200}>
     <div className="space-y-4">
