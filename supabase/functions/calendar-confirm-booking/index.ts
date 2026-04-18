@@ -216,7 +216,7 @@ serve(async (req) => {
     // Create Google Calendar event
     const calendarEvent = {
       summary: `${eventTitle} - ${client_name}`,
-      description: `Cliente: ${client_name}\nTelefone: ${client_phone}${staffName ? `\nProfissional: ${staffName}` : ''}${client_instagram ? `\nInstagram: ${client_instagram}` : ''}${notes ? `\nNotas: ${notes}` : ''}`,
+      description: `Cliente: ${client_name}${effectivePhone ? `\nTelefone: ${effectivePhone}` : ''}${staffName ? `\nProfissional: ${staffName}` : ''}${client_instagram ? `\nInstagram: ${client_instagram}` : ''}${notes ? `\nNotas: ${notes}` : ''}`,
       start: { dateTime: start_time, timeZone: timezone },
       end: { dateTime: end_time, timeZone: timezone },
       reminders: {
@@ -246,35 +246,37 @@ serve(async (req) => {
     const createdEvent = await createEventResponse.json();
     console.log('Created Google Calendar event:', createdEvent.id);
 
-    // Upsert client by phone
-    const { data: existingClient } = await supabase
-      .from('clients').select('id').eq('phone', client_phone).single();
+    // Upsert client by phone (only if phone provided)
+    let clientId: string | null = null;
 
-    let clientId: string;
-    
-    if (existingClient) {
-      clientId = existingClient.id;
-      await supabase.from('clients').update({
-        name: client_name,
-        email: client_email || null,
-        instagram: client_instagram || null,
-        last_visit_at: new Date().toISOString(),
-      }).eq('id', clientId);
-    } else {
-      const { data: newClient, error: clientError } = await supabase
-        .from('clients').insert({
+    if (effectivePhone) {
+      const { data: existingClient } = await supabase
+        .from('clients').select('id').eq('phone', effectivePhone).maybeSingle();
+
+      if (existingClient) {
+        clientId = existingClient.id;
+        await supabase.from('clients').update({
           name: client_name,
-          phone: client_phone,
-          email: client_email || null,
+          email: client_email?.trim() || null,
           instagram: client_instagram || null,
-        }).select().single();
-      if (clientError) throw clientError;
-      clientId = newClient.id;
+          last_visit_at: new Date().toISOString(),
+        }).eq('id', clientId);
+      } else {
+        const { data: newClient, error: clientError } = await supabase
+          .from('clients').insert({
+            name: client_name,
+            phone: effectivePhone,
+            email: client_email?.trim() || null,
+            instagram: client_instagram || null,
+          }).select().single();
+        if (clientError) throw clientError;
+        clientId = newClient.id;
+      }
     }
 
-    // Fetch SKU price from DB (price lock)
-    let skuTotalPrice: number | null = null;
-    if (sku_id) {
+    // Resolve total price: explicit > SKU lookup
+    let resolvedTotalPrice: number | null = providedTotalPrice ?? null;
+    if (resolvedTotalPrice == null && sku_id) {
       const { data: skuData, error: skuError } = await supabase
         .from('service_skus')
         .select('price, promo_price')
@@ -282,11 +284,14 @@ serve(async (req) => {
         .single();
       
       if (!skuError && skuData) {
-        skuTotalPrice = (skuData.promo_price != null && Number(skuData.promo_price) < Number(skuData.price))
+        resolvedTotalPrice = (skuData.promo_price != null && Number(skuData.promo_price) < Number(skuData.price))
           ? Number(skuData.promo_price)
           : Number(skuData.price);
       }
     }
+
+    // Resolve status: explicit > confirmed
+    const bookingStatus = initialStatus === 'requested' ? 'requested' : 'confirmed';
 
     // Create booking
     const { data: booking, error: bookingError } = await supabase
@@ -294,17 +299,17 @@ serve(async (req) => {
       .insert({
         client_id: clientId,
         client_name,
-        client_phone,
-        client_email: client_email || `${client_phone.replace(/\D/g, '')}@placeholder.com`,
+        client_phone: effectivePhone,
+        client_email: effectiveEmail,
         service_id: service_id || null,
         package_id: package_id || null,
         sku_id: sku_id || null,
         staff_id: staff_id || null,
-        total_price: skuTotalPrice,
+        total_price: resolvedTotalPrice,
         start_time,
         end_time,
         timezone,
-        status: 'confirmed',
+        status: bookingStatus,
         google_calendar_event_id: createdEvent.id,
         notes: notes || null,
       })
@@ -324,8 +329,10 @@ serve(async (req) => {
       throw bookingError;
     }
 
-    // Delete the hold
-    await supabase.from('booking_holds').delete().eq('id', hold_id);
+    // Delete the hold (if any)
+    if (hold_id) {
+      await supabase.from('booking_holds').delete().eq('id', hold_id);
+    }
 
     // Fetch service/package details for confirmation
     let serviceData = null;
