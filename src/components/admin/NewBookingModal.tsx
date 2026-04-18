@@ -67,56 +67,87 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
     },
   });
 
-  // Services
-  const { data: services } = useQuery({
-    queryKey: ["admin-services-for-booking"],
+  // Unified flat catalog: services + their SKUs (with variation labels) for a single searchable list
+  const { data: catalog } = useQuery({
+    queryKey: ["admin-booking-catalog"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("services")
-        .select("id, name, duration_minutes, price")
-        .eq("is_active", true)
-        .order("sort_order")
-        .order("name");
-      if (error) throw error;
-      return data;
+      const [servicesRes, skusRes, variationsRes] = await Promise.all([
+        supabase.from("services").select("id, name, duration_minutes, price").eq("is_active", true).order("sort_order").order("name"),
+        supabase.from("service_skus").select("id, name, duration_minutes, price, promo_price, variation_id, service_id").eq("is_active", true).order("sort_order"),
+        supabase.from("service_variations").select("id, name, service_id").eq("is_active", true),
+      ]);
+      if (servicesRes.error) throw servicesRes.error;
+      if (skusRes.error) throw skusRes.error;
+      if (variationsRes.error) throw variationsRes.error;
+
+      const servicesData = servicesRes.data || [];
+      const skusData = skusRes.data || [];
+      const variationsData = variationsRes.data || [];
+      const variationMap = new Map(variationsData.map((v) => [v.id, v.name]));
+
+      // Build flat entries: each SKU is one entry; services without SKUs become a single entry
+      type Entry = {
+        key: string; // unique key (sku-<id> or service-<id>)
+        serviceId: string;
+        skuId: string | null;
+        serviceName: string;
+        variationName: string | null;
+        skuName: string | null;
+        duration: number;
+        price: number | null;
+        searchText: string;
+      };
+      const entries: Entry[] = [];
+      const skusByService = new Map<string, typeof skusData>();
+      skusData.forEach((s) => {
+        const arr = skusByService.get(s.service_id) || [];
+        arr.push(s);
+        skusByService.set(s.service_id, arr);
+      });
+
+      servicesData.forEach((svc) => {
+        const svcSkus = skusByService.get(svc.id) || [];
+        if (svcSkus.length === 0) {
+          entries.push({
+            key: `service-${svc.id}`,
+            serviceId: svc.id,
+            skuId: null,
+            serviceName: svc.name,
+            variationName: null,
+            skuName: null,
+            duration: svc.duration_minutes,
+            price: svc.price != null ? Number(svc.price) : null,
+            searchText: svc.name.toLowerCase(),
+          });
+        } else {
+          svcSkus.forEach((sk) => {
+            const variationName = sk.variation_id ? variationMap.get(sk.variation_id) || null : null;
+            const price = sk.promo_price != null && Number(sk.promo_price) < Number(sk.price)
+              ? Number(sk.promo_price)
+              : (sk.price != null ? Number(sk.price) : null);
+            entries.push({
+              key: `sku-${sk.id}`,
+              serviceId: svc.id,
+              skuId: sk.id,
+              serviceName: svc.name,
+              variationName,
+              skuName: sk.name,
+              duration: sk.duration_minutes,
+              price,
+              searchText: `${svc.name} ${variationName || ""} ${sk.name}`.toLowerCase(),
+            });
+          });
+        }
+      });
+
+      return entries;
     },
   });
 
-  // Variations (Técnicas) for selected service
-  const { data: variations } = useQuery({
-    queryKey: ["admin-variations-for-booking", serviceId],
-    enabled: !!serviceId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("service_variations")
-        .select("id, name")
-        .eq("service_id", serviceId)
-        .eq("is_active", true)
-        .order("sort_order");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  // SKUs (Opções) — filtered by service + (variation if any exist)
-  const { data: skus } = useQuery({
-    queryKey: ["admin-skus-for-booking", serviceId, variationId],
-    enabled: !!serviceId,
-    queryFn: async () => {
-      let query = supabase
-        .from("service_skus")
-        .select("id, name, duration_minutes, price, promo_price, variation_id")
-        .eq("service_id", serviceId)
-        .eq("is_active", true)
-        .order("sort_order");
-      if (variationId) {
-        query = query.eq("variation_id", variationId);
-      }
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
-    },
-  });
+  const selectedEntry = useMemo(
+    () => catalog?.find((e) => (skuId ? e.skuId === skuId : e.serviceId === serviceId && e.skuId === null)),
+    [catalog, serviceId, skuId]
+  );
 
   // Client autocomplete
   const { data: clientResults } = useQuery({
