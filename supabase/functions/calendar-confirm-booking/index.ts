@@ -64,15 +64,26 @@ serve(async (req) => {
 
     const body = await req.json() as ConfirmBookingRequest;
     const { 
-      hold_id, client_name, client_phone, client_email, client_instagram,
-      service_id, package_id, offer_id, sku_id, staff_id, start_time, end_time, notes 
+      hold_id, skip_hold, client_name, client_phone, client_email, client_instagram,
+      service_id, package_id, offer_id, sku_id, staff_id, start_time, end_time, notes,
+      status: initialStatus, total_price: providedTotalPrice
     } = body;
 
-    if (!hold_id || !client_name || !client_phone || !start_time || !end_time) {
+    if (!client_name || !start_time || !end_time) {
       throw new Error('Missing required parameters');
     }
 
-    console.log(`Confirming booking for hold ${hold_id}, staff: ${staff_id || 'global'}`);
+    // hold_id required unless skip_hold (admin manual booking)
+    if (!skip_hold && !hold_id) {
+      throw new Error('Missing hold_id');
+    }
+
+    // Normalize phone for walk-in email and DB lookups
+    const phoneDigits = (client_phone || '').replace(/\D/g, '');
+    const effectivePhone = client_phone?.trim() || null;
+    const effectiveEmail = client_email?.trim() || (phoneDigits ? `walkin_${phoneDigits}@acsbeauty.app` : `walkin_${Date.now()}@acsbeauty.app`);
+
+    console.log(`Confirming booking ${skip_hold ? '(skip_hold/admin)' : `for hold ${hold_id}`}, staff: ${staff_id || 'global'}`);
 
     // Get Google credentials
     const serviceAccountJson = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_JSON');
@@ -83,35 +94,37 @@ serve(async (req) => {
     const serviceAccount = JSON.parse(serviceAccountJson);
     const accessToken = await getGoogleAccessToken(serviceAccount);
 
-    // Validate hold exists and is not expired
-    const { data: hold, error: holdError } = await supabase
-      .from('booking_holds')
-      .select('*')
-      .eq('id', hold_id)
-      .single();
+    // Validate hold exists and is not expired (skip when admin)
+    if (!skip_hold && hold_id) {
+      const { data: hold, error: holdError } = await supabase
+        .from('booking_holds')
+        .select('*')
+        .eq('id', hold_id)
+        .single();
 
-    if (holdError || !hold) {
-      console.log('Hold not found or expired');
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Your reservation has expired. Please select a new time slot.',
-        code: 'HOLD_EXPIRED'
-      }), {
-        status: 410,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+      if (holdError || !hold) {
+        console.log('Hold not found or expired');
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Your reservation has expired. Please select a new time slot.',
+          code: 'HOLD_EXPIRED'
+        }), {
+          status: 410,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
 
-    if (new Date(hold.expires_at) < new Date()) {
-      await supabase.from('booking_holds').delete().eq('id', hold_id);
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Your reservation has expired. Please select a new time slot.',
-        code: 'HOLD_EXPIRED'
-      }), {
-        status: 410,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      if (new Date(hold.expires_at) < new Date()) {
+        await supabase.from('booking_holds').delete().eq('id', hold_id);
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Your reservation has expired. Please select a new time slot.',
+          code: 'HOLD_EXPIRED'
+        }), {
+          status: 410,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     // Get calendar configuration — staff-specific or global fallback
