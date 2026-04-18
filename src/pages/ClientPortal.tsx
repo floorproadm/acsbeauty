@@ -731,11 +731,21 @@ function ServiceSelectionTab({
     });
   }
 
+  const CATEGORY_ORDER = ["cabelo", "sobrancelhas", "unhas", "tratamentos", "maquiagem"];
+  const uniqueSlugs = Array.from(new Set(services.map((s) => s.category_slug).filter(Boolean))) as string[];
+  const sortedSlugs = uniqueSlugs.sort((a, b) => {
+    const ia = CATEGORY_ORDER.indexOf(a);
+    const ib = CATEGORY_ORDER.indexOf(b);
+    if (ia === -1 && ib === -1) return a.localeCompare(b);
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
   const categories = [
     { slug: "all", label: isPt ? "Todos" : "All" },
-    ...Array.from(new Set(services.map((s) => s.category_slug).filter(Boolean))).map((slug) => ({
-      slug: slug!,
-      label: services.find((s) => s.category_slug === slug)?.category ?? slug!,
+    ...sortedSlugs.map((slug) => ({
+      slug,
+      label: services.find((s) => s.category_slug === slug)?.category ?? slug,
     })),
   ];
 
