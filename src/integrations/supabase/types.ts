@@ -38,6 +38,48 @@ export type Database = {
         }
         Relationships: []
       }
+      automation_rules: {
+        Row: {
+          action_type: string
+          conditions: Json | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          recipient_type: string
+          template_language: string | null
+          template_name: string | null
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          action_type?: string
+          conditions?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          recipient_type?: string
+          template_language?: string | null
+          template_name?: string | null
+          trigger_event: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          conditions?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          recipient_type?: string
+          template_language?: string | null
+          template_name?: string | null
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       booking_holds: {
         Row: {
           calendar_id: string | null
@@ -496,6 +538,57 @@ export type Database = {
           },
         ]
       }
+      conversations: {
+        Row: {
+          ai_summary: string | null
+          assigned_to: string | null
+          channel: string
+          client_id: string | null
+          created_at: string
+          external_id: string | null
+          id: string
+          last_message_at: string | null
+          last_message_preview: string | null
+          status: string
+          subject: string | null
+          tags: string[] | null
+          unread_count: number
+          updated_at: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          assigned_to?: string | null
+          channel: string
+          client_id?: string | null
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          status?: string
+          subject?: string | null
+          tags?: string[] | null
+          unread_count?: number
+          updated_at?: string
+        }
+        Update: {
+          ai_summary?: string | null
+          assigned_to?: string | null
+          channel?: string
+          client_id?: string | null
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          status?: string
+          subject?: string | null
+          tags?: string[] | null
+          unread_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gallery_categories: {
         Row: {
           created_at: string
@@ -681,6 +774,71 @@ export type Database = {
           lead_source?: string
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          ai_generated: boolean
+          body: string | null
+          channel: string
+          conversation_id: string
+          created_at: string
+          delivery_status: string | null
+          direction: string
+          error_message: string | null
+          external_message_id: string | null
+          id: string
+          media_type: string | null
+          media_url: string | null
+          metadata: Json | null
+          sender_id: string | null
+          template_name: string | null
+          template_variables: Json | null
+        }
+        Insert: {
+          ai_generated?: boolean
+          body?: string | null
+          channel: string
+          conversation_id: string
+          created_at?: string
+          delivery_status?: string | null
+          direction: string
+          error_message?: string | null
+          external_message_id?: string | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          metadata?: Json | null
+          sender_id?: string | null
+          template_name?: string | null
+          template_variables?: Json | null
+        }
+        Update: {
+          ai_generated?: boolean
+          body?: string | null
+          channel?: string
+          conversation_id?: string
+          created_at?: string
+          delivery_status?: string | null
+          direction?: string
+          error_message?: string | null
+          external_message_id?: string | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          metadata?: Json | null
+          sender_id?: string | null
+          template_name?: string | null
+          template_variables?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       offers: {
         Row: {
@@ -1724,6 +1882,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      whatsapp_templates: {
+        Row: {
+          body_text: string
+          category: string
+          created_at: string
+          footer_text: string | null
+          header_text: string | null
+          id: string
+          language: string
+          meta_template_id: string | null
+          name: string
+          status: string
+          updated_at: string
+          variables: Json | null
+        }
+        Insert: {
+          body_text: string
+          category?: string
+          created_at?: string
+          footer_text?: string | null
+          header_text?: string | null
+          id?: string
+          language?: string
+          meta_template_id?: string | null
+          name: string
+          status?: string
+          updated_at?: string
+          variables?: Json | null
+        }
+        Update: {
+          body_text?: string
+          category?: string
+          created_at?: string
+          footer_text?: string | null
+          header_text?: string | null
+          id?: string
+          language?: string
+          meta_template_id?: string | null
+          name?: string
+          status?: string
+          updated_at?: string
+          variables?: Json | null
+        }
+        Relationships: []
       }
     }
     Views: {
