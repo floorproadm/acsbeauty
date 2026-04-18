@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import hairServiceImg from "@/assets/hair-service.jpg";
 import browsServiceImg from "@/assets/brows-service.jpg";
 import nailsServiceImg from "@/assets/nails-service.jpg";
+import makeupServiceImg from "@/assets/makeup-service.jpg";
+import treatmentsServiceImg from "@/assets/treatments-service.jpg";
 
 // Fallback images and icons by category_slug
 // TODO: Replace makeup/treatments fallback images with dedicated assets
@@ -18,8 +20,8 @@ const CATEGORY_META: Record<string, { icon: typeof Scissors; image: string }> = 
   cabelo: { icon: Scissors, image: hairServiceImg },
   sobrancelhas: { icon: Eye, image: browsServiceImg },
   unhas: { icon: Palette, image: nailsServiceImg },
-  maquiagem: { icon: Brush, image: browsServiceImg },
-  tratamentos: { icon: Droplet, image: hairServiceImg },
+  maquiagem: { icon: Brush, image: makeupServiceImg },
+  tratamentos: { icon: Droplet, image: treatmentsServiceImg },
 };
 
 export default function Services() {
