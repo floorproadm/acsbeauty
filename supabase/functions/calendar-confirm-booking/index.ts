@@ -7,9 +7,10 @@ const corsHeaders = {
 };
 
 interface ConfirmBookingRequest {
-  hold_id: string;
+  hold_id?: string;
+  skip_hold?: boolean;
   client_name: string;
-  client_phone: string;
+  client_phone?: string;
   client_email?: string;
   client_instagram?: string;
   service_id?: string;
@@ -20,6 +21,8 @@ interface ConfirmBookingRequest {
   start_time: string;
   end_time: string;
   notes?: string;
+  status?: 'requested' | 'confirmed';
+  total_price?: number | null;
 }
 
 serve(async (req) => {
