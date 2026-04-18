@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 
-import hairServiceImg from "@/assets/hair-service.png";
+import hairServiceImg from "@/assets/hair-service.jpg";
 import browsServiceImg from "@/assets/brows-service.jpg";
 import nailsServiceImg from "@/assets/nails-service.jpg";
 
