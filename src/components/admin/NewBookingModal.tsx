@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Loader2, Search, UserCheck, UserPlus } from "lucide-react";
+import { CalendarIcon, Loader2, Search, UserCheck, UserPlus, Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NewBookingModalProps {
@@ -41,8 +41,8 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
 
   const [staffId, setStaffId] = useState<string>("none");
   const [serviceId, setServiceId] = useState<string>("");
-  const [variationId, setVariationId] = useState<string>("");
   const [skuId, setSkuId] = useState<string>("");
+  const [serviceSearchOpen, setServiceSearchOpen] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
@@ -67,56 +67,87 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
     },
   });
 
-  // Services
-  const { data: services } = useQuery({
-    queryKey: ["admin-services-for-booking"],
+  // Unified flat catalog: services + their SKUs (with variation labels) for a single searchable list
+  const { data: catalog } = useQuery({
+    queryKey: ["admin-booking-catalog"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("services")
-        .select("id, name, duration_minutes, price")
-        .eq("is_active", true)
-        .order("sort_order")
-        .order("name");
-      if (error) throw error;
-      return data;
+      const [servicesRes, skusRes, variationsRes] = await Promise.all([
+        supabase.from("services").select("id, name, duration_minutes, price").eq("is_active", true).order("sort_order").order("name"),
+        supabase.from("service_skus").select("id, name, duration_minutes, price, promo_price, variation_id, service_id").eq("is_active", true).order("sort_order"),
+        supabase.from("service_variations").select("id, name, service_id").eq("is_active", true),
+      ]);
+      if (servicesRes.error) throw servicesRes.error;
+      if (skusRes.error) throw skusRes.error;
+      if (variationsRes.error) throw variationsRes.error;
+
+      const servicesData = servicesRes.data || [];
+      const skusData = skusRes.data || [];
+      const variationsData = variationsRes.data || [];
+      const variationMap = new Map(variationsData.map((v) => [v.id, v.name]));
+
+      // Build flat entries: each SKU is one entry; services without SKUs become a single entry
+      type Entry = {
+        key: string; // unique key (sku-<id> or service-<id>)
+        serviceId: string;
+        skuId: string | null;
+        serviceName: string;
+        variationName: string | null;
+        skuName: string | null;
+        duration: number;
+        price: number | null;
+        searchText: string;
+      };
+      const entries: Entry[] = [];
+      const skusByService = new Map<string, typeof skusData>();
+      skusData.forEach((s) => {
+        const arr = skusByService.get(s.service_id) || [];
+        arr.push(s);
+        skusByService.set(s.service_id, arr);
+      });
+
+      servicesData.forEach((svc) => {
+        const svcSkus = skusByService.get(svc.id) || [];
+        if (svcSkus.length === 0) {
+          entries.push({
+            key: `service-${svc.id}`,
+            serviceId: svc.id,
+            skuId: null,
+            serviceName: svc.name,
+            variationName: null,
+            skuName: null,
+            duration: svc.duration_minutes,
+            price: svc.price != null ? Number(svc.price) : null,
+            searchText: svc.name.toLowerCase(),
+          });
+        } else {
+          svcSkus.forEach((sk) => {
+            const variationName = sk.variation_id ? variationMap.get(sk.variation_id) || null : null;
+            const price = sk.promo_price != null && Number(sk.promo_price) < Number(sk.price)
+              ? Number(sk.promo_price)
+              : (sk.price != null ? Number(sk.price) : null);
+            entries.push({
+              key: `sku-${sk.id}`,
+              serviceId: svc.id,
+              skuId: sk.id,
+              serviceName: svc.name,
+              variationName,
+              skuName: sk.name,
+              duration: sk.duration_minutes,
+              price,
+              searchText: `${svc.name} ${variationName || ""} ${sk.name}`.toLowerCase(),
+            });
+          });
+        }
+      });
+
+      return entries;
     },
   });
 
-  // Variations (Técnicas) for selected service
-  const { data: variations } = useQuery({
-    queryKey: ["admin-variations-for-booking", serviceId],
-    enabled: !!serviceId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("service_variations")
-        .select("id, name")
-        .eq("service_id", serviceId)
-        .eq("is_active", true)
-        .order("sort_order");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  // SKUs (Opções) — filtered by service + (variation if any exist)
-  const { data: skus } = useQuery({
-    queryKey: ["admin-skus-for-booking", serviceId, variationId],
-    enabled: !!serviceId,
-    queryFn: async () => {
-      let query = supabase
-        .from("service_skus")
-        .select("id, name, duration_minutes, price, promo_price, variation_id")
-        .eq("service_id", serviceId)
-        .eq("is_active", true)
-        .order("sort_order");
-      if (variationId) {
-        query = query.eq("variation_id", variationId);
-      }
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
-    },
-  });
+  const selectedEntry = useMemo(
+    () => catalog?.find((e) => (skuId ? e.skuId === skuId : e.serviceId === serviceId && e.skuId === null)),
+    [catalog, serviceId, skuId]
+  );
 
   // Client autocomplete
   const { data: clientResults } = useQuery({
@@ -147,28 +178,17 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
     },
   });
 
-  const selectedService = services?.find((s) => s.id === serviceId);
-  const selectedSku = skus?.find((s) => s.id === skuId);
-  const hasVariations = (variations?.length ?? 0) > 0;
-  const hasSkus = (skus?.length ?? 0) > 0;
-
-  // Effective duration & price (SKU > Service)
-  const effectiveDuration = selectedSku?.duration_minutes ?? selectedService?.duration_minutes ?? 0;
-  const effectivePrice = useMemo(() => {
-    if (selectedSku) {
-      return selectedSku.promo_price != null && Number(selectedSku.promo_price) < Number(selectedSku.price)
-        ? Number(selectedSku.promo_price)
-        : Number(selectedSku.price);
-    }
-    return selectedService?.price ?? null;
-  }, [selectedSku, selectedService]);
+  // Effective duration & price come from selected catalog entry
+  const effectiveDuration = selectedEntry?.duration ?? 0;
+  const effectivePrice = selectedEntry?.price ?? null;
+  const hasSelection = !!selectedEntry;
 
   // Reset slot when staff or service changes
   useEffect(() => {
     setSelectedDate(undefined);
     setSelectedSlot(null);
     setSlots([]);
-  }, [staffId, serviceId, variationId, skuId]);
+  }, [staffId, serviceId, skuId]);
 
   const handleClientSelect = (c: { id: string; name: string; phone: string | null; email: string | null }) => {
     setClientId(c.id);
@@ -252,7 +272,6 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
     setClientPhone("");
     setStaffId("none");
     setServiceId("");
-    setVariationId("");
     setSkuId("");
     setSelectedDate(undefined);
     setSelectedSlot(null);
@@ -272,8 +291,7 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
 
   const canSubmit = clientName.trim() &&
     selectedSlot &&
-    serviceId &&
-    (!hasSkus || skuId) &&
+    hasSelection &&
     !createBookingMutation.isPending;
 
   return (
@@ -376,56 +394,84 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
             </Select>
           </div>
 
-          {/* Service */}
+          {/* Unified Service / Technique / Option search */}
           <div className="space-y-1.5">
             <Label>Serviço *</Label>
-            <Select value={serviceId} onValueChange={(v) => { setServiceId(v); setVariationId(""); setSkuId(""); }}>
-              <SelectTrigger><SelectValue placeholder="Selecione um serviço" /></SelectTrigger>
-              <SelectContent>
-                {services?.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.name} ({s.duration_minutes}min)
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={serviceSearchOpen} onOpenChange={setServiceSearchOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className="w-full justify-between font-normal"
+                  type="button"
+                >
+                  {selectedEntry ? (
+                    <span className="flex items-center gap-2 truncate text-left">
+                      <span className="truncate">
+                        {selectedEntry.serviceName}
+                        {selectedEntry.variationName && <span className="text-muted-foreground"> · {selectedEntry.variationName}</span>}
+                        {selectedEntry.skuName && <span className="text-muted-foreground"> · {selectedEntry.skuName}</span>}
+                      </span>
+                      <span className="ml-auto shrink-0 text-xs text-muted-foreground">
+                        {selectedEntry.duration}min{selectedEntry.price != null && ` · $${selectedEntry.price.toFixed(2)}`}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">Buscar serviço, técnica ou opção…</span>
+                  )}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command
+                  filter={(value, search) => {
+                    const entry = catalog?.find((e) => e.key === value);
+                    if (!entry) return 0;
+                    return entry.searchText.includes(search.toLowerCase()) ? 1 : 0;
+                  }}
+                >
+                  <CommandInput placeholder="Digite para filtrar…" />
+                  <CommandList className="max-h-[320px]">
+                    <CommandEmpty>Nenhum serviço encontrado.</CommandEmpty>
+                    {catalog && Object.entries(
+                      catalog.reduce<Record<string, typeof catalog>>((acc, e) => {
+                        (acc[e.serviceName] ||= []).push(e);
+                        return acc;
+                      }, {})
+                    ).map(([groupName, items]) => (
+                      <CommandGroup key={groupName} heading={groupName}>
+                        {items.map((entry) => {
+                          const isSelected = selectedEntry?.key === entry.key;
+                          const label = entry.skuName
+                            ? `${entry.variationName ? `${entry.variationName} · ` : ""}${entry.skuName}`
+                            : "Padrão";
+                          return (
+                            <CommandItem
+                              key={entry.key}
+                              value={entry.key}
+                              onSelect={() => {
+                                setServiceId(entry.serviceId);
+                                setSkuId(entry.skuId || "");
+                                setServiceSearchOpen(false);
+                              }}
+                              className="flex items-center gap-2"
+                            >
+                              <Check className={cn("h-4 w-4 shrink-0", isSelected ? "opacity-100" : "opacity-0")} />
+                              <span className="flex-1 truncate">{label}</span>
+                              <span className="shrink-0 text-xs text-muted-foreground">
+                                {entry.duration}min{entry.price != null && ` · $${entry.price.toFixed(2)}`}
+                              </span>
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+                    ))}
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
-          {/* Variation (Técnica) */}
-          {hasVariations && (
-            <div className="space-y-1.5">
-              <Label>Técnica</Label>
-              <Select value={variationId} onValueChange={(v) => { setVariationId(v); setSkuId(""); }}>
-                <SelectTrigger><SelectValue placeholder="Selecione a técnica" /></SelectTrigger>
-                <SelectContent>
-                  {variations?.map((v) => (
-                    <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {/* SKU (Opção) */}
-          {hasSkus && (
-            <div className="space-y-1.5">
-              <Label>Opção *</Label>
-              <Select value={skuId} onValueChange={setSkuId}>
-                <SelectTrigger><SelectValue placeholder="Selecione a opção" /></SelectTrigger>
-                <SelectContent>
-                  {skus?.map((s) => {
-                    const price = s.promo_price != null && Number(s.promo_price) < Number(s.price)
-                      ? Number(s.promo_price) : Number(s.price);
-                    return (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.name} — {s.duration_minutes}min · ${price?.toFixed(2)}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
 
           {/* Initial Status */}
           <div className="space-y-1.5">
