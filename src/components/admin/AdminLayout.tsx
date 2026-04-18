@@ -47,6 +47,7 @@ type AppRole = Database["public"]["Enums"]["app_role"];
 export type AdminTab =
   | "dashboard"
   | "bookings"
+  | "conversations"
   | "payments"
   | "crm"
   | "services"
