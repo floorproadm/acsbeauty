@@ -72,7 +72,7 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
     queryKey: ["admin-booking-catalog"],
     queryFn: async () => {
       const [servicesRes, skusRes, variationsRes] = await Promise.all([
-        supabase.from("services").select("id, name, duration_minutes, price").eq("is_active", true).order("sort_order").order("name"),
+        supabase.from("services").select("id, name, category, duration_minutes, price").eq("is_active", true).order("sort_order").order("name"),
         supabase.from("service_skus").select("id, name, duration_minutes, price, promo_price, variation_id, service_id").eq("is_active", true).order("sort_order"),
         supabase.from("service_variations").select("id, name, service_id").eq("is_active", true),
       ]);
@@ -85,11 +85,11 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
       const variationsData = variationsRes.data || [];
       const variationMap = new Map(variationsData.map((v) => [v.id, v.name]));
 
-      // Build flat entries: each SKU is one entry; services without SKUs become a single entry
       type Entry = {
-        key: string; // unique key (sku-<id> or service-<id>)
+        key: string;
         serviceId: string;
         skuId: string | null;
+        category: string;
         serviceName: string;
         variationName: string | null;
         skuName: string | null;
@@ -106,18 +106,20 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
       });
 
       servicesData.forEach((svc) => {
+        const category = svc.category || "Outros";
         const svcSkus = skusByService.get(svc.id) || [];
         if (svcSkus.length === 0) {
           entries.push({
             key: `service-${svc.id}`,
             serviceId: svc.id,
             skuId: null,
+            category,
             serviceName: svc.name,
             variationName: null,
             skuName: null,
             duration: svc.duration_minutes,
             price: svc.price != null ? Number(svc.price) : null,
-            searchText: svc.name.toLowerCase(),
+            searchText: `${category} ${svc.name}`.toLowerCase(),
           });
         } else {
           svcSkus.forEach((sk) => {
@@ -129,12 +131,13 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
               key: `sku-${sk.id}`,
               serviceId: svc.id,
               skuId: sk.id,
+              category,
               serviceName: svc.name,
               variationName,
               skuName: sk.name,
               duration: sk.duration_minutes,
               price,
-              searchText: `${svc.name} ${variationName || ""} ${sk.name}`.toLowerCase(),
+              searchText: `${category} ${svc.name} ${variationName || ""} ${sk.name}`.toLowerCase(),
             });
           });
         }
