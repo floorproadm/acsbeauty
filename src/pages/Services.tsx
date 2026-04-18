@@ -47,6 +47,11 @@ export default function Services() {
           unique.push({ category: row.category!, category_slug: row.category_slug });
         }
       }
+      // Custom display order
+      const order = ["cabelo", "tratamentos", "sobrancelhas", "unhas", "maquiagem"];
+      unique.sort(
+        (a, b) => order.indexOf(a.category_slug) - order.indexOf(b.category_slug)
+      );
       return unique;
     },
   });
