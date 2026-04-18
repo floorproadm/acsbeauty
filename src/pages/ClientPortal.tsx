@@ -244,7 +244,7 @@ function HomeTab({
         <h2 className="font-serif text-base font-bold text-foreground mb-2">
           {isPt ? "Sobre nós" : "About Us"}
         </h2>
-        <div className="rounded-2xl overflow-hidden cursor-pointer" onClick={() => navigate("/team")}>
+        <div className="rounded-2xl overflow-hidden cursor-pointer" onClick={() => navigate("/about")}>
           <img
             src={teamHero}
             alt="ACS Beauty Team"
