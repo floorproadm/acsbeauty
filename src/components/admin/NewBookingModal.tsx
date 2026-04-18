@@ -337,7 +337,7 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
                     <Badge variant="secondary" className="gap-1"><UserCheck className="w-3 h-3" /> Recorrente</Badge>
                   )}
                   {showNewClientBadge && (
-                    <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/20 border border-emerald-500/30"><UserPlus className="w-3 h-3" /> Novo cliente</Badge>
+                    <Badge variant="outline" className="gap-1 border-primary/40 text-primary"><UserPlus className="w-3 h-3" /> Novo cliente</Badge>
                   )}
                   {clientId && (
                     <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={handleClearClient}>Limpar</Button>
