@@ -291,8 +291,7 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
 
   const canSubmit = clientName.trim() &&
     selectedSlot &&
-    serviceId &&
-    (!hasSkus || skuId) &&
+    hasSelection &&
     !createBookingMutation.isPending;
 
   return (
