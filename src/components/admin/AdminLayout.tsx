@@ -21,6 +21,7 @@ import {
   Gift,
   UsersRound,
   ImageIcon,
+  MessageSquare,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
@@ -46,6 +47,7 @@ type AppRole = Database["public"]["Enums"]["app_role"];
 export type AdminTab =
   | "dashboard"
   | "bookings"
+  | "conversations"
   | "payments"
   | "crm"
   | "services"
@@ -66,6 +68,7 @@ interface AdminLayoutProps {
 
 const allTabs: { id: AdminTab; label: string; icon: React.ElementType; roles: AppRole[] }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin_owner"] },
+  { id: "conversations", label: "Conversas", icon: MessageSquare, roles: ["admin_owner", "staff"] },
   { id: "crm", label: "CRM", icon: Users, roles: ["admin_owner", "staff"] },
   { id: "bookings", label: "Agendamentos", icon: Calendar, roles: ["admin_owner", "staff"] },
   { id: "payments", label: "Pagamentos", icon: DollarSign, roles: ["admin_owner"] },
@@ -123,12 +126,29 @@ function AdminSidebar({
     refetchInterval: 30000,
   });
 
+  // Fetch unread conversations count
+  const { data: unreadConvs } = useQuery({
+    queryKey: ["admin-sidebar-unread-convs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("conversations")
+        .select("unread_count")
+        .gt("unread_count", 0);
+      if (error) return 0;
+      return (data ?? []).reduce((sum, c) => sum + (c.unread_count ?? 0), 0);
+    },
+    refetchInterval: 15000,
+  });
+
   const getBadge = (tabId: AdminTab) => {
     if (tabId === "bookings" && pendingCount && pendingCount > 0) {
       return { count: pendingCount, pulse: true };
     }
     if (tabId === "tasks" && tasksCount && tasksCount > 0) {
       return { count: tasksCount, pulse: false };
+    }
+    if (tabId === "conversations" && unreadConvs && unreadConvs > 0) {
+      return { count: unreadConvs, pulse: true };
     }
     return null;
   };

@@ -14,6 +14,7 @@ import { AllowedEmailsTab } from "@/components/admin/AllowedEmailsTab";
 import { GiftCardsTab } from "@/components/admin/GiftCardsTab";
 import { GalleryTab } from "@/components/admin/GalleryTab";
 import { TeamTab } from "@/components/admin/TeamTab";
+import { ConversationsTab } from "@/components/admin/ConversationsTab";
 import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Admin() {
@@ -33,6 +34,8 @@ export default function Admin() {
         return <DashboardTab onNavigate={setActiveTab} />;
       case "bookings":
         return <BookingsTab />;
+      case "conversations":
+        return <ConversationsTab />;
       case "payments":
         return <PaymentsTab />;
       case "crm":
