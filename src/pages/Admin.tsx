@@ -34,6 +34,8 @@ export default function Admin() {
         return <DashboardTab onNavigate={setActiveTab} />;
       case "bookings":
         return <BookingsTab />;
+      case "conversations":
+        return <ConversationsTab />;
       case "payments":
         return <PaymentsTab />;
       case "crm":
