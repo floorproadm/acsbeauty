@@ -1,62 +1,42 @@
 
-## Análise — Aba "Agendamentos" do Admin
+User está olhando o modal "Novo Agendamento" (NewBookingModal.tsx) e percebeu que falta seleção de profissional/colaborador. Vou analisar o que existe vs o que precisa ter.
 
-### O que existe hoje
+**O que tem hoje no modal:**
+- Nome, Email, Telefone do cliente (campos livres, sem autocomplete)
+- Serviço (apenas o serviço base, sem técnica/opção)
+- Data
+- Horário (slots automáticos)
+- Observações
 
-**Visualizações:** Lista, Semana e Mês.
-**Ações por agendamento:** Confirmar, Cancelar, Remarcar, Concluir, Não compareceu, atribuir profissional, abrir WhatsApp.
-**Filtros:** Busca por cliente, período (Hoje/Amanhã/7d/30d/Todos), status.
+**O que falta (problemas reais):**
 
-### Problemas identificados
+1. **Sem seleção de profissional** — modal cria booking sem `staff_id`, mesmo já tendo a coluna no DB e UI de atribuição depois.
+2. **Sem autocomplete de cliente existente** — staff digita tudo manualmente mesmo se cliente já está cadastrado. Risco de duplicar registros.
+3. **Sem seleção de Técnica/Opção (SKU)** — só escolhe o serviço pai. Mas o sistema tem 3 níveis (Serviço → Técnicas → Opções) com preços diferentes. Booking fica sem `sku_id` e sem preço correto.
+4. **Sem opção de marcar status inicial** — sempre cria como "confirmed" via skip_hold. Talvez staff queira criar como "requested" para confirmar depois.
+5. **Validação fraca de telefone** — placeholder "(11) 99999-9999" é formato BR; mercado é US "(XXX) XXX-XXXX".
+6. **Email obrigatório** — mas no admin muitos clientes walk-in não dão email. Deveria ser opcional (gerar fake tipo `walkin_+phone@acsbeauty.app`).
+7. **Sem opção "agendamento recorrente"** — cliente que faz manutenção a cada 4 semanas.
+8. **Disponibilidade não considera staff selecionado** — se filtrar por profissional, slots deveriam refletir agenda dele.
+9. **Sem indicação visual** se cliente é novo ou recorrente após digitar telefone/email.
+10. **Sem "duração customizada"** — staff pode querer reservar 2h para algo especial sem amarrar a um SKU.
 
-1. **Nenhum indicador de pendências** no topo — staff precisa olhar a lista para ver quantos pedidos aguardam aprovação.
-2. **Filtro de período limitado** — sem "Amanhã + 7 dias", sem range customizado, sem filtro por profissional.
-3. **Visão semanal/mensal sem grade de horários reais** — só mostra blocos por dia, sem visualização tipo agenda (08h, 09h, 10h…). Difícil ver lacunas de horário.
-4. **Ações em lote inexistentes** — não dá pra confirmar/cancelar múltiplos pedidos de uma vez.
-5. **Modal de detalhes sem histórico** — não mostra outros agendamentos do mesmo cliente, nem se é primeira visita.
-6. **Sem indicador visual de "novo cliente"** vs cliente recorrente na lista.
-7. **Remarcar usa Dialog** — em mobile fica apertado; melhor usar Sheet (drawer lateral) que combina com o resto do admin.
-8. **Sem opção de exportar/imprimir** a agenda do dia para a equipe.
-9. **Cores de status inconsistentes** entre lista (border-l + badge) e calendário (background colorido). Padronizar.
-10. **Filtro "Hoje" não destaca o "agora"** — não há separador "próximos vs já passaram hoje".
-11. **Telefone na lista não é clicável** para WhatsApp diretamente — só via botão separado.
-12. **Sem contador rápido** por status no topo (ex: "3 aguardando · 12 confirmados hoje").
+**Priorização sugerida (Tier 1 = essencial agora):**
 
-### Proposta de melhorias (priorizadas)
+**Tier 1 — Crítico**
+- Seleção de profissional (staff_id) — bloqueia atribuição correta
+- Autocomplete de cliente existente (busca por telefone/nome) — evita duplicação
+- Seleção de Técnica/Opção (SKU) quando o serviço tiver — preço correto
+- Telefone formato US + email opcional (auto-gerar walk-in email)
 
-**Tier 1 — Alta prioridade (impacto operacional direto)**
+**Tier 2 — UX/Operação**
+- Status inicial selecionável (Confirmado / Aguardando)
+- Indicador "novo cliente" / "recorrente" após digitar contato
+- Disponibilidade respeitando staff selecionado
 
-1. **Header com KPIs do período**: 4 cards compactos no topo mostrando "Aguardando", "Hoje", "Esta semana", "Receita estimada". Clicar filtra.
-2. **Banner de pendências persistente** quando há `requested` no período: "Você tem X agendamentos aguardando aprovação · [Ver agora]".
-3. **Visão diária por horários** (nova aba "Dia"): timeline 08h–20h em coluna única estilo Google Calendar, com blocos posicionados pelo horário real e duração. Fica claro o que é gap.
-4. **Filtro por profissional** no modo lista e calendário (dropdown que carrega `staff_profiles`).
-5. **Indicador de cliente novo vs recorrente** na lista (badge "Novo cliente" para `client_id` sem bookings anteriores ou para emails inéditos).
+**Tier 3 — Avançado**
+- Duração customizada (override do SKU)
+- Agendamento recorrente (criar N bookings espaçados)
+- Bloquear horário sem cliente (espaço pessoal/folga) — mas isso é outra feature
 
-**Tier 2 — Média prioridade (UX e produtividade)**
-
-6. **Modal de detalhes com mini-histórico**: últimos 3 agendamentos do mesmo cliente, total gasto, frequência. Ajuda na decisão de aprovar/remarcar.
-7. **Remarcar vira Sheet lateral** (não Dialog) — mais espaço, melhor em mobile, padroniza com outras abas.
-8. **Ações em lote**: checkbox por linha + barra inferior "Confirmar X · Cancelar X" para `requested`.
-9. **Exportar dia** como PDF/print da agenda do dia (lista impressa para equipe).
-10. **Range customizado de datas** no filtro (DateRangePicker).
-
-**Tier 3 — Polimento**
-
-11. **Padronizar cores de status** — usar mesma palette (background suave + border-l) na lista E no calendário.
-12. **Separador "Agora" na visão Hoje**: linha visual marcando o momento atual entre os agendamentos passados e futuros.
-13. **Telefone clicável direto** na linha (não só botão).
-14. **Atalhos de teclado** no modal: `C` confirma, `R` remarca, `X` cancela.
-
-### Sugestão de execução
-
-Recomendo começar pelo **Tier 1** num único ciclo (header KPIs + banner pendências + filtro profissional + visão Dia + badge novo cliente). É o que mais muda a operação no dia-a-dia. Tier 2 e 3 em ciclos seguintes.
-
-### Arquivos afetados (Tier 1)
-
-- `src/components/admin/BookingsTab.tsx` — KPIs, banner, filtro profissional, nova aba "Dia"
-- `src/components/admin/BookingDayView.tsx` — **novo**, timeline diária por horário
-- Query de bookings — adicionar `staff_id` ao filtro e contagem por cliente
-
-### Pergunta antes de executar
-
-Quer que eu execute todo o **Tier 1** de uma vez, ou prefere dividir (ex: começar só pela visão "Dia" + KPIs)?
+Plano enxuto, vou apresentar com pergunta no fim.
