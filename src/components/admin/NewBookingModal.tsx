@@ -436,12 +436,22 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
                   <CommandInput placeholder="Digite para filtrar…" />
                   <CommandList className="max-h-[320px]">
                     <CommandEmpty>Nenhum serviço encontrado.</CommandEmpty>
-                    {catalog && Object.entries(
-                      catalog.reduce<Record<string, typeof catalog>>((acc, e) => {
+                    {catalog && (() => {
+                      const CATEGORY_ORDER = ["Cabelo", "Sobrancelhas", "Unhas", "Tratamentos"];
+                      const grouped = catalog.reduce<Record<string, typeof catalog>>((acc, e) => {
                         (acc[e.category] ||= []).push(e);
                         return acc;
-                      }, {})
-                    ).map(([categoryName, items]) => (
+                      }, {});
+                      const sortedEntries = Object.entries(grouped).sort(([a], [b]) => {
+                        const ia = CATEGORY_ORDER.indexOf(a);
+                        const ib = CATEGORY_ORDER.indexOf(b);
+                        if (ia === -1 && ib === -1) return a.localeCompare(b);
+                        if (ia === -1) return 1;
+                        if (ib === -1) return -1;
+                        return ia - ib;
+                      });
+                      return sortedEntries;
+                    })().map(([categoryName, items]) => (
                       <CommandGroup key={categoryName} heading={categoryName}>
                         {items.map((entry) => {
                           const isSelected = selectedEntry?.key === entry.key;
