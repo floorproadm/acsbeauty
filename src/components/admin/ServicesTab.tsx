@@ -478,143 +478,42 @@ export function ServicesTab() {
                       <p className="text-sm text-muted-foreground">Nenhum serviço</p>
                     </div>
                   ) : (
-                    categoryServices.map((service) => {
-                      const isExpanded = expandedService === service.id;
-                      const hasTechniques = service.variations_count > 0 || service.skus_count > 0;
-
-                      return (
-                        <div
-                          key={service.id}
-                          className={`bg-card rounded-xl border border-border shadow-soft ${
-                            !service.is_active ? "opacity-60" : ""
-                          }`}
-                        >
-                          {/* Main row */}
-                          <div className="p-3">
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                                {service.hero_image_url ? (
-                                  <img
-                                    src={service.hero_image_url}
-                                    alt={service.name}
-                                    className="h-12 w-12 rounded-lg object-cover border border-border shrink-0"
-                                  />
-                                ) : (
-                                  <div className="h-12 w-12 rounded-lg bg-muted border border-border flex items-center justify-center shrink-0">
-                                    <Sparkles className="w-4 h-4 text-muted-foreground/50" />
-                                  </div>
-                                )}
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="font-semibold text-sm truncate flex items-center gap-1.5">
-                                    <span className="truncate">{service.name}</span>
-                                    {service.hero_video_url && (
-                                      <span title="Possui vídeo" aria-label="Possui vídeo" className="shrink-0 text-[11px] leading-none">
-                                        🎬
-                                      </span>
-                                    )}
-                                  </h3>
-                                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                                    <span className="flex items-center gap-0.5">
-                                      <Clock className="w-3 h-3" />
-                                      {service.duration_minutes}min
-                                    </span>
-                                    <span className="flex items-center gap-0.5">
-                                      <DollarSign className="w-3 h-3" />
-                                      {service.price}
-                                      {service.promo_price && (
-                                        <span className="text-rose-gold ml-0.5">→{service.promo_price}</span>
-                                      )}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-1.5 shrink-0">
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    {service.is_active ? (
-                                      <a
-                                        href={`/servicos/${service.category_slug || category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}/${(service as any).slug || ""}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center justify-center h-7 w-7 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
-                                        aria-label="Ver como cliente"
-                                      >
-                                        <Eye className="w-3.5 h-3.5" />
-                                      </a>
-                                    ) : (
-                                      <span className="inline-flex items-center justify-center h-7 w-7 rounded-md text-muted-foreground/40 cursor-not-allowed">
-                                        <Eye className="w-3.5 h-3.5" />
-                                      </span>
-                                    )}
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    {service.is_active ? "Ver como cliente" : "Ative o serviço para visualizar"}
-                                  </TooltipContent>
-                                </Tooltip>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-7 w-7"
-                                  onClick={() => openEditModal(service)}
-                                >
-                                  <Pencil className="w-3.5 h-3.5" />
-                                </Button>
-                                <Switch
-                                  checked={service.is_active || false}
-                                  onCheckedChange={(checked) =>
-                                    updateService.mutate({ id: service.id, updates: { is_active: checked } })
-                                  }
-                                  className="scale-75"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Expandable techniques/options row */}
-                            <button
-                              onClick={() => setExpandedService(isExpanded ? null : service.id)}
-                              className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
-                            >
-                              {isExpanded ? (
-                                <ChevronDown className="w-3 h-3" />
-                              ) : (
-                                <ChevronRight className="w-3 h-3" />
-                              )}
-                              <span>
-                                {service.variations_count} técnica{service.variations_count !== 1 ? "s" : ""} ·{" "}
-                                {service.skus_count} opç{service.skus_count !== 1 ? "ões" : "ão"}
-                              </span>
-                            </button>
-                          </div>
-
-                          {/* Expanded content */}
-                          {isExpanded && (
-                            <div className="border-t border-border px-3 py-2 bg-muted/30 rounded-b-xl">
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="flex-1 h-8 text-xs"
-                                  onClick={() => setVariationsService(service)}
-                                >
-                                  <Layers className="w-3 h-3 mr-1" />
-                                  Técnicas ({service.variations_count})
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="flex-1 h-8 text-xs"
-                                  onClick={() => setSkusService(service)}
-                                >
-                                  <Package className="w-3 h-3 mr-1" />
-                                  Opções ({service.skus_count})
-                                </Button>
-                              </div>
-                            </div>
-                          )}
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={(e) => handleDragEnd(category, e)}
+                    >
+                      <SortableContext
+                        items={categoryServices.map((s) => s.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div className="space-y-2">
+                          {categoryServices.map((service) => (
+                            <SortableServiceCard
+                              key={service.id}
+                              service={service}
+                              category={category}
+                              isExpanded={expandedService === service.id}
+                              onToggleExpand={() =>
+                                setExpandedService(
+                                  expandedService === service.id ? null : service.id
+                                )
+                              }
+                              onEdit={() => openEditModal(service)}
+                              onToggleActive={(checked) =>
+                                updateService.mutate({
+                                  id: service.id,
+                                  updates: { is_active: checked },
+                                })
+                              }
+                              onOpenVariations={() => setVariationsService(service)}
+                              onOpenSkus={() => setSkusService(service)}
+                              dragDisabled={!!normalizedQuery}
+                            />
+                          ))}
                         </div>
-                      );
-                    })
+                      </SortableContext>
+                    </DndContext>
                   )}
                 </CollapsibleContent>
               </Collapsible>
