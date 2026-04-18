@@ -41,8 +41,8 @@ export function NewBookingModal({ open, onOpenChange }: NewBookingModalProps) {
 
   const [staffId, setStaffId] = useState<string>("none");
   const [serviceId, setServiceId] = useState<string>("");
-  const [variationId, setVariationId] = useState<string>("");
   const [skuId, setSkuId] = useState<string>("");
+  const [serviceSearchOpen, setServiceSearchOpen] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
