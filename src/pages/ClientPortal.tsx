@@ -715,6 +715,7 @@ function ServiceSelectionTab({
         .select("id, name, description, price, duration_minutes, hero_image_url, category, category_slug, is_active")
         .eq("is_active", true)
         .order("category_slug")
+        .order("sort_order", { ascending: true })
         .order("name");
       setServices((data as ServiceItem[]) ?? []);
       setLoadingSvc(false);

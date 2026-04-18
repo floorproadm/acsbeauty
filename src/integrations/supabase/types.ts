@@ -1418,6 +1418,7 @@ export type Database = {
           price: number
           promo_price: number | null
           slug: string
+          sort_order: number
           status: Database["public"]["Enums"]["service_status"] | null
           updated_at: string
         }
@@ -1437,6 +1438,7 @@ export type Database = {
           price: number
           promo_price?: number | null
           slug: string
+          sort_order?: number
           status?: Database["public"]["Enums"]["service_status"] | null
           updated_at?: string
         }
@@ -1456,6 +1458,7 @@ export type Database = {
           price?: number
           promo_price?: number | null
           slug?: string
+          sort_order?: number
           status?: Database["public"]["Enums"]["service_status"] | null
           updated_at?: string
         }

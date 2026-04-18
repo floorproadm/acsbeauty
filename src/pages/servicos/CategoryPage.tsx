@@ -68,6 +68,7 @@ export default function CategoryPage() {
         .select("id, name, slug, description, price, hero_image_url")
         .eq("category_slug", categorySlug)
         .eq("is_active", true)
+        .order("sort_order", { ascending: true })
         .order("name");
       if (error) throw error;
       return data || [];
