@@ -24,12 +24,6 @@ export function Hero() {
   const onboardingDone = typeof window !== "undefined" && localStorage.getItem("acs_onboarding_done") === "1";
   const ctaHref = isLoggedIn ? "/portal" : onboardingDone ? "/auth" : "/onboarding";
 
-  const stats = [
-    { value: "10+", label: t("home.hero.stat_years") },
-    { value: "5K+", label: t("home.hero.stat_clients") },
-    { value: "50+", label: t("home.hero.stat_treatments") },
-  ];
-
   return (
     <section className="relative min-h-[85svh] lg:min-h-0 flex items-center bg-gradient-nude overflow-hidden">
       {/* Decorative elements - Gold accents */}
@@ -89,29 +83,6 @@ export function Hero() {
                   {t("global.contact_us")}
                 </Button>
               </Link>
-            </motion.div>
-
-            {/* Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="grid grid-cols-3 gap-3 md:gap-8 mt-8 md:mt-12 pt-6 md:pt-12 border-t border-border"
-            >
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-                  className="flex flex-col items-center text-center md:items-start md:text-left bg-secondary/50 md:bg-transparent rounded-lg p-3 md:p-0"
-                >
-                  <div className="font-sans text-2xl md:text-3xl font-light tracking-wide text-gold">
-                    {stat.value}
-                  </div>
-                  <div className="text-[11px] md:text-sm text-muted-foreground font-light tracking-wide leading-tight mt-1">{stat.label}</div>
-                </motion.div>
-              ))}
             </motion.div>
           </div>
 
