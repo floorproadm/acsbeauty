@@ -214,7 +214,7 @@ export function ServicesPreview() {
           >
             <Link to="/services">
               <Button variant="hero" size="lg" className="group min-h-[52px] px-8 text-base">
-                <Calendar className="w-5 h-5" />
+                <Sparkles className="w-5 h-5" />
                 {t("home.cta.view_services")}
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </Button>
