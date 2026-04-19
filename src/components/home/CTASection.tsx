@@ -34,7 +34,7 @@ export function CTASection() {
             <Link to="/portal" className="w-full sm:w-auto">
               <Button size="xl" className="bg-white text-primary font-medium hover:bg-white/90 shadow-elevated group w-full sm:w-auto">
                 <Calendar className="w-5 h-5" />
-                {t("home.cta.view_services")}
+                {t("home.hero.cta_services")}
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
