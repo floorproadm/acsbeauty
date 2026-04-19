@@ -34,18 +34,17 @@ export function CTASection() {
             <Link to="/portal" className="w-full sm:w-auto">
               <Button size="xl" className="bg-white text-primary font-medium hover:bg-white/90 shadow-elevated group w-full sm:w-auto">
                 <Calendar className="w-5 h-5" />
-                {t("home.cta.view_services")}
+                {t("home.cta.book_now")}
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
-            <Link to="/contact" className="w-full sm:w-auto">
+            <Link to="/services" className="w-full sm:w-auto">
               <Button
                 variant="outline"
                 size="lg"
                 className="border-white text-white bg-white/15 hover:bg-white/25 w-full sm:w-auto"
               >
-                <Instagram className="w-4 h-4" />
-                {t("global.contact_us")}
+                {t("home.cta.view_services")}
               </Button>
             </Link>
           </div>
