@@ -24,12 +24,6 @@ export function Hero() {
   const onboardingDone = typeof window !== "undefined" && localStorage.getItem("acs_onboarding_done") === "1";
   const ctaHref = isLoggedIn ? "/portal" : onboardingDone ? "/auth" : "/onboarding";
 
-  const stats = [
-    { value: "10+", label: t("home.hero.stat_years") },
-    { value: "5K+", label: t("home.hero.stat_clients") },
-    { value: "50+", label: t("home.hero.stat_treatments") },
-  ];
-
   return (
     <section className="relative min-h-[85svh] lg:min-h-0 flex items-center bg-gradient-nude overflow-hidden">
       {/* Decorative elements - Gold accents */}
