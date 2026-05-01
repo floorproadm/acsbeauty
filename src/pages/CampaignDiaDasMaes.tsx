@@ -85,8 +85,13 @@ const WhatsAppButton = ({ href, ctaType, message, value, children, className = "
   </a>
 );
 
-// Mother's Day 2026 = Sunday, May 10, 2026
-const MOTHERS_DAY = new Date("2026-05-10T23:59:59-04:00").getTime();
+// =============================================================
+// CONFIG: data/hora final da campanha (timezone America/New_York).
+// Altere apenas esta linha para estender ou encerrar a campanha.
+// Formato ISO 8601 com offset (-04:00 EDT / -05:00 EST).
+// =============================================================
+const CAMPAIGN_END_DATE = "2026-05-10T23:59:59-04:00";
+const CAMPAIGN_END_TS = new Date(CAMPAIGN_END_DATE).getTime();
 
 function useCountdown(target: number) {
   const [now, setNow] = useState(() => Date.now());
