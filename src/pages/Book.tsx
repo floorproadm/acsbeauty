@@ -98,9 +98,10 @@ export default function Book() {
   const isCalendarFlow = flowMode === "calendar" && !offerId && !packageId && !serviceParam;
 
   // Booking flow state
-  const [step, setStep] = useState<"service" | "sku" | "staff" | "date" | "form">(
+  const [step, setStep] = useState<"service" | "sku" | "staff" | "date" | "form" | "whatsapp">(
     isCalendarFlow ? "date" : serviceParam ? "sku" : "service"
   );
+  const [waLoading, setWaLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [holdId, setHoldId] = useState<string | null>(null);
