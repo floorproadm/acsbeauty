@@ -47,11 +47,17 @@ const STUDIO_ADDRESS = "375 Chestnut St, 3rd Floor, Suite 3B, Newark, NJ";
 export default function Confirmation() {
   const { bookingId } = useParams<{ bookingId: string }>();
   const location = useLocation();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   // Get booking data from navigation state (passed from Book.tsx)
   const bookingData = location.state?.bookingData as BookingData | undefined;
-  const isPending = location.state?.isPending === true || bookingData?.status === "requested";
+  const isWhatsApp =
+    location.state?.isWhatsApp === true || bookingData?.status === "whatsapp_pending";
+  const whatsappUrl = location.state?.whatsappUrl as string | undefined;
+  const stateServiceName = location.state?.serviceName as string | undefined;
+  const stateStaffName = location.state?.staffName as string | undefined;
+  const isPending =
+    !isWhatsApp && (location.state?.isPending === true || bookingData?.status === "requested");
 
   const generateGoogleCalendarUrl = () => {
     if (!bookingData) return "#";
