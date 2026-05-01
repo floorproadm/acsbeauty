@@ -81,21 +81,34 @@ interface WAProps {
   value?: number;
   children: React.ReactNode;
   className?: string;
-  onIntent: (payload: { ctaType: string; message: string; value?: number }) => void;
+  onTrigger: (payload: { ctaType: string; message: string; value?: number }) => void;
 }
 
-const WhatsAppButton = ({ ctaType, message, value, children, className = "", onIntent }: WAProps) => (
+const WhatsAppButton = ({ ctaType, message, value, children, className = "", onTrigger }: WAProps) => (
   <button
     type="button"
-    onClick={() => {
-      trackClick({ ctaType, whatsappMessage: message, selectedValue: value, chosenOption: "intent" });
-      onIntent({ ctaType, message, value });
-    }}
+    onClick={() => onTrigger({ ctaType, message, value })}
     className={`inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-8 py-5 text-base sm:text-lg font-medium tracking-wide text-white shadow-[0_8px_30px_-8px_rgba(37,211,102,0.6)] transition-all duration-300 hover:bg-[#20bd5a] hover:scale-[1.02] hover:shadow-[0_12px_40px_-8px_rgba(37,211,102,0.8)] active:scale-[0.98] ${className}`}
   >
     {children}
   </button>
 );
+
+function copyToClipboard(text: string): Promise<void> {
+  if (navigator.clipboard?.writeText) {
+    return navigator.clipboard.writeText(text).catch(() => legacyCopy(text));
+  }
+  return Promise.resolve(legacyCopy(text));
+}
+
+function legacyCopy(text: string) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand("copy"); } catch { /* ignore */ }
+  document.body.removeChild(ta);
+}
 
 // =============================================================
 // CONFIG: data/hora final da campanha (timezone America/New_York).
