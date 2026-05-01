@@ -27,6 +27,7 @@ import Links from "./pages/Links";
 import ClientPortal from "./pages/ClientPortal";
 import NotFound from "./pages/NotFound";
 import ReviewRequest from "./pages/ReviewRequest";
+import CampaignDiaDasMaes from "./pages/CampaignDiaDasMaes";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
           <Route path="/hub" element={<Links />} />
           <Route path="/portal" element={<ClientPortal />} />
           <Route path="/review" element={<ReviewRequest />} />
+          <Route path="/campaign-dia-das-maes" element={<CampaignDiaDasMaes />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
