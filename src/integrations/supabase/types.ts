@@ -366,6 +366,39 @@ export type Database = {
           },
         ]
       }
+      campaign_clicks: {
+        Row: {
+          campaign_source: string
+          created_at: string
+          cta_type: string
+          id: string
+          referrer: string | null
+          selected_value: number | null
+          user_agent: string | null
+          whatsapp_message: string | null
+        }
+        Insert: {
+          campaign_source: string
+          created_at?: string
+          cta_type: string
+          id?: string
+          referrer?: string | null
+          selected_value?: number | null
+          user_agent?: string | null
+          whatsapp_message?: string | null
+        }
+        Update: {
+          campaign_source?: string
+          created_at?: string
+          cta_type?: string
+          id?: string
+          referrer?: string | null
+          selected_value?: number | null
+          user_agent?: string | null
+          whatsapp_message?: string | null
+        }
+        Relationships: []
+      }
       campaigns: {
         Row: {
           budget: number | null
