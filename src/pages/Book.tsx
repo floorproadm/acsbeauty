@@ -446,9 +446,8 @@ export default function Book() {
       if (data.success && data.hold_id) {
         setHoldId(data.hold_id);
         setHoldExpiresAt(new Date(data.expires_at!));
-        // Portal users have full data — go straight to form (existing flow).
-        // Public users go to the WhatsApp confirmation step.
-        setStep(isPortalSource ? "form" : "whatsapp");
+        // Everyone lands on the WhatsApp lock screen now — including portal/logged-in users.
+        setStep("whatsapp");
         toast.success(language === "pt" ? "Horário reservado por 5 minutos" : "Time slot reserved for 5 minutes");
       } else if (data.code === 'RATE_LIMITED') {
         toast.error(language === "pt" ?
@@ -850,10 +849,14 @@ export default function Book() {
       ].filter(Boolean).join("\n");
       const utm = new URLSearchParams(window.location.search);
       // Note: not awaited — runs in background
+      const leadClientName = portalUser?.name || (language === "pt" ? "Lead WhatsApp (agendamento)" : "WhatsApp Lead (booking)");
+      const leadClientEmail = portalUser?.email || `wa_lead_${Date.now()}@pending.acsbeauty.app`;
+      const leadClientPhone = portalUser?.phone || null;
+
       supabase.from("contact_submissions").insert({
-        name: language === "pt" ? "Lead WhatsApp (agendamento)" : "WhatsApp Lead (booking)",
-        email: `wa_lead_${Date.now()}@pending.acsbeauty.app`,
-        phone: null,
+        name: leadClientName,
+        email: leadClientEmail,
+        phone: leadClientPhone,
         message: leadMessage,
         service_interest: serviceName,
         utm_source: utm.get("utm_source") || "booking_flow",
@@ -868,8 +871,10 @@ export default function Book() {
       const { data: booking, error: bookingError } = await supabase
         .from("bookings")
         .insert({
-          client_name: language === "pt" ? "Cliente WhatsApp" : "WhatsApp Client",
-          client_email: placeholderEmail,
+          client_id: portalUser?.client?.id || null,
+          client_name: portalUser?.name || (language === "pt" ? "Cliente WhatsApp" : "WhatsApp Client"),
+          client_phone: portalUser?.phone || null,
+          client_email: portalUser?.email || placeholderEmail,
           service_id: finalServiceId,
           package_id: packageId || null,
           sku_id: pickedSkuId || null,
