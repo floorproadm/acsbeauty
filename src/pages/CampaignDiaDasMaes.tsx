@@ -535,15 +535,18 @@ export default function CampaignDiaDasMaes() {
         className="fixed bottom-0 inset-x-0 z-50 p-3 bg-background/95 backdrop-blur border-t border-border md:hidden"
         style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
       >
-        <WhatsAppButton
+        <CtaBlock
           ctaType="sticky_mobile"
           message={HERO_MSG}
           onTrigger={handleTrigger}
-          className="w-full !py-4 !text-base"
-        >
-          <MessageCircle className="w-5 h-5" />
-          Comprar pelo WhatsApp
-        </WhatsAppButton>
+          onCopy={handleCopy}
+          label={
+            <>
+              <MessageCircle className="w-5 h-5" />
+              Comprar pelo WhatsApp
+            </>
+          }
+        />
       </div>
       <div className="h-20 md:hidden" aria-hidden />
 
