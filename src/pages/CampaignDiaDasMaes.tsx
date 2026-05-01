@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { MessageCircle, Check, Crown, Sparkles, Clock, Gift, Hourglass } from "lucide-react";
+import { MessageCircle, Check, Crown, Sparkles, Clock, Gift, Hourglass, Copy, Smartphone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import hairService from "@/assets/hair-service.jpg";
 import treatments from "@/assets/treatments-service.jpg";
 import aneHero from "@/assets/ane-hero.jpg";
@@ -12,6 +14,13 @@ const CAMPAIGN_SOURCE = "campaign-dia-das-maes";
 
 const waLink = (msg: string) =>
   `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
+
+const waBusinessDeepLink = (msg: string) =>
+  `whatsapp://send?phone=${WA_NUMBER}&text=${encodeURIComponent(msg)}`;
+
+const isMobile = () =>
+  typeof navigator !== "undefined" &&
+  /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent);
 
 const HERO_MSG = "Oi! Quero comprar um Gift Card de Dia das Mães 💝";
 const FINAL_MSG = "Oi! Quero garantir o presente do Dia das Mães pelo WhatsApp 💝";
