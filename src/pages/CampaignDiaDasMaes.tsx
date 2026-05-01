@@ -84,7 +84,7 @@ const WhatsAppButton = React.forwardRef<HTMLButtonElement, WAProps>(
       ref={ref}
       type="button"
       onClick={() => onTrigger({ ctaType, message, value })}
-      className={`inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-8 py-5 text-base sm:text-lg font-medium tracking-wide text-white shadow-[0_8px_30px_-8px_rgba(37,211,102,0.6)] transition-all duration-300 hover:bg-[#20bd5a] hover:scale-[1.02] hover:shadow-[0_12px_40px_-8px_rgba(37,211,102,0.8)] active:scale-[0.98] ${className}`}
+      className={`inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-8 py-4 sm:py-[18px] text-sm sm:text-base font-sans font-normal tracking-[0.04em] text-white shadow-[0_8px_30px_-8px_rgba(37,211,102,0.55)] transition-all duration-300 hover:bg-[#20bd5a] hover:scale-[1.02] hover:shadow-[0_12px_40px_-8px_rgba(37,211,102,0.7)] active:scale-[0.98] ${className}`}
     >
       {children}
     </button>
@@ -132,7 +132,7 @@ const CtaBlock = ({ ctaType, message, value, label, className = "", onTrigger, o
     <button
       type="button"
       onClick={() => onCopy({ ctaType, message, value })}
-      className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 decoration-dotted transition-colors"
+      className="inline-flex items-center gap-1.5 text-[11px] tracking-[0.05em] text-muted-foreground hover:text-foreground underline underline-offset-4 decoration-dotted transition-colors"
     >
       <Copy className="w-3 h-3" />
       Usa WhatsApp Business? Copiar mensagem
@@ -164,10 +164,10 @@ function useCountdown(target: number) {
 
 const TimeBox = ({ value, label }: { value: number; label: string }) => (
   <div className="flex flex-col items-center min-w-[60px] sm:min-w-[72px]">
-    <div className="bg-foreground/95 text-background rounded-lg px-3 py-2 sm:px-4 sm:py-3 font-editorial text-2xl sm:text-3xl tabular-nums shadow-card">
+    <div className="bg-foreground/95 text-background rounded-lg px-3 py-2 sm:px-4 sm:py-3 font-sans font-light text-2xl sm:text-3xl tabular-nums shadow-card">
       {value.toString().padStart(2, "0")}
     </div>
-    <span className="text-[10px] sm:text-xs uppercase tracking-[0.18em] text-muted-foreground mt-1.5">
+    <span className="text-[10px] sm:text-xs uppercase tracking-[0.22em] text-muted-foreground mt-2">
       {label}
     </span>
   </div>
@@ -236,7 +236,7 @@ export default function CampaignDiaDasMaes() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-background/80 backdrop-blur px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-gold-dark mb-6"
+            className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-background/80 backdrop-blur px-4 py-1.5 text-[11px] uppercase tracking-[0.25em] text-gold-dark mb-7"
           >
             <Sparkles className="w-3.5 h-3.5" />
             Edição Dia das Mães
@@ -246,16 +246,17 @@ export default function CampaignDiaDasMaes() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className="font-editorial text-3xl sm:text-5xl leading-[1.1] text-foreground mb-5"
+            className="font-sans text-3xl sm:text-5xl lg:text-6xl font-light tracking-[0.01em] leading-[1.15] text-foreground mb-5"
           >
-            Ainda não comprou o presente do Dia das Mães?
+            Ainda não comprou o presente do{" "}
+            <span className="text-gradient-gold">Dia das Mães?</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-lg sm:text-xl text-muted-foreground mb-3"
+            className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-5 max-w-md mx-auto"
           >
             Resolve isso em menos de 2 minutos 👇
           </motion.p>
@@ -264,7 +265,7 @@ export default function CampaignDiaDasMaes() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.7, delay: 0.3 }}
-            className="inline-flex items-center gap-2 rounded-full bg-destructive/10 border border-destructive/30 px-4 py-2 text-sm font-medium text-destructive mb-8"
+            className="inline-flex items-center gap-2 rounded-full bg-destructive/10 border border-destructive/30 px-4 py-1.5 text-[12px] tracking-[0.05em] font-medium text-destructive mb-9"
           >
             ⚠️ Entrega garantida até o Dia das Mães
           </motion.div>
@@ -293,7 +294,7 @@ export default function CampaignDiaDasMaes() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.7, delay: 0.6 }}
-            className="mt-4 text-xs text-muted-foreground"
+            className="mt-5 text-[11px] uppercase tracking-[0.2em] text-muted-foreground"
           >
             Resposta em minutos · Pagamento seguro
           </motion.p>
@@ -309,25 +310,25 @@ export default function CampaignDiaDasMaes() {
           className="container mx-auto px-5 max-w-2xl text-center"
         >
           {expired ? (
-            <p className="font-editorial text-xl sm:text-2xl text-foreground">
+            <p className="font-sans font-light text-xl sm:text-2xl tracking-[0.01em] text-foreground">
               Campanha encerrada — fale no WhatsApp para consultar disponibilidade
             </p>
           ) : (
             <>
-              <div className="inline-flex items-center gap-2 text-gold-dark text-sm font-medium uppercase tracking-[0.2em] mb-4">
-                <Hourglass className="w-4 h-4" />
+              <div className="inline-flex items-center gap-2 text-gold-dark text-[11px] font-medium uppercase tracking-[0.25em] mb-4">
+                <Hourglass className="w-3.5 h-3.5" />
                 Tempo restante
               </div>
-              <p className="font-editorial text-xl sm:text-2xl text-foreground mb-6">
-                ⏳ Campanha especial de Dia das Mães termina em breve
+              <p className="font-sans font-light text-xl sm:text-2xl tracking-[0.01em] leading-snug text-foreground mb-7 max-w-lg mx-auto">
+                Campanha especial de Dia das Mães termina em breve
               </p>
               <div className="flex justify-center items-end gap-2 sm:gap-4">
                 <TimeBox value={days} label="dias" />
-                <span className="font-editorial text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
+                <span className="font-sans font-light text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
                 <TimeBox value={hours} label="horas" />
-                <span className="font-editorial text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
+                <span className="font-sans font-light text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
                 <TimeBox value={minutes} label="min" />
-                <span className="font-editorial text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
+                <span className="font-sans font-light text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
                 <TimeBox value={seconds} label="seg" />
               </div>
             </>
@@ -338,11 +339,11 @@ export default function CampaignDiaDasMaes() {
       {/* TIERS */}
       <section className="py-14 sm:py-20 bg-card">
         <div className="container mx-auto px-5 max-w-5xl">
-          <div className="text-center mb-10">
-            <p className="text-xs uppercase tracking-[0.25em] text-gold mb-3">
+          <div className="text-center mb-12">
+            <p className="text-[11px] uppercase tracking-[0.3em] text-gold mb-3">
               Escolha o valor
             </p>
-            <h2 className="font-editorial text-2xl sm:text-4xl text-foreground">
+            <h2 className="font-sans font-light text-2xl sm:text-4xl tracking-[0.01em] leading-snug text-foreground">
               Qual presente combina com ela?
             </h2>
           </div>
@@ -362,16 +363,16 @@ export default function CampaignDiaDasMaes() {
                 }`}
               >
                 {tier.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full bg-gradient-gold px-4 py-1 text-[11px] uppercase tracking-[0.15em] text-white font-medium shadow-gold">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full bg-gradient-gold px-4 py-1 text-[10px] uppercase tracking-[0.2em] text-white font-medium shadow-gold">
                     <Crown className="w-3 h-3" />
                     Mais escolhido
                   </div>
                 )}
 
-                <div className="font-editorial text-5xl sm:text-6xl text-foreground mb-2">
+                <div className="font-sans font-light text-5xl sm:text-6xl tracking-[0.01em] text-foreground mb-2">
                   ${tier.value}
                 </div>
-                <p className="text-sm uppercase tracking-[0.15em] text-muted-foreground mb-6">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground mb-7">
                   {tier.label}
                 </p>
 
@@ -404,9 +405,9 @@ export default function CampaignDiaDasMaes() {
           className="container mx-auto px-5 max-w-2xl text-center"
         >
           <div className="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-gold/10 via-gold-light/10 to-gold/10 border border-gold/20 px-6 py-3">
-            <Crown className="w-5 h-5 text-gold" />
-            <p className="text-sm sm:text-base text-foreground font-medium">
-              Mais de <span className="text-gold-dark font-semibold">120 clientes</span> já compraram esse mês
+            <Crown className="w-4 h-4 text-gold" />
+            <p className="text-sm sm:text-base text-foreground tracking-[0.01em]">
+              Mais de <span className="text-gold-dark font-medium">120 clientes</span> já compraram esse mês
             </p>
           </div>
         </motion.div>
@@ -434,7 +435,7 @@ export default function CampaignDiaDasMaes() {
               </motion.div>
             ))}
           </div>
-          <p className="text-center text-xs sm:text-sm text-muted-foreground mt-5 italic">
+          <p className="text-center text-[11px] sm:text-xs uppercase tracking-[0.25em] text-muted-foreground mt-6">
             Resultados reais de quem confia na ACS
           </p>
         </div>
@@ -443,9 +444,12 @@ export default function CampaignDiaDasMaes() {
       {/* BENEFITS */}
       <section className="py-14 sm:py-20 bg-card">
         <div className="container mx-auto px-5 max-w-3xl">
-          <div className="text-center mb-10">
-            <h2 className="font-editorial text-2xl sm:text-4xl text-foreground">
-              Por que esse presente funciona
+          <div className="text-center mb-12">
+            <p className="text-[11px] uppercase tracking-[0.3em] text-gold mb-3">
+              Por que funciona
+            </p>
+            <h2 className="font-sans font-light text-2xl sm:text-4xl tracking-[0.01em] leading-snug text-foreground">
+              Um presente que ela vai usar de verdade
             </h2>
           </div>
 
@@ -478,13 +482,13 @@ export default function CampaignDiaDasMaes() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="font-editorial text-3xl sm:text-5xl leading-tight text-foreground mb-4">
-              Não deixa pra última hora.
+            <h2 className="font-sans font-light text-3xl sm:text-5xl tracking-[0.01em] leading-[1.15] text-foreground mb-5">
+              Não deixa pra <span className="text-gradient-gold">última hora.</span>
             </h2>
-            <p className="text-base sm:text-lg text-muted-foreground mb-3">
+            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-5 max-w-md mx-auto">
               Em menos de 2 minutos o presente está garantido.
             </p>
-            <div className="inline-flex items-center gap-2 rounded-full bg-destructive/10 border border-destructive/30 px-4 py-2 text-sm font-medium text-destructive mb-8">
+            <div className="inline-flex items-center gap-2 rounded-full bg-destructive/10 border border-destructive/30 px-4 py-1.5 text-[12px] tracking-[0.05em] font-medium text-destructive mb-9">
               ⚠️ Entrega garantida até o Dia das Mães
             </div>
 
