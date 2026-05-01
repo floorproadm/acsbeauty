@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Check, Crown, Sparkles, Clock, Gift, Hourglass, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -162,16 +162,33 @@ function useCountdown(target: number) {
   return { days, hours, minutes, seconds, expired: diff === 0 };
 }
 
-const TimeBox = ({ value, label }: { value: number; label: string }) => (
-  <div className="flex flex-col items-center min-w-[60px] sm:min-w-[72px]">
-    <div className="bg-foreground/95 text-background rounded-lg px-3 py-2 sm:px-4 sm:py-3 font-sans font-light text-2xl sm:text-3xl tabular-nums shadow-card">
-      {value.toString().padStart(2, "0")}
+const TimeBox = ({ value, label }: { value: number; label: string }) => {
+  const display = value.toString().padStart(2, "0");
+  return (
+    <div className="flex flex-col items-center min-w-[64px] sm:min-w-[84px]">
+      <div className="relative w-full overflow-hidden rounded-xl border border-gold/20 bg-gradient-to-b from-foreground to-[hsl(0_0%_12%)] px-3 py-3 sm:px-5 sm:py-4 shadow-[0_10px_30px_-12px_hsl(0_0%_0%_/_0.4)]">
+        {/* subtle gold sheen */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/5 to-transparent" />
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div
+            key={display}
+            initial={{ y: "40%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "-40%", opacity: 0 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            className="relative font-sans font-extralight text-3xl sm:text-4xl tabular-nums text-background text-center leading-none"
+          >
+            {display}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+      <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.28em] text-muted-foreground mt-3">
+        {label}
+      </span>
     </div>
-    <span className="text-[10px] sm:text-xs uppercase tracking-[0.22em] text-muted-foreground mt-2">
-      {label}
-    </span>
-  </div>
-);
+  );
+};
 
 interface TriggerPayload {
   ctaType: string;
