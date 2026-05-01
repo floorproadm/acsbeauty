@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { MessageCircle, Check, Crown, Sparkles, Clock, Gift, Hourglass } from "lucide-react";
+import { MessageCircle, Check, Crown, Sparkles, Clock, Gift, Hourglass, Copy, Smartphone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import hairService from "@/assets/hair-service.jpg";
 import treatments from "@/assets/treatments-service.jpg";
 import aneHero from "@/assets/ane-hero.jpg";
@@ -12,6 +14,13 @@ const CAMPAIGN_SOURCE = "campaign-dia-das-maes";
 
 const waLink = (msg: string) =>
   `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
+
+const waBusinessDeepLink = (msg: string) =>
+  `whatsapp://send?phone=${WA_NUMBER}&text=${encodeURIComponent(msg)}`;
+
+const isMobile = () =>
+  typeof navigator !== "undefined" &&
+  /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent);
 
 const HERO_MSG = "Oi! Quero comprar um Gift Card de Dia das Mães 💝";
 const FINAL_MSG = "Oi! Quero garantir o presente do Dia das Mães pelo WhatsApp 💝";
@@ -49,11 +58,14 @@ function trackClick(params: {
   ctaType: string;
   whatsappMessage: string;
   selectedValue?: number;
+  chosenOption?: "intent" | "whatsapp_normal" | "whatsapp_business" | "copy_message";
 }) {
   try {
     void supabase.from("campaign_clicks").insert({
       campaign_source: CAMPAIGN_SOURCE,
-      cta_type: params.ctaType,
+      cta_type: params.chosenOption
+        ? `${params.ctaType}:${params.chosenOption}`
+        : params.ctaType,
       selected_value: params.selectedValue ?? null,
       whatsapp_message: params.whatsappMessage,
       user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
@@ -65,24 +77,25 @@ function trackClick(params: {
 }
 
 interface WAProps {
-  href: string;
   ctaType: string;
   message: string;
   value?: number;
   children: React.ReactNode;
   className?: string;
+  onIntent: (payload: { ctaType: string; message: string; value?: number }) => void;
 }
 
-const WhatsAppButton = ({ href, ctaType, message, value, children, className = "" }: WAProps) => (
-  <a
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer"
-    onClick={() => trackClick({ ctaType, whatsappMessage: message, selectedValue: value })}
+const WhatsAppButton = ({ ctaType, message, value, children, className = "", onIntent }: WAProps) => (
+  <button
+    type="button"
+    onClick={() => {
+      trackClick({ ctaType, whatsappMessage: message, selectedValue: value, chosenOption: "intent" });
+      onIntent({ ctaType, message, value });
+    }}
     className={`inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-8 py-5 text-base sm:text-lg font-medium tracking-wide text-white shadow-[0_8px_30px_-8px_rgba(37,211,102,0.6)] transition-all duration-300 hover:bg-[#20bd5a] hover:scale-[1.02] hover:shadow-[0_12px_40px_-8px_rgba(37,211,102,0.8)] active:scale-[0.98] ${className}`}
   >
     {children}
-  </a>
+  </button>
 );
 
 // =============================================================
@@ -118,8 +131,80 @@ const TimeBox = ({ value, label }: { value: number; label: string }) => (
   </div>
 );
 
+interface IntentPayload {
+  ctaType: string;
+  message: string;
+  value?: number;
+}
+
 export default function CampaignDiaDasMaes() {
   const { days, hours, minutes, seconds, expired } = useCountdown(CAMPAIGN_END_TS);
+  const [intent, setIntent] = useState<IntentPayload | null>(null);
+  const onIntent = (p: IntentPayload) => setIntent(p);
+
+  const handleOption = (option: "whatsapp_normal" | "whatsapp_business" | "copy_message") => {
+    if (!intent) return;
+    trackClick({
+      ctaType: intent.ctaType,
+      whatsappMessage: intent.message,
+      selectedValue: intent.value,
+      chosenOption: option,
+    });
+
+    if (option === "whatsapp_normal") {
+      window.open(waLink(intent.message), "_blank", "noopener,noreferrer");
+      setIntent(null);
+      return;
+    }
+
+    if (option === "whatsapp_business") {
+      const fallback = waLink(intent.message);
+      if (isMobile()) {
+        // Try deep link; if app not installed, fall back to wa.me after a short delay
+        const start = Date.now();
+        window.location.href = waBusinessDeepLink(intent.message);
+        setTimeout(() => {
+          if (Date.now() - start < 1800 && document.visibilityState === "visible") {
+            window.open(fallback, "_blank", "noopener,noreferrer");
+          }
+        }, 1200);
+      } else {
+        // Desktop has no WhatsApp Business app — use wa.me
+        window.open(fallback, "_blank", "noopener,noreferrer");
+      }
+      setIntent(null);
+      return;
+    }
+
+    if (option === "copy_message") {
+      const text = intent.message;
+      const done = () =>
+        toast.success("Mensagem copiada", {
+          description: "Agora cole no WhatsApp Business.",
+        });
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(() => {
+          // Legacy fallback
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand("copy"); done(); } catch { /* ignore */ }
+          document.body.removeChild(ta);
+        });
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); done(); } catch { /* ignore */ }
+        document.body.removeChild(ta);
+      }
+      // Keep dialog open briefly so user sees the toast then close
+      setTimeout(() => setIntent(null), 600);
+    }
+  };
+
 
   useEffect(() => {
     document.title = "Gift Card Dia das Mães | ACS Beauty Studio";
@@ -191,9 +276,9 @@ export default function CampaignDiaDasMaes() {
             transition={{ duration: 0.7, delay: 0.4 }}
           >
             <WhatsAppButton
-              href={waLink(HERO_MSG)}
               ctaType="hero"
               message={HERO_MSG}
+              onIntent={onIntent}
               className="w-full sm:w-auto"
             >
               <MessageCircle className="w-5 h-5" />
@@ -288,10 +373,10 @@ export default function CampaignDiaDasMaes() {
                 </p>
 
                 <WhatsAppButton
-                  href={waLink(tier.msg)}
                   ctaType={`tier_${tier.value}`}
                   message={tier.msg}
                   value={tier.value}
+                  onIntent={onIntent}
                   className="w-full mt-auto"
                 >
                   <MessageCircle className="w-4 h-4" />
@@ -398,9 +483,9 @@ export default function CampaignDiaDasMaes() {
 
             <div>
               <WhatsAppButton
-                href={waLink(FINAL_MSG)}
                 ctaType="final"
                 message={FINAL_MSG}
+                onIntent={onIntent}
                 className="w-full sm:w-auto"
               >
                 <MessageCircle className="w-5 h-5" />
@@ -424,9 +509,9 @@ export default function CampaignDiaDasMaes() {
         style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
       >
         <WhatsAppButton
-          href={waLink(HERO_MSG)}
           ctaType="sticky_mobile"
           message={HERO_MSG}
+          onIntent={onIntent}
           className="w-full !py-4 !text-base"
         >
           <MessageCircle className="w-5 h-5" />
@@ -434,6 +519,58 @@ export default function CampaignDiaDasMaes() {
         </WhatsAppButton>
       </div>
       <div className="h-20 md:hidden" aria-hidden />
+
+      {/* WhatsApp option chooser */}
+      <Dialog open={!!intent} onOpenChange={(o) => !o && setIntent(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-editorial text-2xl text-center">
+              Como você quer continuar?
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              Escolha o app onde quer enviar a mensagem
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-3 mt-4">
+            <button
+              type="button"
+              onClick={() => handleOption("whatsapp_normal")}
+              className="flex items-center gap-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white px-5 py-4 transition-all active:scale-[0.98]"
+            >
+              <MessageCircle className="w-5 h-5 flex-shrink-0" />
+              <div className="text-left flex-1">
+                <div className="font-medium">Abrir no WhatsApp</div>
+                <div className="text-xs opacity-90">App pessoal padrão</div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleOption("whatsapp_business")}
+              className="flex items-center gap-3 rounded-xl bg-[#075E54] hover:bg-[#064a42] text-white px-5 py-4 transition-all active:scale-[0.98]"
+            >
+              <Smartphone className="w-5 h-5 flex-shrink-0" />
+              <div className="text-left flex-1">
+                <div className="font-medium">Abrir no WhatsApp Business</div>
+                <div className="text-xs opacity-90">Para quem usa o app comercial</div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleOption("copy_message")}
+              className="flex items-center gap-3 rounded-xl bg-background border-2 border-border hover:border-gold text-foreground px-5 py-4 transition-all active:scale-[0.98]"
+            >
+              <Copy className="w-5 h-5 flex-shrink-0 text-gold-dark" />
+              <div className="text-left flex-1">
+                <div className="font-medium">Copiar mensagem</div>
+                <div className="text-xs text-muted-foreground">Cole onde preferir</div>
+              </div>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
