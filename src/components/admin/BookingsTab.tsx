@@ -470,6 +470,7 @@ export function BookingsTab() {
                     booking.status === "completed" ? "border-l-blue-500" :
                     booking.status === "cancelled" ? "border-l-red-500" :
                     booking.status === "no_show" ? "border-l-gray-400" :
+                    booking.status === "whatsapp_pending" ? "border-l-[#25D366]" :
                     "border-l-amber-500"
                   }`}>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
