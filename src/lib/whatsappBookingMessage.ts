@@ -31,30 +31,24 @@ export function buildWhatsAppBookingUrl(params: BuildMessageParams): string {
   const lines =
     language === "pt"
       ? [
-          `Oi!`,
+          `Oi! Sou ${clientName}.`,
           ``,
-          `Acabei de reservar esse horario no site:`,
+          `Acabei de reservar esse horario no site e quero confirmar:`,
           ``,
-          `Cliente: ${clientName}`,
           `Servico: ${serviceName}`,
           staffName ? `Com: ${staffName}` : null,
           `Quando: ${dateLabel}`,
           ``,
-          `Quero garantir esse horario!`,
-          ``,
           `(codigo: ${code})`,
         ]
       : [
-          `Hi!`,
+          `Hi! This is ${clientName}.`,
           ``,
-          `I just reserved this time slot on the website:`,
+          `I just booked this time slot on the website and want to confirm:`,
           ``,
-          `Client: ${clientName}`,
           `Service: ${serviceName}`,
           staffName ? `With: ${staffName}` : null,
           `When: ${dateLabel}`,
-          ``,
-          `I want to lock in this time!`,
           ``,
           `(code: ${code})`,
         ];
