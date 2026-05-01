@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { MessageCircle, Check, Crown, Sparkles, Clock, Gift, Hourglass } from "lucide-react";
+import { MessageCircle, Check, Crown, Sparkles, Clock, Gift, Hourglass, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import hairService from "@/assets/hair-service.jpg";
@@ -78,15 +78,19 @@ interface WAProps {
   onTrigger: (payload: { ctaType: string; message: string; value?: number }) => void;
 }
 
-const WhatsAppButton = ({ ctaType, message, value, children, className = "", onTrigger }: WAProps) => (
-  <button
-    type="button"
-    onClick={() => onTrigger({ ctaType, message, value })}
-    className={`inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-8 py-5 text-base sm:text-lg font-medium tracking-wide text-white shadow-[0_8px_30px_-8px_rgba(37,211,102,0.6)] transition-all duration-300 hover:bg-[#20bd5a] hover:scale-[1.02] hover:shadow-[0_12px_40px_-8px_rgba(37,211,102,0.8)] active:scale-[0.98] ${className}`}
-  >
-    {children}
-  </button>
+const WhatsAppButton = React.forwardRef<HTMLButtonElement, WAProps>(
+  ({ ctaType, message, value, children, className = "", onTrigger }, ref) => (
+    <button
+      ref={ref}
+      type="button"
+      onClick={() => onTrigger({ ctaType, message, value })}
+      className={`inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-8 py-5 text-base sm:text-lg font-medium tracking-wide text-white shadow-[0_8px_30px_-8px_rgba(37,211,102,0.6)] transition-all duration-300 hover:bg-[#20bd5a] hover:scale-[1.02] hover:shadow-[0_12px_40px_-8px_rgba(37,211,102,0.8)] active:scale-[0.98] ${className}`}
+    >
+      {children}
+    </button>
+  )
 );
+WhatsAppButton.displayName = "WhatsAppButton";
 
 function copyToClipboard(text: string): Promise<void> {
   if (navigator.clipboard?.writeText) {
@@ -103,6 +107,38 @@ function legacyCopy(text: string) {
   try { document.execCommand("copy"); } catch { /* ignore */ }
   document.body.removeChild(ta);
 }
+
+interface CtaBlockProps {
+  ctaType: string;
+  message: string;
+  value?: number;
+  label: React.ReactNode;
+  className?: string;
+  onTrigger: (payload: { ctaType: string; message: string; value?: number }) => void;
+  onCopy: (payload: { ctaType: string; message: string; value?: number }) => void;
+}
+
+const CtaBlock = ({ ctaType, message, value, label, className = "", onTrigger, onCopy }: CtaBlockProps) => (
+  <div className={`flex flex-col items-center gap-2 ${className}`}>
+    <WhatsAppButton
+      ctaType={ctaType}
+      message={message}
+      value={value}
+      onTrigger={onTrigger}
+      className="w-full"
+    >
+      {label}
+    </WhatsAppButton>
+    <button
+      type="button"
+      onClick={() => onCopy({ ctaType, message, value })}
+      className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 decoration-dotted transition-colors"
+    >
+      <Copy className="w-3 h-3" />
+      Usa WhatsApp Business? Copiar mensagem
+    </button>
+  </div>
+);
 
 // =============================================================
 // CONFIG: data/hora final da campanha (timezone America/New_York).
@@ -153,23 +189,19 @@ export default function CampaignDiaDasMaes() {
     // 2. abrir wa.me direto
     window.open(waLink(message), "_blank", "noopener,noreferrer");
 
-    // 3. toast discreto com fallback "Copiar mensagem"
-    toast("Usa WhatsApp Business? Copie a mensagem se não abrir no app certo.", {
-      action: {
-        label: "Copiar mensagem",
-        onClick: () => {
-          trackClick({
-            ctaType,
-            whatsappMessage: message,
-            selectedValue: value,
-            chosenOption: "copy_message",
-          });
-          void copyToClipboard(message).then(() => {
-            toast.success("Mensagem copiada.");
-          });
-        },
-      },
-      duration: 8000,
+  };
+
+  const handleCopy = ({ ctaType, message, value }: TriggerPayload) => {
+    trackClick({
+      ctaType,
+      whatsappMessage: message,
+      selectedValue: value,
+      chosenOption: "copy_message",
+    });
+    void copyToClipboard(message).then(() => {
+      toast.success("Mensagem copiada", {
+        description: "Cole no WhatsApp Business.",
+      });
     });
   };
 
@@ -242,15 +274,19 @@ export default function CampaignDiaDasMaes() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.4 }}
           >
-            <WhatsAppButton
+            <CtaBlock
               ctaType="hero"
               message={HERO_MSG}
               onTrigger={handleTrigger}
-              className="w-full sm:w-auto"
-            >
-              <MessageCircle className="w-5 h-5" />
-              Comprar pelo WhatsApp agora
-            </WhatsAppButton>
+              onCopy={handleCopy}
+              className="w-full sm:w-auto sm:inline-flex"
+              label={
+                <>
+                  <MessageCircle className="w-5 h-5" />
+                  Comprar pelo WhatsApp agora
+                </>
+              }
+            />
           </motion.div>
 
           <motion.p
@@ -339,16 +375,20 @@ export default function CampaignDiaDasMaes() {
                   {tier.label}
                 </p>
 
-                <WhatsAppButton
+                <CtaBlock
                   ctaType={`tier_${tier.value}`}
                   message={tier.msg}
                   value={tier.value}
                   onTrigger={handleTrigger}
-                  className="w-full mt-auto"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  Quero esse valor
-                </WhatsAppButton>
+                  onCopy={handleCopy}
+                  className="mt-auto"
+                  label={
+                    <>
+                      <MessageCircle className="w-4 h-4" />
+                      Quero esse valor
+                    </>
+                  }
+                />
               </motion.div>
             ))}
           </div>
@@ -448,17 +488,19 @@ export default function CampaignDiaDasMaes() {
               ⚠️ Entrega garantida até o Dia das Mães
             </div>
 
-            <div>
-              <WhatsAppButton
-                ctaType="final"
-                message={FINAL_MSG}
-                onTrigger={handleTrigger}
-                className="w-full sm:w-auto"
-              >
-                <MessageCircle className="w-5 h-5" />
-                Comprar pelo WhatsApp agora
-              </WhatsAppButton>
-            </div>
+            <CtaBlock
+              ctaType="final"
+              message={FINAL_MSG}
+              onTrigger={handleTrigger}
+              onCopy={handleCopy}
+              className="w-full sm:max-w-sm sm:mx-auto"
+              label={
+                <>
+                  <MessageCircle className="w-5 h-5" />
+                  Comprar pelo WhatsApp agora
+                </>
+              }
+            />
           </motion.div>
         </div>
       </section>
@@ -475,15 +517,18 @@ export default function CampaignDiaDasMaes() {
         className="fixed bottom-0 inset-x-0 z-50 p-3 bg-background/95 backdrop-blur border-t border-border md:hidden"
         style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
       >
-        <WhatsAppButton
+        <CtaBlock
           ctaType="sticky_mobile"
           message={HERO_MSG}
           onTrigger={handleTrigger}
-          className="w-full !py-4 !text-base"
-        >
-          <MessageCircle className="w-5 h-5" />
-          Comprar pelo WhatsApp
-        </WhatsAppButton>
+          onCopy={handleCopy}
+          label={
+            <>
+              <MessageCircle className="w-5 h-5" />
+              Comprar pelo WhatsApp
+            </>
+          }
+        />
       </div>
       <div className="h-20 md:hidden" aria-hidden />
 
