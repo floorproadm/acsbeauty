@@ -234,7 +234,7 @@ export function BookingDetailModal({ booking, open, onOpenChange, onConfirm, onC
 
           {/* Status-specific actions */}
           <div className="space-y-2 pt-4 border-t border-border">
-            {booking.status === "requested" && (
+            {(booking.status === "requested" || booking.status === "whatsapp_pending") && (
               <div className="flex gap-2">
                 <Button onClick={() => handleAction(onConfirm)} className="flex-1 gap-1">
                   <CheckCircle className="w-4 h-4" />Confirmar
