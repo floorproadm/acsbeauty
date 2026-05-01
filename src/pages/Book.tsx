@@ -17,6 +17,8 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { WhatsAppStep } from "@/components/booking/WhatsAppStep";
+import { buildWhatsAppBookingUrl } from "@/lib/whatsappBookingMessage";
 
 interface TimeSlot {
   start: string;
