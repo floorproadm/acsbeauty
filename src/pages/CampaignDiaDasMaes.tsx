@@ -339,11 +339,11 @@ export default function CampaignDiaDasMaes() {
       {/* TIERS */}
       <section className="py-14 sm:py-20 bg-card">
         <div className="container mx-auto px-5 max-w-5xl">
-          <div className="text-center mb-10">
-            <p className="text-xs uppercase tracking-[0.25em] text-gold mb-3">
+          <div className="text-center mb-12">
+            <p className="text-[11px] uppercase tracking-[0.3em] text-gold mb-3">
               Escolha o valor
             </p>
-            <h2 className="font-editorial text-2xl sm:text-4xl text-foreground">
+            <h2 className="font-sans font-light text-2xl sm:text-4xl tracking-[0.01em] leading-snug text-foreground">
               Qual presente combina com ela?
             </h2>
           </div>
@@ -363,16 +363,16 @@ export default function CampaignDiaDasMaes() {
                 }`}
               >
                 {tier.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full bg-gradient-gold px-4 py-1 text-[11px] uppercase tracking-[0.15em] text-white font-medium shadow-gold">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full bg-gradient-gold px-4 py-1 text-[10px] uppercase tracking-[0.2em] text-white font-medium shadow-gold">
                     <Crown className="w-3 h-3" />
                     Mais escolhido
                   </div>
                 )}
 
-                <div className="font-editorial text-5xl sm:text-6xl text-foreground mb-2">
+                <div className="font-sans font-light text-5xl sm:text-6xl tracking-[0.01em] text-foreground mb-2">
                   ${tier.value}
                 </div>
-                <p className="text-sm uppercase tracking-[0.15em] text-muted-foreground mb-6">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground mb-7">
                   {tier.label}
                 </p>
 
@@ -405,9 +405,9 @@ export default function CampaignDiaDasMaes() {
           className="container mx-auto px-5 max-w-2xl text-center"
         >
           <div className="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-gold/10 via-gold-light/10 to-gold/10 border border-gold/20 px-6 py-3">
-            <Crown className="w-5 h-5 text-gold" />
-            <p className="text-sm sm:text-base text-foreground font-medium">
-              Mais de <span className="text-gold-dark font-semibold">120 clientes</span> já compraram esse mês
+            <Crown className="w-4 h-4 text-gold" />
+            <p className="text-sm sm:text-base text-foreground tracking-[0.01em]">
+              Mais de <span className="text-gold-dark font-medium">120 clientes</span> já compraram esse mês
             </p>
           </div>
         </motion.div>
@@ -435,7 +435,7 @@ export default function CampaignDiaDasMaes() {
               </motion.div>
             ))}
           </div>
-          <p className="text-center text-xs sm:text-sm text-muted-foreground mt-5 italic">
+          <p className="text-center text-[11px] sm:text-xs uppercase tracking-[0.25em] text-muted-foreground mt-6">
             Resultados reais de quem confia na ACS
           </p>
         </div>
@@ -444,9 +444,12 @@ export default function CampaignDiaDasMaes() {
       {/* BENEFITS */}
       <section className="py-14 sm:py-20 bg-card">
         <div className="container mx-auto px-5 max-w-3xl">
-          <div className="text-center mb-10">
-            <h2 className="font-editorial text-2xl sm:text-4xl text-foreground">
-              Por que esse presente funciona
+          <div className="text-center mb-12">
+            <p className="text-[11px] uppercase tracking-[0.3em] text-gold mb-3">
+              Por que funciona
+            </p>
+            <h2 className="font-sans font-light text-2xl sm:text-4xl tracking-[0.01em] leading-snug text-foreground">
+              Um presente que ela vai usar de verdade
             </h2>
           </div>
 
@@ -479,13 +482,13 @@ export default function CampaignDiaDasMaes() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="font-editorial text-3xl sm:text-5xl leading-tight text-foreground mb-4">
-              Não deixa pra última hora.
+            <h2 className="font-sans font-light text-3xl sm:text-5xl tracking-[0.01em] leading-[1.15] text-foreground mb-5">
+              Não deixa pra <span className="text-gradient-gold">última hora.</span>
             </h2>
-            <p className="text-base sm:text-lg text-muted-foreground mb-3">
+            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-5 max-w-md mx-auto">
               Em menos de 2 minutos o presente está garantido.
             </p>
-            <div className="inline-flex items-center gap-2 rounded-full bg-destructive/10 border border-destructive/30 px-4 py-2 text-sm font-medium text-destructive mb-8">
+            <div className="inline-flex items-center gap-2 rounded-full bg-destructive/10 border border-destructive/30 px-4 py-1.5 text-[12px] tracking-[0.05em] font-medium text-destructive mb-9">
               ⚠️ Entrega garantida até o Dia das Mães
             </div>
 
