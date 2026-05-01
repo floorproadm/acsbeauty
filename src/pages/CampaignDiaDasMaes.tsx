@@ -108,6 +108,38 @@ function legacyCopy(text: string) {
   document.body.removeChild(ta);
 }
 
+interface CtaBlockProps {
+  ctaType: string;
+  message: string;
+  value?: number;
+  label: React.ReactNode;
+  className?: string;
+  onTrigger: (payload: { ctaType: string; message: string; value?: number }) => void;
+  onCopy: (payload: { ctaType: string; message: string; value?: number }) => void;
+}
+
+const CtaBlock = ({ ctaType, message, value, label, className = "", onTrigger, onCopy }: CtaBlockProps) => (
+  <div className={`flex flex-col items-center gap-2 ${className}`}>
+    <WhatsAppButton
+      ctaType={ctaType}
+      message={message}
+      value={value}
+      onTrigger={onTrigger}
+      className="w-full"
+    >
+      {label}
+    </WhatsAppButton>
+    <button
+      type="button"
+      onClick={() => onCopy({ ctaType, message, value })}
+      className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 decoration-dotted transition-colors"
+    >
+      <Copy className="w-3 h-3" />
+      Usa WhatsApp Business? Copiar mensagem
+    </button>
+  </div>
+);
+
 // =============================================================
 // CONFIG: data/hora final da campanha (timezone America/New_York).
 // Altere apenas esta linha para estender ou encerrar a campanha.
