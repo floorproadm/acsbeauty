@@ -339,13 +339,13 @@ export default function CampaignDiaDasMaes() {
               <p className="font-sans font-light text-xl sm:text-2xl tracking-[0.01em] leading-snug text-foreground mb-7 max-w-lg mx-auto">
                 Campanha especial de Dia das Mães termina em breve
               </p>
-              <div className="flex justify-center items-end gap-2 sm:gap-4">
+              <div className="flex justify-center items-start gap-1.5 sm:gap-3">
                 <TimeBox value={days} label="dias" />
-                <span className="font-sans font-light text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
+                <span className="font-sans font-extralight text-2xl sm:text-3xl text-gold/50 pt-3 sm:pt-4 select-none">·</span>
                 <TimeBox value={hours} label="horas" />
-                <span className="font-sans font-light text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
+                <span className="font-sans font-extralight text-2xl sm:text-3xl text-gold/50 pt-3 sm:pt-4 select-none">·</span>
                 <TimeBox value={minutes} label="min" />
-                <span className="font-sans font-light text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
+                <span className="font-sans font-extralight text-2xl sm:text-3xl text-gold/50 pt-3 sm:pt-4 select-none">·</span>
                 <TimeBox value={seconds} label="seg" />
               </div>
             </>
