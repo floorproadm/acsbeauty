@@ -1386,6 +1386,26 @@ export default function Book() {
                 </motion.div>
               }
 
+              {/* Step: WhatsApp confirmation (high-conversion redirect) */}
+              {step === "whatsapp" && selectedSlot && (
+                <WhatsAppStep
+                  language={language as "pt" | "en"}
+                  countdown={countdown}
+                  formatCountdown={formatCountdown}
+                  serviceName={offer?.headline || offer?.name || pkg?.name || selectedSkuData?.name || service?.name || (language === "pt" ? "Consulta" : "Consultation")}
+                  staffName={selectedStaffName}
+                  startTime={selectedSlot.start}
+                  onConfirm={handleWhatsAppConfirm}
+                  onChangeSlot={() => {
+                    setStep("date");
+                    setHoldId(null);
+                    setHoldExpiresAt(null);
+                    setSelectedSlot(null);
+                  }}
+                  isLoading={waLoading}
+                />
+              )}
+
               {/* Step: Client Information */}
               {step === "form" &&
               <motion.div
