@@ -143,7 +143,7 @@ const TimeBox = ({ value, label }: { value: number; label: string }) => (
   </div>
 );
 
-interface IntentPayload {
+interface TriggerPayload {
   ctaType: string;
   message: string;
   value?: number;
@@ -151,72 +151,33 @@ interface IntentPayload {
 
 export default function CampaignDiaDasMaes() {
   const { days, hours, minutes, seconds, expired } = useCountdown(CAMPAIGN_END_TS);
-  const [intent, setIntent] = useState<IntentPayload | null>(null);
-  const onIntent = (p: IntentPayload) => setIntent(p);
 
-  const handleOption = (option: "whatsapp_normal" | "whatsapp_business" | "copy_message") => {
-    if (!intent) return;
-    trackClick({
-      ctaType: intent.ctaType,
-      whatsappMessage: intent.message,
-      selectedValue: intent.value,
-      chosenOption: option,
+  const handleTrigger = ({ ctaType, message, value }: TriggerPayload) => {
+    // 1. tracking (fire-and-forget)
+    trackClick({ ctaType, whatsappMessage: message, selectedValue: value });
+
+    // 2. abrir wa.me direto
+    window.open(waLink(message), "_blank", "noopener,noreferrer");
+
+    // 3. toast discreto com fallback "Copiar mensagem"
+    toast("Usa WhatsApp Business? Copie a mensagem se não abrir no app certo.", {
+      action: {
+        label: "Copiar mensagem",
+        onClick: () => {
+          trackClick({
+            ctaType,
+            whatsappMessage: message,
+            selectedValue: value,
+            chosenOption: "copy_message",
+          });
+          void copyToClipboard(message).then(() => {
+            toast.success("Mensagem copiada.");
+          });
+        },
+      },
+      duration: 8000,
     });
-
-    if (option === "whatsapp_normal") {
-      window.open(waLink(intent.message), "_blank", "noopener,noreferrer");
-      setIntent(null);
-      return;
-    }
-
-    if (option === "whatsapp_business") {
-      const fallback = waLink(intent.message);
-      if (isMobile()) {
-        // Try deep link; if app not installed, fall back to wa.me after a short delay
-        const start = Date.now();
-        window.location.href = waBusinessDeepLink(intent.message);
-        setTimeout(() => {
-          if (Date.now() - start < 1800 && document.visibilityState === "visible") {
-            window.open(fallback, "_blank", "noopener,noreferrer");
-          }
-        }, 1200);
-      } else {
-        // Desktop has no WhatsApp Business app — use wa.me
-        window.open(fallback, "_blank", "noopener,noreferrer");
-      }
-      setIntent(null);
-      return;
-    }
-
-    if (option === "copy_message") {
-      const text = intent.message;
-      const done = () =>
-        toast.success("Mensagem copiada", {
-          description: "Agora cole no WhatsApp Business.",
-        });
-      if (navigator.clipboard?.writeText) {
-        navigator.clipboard.writeText(text).then(done).catch(() => {
-          // Legacy fallback
-          const ta = document.createElement("textarea");
-          ta.value = text;
-          document.body.appendChild(ta);
-          ta.select();
-          try { document.execCommand("copy"); done(); } catch { /* ignore */ }
-          document.body.removeChild(ta);
-        });
-      } else {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        try { document.execCommand("copy"); done(); } catch { /* ignore */ }
-        document.body.removeChild(ta);
-      }
-      // Keep dialog open briefly so user sees the toast then close
-      setTimeout(() => setIntent(null), 600);
-    }
   };
-
 
   useEffect(() => {
     document.title = "Gift Card Dia das Mães | ACS Beauty Studio";
