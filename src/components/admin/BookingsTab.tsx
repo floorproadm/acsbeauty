@@ -18,10 +18,11 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookingCalendarView } from "./BookingCalendarView";
 import { BookingDayView } from "./BookingDayView";
 
-type BookingStatus = "requested" | "confirmed" | "completed" | "cancelled" | "no_show";
+type BookingStatus = "requested" | "whatsapp_pending" | "confirmed" | "completed" | "cancelled" | "no_show";
 
 const statusConfig: Record<BookingStatus, { label: string; color: string; icon: React.ElementType }> = {
   requested: { label: "Aguardando", color: "bg-yellow-100 text-yellow-700", icon: Clock },
+  whatsapp_pending: { label: "Aguardando WhatsApp", color: "bg-[#25D366]/15 text-[#128C4B]", icon: Clock },
   confirmed: { label: "Confirmado", color: "bg-green-100 text-green-700", icon: CheckCircle },
   completed: { label: "Concluído", color: "bg-blue-100 text-blue-700", icon: CheckCircle },
   cancelled: { label: "Cancelado", color: "bg-red-100 text-red-700", icon: XCircle },
@@ -393,6 +394,7 @@ export function BookingsTab() {
               <SelectContent>
                 <SelectItem value="all">Todos status</SelectItem>
                 <SelectItem value="requested">Aguardando</SelectItem>
+                <SelectItem value="whatsapp_pending">Aguardando WhatsApp</SelectItem>
                 <SelectItem value="confirmed">Confirmados</SelectItem>
                 <SelectItem value="completed">Concluídos</SelectItem>
                 <SelectItem value="cancelled">Cancelados</SelectItem>
@@ -468,6 +470,7 @@ export function BookingsTab() {
                     booking.status === "completed" ? "border-l-blue-500" :
                     booking.status === "cancelled" ? "border-l-red-500" :
                     booking.status === "no_show" ? "border-l-gray-400" :
+                    booking.status === "whatsapp_pending" ? "border-l-[#25D366]" :
                     "border-l-amber-500"
                   }`}>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -515,7 +518,7 @@ export function BookingsTab() {
                             <MessageSquare className="w-4 h-4" />
                           </Button>
                         )}
-                        {booking.status === "requested" && (
+                        {(booking.status === "requested" || booking.status === "whatsapp_pending") && (
                           <>
                             <Button size="sm" onClick={(e) => { e.stopPropagation(); approveBookingMutation.mutate(booking.id); }} className="gap-1 text-xs" disabled={approveBookingMutation.isPending}>
                               {approveBookingMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}Confirmar

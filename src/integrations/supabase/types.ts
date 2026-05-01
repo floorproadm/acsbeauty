@@ -182,12 +182,14 @@ export type Database = {
           created_at: string
           end_time: string
           google_calendar_event_id: string | null
+          hold_id: string | null
           id: string
           notes: string | null
           package_id: string | null
           payment_method: string | null
           service_id: string | null
           sku_id: string | null
+          source: string | null
           staff_id: string | null
           start_time: string
           status: string
@@ -203,12 +205,14 @@ export type Database = {
           created_at?: string
           end_time: string
           google_calendar_event_id?: string | null
+          hold_id?: string | null
           id?: string
           notes?: string | null
           package_id?: string | null
           payment_method?: string | null
           service_id?: string | null
           sku_id?: string | null
+          source?: string | null
           staff_id?: string | null
           start_time: string
           status?: string
@@ -224,12 +228,14 @@ export type Database = {
           created_at?: string
           end_time?: string
           google_calendar_event_id?: string | null
+          hold_id?: string | null
           id?: string
           notes?: string | null
           package_id?: string | null
           payment_method?: string | null
           service_id?: string | null
           sku_id?: string | null
+          source?: string | null
           staff_id?: string | null
           start_time?: string
           status?: string

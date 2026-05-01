@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,6 +17,8 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { WhatsAppStep } from "@/components/booking/WhatsAppStep";
+import { buildWhatsAppBookingUrl } from "@/lib/whatsappBookingMessage";
 
 interface TimeSlot {
   start: string;
@@ -96,9 +98,10 @@ export default function Book() {
   const isCalendarFlow = flowMode === "calendar" && !offerId && !packageId && !serviceParam;
 
   // Booking flow state
-  const [step, setStep] = useState<"service" | "sku" | "staff" | "date" | "form">(
+  const [step, setStep] = useState<"service" | "sku" | "staff" | "date" | "form" | "whatsapp">(
     isCalendarFlow ? "date" : serviceParam ? "sku" : "service"
   );
+  const [waLoading, setWaLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [holdId, setHoldId] = useState<string | null>(null);
@@ -443,13 +446,15 @@ export default function Book() {
       if (data.success && data.hold_id) {
         setHoldId(data.hold_id);
         setHoldExpiresAt(new Date(data.expires_at!));
-        setStep("form");
+        // Portal users have full data — go straight to form (existing flow).
+        // Public users go to the WhatsApp confirmation step.
+        setStep(isPortalSource ? "form" : "whatsapp");
         toast.success(language === "pt" ? "Horário reservado por 5 minutos" : "Time slot reserved for 5 minutes");
       } else if (data.code === 'RATE_LIMITED') {
         toast.error(language === "pt" ?
         "Muitas tentativas. Aguarde um momento ou fale conosco pelo WhatsApp." :
         "Too many attempts. Please wait or contact us via WhatsApp.",
-        { duration: 8000, action: { label: "WhatsApp", onClick: () => window.open("https://wa.me/19739004498", "_blank") } }
+        { duration: 8000, action: { label: "WhatsApp", onClick: () => window.open("https://wa.me/17329153430", "_blank") } }
         );
       } else {
         toast.error(data.error || "Failed to reserve time slot");
@@ -763,7 +768,12 @@ export default function Book() {
 
   // Handle back navigation
   const handleBack = () => {
-    if (step === "form") {
+    if (step === "whatsapp") {
+      setStep("date");
+      setHoldId(null);
+      setHoldExpiresAt(null);
+      setSelectedSlot(null);
+    } else if (step === "form") {
       setStep("date");
       setHoldId(null);
       setHoldExpiresAt(null);
@@ -792,6 +802,97 @@ export default function Book() {
       navigate(-1);
     } else {
       navigate(-1);
+    }
+  };
+
+  // Get staff name for WhatsApp message + UI
+  const selectedStaffName = useMemo(() => {
+    if (!pickedStaffId || !eligibleStaff) return null;
+    return eligibleStaff.find((s: any) => s.staff_profile_id === pickedStaffId)?.name || null;
+  }, [pickedStaffId, eligibleStaff]);
+
+  // Create booking as whatsapp_pending + open WhatsApp synchronously
+  const handleWhatsAppConfirm = async () => {
+    if (!selectedSlot || !holdId) return;
+    if (waLoading) return;
+    setWaLoading(true);
+
+    // 1) Open window SYNCHRONOUSLY with placeholder URL (iOS/Safari popup blocker safety).
+    const waWindow = window.open("about:blank", "_blank");
+
+    try {
+      const finalServiceId = offer?.service_id || activeServiceId || null;
+      const serviceName = offer?.headline || offer?.name || pkg?.name || selectedSkuData?.name || service?.name || (language === "pt" ? "Consulta" : "Consultation");
+
+      // Lock price from SKU
+      let totalPrice: number | null = null;
+      if (selectedSkuData) {
+        const p = Number(selectedSkuData.price ?? 0);
+        const promo = selectedSkuData.promo_price != null ? Number(selectedSkuData.promo_price) : null;
+        totalPrice = promo != null && promo < p ? promo : p;
+      }
+
+      // Insert booking as whatsapp_pending
+      const placeholderEmail = `wa_${Date.now()}_${Math.random().toString(36).slice(2, 8)}@pending.acsbeauty.app`;
+      const { data: booking, error: bookingError } = await supabase
+        .from("bookings")
+        .insert({
+          client_name: language === "pt" ? "Cliente WhatsApp" : "WhatsApp Client",
+          client_email: placeholderEmail,
+          service_id: finalServiceId,
+          package_id: packageId || null,
+          sku_id: pickedSkuId || null,
+          staff_id: pickedStaffId || null,
+          total_price: totalPrice,
+          start_time: selectedSlot.start,
+          end_time: selectedSlot.end,
+          timezone: "America/New_York",
+          status: "whatsapp_pending",
+          source: "whatsapp",
+          hold_id: holdId,
+          notes: `[WhatsApp pending] Aguardando confirmação via WhatsApp.`,
+        })
+        .select("id")
+        .single();
+
+      if (bookingError || !booking) throw bookingError || new Error("Insert failed");
+
+      const url = buildWhatsAppBookingUrl({
+        bookingId: booking.id,
+        clientName: language === "pt" ? "Cliente" : "Client",
+        serviceName,
+        staffName: selectedStaffName,
+        startTime: selectedSlot.start,
+        language,
+      });
+
+      if (waWindow) {
+        waWindow.location.href = url;
+      } else {
+        // Popup blocked — fall back
+        window.location.href = url;
+      }
+
+      toast.success(language === "pt" ? "Redirecionando para o WhatsApp..." : "Redirecting to WhatsApp...");
+      // Navigate to a friendly "waiting" state — reuse confirmation page
+      setTimeout(() => {
+        navigate(`/confirm/${booking.id}`, {
+          state: {
+            bookingData: {
+              id: booking.id,
+              start_time: selectedSlot.start,
+              end_time: selectedSlot.end,
+              status: "whatsapp_pending",
+            },
+            isWhatsApp: true,
+          },
+        });
+      }, 800);
+    } catch (err: any) {
+      console.error("WhatsApp confirm error:", err);
+      if (waWindow) waWindow.close();
+      toast.error(language === "pt" ? "Erro ao processar reserva. Tente novamente." : "Error processing reservation. Try again.");
+      setWaLoading(false);
     }
   };
 
@@ -1284,6 +1385,26 @@ export default function Book() {
                   )}
                 </motion.div>
               }
+
+              {/* Step: WhatsApp confirmation (high-conversion redirect) */}
+              {step === "whatsapp" && selectedSlot && (
+                <WhatsAppStep
+                  language={language as "pt" | "en"}
+                  countdown={countdown}
+                  formatCountdown={formatCountdown}
+                  serviceName={offer?.headline || offer?.name || pkg?.name || selectedSkuData?.name || service?.name || (language === "pt" ? "Consulta" : "Consultation")}
+                  staffName={selectedStaffName}
+                  startTime={selectedSlot.start}
+                  onConfirm={handleWhatsAppConfirm}
+                  onChangeSlot={() => {
+                    setStep("date");
+                    setHoldId(null);
+                    setHoldExpiresAt(null);
+                    setSelectedSlot(null);
+                  }}
+                  isLoading={waLoading}
+                />
+              )}
 
               {/* Step: Client Information */}
               {step === "form" &&

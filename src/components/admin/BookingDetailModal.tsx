@@ -36,6 +36,7 @@ interface BookingDetailModalProps {
 
 const statusLabels: Record<string, { label: string; color: string }> = {
   requested: { label: "Aguardando", color: "bg-yellow-100 text-yellow-700" },
+  whatsapp_pending: { label: "Aguardando WhatsApp", color: "bg-[#25D366]/15 text-[#128C4B]" },
   confirmed: { label: "Confirmado", color: "bg-green-100 text-green-700" },
   completed: { label: "Concluído", color: "bg-blue-100 text-blue-700" },
   cancelled: { label: "Cancelado", color: "bg-red-100 text-red-700" },
@@ -233,7 +234,7 @@ export function BookingDetailModal({ booking, open, onOpenChange, onConfirm, onC
 
           {/* Status-specific actions */}
           <div className="space-y-2 pt-4 border-t border-border">
-            {booking.status === "requested" && (
+            {(booking.status === "requested" || booking.status === "whatsapp_pending") && (
               <div className="flex gap-2">
                 <Button onClick={() => handleAction(onConfirm)} className="flex-1 gap-1">
                   <CheckCircle className="w-4 h-4" />Confirmar
