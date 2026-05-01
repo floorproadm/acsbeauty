@@ -276,9 +276,9 @@ export default function CampaignDiaDasMaes() {
             transition={{ duration: 0.7, delay: 0.4 }}
           >
             <WhatsAppButton
-              href={waLink(HERO_MSG)}
               ctaType="hero"
               message={HERO_MSG}
+              onIntent={onIntent}
               className="w-full sm:w-auto"
             >
               <MessageCircle className="w-5 h-5" />
@@ -373,10 +373,10 @@ export default function CampaignDiaDasMaes() {
                 </p>
 
                 <WhatsAppButton
-                  href={waLink(tier.msg)}
                   ctaType={`tier_${tier.value}`}
                   message={tier.msg}
                   value={tier.value}
+                  onIntent={onIntent}
                   className="w-full mt-auto"
                 >
                   <MessageCircle className="w-4 h-4" />
@@ -483,9 +483,9 @@ export default function CampaignDiaDasMaes() {
 
             <div>
               <WhatsAppButton
-                href={waLink(FINAL_MSG)}
                 ctaType="final"
                 message={FINAL_MSG}
+                onIntent={onIntent}
                 className="w-full sm:w-auto"
               >
                 <MessageCircle className="w-5 h-5" />
@@ -509,9 +509,9 @@ export default function CampaignDiaDasMaes() {
         style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
       >
         <WhatsAppButton
-          href={waLink(HERO_MSG)}
           ctaType="sticky_mobile"
           message={HERO_MSG}
+          onIntent={onIntent}
           className="w-full !py-4 !text-base"
         >
           <MessageCircle className="w-5 h-5" />
