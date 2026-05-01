@@ -57,7 +57,7 @@ function trackClick(params: {
   ctaType: string;
   whatsappMessage: string;
   selectedValue?: number;
-  chosenOption?: "intent" | "whatsapp_normal" | "whatsapp_business" | "copy_message";
+  chosenOption?: "copy_message";
 }) {
   try {
     void supabase.from("campaign_clicks").insert({
