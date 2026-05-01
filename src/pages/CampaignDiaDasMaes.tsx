@@ -78,15 +78,19 @@ interface WAProps {
   onTrigger: (payload: { ctaType: string; message: string; value?: number }) => void;
 }
 
-const WhatsAppButton = ({ ctaType, message, value, children, className = "", onTrigger }: WAProps) => (
-  <button
-    type="button"
-    onClick={() => onTrigger({ ctaType, message, value })}
-    className={`inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-8 py-5 text-base sm:text-lg font-medium tracking-wide text-white shadow-[0_8px_30px_-8px_rgba(37,211,102,0.6)] transition-all duration-300 hover:bg-[#20bd5a] hover:scale-[1.02] hover:shadow-[0_12px_40px_-8px_rgba(37,211,102,0.8)] active:scale-[0.98] ${className}`}
-  >
-    {children}
-  </button>
+const WhatsAppButton = React.forwardRef<HTMLButtonElement, WAProps>(
+  ({ ctaType, message, value, children, className = "", onTrigger }, ref) => (
+    <button
+      ref={ref}
+      type="button"
+      onClick={() => onTrigger({ ctaType, message, value })}
+      className={`inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-8 py-5 text-base sm:text-lg font-medium tracking-wide text-white shadow-[0_8px_30px_-8px_rgba(37,211,102,0.6)] transition-all duration-300 hover:bg-[#20bd5a] hover:scale-[1.02] hover:shadow-[0_12px_40px_-8px_rgba(37,211,102,0.8)] active:scale-[0.98] ${className}`}
+    >
+      {children}
+    </button>
+  )
 );
+WhatsAppButton.displayName = "WhatsAppButton";
 
 function copyToClipboard(text: string): Promise<void> {
   if (navigator.clipboard?.writeText) {
