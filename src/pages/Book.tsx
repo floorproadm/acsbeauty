@@ -446,13 +446,15 @@ export default function Book() {
       if (data.success && data.hold_id) {
         setHoldId(data.hold_id);
         setHoldExpiresAt(new Date(data.expires_at!));
-        setStep("form");
+        // Portal users have full data — go straight to form (existing flow).
+        // Public users go to the WhatsApp confirmation step.
+        setStep(isPortalSource ? "form" : "whatsapp");
         toast.success(language === "pt" ? "Horário reservado por 5 minutos" : "Time slot reserved for 5 minutes");
       } else if (data.code === 'RATE_LIMITED') {
         toast.error(language === "pt" ?
         "Muitas tentativas. Aguarde um momento ou fale conosco pelo WhatsApp." :
         "Too many attempts. Please wait or contact us via WhatsApp.",
-        { duration: 8000, action: { label: "WhatsApp", onClick: () => window.open("https://wa.me/19739004498", "_blank") } }
+        { duration: 8000, action: { label: "WhatsApp", onClick: () => window.open("https://wa.me/17329153430", "_blank") } }
         );
       } else {
         toast.error(data.error || "Failed to reserve time slot");
