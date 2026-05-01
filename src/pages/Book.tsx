@@ -832,6 +832,37 @@ export default function Book() {
         totalPrice = promo != null && promo < p ? promo : p;
       }
 
+      // 🔒 SAFETY NET: Save lead to contact_submissions FIRST.
+      // If booking insert or WhatsApp redirect fails, the lead is still captured in admin.
+      // Fire-and-forget — never block the WhatsApp redirect on this.
+      const slotDateLabel = (() => {
+        try {
+          const d = new Date(selectedSlot.start);
+          return d.toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "short", timeStyle: "short" });
+        } catch { return selectedSlot.start; }
+      })();
+      const leadMessage = [
+        `[Booking via WhatsApp redirect]`,
+        `Service: ${serviceName}`,
+        selectedStaffName ? `Stylist: ${selectedStaffName}` : null,
+        `Slot: ${slotDateLabel} (NY)`,
+        `Hold ID: ${holdId}`,
+      ].filter(Boolean).join("\n");
+      const utm = new URLSearchParams(window.location.search);
+      // Note: not awaited — runs in background
+      supabase.from("contact_submissions").insert({
+        name: language === "pt" ? "Lead WhatsApp (agendamento)" : "WhatsApp Lead (booking)",
+        email: `wa_lead_${Date.now()}@pending.acsbeauty.app`,
+        phone: null,
+        message: leadMessage,
+        service_interest: serviceName,
+        utm_source: utm.get("utm_source") || "booking_flow",
+        utm_medium: utm.get("utm_medium") || "whatsapp_redirect",
+        utm_campaign: utm.get("utm_campaign") || null,
+      }).then(({ error: leadErr }) => {
+        if (leadErr) console.warn("[lead capture] failed (non-blocking):", leadErr.message);
+      });
+
       // Insert booking as whatsapp_pending
       const placeholderEmail = `wa_${Date.now()}_${Math.random().toString(36).slice(2, 8)}@pending.acsbeauty.app`;
       const { data: booking, error: bookingError } = await supabase
