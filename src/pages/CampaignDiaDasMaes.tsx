@@ -84,7 +84,7 @@ const WhatsAppButton = React.forwardRef<HTMLButtonElement, WAProps>(
       ref={ref}
       type="button"
       onClick={() => onTrigger({ ctaType, message, value })}
-      className={`inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-8 py-5 text-base sm:text-lg font-medium tracking-wide text-white shadow-[0_8px_30px_-8px_rgba(37,211,102,0.6)] transition-all duration-300 hover:bg-[#20bd5a] hover:scale-[1.02] hover:shadow-[0_12px_40px_-8px_rgba(37,211,102,0.8)] active:scale-[0.98] ${className}`}
+      className={`inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-8 py-4 sm:py-[18px] text-sm sm:text-base font-sans font-normal tracking-[0.04em] text-white shadow-[0_8px_30px_-8px_rgba(37,211,102,0.55)] transition-all duration-300 hover:bg-[#20bd5a] hover:scale-[1.02] hover:shadow-[0_12px_40px_-8px_rgba(37,211,102,0.7)] active:scale-[0.98] ${className}`}
     >
       {children}
     </button>
@@ -132,7 +132,7 @@ const CtaBlock = ({ ctaType, message, value, label, className = "", onTrigger, o
     <button
       type="button"
       onClick={() => onCopy({ ctaType, message, value })}
-      className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 decoration-dotted transition-colors"
+      className="inline-flex items-center gap-1.5 text-[11px] tracking-[0.05em] text-muted-foreground hover:text-foreground underline underline-offset-4 decoration-dotted transition-colors"
     >
       <Copy className="w-3 h-3" />
       Usa WhatsApp Business? Copiar mensagem
@@ -164,10 +164,10 @@ function useCountdown(target: number) {
 
 const TimeBox = ({ value, label }: { value: number; label: string }) => (
   <div className="flex flex-col items-center min-w-[60px] sm:min-w-[72px]">
-    <div className="bg-foreground/95 text-background rounded-lg px-3 py-2 sm:px-4 sm:py-3 font-editorial text-2xl sm:text-3xl tabular-nums shadow-card">
+    <div className="bg-foreground/95 text-background rounded-lg px-3 py-2 sm:px-4 sm:py-3 font-sans font-light text-2xl sm:text-3xl tabular-nums shadow-card">
       {value.toString().padStart(2, "0")}
     </div>
-    <span className="text-[10px] sm:text-xs uppercase tracking-[0.18em] text-muted-foreground mt-1.5">
+    <span className="text-[10px] sm:text-xs uppercase tracking-[0.22em] text-muted-foreground mt-2">
       {label}
     </span>
   </div>
