@@ -518,7 +518,7 @@ export function BookingsTab() {
                             <MessageSquare className="w-4 h-4" />
                           </Button>
                         )}
-                        {booking.status === "requested" && (
+                        {(booking.status === "requested" || booking.status === "whatsapp_pending") && (
                           <>
                             <Button size="sm" onClick={(e) => { e.stopPropagation(); approveBookingMutation.mutate(booking.id); }} className="gap-1 text-xs" disabled={approveBookingMutation.isPending}>
                               {approveBookingMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}Confirmar
