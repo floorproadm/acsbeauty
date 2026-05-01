@@ -393,16 +393,20 @@ export default function CampaignDiaDasMaes() {
                   {tier.label}
                 </p>
 
-                <WhatsAppButton
+                <CtaBlock
                   ctaType={`tier_${tier.value}`}
                   message={tier.msg}
                   value={tier.value}
                   onTrigger={handleTrigger}
-                  className="w-full mt-auto"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  Quero esse valor
-                </WhatsAppButton>
+                  onCopy={handleCopy}
+                  className="mt-auto"
+                  label={
+                    <>
+                      <MessageCircle className="w-4 h-4" />
+                      Quero esse valor
+                    </>
+                  }
+                />
               </motion.div>
             ))}
           </div>
