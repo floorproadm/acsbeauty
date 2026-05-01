@@ -68,7 +68,7 @@ serve(async (req) => {
       throw new Error('Booking not found');
     }
 
-    if (booking.status !== 'requested') {
+    if (!['requested', 'whatsapp_pending'].includes(booking.status)) {
       return new Response(JSON.stringify({
         success: false,
         error: `Booking is already ${booking.status}`,
@@ -76,6 +76,11 @@ serve(async (req) => {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Cleanup booking_holds reference if present (whatsapp_pending bookings carry hold_id)
+    if (booking.hold_id) {
+      await supabase.from('booking_holds').delete().eq('id', booking.hold_id);
     }
 
     // Get Google credentials
