@@ -768,7 +768,12 @@ export default function Book() {
 
   // Handle back navigation
   const handleBack = () => {
-    if (step === "form") {
+    if (step === "whatsapp") {
+      setStep("date");
+      setHoldId(null);
+      setHoldExpiresAt(null);
+      setSelectedSlot(null);
+    } else if (step === "form") {
       setStep("date");
       setHoldId(null);
       setHoldExpiresAt(null);
@@ -797,6 +802,97 @@ export default function Book() {
       navigate(-1);
     } else {
       navigate(-1);
+    }
+  };
+
+  // Get staff name for WhatsApp message + UI
+  const selectedStaffName = useMemo(() => {
+    if (!pickedStaffId || !eligibleStaff) return null;
+    return eligibleStaff.find((s: any) => s.staff_profile_id === pickedStaffId)?.name || null;
+  }, [pickedStaffId, eligibleStaff]);
+
+  // Create booking as whatsapp_pending + open WhatsApp synchronously
+  const handleWhatsAppConfirm = async () => {
+    if (!selectedSlot || !holdId) return;
+    if (waLoading) return;
+    setWaLoading(true);
+
+    // 1) Open window SYNCHRONOUSLY with placeholder URL (iOS/Safari popup blocker safety).
+    const waWindow = window.open("about:blank", "_blank");
+
+    try {
+      const finalServiceId = offer?.service_id || activeServiceId || null;
+      const serviceName = offer?.headline || offer?.name || pkg?.name || selectedSkuData?.name || service?.name || (language === "pt" ? "Consulta" : "Consultation");
+
+      // Lock price from SKU
+      let totalPrice: number | null = null;
+      if (selectedSkuData) {
+        const p = Number(selectedSkuData.price ?? 0);
+        const promo = selectedSkuData.promo_price != null ? Number(selectedSkuData.promo_price) : null;
+        totalPrice = promo != null && promo < p ? promo : p;
+      }
+
+      // Insert booking as whatsapp_pending
+      const placeholderEmail = `wa_${Date.now()}_${Math.random().toString(36).slice(2, 8)}@pending.acsbeauty.app`;
+      const { data: booking, error: bookingError } = await supabase
+        .from("bookings")
+        .insert({
+          client_name: language === "pt" ? "Cliente WhatsApp" : "WhatsApp Client",
+          client_email: placeholderEmail,
+          service_id: finalServiceId,
+          package_id: packageId || null,
+          sku_id: pickedSkuId || null,
+          staff_id: pickedStaffId || null,
+          total_price: totalPrice,
+          start_time: selectedSlot.start,
+          end_time: selectedSlot.end,
+          timezone: "America/New_York",
+          status: "whatsapp_pending",
+          source: "whatsapp",
+          hold_id: holdId,
+          notes: `[WhatsApp pending] Aguardando confirmação via WhatsApp.`,
+        })
+        .select("id")
+        .single();
+
+      if (bookingError || !booking) throw bookingError || new Error("Insert failed");
+
+      const url = buildWhatsAppBookingUrl({
+        bookingId: booking.id,
+        clientName: language === "pt" ? "Cliente" : "Client",
+        serviceName,
+        staffName: selectedStaffName,
+        startTime: selectedSlot.start,
+        language,
+      });
+
+      if (waWindow) {
+        waWindow.location.href = url;
+      } else {
+        // Popup blocked — fall back
+        window.location.href = url;
+      }
+
+      toast.success(language === "pt" ? "Redirecionando para o WhatsApp..." : "Redirecting to WhatsApp...");
+      // Navigate to a friendly "waiting" state — reuse confirmation page
+      setTimeout(() => {
+        navigate(`/confirm/${booking.id}`, {
+          state: {
+            bookingData: {
+              id: booking.id,
+              start_time: selectedSlot.start,
+              end_time: selectedSlot.end,
+              status: "whatsapp_pending",
+            },
+            isWhatsApp: true,
+          },
+        });
+      }, 800);
+    } catch (err: any) {
+      console.error("WhatsApp confirm error:", err);
+      if (waWindow) waWindow.close();
+      toast.error(language === "pt" ? "Erro ao processar reserva. Tente novamente." : "Error processing reservation. Try again.");
+      setWaLoading(false);
     }
   };
 
