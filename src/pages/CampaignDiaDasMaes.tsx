@@ -519,57 +519,6 @@ export default function CampaignDiaDasMaes() {
       </div>
       <div className="h-20 md:hidden" aria-hidden />
 
-      {/* WhatsApp option chooser */}
-      <Dialog open={!!intent} onOpenChange={(o) => !o && setIntent(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-editorial text-2xl text-center">
-              Como você quer continuar?
-            </DialogTitle>
-            <DialogDescription className="text-center">
-              Escolha o app onde quer enviar a mensagem
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex flex-col gap-3 mt-4">
-            <button
-              type="button"
-              onClick={() => handleOption("whatsapp_normal")}
-              className="flex items-center gap-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white px-5 py-4 transition-all active:scale-[0.98]"
-            >
-              <MessageCircle className="w-5 h-5 flex-shrink-0" />
-              <div className="text-left flex-1">
-                <div className="font-medium">Abrir no WhatsApp</div>
-                <div className="text-xs opacity-90">App pessoal padrão</div>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleOption("whatsapp_business")}
-              className="flex items-center gap-3 rounded-xl bg-[#075E54] hover:bg-[#064a42] text-white px-5 py-4 transition-all active:scale-[0.98]"
-            >
-              <Smartphone className="w-5 h-5 flex-shrink-0" />
-              <div className="text-left flex-1">
-                <div className="font-medium">Abrir no WhatsApp Business</div>
-                <div className="text-xs opacity-90">Para quem usa o app comercial</div>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleOption("copy_message")}
-              className="flex items-center gap-3 rounded-xl bg-background border-2 border-border hover:border-gold text-foreground px-5 py-4 transition-all active:scale-[0.98]"
-            >
-              <Copy className="w-5 h-5 flex-shrink-0 text-gold-dark" />
-              <div className="text-left flex-1">
-                <div className="font-medium">Copiar mensagem</div>
-                <div className="text-xs text-muted-foreground">Cole onde preferir</div>
-              </div>
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </main>
   );
 }
