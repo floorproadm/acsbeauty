@@ -236,7 +236,7 @@ export default function CampaignDiaDasMaes() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-background/80 backdrop-blur px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-gold-dark mb-6"
+            className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-background/80 backdrop-blur px-4 py-1.5 text-[11px] uppercase tracking-[0.25em] text-gold-dark mb-7"
           >
             <Sparkles className="w-3.5 h-3.5" />
             Edição Dia das Mães
@@ -246,9 +246,10 @@ export default function CampaignDiaDasMaes() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className="font-editorial text-3xl sm:text-5xl leading-[1.1] text-foreground mb-5"
+            className="font-sans text-3xl sm:text-5xl lg:text-6xl font-light tracking-[0.01em] leading-[1.15] text-foreground mb-5"
           >
-            Ainda não comprou o presente do Dia das Mães?
+            Ainda não comprou o presente do{" "}
+            <span className="text-gradient-gold">Dia das Mães?</span>
           </motion.h1>
 
           <motion.p
