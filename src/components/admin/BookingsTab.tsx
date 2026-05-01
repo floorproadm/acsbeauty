@@ -394,6 +394,7 @@ export function BookingsTab() {
               <SelectContent>
                 <SelectItem value="all">Todos status</SelectItem>
                 <SelectItem value="requested">Aguardando</SelectItem>
+                <SelectItem value="whatsapp_pending">Aguardando WhatsApp</SelectItem>
                 <SelectItem value="confirmed">Confirmados</SelectItem>
                 <SelectItem value="completed">Concluídos</SelectItem>
                 <SelectItem value="cancelled">Cancelados</SelectItem>
