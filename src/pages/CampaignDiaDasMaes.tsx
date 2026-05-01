@@ -292,15 +292,19 @@ export default function CampaignDiaDasMaes() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.4 }}
           >
-            <WhatsAppButton
+            <CtaBlock
               ctaType="hero"
               message={HERO_MSG}
               onTrigger={handleTrigger}
-              className="w-full sm:w-auto"
-            >
-              <MessageCircle className="w-5 h-5" />
-              Comprar pelo WhatsApp agora
-            </WhatsAppButton>
+              onCopy={handleCopy}
+              className="w-full sm:w-auto sm:inline-flex"
+              label={
+                <>
+                  <MessageCircle className="w-5 h-5" />
+                  Comprar pelo WhatsApp agora
+                </>
+              }
+            />
           </motion.div>
 
           <motion.p
