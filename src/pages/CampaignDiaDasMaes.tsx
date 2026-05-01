@@ -209,6 +209,20 @@ export default function CampaignDiaDasMaes() {
     });
   };
 
+  const handleCopy = ({ ctaType, message, value }: TriggerPayload) => {
+    trackClick({
+      ctaType,
+      whatsappMessage: message,
+      selectedValue: value,
+      chosenOption: "copy_message",
+    });
+    void copyToClipboard(message).then(() => {
+      toast.success("Mensagem copiada", {
+        description: "Cole no WhatsApp Business.",
+      });
+    });
+  };
+
   useEffect(() => {
     document.title = "Gift Card Dia das Mães | ACS Beauty Studio";
     const meta =
