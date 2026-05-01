@@ -189,24 +189,6 @@ export default function CampaignDiaDasMaes() {
     // 2. abrir wa.me direto
     window.open(waLink(message), "_blank", "noopener,noreferrer");
 
-    // 3. toast discreto com fallback "Copiar mensagem"
-    toast("Usa WhatsApp Business? Copie a mensagem se não abrir no app certo.", {
-      action: {
-        label: "Copiar mensagem",
-        onClick: () => {
-          trackClick({
-            ctaType,
-            whatsappMessage: message,
-            selectedValue: value,
-            chosenOption: "copy_message",
-          });
-          void copyToClipboard(message).then(() => {
-            toast.success("Mensagem copiada.");
-          });
-        },
-      },
-      duration: 8000,
-    });
   };
 
   const handleCopy = ({ ctaType, message, value }: TriggerPayload) => {
