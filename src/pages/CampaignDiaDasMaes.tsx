@@ -506,17 +506,19 @@ export default function CampaignDiaDasMaes() {
               ⚠️ Entrega garantida até o Dia das Mães
             </div>
 
-            <div>
-              <WhatsAppButton
-                ctaType="final"
-                message={FINAL_MSG}
-                onTrigger={handleTrigger}
-                className="w-full sm:w-auto"
-              >
-                <MessageCircle className="w-5 h-5" />
-                Comprar pelo WhatsApp agora
-              </WhatsAppButton>
-            </div>
+            <CtaBlock
+              ctaType="final"
+              message={FINAL_MSG}
+              onTrigger={handleTrigger}
+              onCopy={handleCopy}
+              className="w-full sm:max-w-sm sm:mx-auto"
+              label={
+                <>
+                  <MessageCircle className="w-5 h-5" />
+                  Comprar pelo WhatsApp agora
+                </>
+              }
+            />
           </motion.div>
         </div>
       </section>
