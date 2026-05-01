@@ -1,12 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { MessageCircle, Check, Crown, Sparkles, Clock, Gift } from "lucide-react";
+import { MessageCircle, Check, Crown, Sparkles, Clock, Gift, Hourglass } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import hairService from "@/assets/hair-service.jpg";
 import treatments from "@/assets/treatments-service.jpg";
 import aneHero from "@/assets/ane-hero.jpg";
 import teamHero from "@/assets/team-hero.jpg";
 
 const WA_NUMBER = "17329153430";
+const CAMPAIGN_SOURCE = "campaign-dia-das-maes";
+
 const waLink = (msg: string) =>
   `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
 
@@ -41,26 +44,78 @@ const benefits = [
   { icon: Check, text: "Presente que ela realmente vai usar" },
 ];
 
-const WhatsAppButton = ({
-  href,
-  children,
-  className = "",
-}: {
+// Fire-and-forget tracking (never blocks the WhatsApp redirect)
+function trackClick(params: {
+  ctaType: string;
+  whatsappMessage: string;
+  selectedValue?: number;
+}) {
+  try {
+    void supabase.from("campaign_clicks").insert({
+      campaign_source: CAMPAIGN_SOURCE,
+      cta_type: params.ctaType,
+      selected_value: params.selectedValue ?? null,
+      whatsapp_message: params.whatsappMessage,
+      user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+      referrer: typeof document !== "undefined" ? document.referrer || null : null,
+    });
+  } catch {
+    /* never block UX */
+  }
+}
+
+interface WAProps {
   href: string;
+  ctaType: string;
+  message: string;
+  value?: number;
   children: React.ReactNode;
   className?: string;
-}) => (
+}
+
+const WhatsAppButton = ({ href, ctaType, message, value, children, className = "" }: WAProps) => (
   <a
     href={href}
     target="_blank"
     rel="noopener noreferrer"
+    onClick={() => trackClick({ ctaType, whatsappMessage: message, selectedValue: value })}
     className={`inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-8 py-5 text-base sm:text-lg font-medium tracking-wide text-white shadow-[0_8px_30px_-8px_rgba(37,211,102,0.6)] transition-all duration-300 hover:bg-[#20bd5a] hover:scale-[1.02] hover:shadow-[0_12px_40px_-8px_rgba(37,211,102,0.8)] active:scale-[0.98] ${className}`}
   >
     {children}
   </a>
 );
 
+// Mother's Day 2026 = Sunday, May 10, 2026
+const MOTHERS_DAY = new Date("2026-05-10T23:59:59-04:00").getTime();
+
+function useCountdown(target: number) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const diff = Math.max(0, target - now);
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const minutes = Math.floor((diff % 3600000) / 60000);
+  const seconds = Math.floor((diff % 60000) / 1000);
+  return { days, hours, minutes, seconds, expired: diff === 0 };
+}
+
+const TimeBox = ({ value, label }: { value: number; label: string }) => (
+  <div className="flex flex-col items-center min-w-[60px] sm:min-w-[72px]">
+    <div className="bg-foreground/95 text-background rounded-lg px-3 py-2 sm:px-4 sm:py-3 font-editorial text-2xl sm:text-3xl tabular-nums shadow-card">
+      {value.toString().padStart(2, "0")}
+    </div>
+    <span className="text-[10px] sm:text-xs uppercase tracking-[0.18em] text-muted-foreground mt-1.5">
+      {label}
+    </span>
+  </div>
+);
+
 export default function CampaignDiaDasMaes() {
+  const { days, hours, minutes, seconds } = useCountdown(MOTHERS_DAY);
+
   useEffect(() => {
     document.title = "Gift Card Dia das Mães | ACS Beauty Studio";
     const meta =
@@ -130,7 +185,12 @@ export default function CampaignDiaDasMaes() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.4 }}
           >
-            <WhatsAppButton href={waLink(HERO_MSG)} className="w-full sm:w-auto">
+            <WhatsAppButton
+              href={waLink(HERO_MSG)}
+              ctaType="hero"
+              message={HERO_MSG}
+              className="w-full sm:w-auto"
+            >
               <MessageCircle className="w-5 h-5" />
               Comprar pelo WhatsApp agora
             </WhatsAppButton>
@@ -145,6 +205,33 @@ export default function CampaignDiaDasMaes() {
             Resposta em minutos · Pagamento seguro
           </motion.p>
         </div>
+      </section>
+
+      {/* COUNTDOWN / URGENCY */}
+      <section className="py-10 sm:py-14 bg-gradient-to-b from-background to-card/50">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="container mx-auto px-5 max-w-2xl text-center"
+        >
+          <div className="inline-flex items-center gap-2 text-gold-dark text-sm font-medium uppercase tracking-[0.2em] mb-4">
+            <Hourglass className="w-4 h-4" />
+            Tempo restante
+          </div>
+          <p className="font-editorial text-xl sm:text-2xl text-foreground mb-6">
+            ⏳ Campanha especial de Dia das Mães termina em breve
+          </p>
+          <div className="flex justify-center items-end gap-2 sm:gap-4">
+            <TimeBox value={days} label="dias" />
+            <span className="font-editorial text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
+            <TimeBox value={hours} label="horas" />
+            <span className="font-editorial text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
+            <TimeBox value={minutes} label="min" />
+            <span className="font-editorial text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
+            <TimeBox value={seconds} label="seg" />
+          </div>
+        </motion.div>
       </section>
 
       {/* TIERS */}
@@ -187,7 +274,13 @@ export default function CampaignDiaDasMaes() {
                   {tier.label}
                 </p>
 
-                <WhatsAppButton href={waLink(tier.msg)} className="w-full mt-auto">
+                <WhatsAppButton
+                  href={waLink(tier.msg)}
+                  ctaType={`tier_${tier.value}`}
+                  message={tier.msg}
+                  value={tier.value}
+                  className="w-full mt-auto"
+                >
                   <MessageCircle className="w-4 h-4" />
                   Quero esse valor
                 </WhatsAppButton>
@@ -291,7 +384,12 @@ export default function CampaignDiaDasMaes() {
             </div>
 
             <div>
-              <WhatsAppButton href={waLink(FINAL_MSG)} className="w-full sm:w-auto">
+              <WhatsAppButton
+                href={waLink(FINAL_MSG)}
+                ctaType="final"
+                message={FINAL_MSG}
+                className="w-full sm:w-auto"
+              >
                 <MessageCircle className="w-5 h-5" />
                 Comprar pelo WhatsApp agora
               </WhatsAppButton>
@@ -308,10 +406,16 @@ export default function CampaignDiaDasMaes() {
       </footer>
 
       {/* STICKY MOBILE CTA */}
-      <div className="fixed bottom-0 inset-x-0 z-50 p-3 bg-background/95 backdrop-blur border-t border-border md:hidden"
+      <div
+        className="fixed bottom-0 inset-x-0 z-50 p-3 bg-background/95 backdrop-blur border-t border-border md:hidden"
         style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
       >
-        <WhatsAppButton href={waLink(HERO_MSG)} className="w-full !py-4 !text-base">
+        <WhatsAppButton
+          href={waLink(HERO_MSG)}
+          ctaType="sticky_mobile"
+          message={HERO_MSG}
+          className="w-full !py-4 !text-base"
+        >
           <MessageCircle className="w-5 h-5" />
           Comprar pelo WhatsApp
         </WhatsAppButton>
