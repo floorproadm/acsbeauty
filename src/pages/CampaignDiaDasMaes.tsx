@@ -256,7 +256,7 @@ export default function CampaignDiaDasMaes() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-lg sm:text-xl text-muted-foreground mb-3"
+            className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-5 max-w-md mx-auto"
           >
             Resolve isso em menos de 2 minutos 👇
           </motion.p>
@@ -265,7 +265,7 @@ export default function CampaignDiaDasMaes() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.7, delay: 0.3 }}
-            className="inline-flex items-center gap-2 rounded-full bg-destructive/10 border border-destructive/30 px-4 py-2 text-sm font-medium text-destructive mb-8"
+            className="inline-flex items-center gap-2 rounded-full bg-destructive/10 border border-destructive/30 px-4 py-1.5 text-[12px] tracking-[0.05em] font-medium text-destructive mb-9"
           >
             ⚠️ Entrega garantida até o Dia das Mães
           </motion.div>
@@ -294,7 +294,7 @@ export default function CampaignDiaDasMaes() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.7, delay: 0.6 }}
-            className="mt-4 text-xs text-muted-foreground"
+            className="mt-5 text-[11px] uppercase tracking-[0.2em] text-muted-foreground"
           >
             Resposta em minutos · Pagamento seguro
           </motion.p>
@@ -310,25 +310,25 @@ export default function CampaignDiaDasMaes() {
           className="container mx-auto px-5 max-w-2xl text-center"
         >
           {expired ? (
-            <p className="font-editorial text-xl sm:text-2xl text-foreground">
+            <p className="font-sans font-light text-xl sm:text-2xl tracking-[0.01em] text-foreground">
               Campanha encerrada — fale no WhatsApp para consultar disponibilidade
             </p>
           ) : (
             <>
-              <div className="inline-flex items-center gap-2 text-gold-dark text-sm font-medium uppercase tracking-[0.2em] mb-4">
-                <Hourglass className="w-4 h-4" />
+              <div className="inline-flex items-center gap-2 text-gold-dark text-[11px] font-medium uppercase tracking-[0.25em] mb-4">
+                <Hourglass className="w-3.5 h-3.5" />
                 Tempo restante
               </div>
-              <p className="font-editorial text-xl sm:text-2xl text-foreground mb-6">
-                ⏳ Campanha especial de Dia das Mães termina em breve
+              <p className="font-sans font-light text-xl sm:text-2xl tracking-[0.01em] leading-snug text-foreground mb-7 max-w-lg mx-auto">
+                Campanha especial de Dia das Mães termina em breve
               </p>
               <div className="flex justify-center items-end gap-2 sm:gap-4">
                 <TimeBox value={days} label="dias" />
-                <span className="font-editorial text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
+                <span className="font-sans font-light text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
                 <TimeBox value={hours} label="horas" />
-                <span className="font-editorial text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
+                <span className="font-sans font-light text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
                 <TimeBox value={minutes} label="min" />
-                <span className="font-editorial text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
+                <span className="font-sans font-light text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
                 <TimeBox value={seconds} label="seg" />
               </div>
             </>
