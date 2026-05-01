@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { MessageCircle, Check, Crown, Sparkles, Clock, Gift, Hourglass, Copy, Smartphone } from "lucide-react";
+import { MessageCircle, Check, Crown, Sparkles, Clock, Gift, Hourglass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import hairService from "@/assets/hair-service.jpg";
 import treatments from "@/assets/treatments-service.jpg";
