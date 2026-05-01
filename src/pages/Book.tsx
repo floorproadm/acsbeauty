@@ -911,11 +911,15 @@ export default function Book() {
           state: {
             bookingData: {
               id: booking.id,
+              client_name: language === "pt" ? "Cliente" : "Client",
               start_time: selectedSlot.start,
               end_time: selectedSlot.end,
               status: "whatsapp_pending",
             },
             isWhatsApp: true,
+            whatsappUrl: url,
+            serviceName,
+            staffName: selectedStaffName,
           },
         });
       }, 800);
