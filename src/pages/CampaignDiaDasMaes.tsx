@@ -251,7 +251,7 @@ export default function CampaignDiaDasMaes() {
             <WhatsAppButton
               ctaType="hero"
               message={HERO_MSG}
-              onIntent={onIntent}
+              onTrigger={handleTrigger}
               className="w-full sm:w-auto"
             >
               <MessageCircle className="w-5 h-5" />
@@ -349,7 +349,7 @@ export default function CampaignDiaDasMaes() {
                   ctaType={`tier_${tier.value}`}
                   message={tier.msg}
                   value={tier.value}
-                  onIntent={onIntent}
+                  onTrigger={handleTrigger}
                   className="w-full mt-auto"
                 >
                   <MessageCircle className="w-4 h-4" />
@@ -458,7 +458,7 @@ export default function CampaignDiaDasMaes() {
               <WhatsAppButton
                 ctaType="final"
                 message={FINAL_MSG}
-                onIntent={onIntent}
+                onTrigger={handleTrigger}
                 className="w-full sm:w-auto"
               >
                 <MessageCircle className="w-5 h-5" />
@@ -484,7 +484,7 @@ export default function CampaignDiaDasMaes() {
         <WhatsAppButton
           ctaType="sticky_mobile"
           message={HERO_MSG}
-          onIntent={onIntent}
+          onTrigger={handleTrigger}
           className="w-full !py-4 !text-base"
         >
           <MessageCircle className="w-5 h-5" />
