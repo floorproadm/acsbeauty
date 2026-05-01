@@ -85,8 +85,13 @@ const WhatsAppButton = ({ href, ctaType, message, value, children, className = "
   </a>
 );
 
-// Mother's Day 2026 = Sunday, May 10, 2026
-const MOTHERS_DAY = new Date("2026-05-10T23:59:59-04:00").getTime();
+// =============================================================
+// CONFIG: data/hora final da campanha (timezone America/New_York).
+// Altere apenas esta linha para estender ou encerrar a campanha.
+// Formato ISO 8601 com offset (-04:00 EDT / -05:00 EST).
+// =============================================================
+const CAMPAIGN_END_DATE = "2026-05-10T23:59:59-04:00";
+const CAMPAIGN_END_TS = new Date(CAMPAIGN_END_DATE).getTime();
 
 function useCountdown(target: number) {
   const [now, setNow] = useState(() => Date.now());
@@ -114,7 +119,7 @@ const TimeBox = ({ value, label }: { value: number; label: string }) => (
 );
 
 export default function CampaignDiaDasMaes() {
-  const { days, hours, minutes, seconds } = useCountdown(MOTHERS_DAY);
+  const { days, hours, minutes, seconds, expired } = useCountdown(CAMPAIGN_END_TS);
 
   useEffect(() => {
     document.title = "Gift Card Dia das Mães | ACS Beauty Studio";
@@ -215,22 +220,30 @@ export default function CampaignDiaDasMaes() {
           viewport={{ once: true }}
           className="container mx-auto px-5 max-w-2xl text-center"
         >
-          <div className="inline-flex items-center gap-2 text-gold-dark text-sm font-medium uppercase tracking-[0.2em] mb-4">
-            <Hourglass className="w-4 h-4" />
-            Tempo restante
-          </div>
-          <p className="font-editorial text-xl sm:text-2xl text-foreground mb-6">
-            ⏳ Campanha especial de Dia das Mães termina em breve
-          </p>
-          <div className="flex justify-center items-end gap-2 sm:gap-4">
-            <TimeBox value={days} label="dias" />
-            <span className="font-editorial text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
-            <TimeBox value={hours} label="horas" />
-            <span className="font-editorial text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
-            <TimeBox value={minutes} label="min" />
-            <span className="font-editorial text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
-            <TimeBox value={seconds} label="seg" />
-          </div>
+          {expired ? (
+            <p className="font-editorial text-xl sm:text-2xl text-foreground">
+              Campanha encerrada — fale no WhatsApp para consultar disponibilidade
+            </p>
+          ) : (
+            <>
+              <div className="inline-flex items-center gap-2 text-gold-dark text-sm font-medium uppercase tracking-[0.2em] mb-4">
+                <Hourglass className="w-4 h-4" />
+                Tempo restante
+              </div>
+              <p className="font-editorial text-xl sm:text-2xl text-foreground mb-6">
+                ⏳ Campanha especial de Dia das Mães termina em breve
+              </p>
+              <div className="flex justify-center items-end gap-2 sm:gap-4">
+                <TimeBox value={days} label="dias" />
+                <span className="font-editorial text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
+                <TimeBox value={hours} label="horas" />
+                <span className="font-editorial text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
+                <TimeBox value={minutes} label="min" />
+                <span className="font-editorial text-2xl sm:text-3xl text-muted-foreground pb-7">:</span>
+                <TimeBox value={seconds} label="seg" />
+              </div>
+            </>
+          )}
         </motion.div>
       </section>
 
