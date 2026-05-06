@@ -52,7 +52,7 @@ export default function Team() {
   const { language, t } = useLanguage();
   const isPt = language === "pt";
 
-  const { data: members = [], isLoading } = useQuery({
+  const { data: members = [], isLoading, error } = useQuery({
     queryKey: ["team-members"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -61,8 +61,10 @@ export default function Team() {
         .eq("is_active", true)
         .order("sort_order");
       if (error) throw error;
-      return data as TeamMember[];
+      return (data ?? []) as TeamMember[];
     },
+    retry: 1,
+    staleTime: 60_000,
   });
 
   const founder = members.find(isFounder);
@@ -127,6 +129,10 @@ export default function Team() {
           <div className="container mx-auto px-4 md:px-6 max-w-xl">
             {isLoading ? (
               <div className="text-center text-muted-foreground">{t("team.loading")}</div>
+            ) : error || members.length === 0 ? (
+              <div className="text-center py-10 text-muted-foreground">
+                {isPt ? "Nossa equipe estará disponível em breve." : "Our team will be available soon."}
+              </div>
             ) : (
               <div className="flex flex-col gap-3">
                 {/* Founder highlight card */}
