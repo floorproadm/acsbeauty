@@ -33,7 +33,7 @@ export function TasksTab() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
 
-  const { data: tasks, isLoading } = useQuery({
+  const { data: tasks, isLoading, error } = useQuery({
     queryKey: ["admin-tasks"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -42,8 +42,9 @@ export function TasksTab() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as Task[];
+      return (data ?? []) as Task[];
     },
+    retry: 1,
   });
 
   const handleCreateTask = () => {
@@ -105,6 +106,15 @@ export function TasksTab() {
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-[400px] w-full rounded-xl" />
           ))}
+        </div>
+      ) : error ? (
+        <div className="text-center py-12 bg-card rounded-xl border border-destructive/40">
+          <p className="text-destructive mb-2">Erro ao carregar tarefas</p>
+          <p className="text-xs text-muted-foreground mb-4">{(error as Error).message}</p>
+          <Button onClick={handleCreateTask} variant="outline">
+            <Plus className="w-4 h-4 mr-2" />
+            Tentar criar tarefa
+          </Button>
         </div>
       ) : !tasks || tasks.length === 0 ? (
         <div className="text-center py-12 bg-card rounded-xl border border-border">
