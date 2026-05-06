@@ -289,6 +289,7 @@ const translations: Record<Language, Record<string, string>> = {
     // ========== CONFIRMATION PAGE ==========
     "confirm.title": "Booking Confirmed!",
     "confirm.subtitle": "We look forward to seeing you.",
+    "confirm.check_email": "You will receive a confirmation email shortly.",
     "confirm.not_found": "Booking Not Found",
     "confirm.not_found_desc": "This booking may not exist or you don't have access to it.",
     "confirm.service_label": "Service",
@@ -710,6 +711,7 @@ const translations: Record<Language, Record<string, string>> = {
     // ========== CONFIRMATION PAGE ==========
     "confirm.title": "Agendamento Confirmado!",
     "confirm.subtitle": "Estamos ansiosas para te receber.",
+    "confirm.check_email": "Você receberá um e-mail de confirmação em breve.",
     "confirm.not_found": "Agendamento Não Encontrado",
     "confirm.not_found_desc": "Este agendamento pode não existir ou você não tem acesso.",
     "confirm.service_label": "Serviço",
