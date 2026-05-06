@@ -16,7 +16,7 @@ import Book from "./pages/Book";
 import Confirmation from "./pages/Confirmation";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import Quiz from "./pages/Quiz";
+
 import Studio from "./pages/Studio";
 import Team from "./pages/Team";
 import LocationNewark from "./pages/LocationNewark";
@@ -57,7 +57,7 @@ const App = () => (
           <Route path="/location/newark" element={<LocationNewark />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/gift-cards" element={<GiftCards />} />
-          <Route path="/quiz/:slug" element={<Quiz />} />
+          
           <Route path="/ane-caroline" element={<AneCaroline />} />
           <Route path="/hub" element={<Links />} />
           <Route path="/portal" element={<ClientPortal />} />
