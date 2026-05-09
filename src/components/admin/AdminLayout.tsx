@@ -22,6 +22,7 @@ import {
   UsersRound,
   ImageIcon,
   MessageSquare,
+  Bell,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
