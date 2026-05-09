@@ -126,7 +126,7 @@ serve(async (req) => {
           booking_id,
           client_name: booking.client_name,
           client_phone: booking.client_phone,
-          service_name: booking.services?.name ?? null,
+          service_name: null,
           start_time: booking.start_time,
           end_time: booking.end_time,
         },
