@@ -1,34 +1,70 @@
 
+## Objetivo
 
-## Plano: Páginas dedicadas para Maquiagem e Tratamentos
+Enviar notificações internas para **acsbeautystudio@gmail.com** sempre que:
+1. 🆕 Um novo **booking** for solicitado (status `requested`)
+2. ✅ Um booking for **confirmado** ou ❌ **cancelado**
+3. 🎁 Uma nova compra de **Gift Card** for registrada
 
-### Problema
-A página `/services` lista dinamicamente todas as categorias do banco (`services.category_slug`), incluindo `maquiagem` e `tratamentos`. Mas o `CategoryPage.tsx` só tem config para `cabelo`, `sobrancelhas` e `unhas` no `CATEGORY_CONFIG`. Quando o usuário clica em Maquiagem/Tratamentos, dá erro: `Cannot read properties of undefined (reading 'icon')` (confirmado no runtime-errors).
+Tudo via conta **Gmail oficial do estúdio** (a conectar agora).
 
-### Solução
+Sobre o "remover Resend": confirmado que **não há Resend instalado no código atual** — só uma menção em memória que será atualizada. Nada quebra.
 
-**1. Adicionar 2 categorias ao `CATEGORY_CONFIG` em `src/pages/servicos/CategoryPage.tsx`**
-- `maquiagem`: ícone `Brush` (lucide), imagem fallback
-- `tratamentos`: ícone `Sparkles` ou `Droplet`, imagem fallback
-- Chaves de tradução (`badgeKey`, `titleKey`, `subtitleKey`, `aboutTitleKey`, `aboutTextKey`)
+---
 
-**2. Adicionar traduções PT/EN no `LanguageContext.tsx`** para:
-- `servicos.maquiagem.badge` / `.title` / `.subtitle` / `.about_title` / `.about_text`
-- `servicos.tratamentos.badge` / `.title` / `.subtitle` / `.about_title` / `.about_text`
+## Etapas
 
-**3. Fallback defensivo no `CategoryPage.tsx`**: se `config` for undefined, redirecionar para `/services` em vez de quebrar (proteção futura).
+### 1. Conectar Gmail
+Abrir o conector `google_mail` para você fazer login com `acsbeautystudio@gmail.com` e autorizar o escopo `gmail.send`. Após isso, o secret `GOOGLE_MAIL_API_KEY` fica disponível nas Edge Functions.
 
-**4. Imagens fallback**:
-- Verificar se existem assets em `src/assets/` para maquiagem/tratamentos
-- Se não, reutilizar `hair-service.png` como fallback temporário e marcar como TODO
+### 2. Criar Edge Function `notify-internal`
+Função única e genérica que recebe `{ type, payload }` e monta o email apropriado, enviando via Gmail Gateway (`https://connector-gateway.lovable.dev/google_mail/gmail/v1/users/me/messages/send`).
 
-**5. Atualizar ícone em `Services.tsx`** (`CATEGORY_META`) para que os cards de Maquiagem e Tratamentos também tenham ícone correto na grid.
+Tipos suportados:
+- `booking_requested` — assunto `🆕 Novo agendamento solicitado — {cliente}`
+- `booking_confirmed` — assunto `✅ Booking confirmado — {cliente} {data}`
+- `booking_cancelled` — assunto `❌ Booking cancelado — {cliente} {data}`
+- `giftcard_purchased` — assunto `🎁 Nova compra Gift Card — ${valor}`
 
-### Arquivos a editar
-- `src/pages/servicos/CategoryPage.tsx` — adicionar 2 entries no config + guard
-- `src/pages/Services.tsx` — adicionar 2 entries no `CATEGORY_META`
-- `src/contexts/LanguageContext.tsx` — adicionar 10 chaves de tradução (5 PT + 5 EN por categoria × 2)
+Cada email leva: nome cliente, telefone, serviço/SKU, data/hora (NY), preço, link para `/admin`. Layout HTML simples, branded (cream + bronze).
 
-### Bônus rápido
-Limpar o erro runtime atual que está aparecendo no preview do `/services` quando alguém clica em Maquiagem ou Tratamentos.
+Idempotência: header `X-Idempotency-Key` baseado no booking_id/giftcard_id + tipo, para evitar duplicatas em retry.
 
+### 3. Disparos
+- **Booking solicitado / confirmado / cancelado**: invocar `notify-internal` no final das edge functions já existentes:
+  - `calendar-hold` (quando cria booking `requested` via portal) ou no fluxo `/portal` que cria a request
+  - `calendar-confirm-booking` e `calendar-approve-booking` → `booking_confirmed`
+  - `calendar-cancel-booking` → `booking_cancelled`
+- **Gift Card**: no insert da tabela `gift_card_orders` (frontend `GiftCardForm`) chamar `supabase.functions.invoke('notify-internal', ...)` logo após o insert.
+
+Falha no envio do email **nunca** bloqueia o fluxo principal — só loga warning.
+
+### 4. Limpeza
+- Atualizar `mem://features/email-notifications` para refletir "Gmail (conta do estúdio) para notificações internas; Resend não usado".
+- Atualizar índice de memórias.
+
+---
+
+## Detalhes técnicos
+
+**Edge function** (`supabase/functions/notify-internal/index.ts`):
+- `verify_jwt = false` (chamada server-to-server entre edge functions; rate-limit por tipo+id)
+- Valida payload com Zod
+- Monta RFC 2822 → base64url → POST para gateway Gmail
+- `From: ACS Beauty OS <acsbeautystudio@gmail.com>` / `To: acsbeautystudio@gmail.com`
+- Templates HTML inline (sem React Email — overkill p/ notificação interna)
+
+**Config**: adicionar bloco em `supabase/config.toml`:
+```
+[functions.notify-internal]
+verify_jwt = false
+```
+
+**Sem mudanças de schema.** Não cria tabelas novas (notificações são fire-and-forget; histórico já existe nas tabelas `bookings` e `gift_card_orders`).
+
+---
+
+## Fora de escopo
+- Notificar cliente final por email (continua sendo WhatsApp como hoje)
+- Templates editáveis no admin
+- Inbox / leitura de emails dentro do OS (pode vir depois)
