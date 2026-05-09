@@ -129,6 +129,36 @@ export default function AdminAuth() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Informe seu e-mail",
+        description: "Digite o e-mail admin no campo acima e clique de novo.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/admin/reset-password`,
+      });
+      if (error) throw error;
+      toast({
+        title: "E-mail enviado",
+        description: "Verifique sua caixa de entrada para redefinir a senha.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Erro",
+        description: err?.message ?? "Não foi possível enviar o e-mail.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -191,6 +221,15 @@ export default function AdminAuth() {
                 {creatingAccount && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Criar conta
               </Button>
+
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={loading || creatingAccount}
+                className="w-full text-sm text-muted-foreground hover:text-foreground underline underline-offset-4 pt-1 disabled:opacity-50"
+              >
+                Esqueci minha senha
+              </button>
             </div>
           </form>
         </div>
