@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { NotificationsBell } from "./NotificationsBell";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
