@@ -15,7 +15,8 @@ type NotifyType =
   | 'booking_requested'
   | 'booking_confirmed'
   | 'booking_cancelled'
-  | 'giftcard_purchased';
+  | 'giftcard_purchased'
+  | 'lead_received';
 
 interface Payload {
   type: NotifyType;
