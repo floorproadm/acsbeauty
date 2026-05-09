@@ -246,6 +246,18 @@ export function GiftCardForm({ onFieldChange }: GiftCardFormProps) {
         toast({ title: txt.errorTitle, description: txt.errorDesc, variant: "destructive" });
       } else {
         toast({ title: txt.successTitle, description: txt.successDesc });
+        // Fire-and-forget internal notification
+        supabase.functions.invoke("notify-internal", {
+          body: {
+            type: "giftcard_purchased",
+            amount: effectiveAmount,
+            recipient_name: recipientName.trim(),
+            buyer_name: buyerName.trim(),
+            buyer_email: buyerEmail.trim(),
+            occasion: occasions.find((o) => o.value === occasion)?.label || occasion,
+            code,
+          },
+        }).catch((e) => console.warn("notify-internal failed:", e));
       }
       setIsSubmitting(false);
     });
