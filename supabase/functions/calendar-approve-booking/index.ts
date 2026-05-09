@@ -197,6 +197,22 @@ serve(async (req) => {
 
     console.log('Booking approved successfully:', booking_id);
 
+    try {
+      await supabase.functions.invoke('notify-internal', {
+        body: {
+          type: 'booking_confirmed',
+          booking_id,
+          client_name: booking.client_name,
+          client_phone: booking.client_phone,
+          client_email: booking.client_email,
+          service_name: booking.services?.name ?? booking.packages?.name ?? null,
+          start_time: booking.start_time,
+          end_time: booking.end_time,
+          total_price: booking.total_price,
+        },
+      });
+    } catch (e) { console.warn('notify-internal failed:', e); }
+
     return new Response(JSON.stringify({
       success: true,
       booking_id,

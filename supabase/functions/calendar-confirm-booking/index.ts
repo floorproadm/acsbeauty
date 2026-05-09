@@ -349,6 +349,23 @@ serve(async (req) => {
 
     console.log('Booking confirmed successfully:', booking.id);
 
+    // Fire-and-forget internal notification
+    try {
+      await supabase.functions.invoke('notify-internal', {
+        body: {
+          type: bookingStatus === 'requested' ? 'booking_requested' : 'booking_confirmed',
+          booking_id: booking.id,
+          client_name,
+          client_phone: effectivePhone,
+          client_email: effectiveEmail,
+          service_name: serviceData?.name || packageData?.name || null,
+          start_time, end_time,
+          total_price: resolvedTotalPrice,
+          notes: notes || null,
+        },
+      });
+    } catch (e) { console.warn('notify-internal failed:', e); }
+
     return new Response(JSON.stringify({
       success: true,
       booking: {
