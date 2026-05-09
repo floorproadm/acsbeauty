@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { NotificationsBell } from "./NotificationsBell";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -248,6 +249,7 @@ function AdminHeader() {
       <SidebarTrigger />
       <Separator orientation="vertical" className="h-6" />
       <div className="flex-1" />
+      <NotificationsBell />
     </header>
   );
 }

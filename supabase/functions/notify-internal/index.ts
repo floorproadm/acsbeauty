@@ -15,7 +15,8 @@ type NotifyType =
   | 'booking_requested'
   | 'booking_confirmed'
   | 'booking_cancelled'
-  | 'giftcard_purchased';
+  | 'giftcard_purchased'
+  | 'lead_received';
 
 interface Payload {
   type: NotifyType;
@@ -37,6 +38,13 @@ interface Payload {
   buyer_email?: string;
   occasion?: string;
   code?: string;
+  // lead
+  lead_name?: string;
+  lead_email?: string;
+  lead_phone?: string;
+  lead_service?: string;
+  lead_message?: string;
+  lead_source?: string;
 }
 
 function fmtNY(iso?: string): string {
@@ -112,6 +120,18 @@ function buildEmail(p: Payload): { subject: string; html: string } {
           ['Valor', `$${Number(p.amount ?? 0).toFixed(2)}`],
           ['Código', p.code ?? ''],
         ], 'Ver no Admin'),
+      };
+    case 'lead_received':
+      return {
+        subject: `📩 Novo lead — ${p.lead_name ?? 'sem nome'}`,
+        html: wrap('Novo lead recebido', [
+          ['Nome', p.lead_name ?? ''],
+          ['Telefone', p.lead_phone ?? ''],
+          ['Email', p.lead_email ?? ''],
+          ['Interesse', p.lead_service ?? ''],
+          ['Origem', p.lead_source ?? ''],
+          ['Mensagem', p.lead_message ?? ''],
+        ], 'Abrir CRM'),
       };
   }
 }

@@ -91,6 +91,19 @@ Página: ${pagePath}`;
 
       console.log("[WhatsApp] Lead saved to contact_submissions");
 
+      // Fire-and-forget admin email notification
+      supabase.functions
+        .invoke("notify-internal", {
+          body: {
+            type: "lead_received",
+            lead_name: name.trim(),
+            lead_service: serviceLabels,
+            lead_message: dbMessage,
+            lead_source: "WhatsApp Drawer",
+          },
+        })
+        .catch((e) => console.warn("[notify-internal] failed", e));
+
       // Build WhatsApp message
       const whatsappMessage = `Olá! Meu nome é ${name.trim()}.
 
