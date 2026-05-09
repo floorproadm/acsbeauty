@@ -10,7 +10,7 @@ import { ServicesTab } from "@/components/admin/ServicesTab";
 import { OffersTab } from "@/components/admin/OffersTab";
 
 import { TasksTab } from "@/components/admin/TasksTab";
-import { AllowedEmailsTab } from "@/components/admin/AllowedEmailsTab";
+import { AdminInvitesTab } from "@/components/admin/AdminInvitesTab";
 import { GiftCardsTab } from "@/components/admin/GiftCardsTab";
 import { GalleryTab } from "@/components/admin/GalleryTab";
 import { TeamTab } from "@/components/admin/TeamTab";
@@ -53,7 +53,7 @@ export default function Admin() {
       case "team":
         return <TeamTab />;
       case "access":
-        return <AllowedEmailsTab />;
+        return <AdminInvitesTab />;
       default:
         return <DashboardTab onNavigate={setActiveTab} />;
     }

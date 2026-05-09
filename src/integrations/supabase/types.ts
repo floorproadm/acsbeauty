@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_invites: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          status: Database["public"]["Enums"]["invite_status"]
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          status?: Database["public"]["Enums"]["invite_status"]
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          status?: Database["public"]["Enums"]["invite_status"]
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       allowed_emails: {
         Row: {
           added_by: string | null
@@ -1978,6 +2020,7 @@ export type Database = {
       }
       cleanup_expired_holds: { Args: never; Returns: undefined }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
+      expire_old_invites: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1995,6 +2038,7 @@ export type Database = {
         | "cancelled"
         | "no_show"
       campaign_status: "draft" | "active" | "paused" | "completed"
+      invite_status: "pending" | "accepted" | "expired" | "revoked"
       lead_status: "novo" | "em_contato" | "convertido" | "perdido"
       offer_type: "entry_offer" | "package_offer" | "consultation_offer"
       payment_status: "unpaid" | "paid"
@@ -2137,6 +2181,7 @@ export const Constants = {
         "no_show",
       ],
       campaign_status: ["draft", "active", "paused", "completed"],
+      invite_status: ["pending", "accepted", "expired", "revoked"],
       lead_status: ["novo", "em_contato", "convertido", "perdido"],
       offer_type: ["entry_offer", "package_offer", "consultation_offer"],
       payment_status: ["unpaid", "paid"],

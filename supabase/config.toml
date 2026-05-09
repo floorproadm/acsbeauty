@@ -23,3 +23,12 @@ verify_jwt = false
 
 [functions.notify-internal]
 verify_jwt = false
+
+[functions.invite-admin]
+verify_jwt = false
+
+[functions.accept-admin-invite]
+verify_jwt = false
+
+[functions.manage-admin-invite]
+verify_jwt = false
