@@ -221,6 +221,15 @@ export default function AdminAuth() {
                 {creatingAccount && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Criar conta
               </Button>
+
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={loading || creatingAccount}
+                className="w-full text-sm text-muted-foreground hover:text-foreground underline underline-offset-4 pt-1 disabled:opacity-50"
+              >
+                Esqueci minha senha
+              </button>
             </div>
           </form>
         </div>
