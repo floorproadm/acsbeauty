@@ -119,6 +119,20 @@ serve(async (req) => {
 
     console.log('Booking cancelled successfully');
 
+    try {
+      await supabase.functions.invoke('notify-internal', {
+        body: {
+          type: 'booking_cancelled',
+          booking_id,
+          client_name: booking.client_name,
+          client_phone: booking.client_phone,
+          service_name: booking.services?.name ?? null,
+          start_time: booking.start_time,
+          end_time: booking.end_time,
+        },
+      });
+    } catch (e) { console.warn('notify-internal failed:', e); }
+
     return new Response(JSON.stringify({ success: true, message: 'Booking cancelled successfully' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
