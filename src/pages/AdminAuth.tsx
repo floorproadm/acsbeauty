@@ -129,6 +129,36 @@ export default function AdminAuth() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Informe seu e-mail",
+        description: "Digite o e-mail admin no campo acima e clique de novo.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/admin/reset-password`,
+      });
+      if (error) throw error;
+      toast({
+        title: "E-mail enviado",
+        description: "Verifique sua caixa de entrada para redefinir a senha.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Erro",
+        description: err?.message ?? "Não foi possível enviar o e-mail.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
