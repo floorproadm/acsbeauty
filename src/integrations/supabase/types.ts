@@ -921,6 +921,39 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          meta: Json | null
+          read_at: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          meta?: Json | null
+          read_at?: string | null
+          title: string
+          type: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          meta?: Json | null
+          read_at?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
       offers: {
         Row: {
           active: boolean | null
