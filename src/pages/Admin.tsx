@@ -53,6 +53,8 @@ export default function Admin() {
         return <GiftCardsTab />;
       case "team":
         return <TeamTab />;
+      case "notifications":
+        return <NotificationsTab />;
       case "access":
         return <AdminInvitesTab />;
       default:
