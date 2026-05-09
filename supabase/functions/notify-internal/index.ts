@@ -38,6 +38,13 @@ interface Payload {
   buyer_email?: string;
   occasion?: string;
   code?: string;
+  // lead
+  lead_name?: string;
+  lead_email?: string;
+  lead_phone?: string;
+  lead_service?: string;
+  lead_message?: string;
+  lead_source?: string;
 }
 
 function fmtNY(iso?: string): string {
