@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AdminAuth from "./pages/AdminAuth";
 import AdminAcceptInvite from "./pages/AdminAcceptInvite";
+import AdminResetPassword from "./pages/AdminResetPassword";
 import Admin from "./pages/Admin";
 import Onboarding from "./pages/Onboarding";
 import Services from "./pages/Services";
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin/auth" element={<AdminAuth />} />
           <Route path="/admin/accept-invite" element={<AdminAcceptInvite />} />
+          <Route path="/admin/reset-password" element={<AdminResetPassword />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/services" element={<Services />} />
