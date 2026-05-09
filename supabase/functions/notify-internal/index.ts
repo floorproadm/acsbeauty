@@ -121,6 +121,18 @@ function buildEmail(p: Payload): { subject: string; html: string } {
           ['Código', p.code ?? ''],
         ], 'Ver no Admin'),
       };
+    case 'lead_received':
+      return {
+        subject: `📩 Novo lead — ${p.lead_name ?? 'sem nome'}`,
+        html: wrap('Novo lead recebido', [
+          ['Nome', p.lead_name ?? ''],
+          ['Telefone', p.lead_phone ?? ''],
+          ['Email', p.lead_email ?? ''],
+          ['Interesse', p.lead_service ?? ''],
+          ['Origem', p.lead_source ?? ''],
+          ['Mensagem', p.lead_message ?? ''],
+        ], 'Abrir CRM'),
+      };
   }
 }
 
