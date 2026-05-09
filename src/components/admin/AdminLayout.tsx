@@ -74,12 +74,12 @@ const allTabs: { id: AdminTab; label: string; icon: React.ElementType; roles: Ap
   { id: "conversations", label: "Conversas", icon: MessageSquare, roles: ["admin_owner", "staff"] },
   { id: "crm", label: "CRM", icon: Users, roles: ["admin_owner", "staff"] },
   { id: "bookings", label: "Agendamentos", icon: Calendar, roles: ["admin_owner", "staff"] },
+  { id: "gift-cards", label: "Gift Cards", icon: Gift, roles: ["admin_owner"] },
   { id: "payments", label: "Pagamentos", icon: DollarSign, roles: ["admin_owner"] },
   { id: "services", label: "Serviços", icon: Sparkles, roles: ["admin_owner"] },
   { id: "tasks", label: "Tarefas", icon: ClipboardList, roles: ["admin_owner", "staff"] },
   
   { id: "gallery", label: "Galeria", icon: ImageIcon, roles: ["admin_owner"] },
-  { id: "gift-cards", label: "Gift Cards", icon: Gift, roles: ["admin_owner"] },
   { id: "team", label: "Equipe", icon: UsersRound, roles: ["admin_owner"] },
   { id: "notifications", label: "Notificações", icon: Bell, roles: ["admin_owner", "staff"] },
   { id: "access", label: "Acessos", icon: ShieldCheck, roles: ["admin_owner"] },
