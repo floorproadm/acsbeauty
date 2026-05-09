@@ -248,6 +248,7 @@ function AdminHeader() {
       <SidebarTrigger />
       <Separator orientation="vertical" className="h-6" />
       <div className="flex-1" />
+      <NotificationsBell />
     </header>
   );
 }
