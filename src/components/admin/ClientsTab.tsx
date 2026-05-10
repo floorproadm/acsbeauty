@@ -601,9 +601,9 @@ export function ClientsTab() {
               {/* Footer Info + Edit Button */}
               <div className="pt-4 border-t space-y-4">
                 <div className="text-xs text-muted-foreground text-center">
-                  Cliente desde {format(new Date(selectedClient.created_at), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                  Cliente desde {safeFormat(selectedClient.created_at, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                   {selectedClient.last_visit_at && (
-                    <> • Última visita em {format(new Date(selectedClient.last_visit_at), "dd/MM/yyyy", { locale: ptBR })}</>
+                    <> • Última visita em {safeFormat(selectedClient.last_visit_at, "dd/MM/yyyy", { locale: ptBR })}</>
                   )}
                 </div>
 
