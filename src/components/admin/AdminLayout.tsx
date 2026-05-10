@@ -274,6 +274,18 @@ export function AdminLayout({ children, activeTab, onTabChange, userRole }: Admi
   const effectiveRole = userRole ?? detectedRole;
 
   useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtmlOverflow = html.style.overflow;
+    const previousBodyOverflow = body.style.overflow;
+    const previousHtmlHeight = html.style.height;
+    const previousBodyHeight = body.style.height;
+
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    html.style.height = "100dvh";
+    body.style.height = "100dvh";
+
     const checkAuth = async () => {
       const {
         data: { session },
@@ -315,7 +327,13 @@ export function AdminLayout({ children, activeTab, onTabChange, userRole }: Admi
 
     checkAuth();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      html.style.overflow = previousHtmlOverflow;
+      body.style.overflow = previousBodyOverflow;
+      html.style.height = previousHtmlHeight;
+      body.style.height = previousBodyHeight;
+    };
   }, [navigate, toast]);
 
   const handleSignOut = async () => {
@@ -336,8 +354,8 @@ export function AdminLayout({ children, activeTab, onTabChange, userRole }: Admi
   }
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full bg-background">
+    <SidebarProvider defaultOpen={true} className="fixed inset-0 h-[100dvh] !min-h-0 overflow-hidden">
+      <div className="flex h-full min-h-0 w-full overflow-hidden bg-background">
         <AdminSidebar
           activeTab={activeTab}
           onTabChange={onTabChange}
@@ -345,10 +363,10 @@ export function AdminLayout({ children, activeTab, onTabChange, userRole }: Admi
           onSignOut={handleSignOut}
           userRole={effectiveRole}
         />
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden min-w-0">
           <AdminHeader />
           <main
-            className="flex-1 p-3 sm:p-6 overflow-auto"
+            className="mobile-scrollbar-none min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain p-3 sm:p-6"
             style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
           >
             {children}

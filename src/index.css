@@ -251,6 +251,17 @@
     box-shadow: var(--shadow-gold);
   }
 
+  @media (max-width: 767px) {
+    .mobile-scrollbar-none {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .mobile-scrollbar-none::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
   /* Glassmorphism */
   .glass {
     background: hsl(var(--background) / 0.8);
