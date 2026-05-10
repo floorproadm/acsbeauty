@@ -171,10 +171,10 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="w-full min-w-0 space-y-5 sm:space-y-6">
       {/* Header with Greeting */}
-      <div>
-        <h1 className="font-serif text-xl sm:text-2xl font-bold">
+      <div className="min-w-0">
+        <h1 className="font-serif text-xl sm:text-2xl font-bold break-words leading-tight">
           {getGreeting()}{userName ? `, ${userName}` : ""} ✨
         </h1>
         <p className="text-muted-foreground text-sm">
@@ -213,14 +213,14 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
             initial="hidden"
             animate="visible"
             onClick={card.onClick}
-            className={`bg-card rounded-xl p-4 border border-border shadow-soft ${card.onClick ? "cursor-pointer hover:border-primary/30 transition-colors" : ""}`}
+            className={`bg-card rounded-xl p-4 border border-border shadow-soft min-w-0 ${card.onClick ? "cursor-pointer hover:border-primary/30 transition-colors" : ""}`}
           >
             <div className="flex items-center gap-3">
-              <div className={`p-2 ${card.iconBg} rounded-lg`}>
+              <div className={`shrink-0 p-2 ${card.iconBg} rounded-lg`}>
                 <card.icon className={`w-5 h-5 ${card.iconColor}`} />
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{card.label}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground break-words">{card.label}</p>
                 {card.loading ? (
                   <Skeleton className="h-7 w-8" />
                 ) : (
@@ -383,12 +383,12 @@ export function DashboardTab({ onNavigate }: DashboardTabProps) {
           transition={{ delay: 0.55, duration: 0.3 }}
           className="bg-card rounded-xl border border-border shadow-soft"
         >
-          <div className="p-4 border-b border-border flex items-center justify-between">
-            <h2 className="font-semibold flex items-center gap-2">
+            <div className="p-4 border-b border-border flex items-center justify-between gap-3">
+              <h2 className="font-semibold flex min-w-0 items-center gap-2 text-sm sm:text-base">
               <AlertCircle className="w-4 h-4 text-amber-500" />
-              Aguardando Confirmação
+                <span className="truncate">Aguardando Confirmação</span>
               {pendingBookings && pendingBookings.length > 0 && (
-                <span className="ml-1 text-[10px] font-bold bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="ml-1 text-[10px] font-bold bg-red-500 text-white rounded-full w-5 h-5 shrink-0 flex items-center justify-center">
                   {pendingBookings.length}
                 </span>
               )}
