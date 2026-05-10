@@ -260,12 +260,32 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
 
               <div className="space-y-2">
                 <Label htmlFor="phone">Telefone {isCreateMode ? "*" : ""}</Label>
-                <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="(XXX) XXX-XXXX"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="(XXX) XXX-XXXX"
+                    className="flex-1"
+                  />
+                  {formData.phone.trim() && (() => {
+                    const clean = formData.phone.replace(/\D/g, "");
+                    if (!clean) return null;
+                    const withCountry = clean.startsWith("1") ? clean : `1${clean}`;
+                    return (
+                      <a
+                        href={`https://wa.me/${withCountry}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Abrir WhatsApp"
+                        title="Abrir WhatsApp"
+                        className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-[#25D366] hover:bg-[#20BD5A] text-white transition-colors shrink-0"
+                      >
+                        <MessageCircle className="w-4 h-4" fill="currentColor" />
+                      </a>
+                    );
+                  })()}
+                </div>
               </div>
 
               {!isCreateMode && (
