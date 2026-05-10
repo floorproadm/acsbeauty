@@ -735,11 +735,11 @@ function ServiceFormModal({
 }) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md max-h-[90dvh] p-0 flex flex-col gap-0 overflow-hidden">
+        <DialogHeader className="px-6 pt-6 pb-2 shrink-0">
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-4 px-6 overflow-y-auto flex-1 min-h-0 overscroll-contain">
           <div className="space-y-2">
             <Label>Foto do Serviço</Label>
             <ServiceImageUpload
