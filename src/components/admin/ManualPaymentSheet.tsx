@@ -149,10 +149,14 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const svc = services.find((s) => s.id === serviceId);
+      const selected = services.filter((s) => serviceIds.includes(s.id));
+      const totalDuration = selected.reduce((acc, s) => acc + (s.duration_minutes ?? 0), 0) || 60;
       const startTime = new Date(`${date}T${time}`);
-      const endTime = addMinutes(startTime, svc?.duration_minutes ?? 60);
+      const endTime = addMinutes(startTime, totalDuration);
       const originPrefix = origin ? `[${ORIGINS.find((o) => o.value === origin)?.label ?? origin}] ` : "";
+      const servicesNote = selected.length > 1
+        ? `Serviços: ${selected.map((s) => s.name).join(", ")}. `
+        : "";
 
       // Create client in CRM if none selected
       let finalClientId = clientId;
@@ -175,13 +179,13 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
         client_name: clientName.trim(),
         client_phone: clientPhone.trim(),
         client_email: `manual_${Date.now()}@acsbeauty.app`,
-        service_id: serviceId || null,
+        service_id: selected[0]?.id ?? null,
         total_price: parseFloat(totalPrice) || 0,
         start_time: startTime.toISOString(),
         end_time: endTime.toISOString(),
         status: "completed",
         payment_method: paymentMethod,
-        notes: `${originPrefix}${notes}`.trim() || null,
+        notes: `${originPrefix}${servicesNote}${notes}`.trim() || null,
       });
       if (error) throw error;
     },
