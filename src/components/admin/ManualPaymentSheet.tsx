@@ -137,7 +137,8 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
     setClientName("");
     setClientPhone("");
     setClientSearch("");
-    setServiceId("");
+    setServiceIds([]);
+    setPriceEdited(false);
     setTotalPrice("");
     setDate(format(new Date(), "yyyy-MM-dd"));
     setTime(format(new Date(), "HH:mm"));
