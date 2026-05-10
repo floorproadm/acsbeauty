@@ -335,11 +335,14 @@ export function ServicesTab() {
         <div className="flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <a href="/services" target="_blank" rel="noopener noreferrer">
-                <Button size="sm" variant="outline">
-                  <Eye className="w-4 h-4 mr-1" />
-                  Ver pública
-                </Button>
+              <a
+                href="/services"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-1 h-9 px-3 rounded-md border border-input bg-background text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                <Eye className="w-4 h-4 mr-1" />
+                Ver pública
               </a>
             </TooltipTrigger>
             <TooltipContent>Ver como cliente</TooltipContent>
