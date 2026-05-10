@@ -578,7 +578,7 @@ export function ClientsTab() {
                               {booking.services?.name || booking.packages?.name || "Serviço"}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {format(new Date(booking.start_time), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                              {safeFormat(booking.start_time, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                             </p>
                           </div>
                         </div>
