@@ -31,7 +31,8 @@ import {
   Pencil,
   Upload,
 } from "lucide-react";
-import { format, differenceInDays } from "date-fns";
+import { differenceInDays } from "date-fns";
+import { safeFormat } from "@/lib/safeDate";
 import { ptBR } from "date-fns/locale";
 import { ClientEditModal } from "./ClientEditModal";
 import { ClientImportSheet } from "./ClientImportSheet";
