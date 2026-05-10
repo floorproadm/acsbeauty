@@ -311,21 +311,37 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
             </div>
           )}
 
-          {/* Service */}
+          {/* Services (multi-select) */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Serviço</Label>
-            <Select value={serviceId} onValueChange={handleServiceChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecionar serviço" />
-              </SelectTrigger>
-              <SelectContent>
-                {services.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.name} — ${s.price}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label className="text-xs font-medium">
+              Serviços {serviceIds.length > 0 && (
+                <span className="text-muted-foreground font-normal">· {serviceIds.length} selecionado{serviceIds.length > 1 ? "s" : ""}</span>
+              )}
+            </Label>
+            <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto p-1 rounded-md border border-input">
+              {services.map((s) => {
+                const active = serviceIds.includes(s.id);
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => toggleService(s.id)}
+                    className={cn(
+                      "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors border",
+                      active
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                    )}
+                  >
+                    {active && <Check className="w-3 h-3" />}
+                    {s.name} · ${s.price}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Toque em vários para registrar mais de um serviço na mesma visita.
+            </p>
           </div>
 
           {/* Total price */}
