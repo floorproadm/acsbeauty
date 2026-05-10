@@ -64,7 +64,8 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
   const [clientPhone, setClientPhone] = useState("");
   const [clientPickerOpen, setClientPickerOpen] = useState(false);
   const [clientSearch, setClientSearch] = useState("");
-  const [serviceId, setServiceId] = useState("");
+  const [serviceIds, setServiceIds] = useState<string[]>([]);
+  const [priceEdited, setPriceEdited] = useState(false);
   const [totalPrice, setTotalPrice] = useState("");
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [time, setTime] = useState(format(new Date(), "HH:mm"));
