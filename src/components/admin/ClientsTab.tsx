@@ -30,6 +30,7 @@ import {
   Sparkles,
   Pencil,
   Upload,
+  MessageCircle,
 } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import { safeFormat } from "@/lib/safeDate";
