@@ -197,27 +197,100 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
         </SheetHeader>
 
         <div className="space-y-4 pb-6">
-          {/* Client name */}
+          {/* Client picker (CRM) */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Nome do cliente *</Label>
-            <Input
-              placeholder="Nome completo"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-            />
+            <Label className="text-xs font-medium">Cliente *</Label>
+            <Popover open={clientPickerOpen} onOpenChange={setClientPickerOpen}>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm text-left hover:bg-accent/40 transition-colors"
+                >
+                  <span className={cn("truncate", !clientName && "text-muted-foreground")}>
+                    {clientName
+                      ? `${clientName}${clientPhone ? ` · ${clientPhone}` : ""}`
+                      : "Buscar cliente no CRM ou cadastrar novo"}
+                  </span>
+                  <ChevronsUpDown className="w-4 h-4 opacity-50 shrink-0 ml-2" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0 w-[--radix-popover-trigger-width]" align="start">
+                <Command shouldFilter={false}>
+                  <CommandInput
+                    placeholder="Buscar por nome ou telefone..."
+                    value={clientSearch}
+                    onValueChange={setClientSearch}
+                  />
+                  <CommandList>
+                    <CommandEmpty>
+                      <div className="py-3 text-center text-xs text-muted-foreground">
+                        Nenhum cliente encontrado.
+                        <p className="mt-1">Preencha nome e telefone abaixo para criar um novo.</p>
+                      </div>
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {clients.map((c) => (
+                        <CommandItem
+                          key={c.id}
+                          value={c.id}
+                          onSelect={() => selectClient(c)}
+                          className="flex items-center gap-2"
+                        >
+                          <Check
+                            className={cn(
+                              "w-4 h-4",
+                              clientId === c.id ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm truncate">{c.name}</p>
+                            {c.phone && (
+                              <p className="text-[11px] text-muted-foreground truncate">{c.phone}</p>
+                            )}
+                          </div>
+                        </CommandItem>
+                      ))}
+                      {clientSearch.trim() && (
+                        <CommandItem
+                          value="__new__"
+                          onSelect={() => {
+                            setClientId(null);
+                            setClientName(clientSearch.trim());
+                            setClientPickerOpen(false);
+                          }}
+                          className="flex items-center gap-2 border-t border-border mt-1"
+                        >
+                          <UserPlus className="w-4 h-4" />
+                          <span className="text-sm">Criar "{clientSearch.trim()}"</span>
+                        </CommandItem>
+                      )}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {clientId && (
+              <button
+                type="button"
+                onClick={clearClient}
+                className="text-[11px] text-muted-foreground hover:text-foreground underline"
+              >
+                Limpar seleção
+              </button>
+            )}
           </div>
 
-          {/* Phone — required, number type */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Telefone *</Label>
-            <Input
-              type="tel"
-              inputMode="numeric"
-              placeholder="(000) 000-0000"
-              value={clientPhone}
-              onChange={(e) => setClientPhone(e.target.value.replace(/[^0-9+\-() ]/g, ""))}
-            />
-          </div>
+          {/* Name (editable) — used when criando novo cliente */}
+          {!clientId && (
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Nome do cliente *</Label>
+              <Input
+                placeholder="Nome completo"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+              />
+            </div>
+          )}
 
           {/* Service */}
           <div className="space-y-1.5">
