@@ -19,7 +19,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Banknote, CreditCard, MessageCircle, Phone, Footprints } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Banknote, CreditCard, MessageCircle, Phone, Footprints, Check, ChevronsUpDown, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { addMinutes, format } from "date-fns";
 
@@ -46,8 +59,11 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const [clientId, setClientId] = useState<string | null>(null);
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
+  const [clientPickerOpen, setClientPickerOpen] = useState(false);
+  const [clientSearch, setClientSearch] = useState("");
   const [serviceId, setServiceId] = useState("");
   const [totalPrice, setTotalPrice] = useState("");
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
@@ -69,15 +85,49 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
     },
   });
 
+  const { data: clients = [] } = useQuery({
+    queryKey: ["crm-clients-picker", clientSearch],
+    enabled: clientPickerOpen,
+    queryFn: async () => {
+      let q = supabase
+        .from("clients")
+        .select("id, name, phone, email")
+        .order("name")
+        .limit(50);
+      if (clientSearch.trim()) {
+        const s = `%${clientSearch.trim()}%`;
+        q = q.or(`name.ilike.${s},phone.ilike.${s}`);
+      }
+      const { data, error } = await q;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const handleServiceChange = (id: string) => {
     setServiceId(id);
     const svc = services.find((s) => s.id === id);
     if (svc) setTotalPrice(String(svc.price));
   };
 
-  const resetForm = () => {
+  const selectClient = (c: { id: string; name: string; phone: string | null }) => {
+    setClientId(c.id);
+    setClientName(c.name);
+    setClientPhone(c.phone ?? "");
+    setClientPickerOpen(false);
+  };
+
+  const clearClient = () => {
+    setClientId(null);
     setClientName("");
     setClientPhone("");
+  };
+
+  const resetForm = () => {
+    setClientId(null);
+    setClientName("");
+    setClientPhone("");
+    setClientSearch("");
     setServiceId("");
     setTotalPrice("");
     setDate(format(new Date(), "yyyy-MM-dd"));
@@ -94,7 +144,24 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
       const endTime = addMinutes(startTime, svc?.duration_minutes ?? 60);
       const originPrefix = origin ? `[${ORIGINS.find((o) => o.value === origin)?.label ?? origin}] ` : "";
 
+      // Create client in CRM if none selected
+      let finalClientId = clientId;
+      if (!finalClientId && clientName.trim() && clientPhone.trim()) {
+        const { data: newClient, error: cErr } = await supabase
+          .from("clients")
+          .insert({
+            name: clientName.trim(),
+            phone: clientPhone.trim(),
+            acquisition_source: origin || "walk-in",
+          })
+          .select("id")
+          .single();
+        if (cErr) throw cErr;
+        finalClientId = newClient.id;
+      }
+
       const { error } = await supabase.from("bookings").insert({
+        client_id: finalClientId,
         client_name: clientName.trim(),
         client_phone: clientPhone.trim(),
         client_email: `manual_${Date.now()}@acsbeauty.app`,
@@ -130,17 +197,102 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
         </SheetHeader>
 
         <div className="space-y-4 pb-6">
-          {/* Client name */}
+          {/* Client picker (CRM) */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Nome do cliente *</Label>
-            <Input
-              placeholder="Nome completo"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-            />
+            <Label className="text-xs font-medium">Cliente *</Label>
+            <Popover open={clientPickerOpen} onOpenChange={setClientPickerOpen}>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm text-left hover:bg-accent/40 transition-colors"
+                >
+                  <span className={cn("truncate", !clientName && "text-muted-foreground")}>
+                    {clientName
+                      ? `${clientName}${clientPhone ? ` · ${clientPhone}` : ""}`
+                      : "Buscar cliente no CRM ou cadastrar novo"}
+                  </span>
+                  <ChevronsUpDown className="w-4 h-4 opacity-50 shrink-0 ml-2" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0 w-[--radix-popover-trigger-width]" align="start">
+                <Command shouldFilter={false}>
+                  <CommandInput
+                    placeholder="Buscar por nome ou telefone..."
+                    value={clientSearch}
+                    onValueChange={setClientSearch}
+                  />
+                  <CommandList>
+                    <CommandEmpty>
+                      <div className="py-3 text-center text-xs text-muted-foreground">
+                        Nenhum cliente encontrado.
+                        <p className="mt-1">Preencha nome e telefone abaixo para criar um novo.</p>
+                      </div>
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {clients.map((c) => (
+                        <CommandItem
+                          key={c.id}
+                          value={c.id}
+                          onSelect={() => selectClient(c)}
+                          className="flex items-center gap-2"
+                        >
+                          <Check
+                            className={cn(
+                              "w-4 h-4",
+                              clientId === c.id ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm truncate">{c.name}</p>
+                            {c.phone && (
+                              <p className="text-[11px] text-muted-foreground truncate">{c.phone}</p>
+                            )}
+                          </div>
+                        </CommandItem>
+                      ))}
+                      {clientSearch.trim() && (
+                        <CommandItem
+                          value="__new__"
+                          onSelect={() => {
+                            setClientId(null);
+                            setClientName(clientSearch.trim());
+                            setClientPickerOpen(false);
+                          }}
+                          className="flex items-center gap-2 border-t border-border mt-1"
+                        >
+                          <UserPlus className="w-4 h-4" />
+                          <span className="text-sm">Criar "{clientSearch.trim()}"</span>
+                        </CommandItem>
+                      )}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {clientId && (
+              <button
+                type="button"
+                onClick={clearClient}
+                className="text-[11px] text-muted-foreground hover:text-foreground underline"
+              >
+                Limpar seleção
+              </button>
+            )}
           </div>
 
-          {/* Phone — required, number type */}
+          {/* Name (editable) — used when criando novo cliente */}
+          {!clientId && (
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Nome do cliente *</Label>
+              <Input
+                placeholder="Nome completo"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+              />
+            </div>
+          )}
+
+          {/* Phone — sempre editável (auto-preenchido ao selecionar cliente do CRM) */}
           <div className="space-y-1.5">
             <Label className="text-xs font-medium">Telefone *</Label>
             <Input
