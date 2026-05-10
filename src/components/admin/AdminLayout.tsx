@@ -274,6 +274,18 @@ export function AdminLayout({ children, activeTab, onTabChange, userRole }: Admi
   const effectiveRole = userRole ?? detectedRole;
 
   useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtmlOverflow = html.style.overflow;
+    const previousBodyOverflow = body.style.overflow;
+    const previousHtmlHeight = html.style.height;
+    const previousBodyHeight = body.style.height;
+
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    html.style.height = "100dvh";
+    body.style.height = "100dvh";
+
     const checkAuth = async () => {
       const {
         data: { session },
@@ -315,7 +327,13 @@ export function AdminLayout({ children, activeTab, onTabChange, userRole }: Admi
 
     checkAuth();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      html.style.overflow = previousHtmlOverflow;
+      body.style.overflow = previousBodyOverflow;
+      html.style.height = previousHtmlHeight;
+      body.style.height = previousBodyHeight;
+    };
   }, [navigate, toast]);
 
   const handleSignOut = async () => {
@@ -336,7 +354,7 @@ export function AdminLayout({ children, activeTab, onTabChange, userRole }: Admi
   }
 
   return (
-    <SidebarProvider defaultOpen={true} className="h-[100dvh] min-h-0 overflow-hidden">
+    <SidebarProvider defaultOpen={true} className="fixed inset-0 h-[100dvh] !min-h-0 overflow-hidden">
       <div className="flex h-full min-h-0 w-full overflow-hidden bg-background">
         <AdminSidebar
           activeTab={activeTab}
