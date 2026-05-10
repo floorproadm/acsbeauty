@@ -251,13 +251,15 @@
     box-shadow: var(--shadow-gold);
   }
 
-  .mobile-scrollbar-none {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
+  @media (max-width: 767px) {
+    .mobile-scrollbar-none {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
 
-  .mobile-scrollbar-none::-webkit-scrollbar {
-    display: none;
+    .mobile-scrollbar-none::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   /* Glassmorphism */
