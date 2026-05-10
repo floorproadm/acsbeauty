@@ -292,6 +292,18 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
             </div>
           )}
 
+          {/* Phone — sempre editável (auto-preenchido ao selecionar cliente do CRM) */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Telefone *</Label>
+            <Input
+              type="tel"
+              inputMode="numeric"
+              placeholder="(000) 000-0000"
+              value={clientPhone}
+              onChange={(e) => setClientPhone(e.target.value.replace(/[^0-9+\-() ]/g, ""))}
+            />
+          </div>
+
           {/* Service */}
           <div className="space-y-1.5">
             <Label className="text-xs font-medium">Serviço</Label>
