@@ -105,10 +105,18 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
     },
   });
 
-  const handleServiceChange = (id: string) => {
-    setServiceId(id);
-    const svc = services.find((s) => s.id === id);
-    if (svc) setTotalPrice(String(svc.price));
+  const toggleService = (id: string) => {
+    setServiceIds((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      if (!priceEdited) {
+        const sum = next.reduce((acc, sid) => {
+          const s = services.find((x) => x.id === sid);
+          return acc + (Number(s?.price) || 0);
+        }, 0);
+        setTotalPrice(sum > 0 ? String(sum) : "");
+      }
+      return next;
+    });
   };
 
   const selectClient = (c: { id: string; name: string; phone: string | null }) => {
