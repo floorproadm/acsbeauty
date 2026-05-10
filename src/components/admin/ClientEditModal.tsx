@@ -79,7 +79,11 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
         name: client.name || "",
         email: client.email || "",
         phone: client.phone || "",
-        birthday: client.birthday ? parseISO(client.birthday) : null,
+        birthday: (() => {
+          if (!client.birthday) return null;
+          const d = parseISO(client.birthday);
+          return isNaN(d.getTime()) ? null : d;
+        })(),
         notes: (client as any).notes || "",
         acquisition_source: (client as any).acquisition_source || "",
       });
@@ -290,7 +294,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {formData.birthday
+                          {formData.birthday && !isNaN(formData.birthday.getTime())
                             ? format(formData.birthday, "dd/MM/yyyy", { locale: ptBR })
                             : "Selecionar data"}
                         </Button>
