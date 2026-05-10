@@ -184,7 +184,7 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
     onError: () => toast({ title: "Erro ao registrar", variant: "destructive" }),
   });
 
-  const isValid = clientName.trim() && clientPhone.trim() && paymentMethod && totalPrice;
+  const isValid = clientId && paymentMethod && totalPrice;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -280,19 +280,7 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
             )}
           </div>
 
-          {/* Name (editable) — used when criando novo cliente */}
-          {!clientId && (
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Nome do cliente *</Label>
-              <Input
-                placeholder="Nome completo"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-              />
-            </div>
-          )}
-
-          {/* Phone — sempre editável (auto-preenchido ao selecionar cliente do CRM) */}
+          {/* Phone — auto-preenchido ao selecionar cliente do CRM */}
           <div className="space-y-1.5">
             <Label className="text-xs font-medium">Telefone *</Label>
             <Input
