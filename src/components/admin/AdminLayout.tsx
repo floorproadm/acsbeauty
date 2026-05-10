@@ -71,7 +71,6 @@ interface AdminLayoutProps {
 
 const allTabs: { id: AdminTab; label: string; icon: React.ElementType; roles: AppRole[] }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin_owner"] },
-  { id: "conversations", label: "Conversas", icon: MessageSquare, roles: ["admin_owner", "staff"] },
   { id: "crm", label: "CRM", icon: Users, roles: ["admin_owner", "staff"] },
   { id: "bookings", label: "Agendamentos", icon: Calendar, roles: ["admin_owner", "staff"] },
   { id: "gift-cards", label: "Gift Cards", icon: Gift, roles: ["admin_owner"] },
