@@ -366,7 +366,7 @@ export function AdminLayout({ children, activeTab, onTabChange, userRole }: Admi
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden min-w-0">
           <AdminHeader />
           <main
-            className="mobile-scrollbar-none min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain p-3 sm:p-6 md:scrollbar-default"
+            className="mobile-scrollbar-none min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain p-3 sm:p-6"
             style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
           >
             {children}
