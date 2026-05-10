@@ -184,7 +184,7 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
     onError: () => toast({ title: "Erro ao registrar", variant: "destructive" }),
   });
 
-  const isValid = clientId && paymentMethod && totalPrice;
+  const isValid = (clientId || (clientName.trim() && clientPhone.trim())) && paymentMethod && totalPrice;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -280,17 +280,22 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
             )}
           </div>
 
-          {/* Phone — auto-preenchido ao selecionar cliente do CRM */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Telefone *</Label>
-            <Input
-              type="tel"
-              inputMode="numeric"
-              placeholder="(000) 000-0000"
-              value={clientPhone}
-              onChange={(e) => setClientPhone(e.target.value.replace(/[^0-9+\-() ]/g, ""))}
-            />
-          </div>
+          {/* Phone — só aparece se for cliente novo (sem registro no CRM) */}
+          {!clientId && clientName && (
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Telefone *</Label>
+              <Input
+                type="tel"
+                inputMode="numeric"
+                placeholder="(000) 000-0000"
+                value={clientPhone}
+                onChange={(e) => setClientPhone(e.target.value.replace(/[^0-9+\-() ]/g, ""))}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Cliente novo — telefone será salvo no CRM.
+              </p>
+            </div>
+          )}
 
           {/* Service */}
           <div className="space-y-1.5">
