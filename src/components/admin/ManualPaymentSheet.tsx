@@ -184,7 +184,7 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
     onError: () => toast({ title: "Erro ao registrar", variant: "destructive" }),
   });
 
-  const isValid = clientName.trim() && clientPhone.trim() && paymentMethod && totalPrice;
+  const isValid = clientId && paymentMethod && totalPrice;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
