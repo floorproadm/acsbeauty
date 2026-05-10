@@ -354,7 +354,7 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
               step="0.01"
               placeholder="0.00"
               value={totalPrice}
-              onChange={(e) => setTotalPrice(e.target.value)}
+              onChange={(e) => { setTotalPrice(e.target.value); setPriceEdited(true); }}
             />
           </div>
 
