@@ -202,201 +202,252 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="max-h-[90dvh] overflow-y-auto rounded-t-2xl p-5">
+      <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto rounded-t-2xl">
         <SheetHeader className="text-left mb-4">
-          <SheetTitle className="font-serif text-base font-normal">Novo pagamento</SheetTitle>
-          <SheetDescription className="sr-only">Registrar pagamento manual</SheetDescription>
+          <SheetTitle className="font-serif text-lg">Registrar Pagamento</SheetTitle>
+          <SheetDescription className="text-xs">
+            Walk-in, WhatsApp ou ligação
+          </SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-3 pb-4">
-          {/* Cliente */}
-          <Popover open={clientPickerOpen} onOpenChange={setClientPickerOpen}>
-            <PopoverTrigger asChild>
+        <div className="space-y-4 pb-6">
+          {/* Client picker (CRM) */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Cliente *</Label>
+            <Popover open={clientPickerOpen} onOpenChange={setClientPickerOpen}>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm text-left hover:bg-accent/40 transition-colors"
+                >
+                  <span className={cn("truncate", !clientName && "text-muted-foreground")}>
+                    {clientName
+                      ? `${clientName}${clientPhone ? ` · ${clientPhone}` : ""}`
+                      : "Buscar cliente no CRM ou cadastrar novo"}
+                  </span>
+                  <ChevronsUpDown className="w-4 h-4 opacity-50 shrink-0 ml-2" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0 w-[--radix-popover-trigger-width]" align="start">
+                <Command shouldFilter={false}>
+                  <CommandInput
+                    placeholder="Buscar por nome ou telefone..."
+                    value={clientSearch}
+                    onValueChange={setClientSearch}
+                  />
+                  <CommandList>
+                    <CommandEmpty>
+                      <div className="py-3 text-center text-xs text-muted-foreground">
+                        Nenhum cliente encontrado.
+                        <p className="mt-1">Preencha nome e telefone abaixo para criar um novo.</p>
+                      </div>
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {clients.map((c) => (
+                        <CommandItem
+                          key={c.id}
+                          value={c.id}
+                          onSelect={() => selectClient(c)}
+                          className="flex items-center gap-2"
+                        >
+                          <Check
+                            className={cn(
+                              "w-4 h-4",
+                              clientId === c.id ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm truncate">{c.name}</p>
+                            {c.phone && (
+                              <p className="text-[11px] text-muted-foreground truncate">{c.phone}</p>
+                            )}
+                          </div>
+                        </CommandItem>
+                      ))}
+                      {clientSearch.trim() && (
+                        <CommandItem
+                          value="__new__"
+                          onSelect={() => {
+                            setClientId(null);
+                            setClientName(clientSearch.trim());
+                            setClientPickerOpen(false);
+                          }}
+                          className="flex items-center gap-2 border-t border-border mt-1"
+                        >
+                          <UserPlus className="w-4 h-4" />
+                          <span className="text-sm">Criar "{clientSearch.trim()}"</span>
+                        </CommandItem>
+                      )}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {clientId && (
               <button
                 type="button"
-                className="flex w-full items-center justify-between rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-left hover:bg-accent/40 transition-colors"
+                onClick={clearClient}
+                className="text-[11px] text-muted-foreground hover:text-foreground underline"
               >
-                <span className={cn("truncate", !clientName && "text-muted-foreground")}>
-                  {clientName
-                    ? `${clientName}${clientPhone ? ` · ${clientPhone}` : ""}`
-                    : "Cliente"}
-                </span>
-                {clientId ? (
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    onClick={(e) => { e.stopPropagation(); clearClient(); }}
-                    onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); clearClient(); } }}
-                    className="text-[11px] text-muted-foreground hover:text-foreground ml-2"
-                  >
-                    limpar
-                  </span>
-                ) : (
-                  <ChevronsUpDown className="w-4 h-4 opacity-50 shrink-0 ml-2" />
-                )}
+                Limpar seleção
               </button>
-            </PopoverTrigger>
-            <PopoverContent className="p-0 w-[--radix-popover-trigger-width]" align="start">
-              <Command shouldFilter={false}>
-                <CommandInput
-                  placeholder="Buscar nome ou telefone..."
-                  value={clientSearch}
-                  onValueChange={setClientSearch}
-                />
-                <CommandList>
-                  <CommandEmpty>
-                    <div className="py-3 text-center text-xs text-muted-foreground">
-                      Nenhum cliente.
-                    </div>
-                  </CommandEmpty>
-                  <CommandGroup>
-                    {clients.map((c) => (
-                      <CommandItem
-                        key={c.id}
-                        value={c.id}
-                        onSelect={() => selectClient(c)}
-                        className="flex items-center gap-2"
-                      >
-                        <Check className={cn("w-4 h-4", clientId === c.id ? "opacity-100" : "opacity-0")} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm truncate">{c.name}</p>
-                          {c.phone && <p className="text-[11px] text-muted-foreground truncate">{c.phone}</p>}
-                        </div>
-                      </CommandItem>
-                    ))}
-                    {clientSearch.trim() && (
-                      <CommandItem
-                        value="__new__"
-                        onSelect={() => {
-                          setClientId(null);
-                          setClientName(clientSearch.trim());
-                          setClientPickerOpen(false);
-                        }}
-                        className="flex items-center gap-2 border-t border-border mt-1"
-                      >
-                        <UserPlus className="w-4 h-4" />
-                        <span className="text-sm">Criar "{clientSearch.trim()}"</span>
-                      </CommandItem>
-                    )}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-
-          {/* Telefone — só para cliente novo */}
-          {!clientId && clientName && (
-            <Input
-              type="tel"
-              inputMode="numeric"
-              placeholder="Telefone"
-              value={clientPhone}
-              onChange={(e) => setClientPhone(e.target.value.replace(/[^0-9+\-() ]/g, ""))}
-            />
-          )}
-
-          {/* Serviços */}
-          <div className="flex flex-wrap gap-1.5">
-            {services.map((s) => {
-              const active = serviceIds.includes(s.id);
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => toggleService(s.id)}
-                  className={cn(
-                    "px-2.5 py-1.5 rounded-full text-xs transition-colors border",
-                    active
-                      ? "bg-foreground text-background border-foreground"
-                      : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
-                  )}
-                >
-                  {s.name}
-                </button>
-              );
-            })}
+            )}
           </div>
 
-          {/* Valor + Data + Hora */}
-          <div className="grid grid-cols-3 gap-2">
+          {/* Phone — só aparece se for cliente novo (sem registro no CRM) */}
+          {!clientId && clientName && (
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Telefone *</Label>
+              <Input
+                type="tel"
+                inputMode="numeric"
+                placeholder="(000) 000-0000"
+                value={clientPhone}
+                onChange={(e) => setClientPhone(e.target.value.replace(/[^0-9+\-() ]/g, ""))}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Cliente novo — telefone será salvo no CRM.
+              </p>
+            </div>
+          )}
+
+          {/* Services (multi-select) */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">
+              Serviços {serviceIds.length > 0 && (
+                <span className="text-muted-foreground font-normal">· {serviceIds.length} selecionado{serviceIds.length > 1 ? "s" : ""}</span>
+              )}
+            </Label>
+            <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto p-1 rounded-md border border-input">
+              {services.map((s) => {
+                const active = serviceIds.includes(s.id);
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => toggleService(s.id)}
+                    className={cn(
+                      "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors border",
+                      active
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                    )}
+                  >
+                    {active && <Check className="w-3 h-3" />}
+                    {s.name} · ${s.price}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Toque em vários para registrar mais de um serviço na mesma visita.
+            </p>
+          </div>
+
+          {/* Total price */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Valor ($) *</Label>
             <Input
               type="number"
               inputMode="decimal"
               min="0"
               step="0.01"
-              placeholder="$ 0.00"
+              placeholder="0.00"
               value={totalPrice}
               onChange={(e) => { setTotalPrice(e.target.value); setPriceEdited(true); }}
             />
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-            <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
           </div>
 
-          {/* Pagamento */}
-          <div className="flex flex-wrap gap-1.5">
-            {PAYMENT_METHODS.map((m) => (
-              <button
-                key={m.value}
-                type="button"
-                onClick={() => setPaymentMethod(m.value)}
-                className={cn(
-                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs transition-colors border",
-                  paymentMethod === m.value
-                    ? "bg-foreground text-background border-foreground"
-                    : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
-                )}
-              >
-                <m.icon className="w-3 h-3" />
-                {m.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Mais opções (origem + nota) */}
-          <details className="group">
-            <summary className="text-[11px] text-muted-foreground hover:text-foreground cursor-pointer select-none list-none">
-              + origem & nota
-            </summary>
-            <div className="mt-2 space-y-2">
-              <div className="flex flex-wrap gap-1.5">
-                {ORIGINS.map((o) => (
-                  <button
-                    key={o.value}
-                    type="button"
-                    onClick={() => setOrigin(origin === o.value ? "" : o.value)}
-                    className={cn(
-                      "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs transition-colors border",
-                      origin === o.value
-                        ? "bg-foreground text-background border-foreground"
-                        : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
-                    )}
-                  >
-                    <o.icon className="w-3 h-3" />
-                    {o.label}
-                  </button>
-                ))}
-              </div>
-              <Textarea
-                placeholder="Observação"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={2}
-                maxLength={500}
+          {/* Date + Time */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Data</Label>
+              <Input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
               />
             </div>
-          </details>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Hora</Label>
+              <Input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+              />
+            </div>
+          </div>
 
+          {/* Origin pills */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Origem</Label>
+            <div className="flex gap-2">
+              {ORIGINS.map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => setOrigin(origin === o.value ? "" : o.value)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors border",
+                    origin === o.value
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                  )}
+                >
+                  <o.icon className="w-3.5 h-3.5" />
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Payment method pills */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Método de pagamento *</Label>
+            <div className="flex flex-wrap gap-2">
+              {PAYMENT_METHODS.map((m) => (
+                <button
+                  key={m.value}
+                  type="button"
+                  onClick={() => setPaymentMethod(m.value)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors border",
+                    paymentMethod === m.value
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                  )}
+                >
+                  <m.icon className="w-3.5 h-3.5" />
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Observação</Label>
+            <Textarea
+              placeholder="Alguma observação..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={2}
+              maxLength={500}
+            />
+          </div>
+
+          {/* Submit */}
           <button
             onClick={() => mutation.mutate()}
             disabled={!isValid || mutation.isPending}
             className={cn(
-              "w-full py-2.5 rounded-lg text-sm font-medium transition-colors",
+              "w-full py-3 rounded-xl text-sm font-semibold transition-colors",
               isValid
                 ? "bg-primary text-primary-foreground hover:bg-primary/90"
                 : "bg-muted text-muted-foreground cursor-not-allowed"
             )}
           >
-            {mutation.isPending ? "Salvando..." : "Registrar"}
+            {mutation.isPending ? "Salvando..." : "Registrar pagamento"}
           </button>
         </div>
       </SheetContent>
