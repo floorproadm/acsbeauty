@@ -31,7 +31,8 @@ import {
   Pencil,
   Upload,
 } from "lucide-react";
-import { format, differenceInDays } from "date-fns";
+import { differenceInDays } from "date-fns";
+import { safeFormat } from "@/lib/safeDate";
 import { ptBR } from "date-fns/locale";
 import { ClientEditModal } from "./ClientEditModal";
 import { ClientImportSheet } from "./ClientImportSheet";
@@ -405,7 +406,7 @@ export function ClientsTab() {
                 {/* Arrow indicator */}
                 <div className="flex items-center gap-3">
                   <div className="text-xs text-muted-foreground">
-                    Cliente desde {format(new Date(client.created_at), "MMM yyyy", { locale: ptBR })}
+                    Cliente desde {safeFormat(client.created_at, "MMM yyyy", { locale: ptBR })}
                   </div>
                   <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-rose-gold transition-colors" />
                 </div>
@@ -577,7 +578,7 @@ export function ClientsTab() {
                               {booking.services?.name || booking.packages?.name || "Serviço"}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {format(new Date(booking.start_time), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                              {safeFormat(booking.start_time, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                             </p>
                           </div>
                         </div>
@@ -600,9 +601,9 @@ export function ClientsTab() {
               {/* Footer Info + Edit Button */}
               <div className="pt-4 border-t space-y-4">
                 <div className="text-xs text-muted-foreground text-center">
-                  Cliente desde {format(new Date(selectedClient.created_at), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                  Cliente desde {safeFormat(selectedClient.created_at, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                   {selectedClient.last_visit_at && (
-                    <> • Última visita em {format(new Date(selectedClient.last_visit_at), "dd/MM/yyyy", { locale: ptBR })}</>
+                    <> • Última visita em {safeFormat(selectedClient.last_visit_at, "dd/MM/yyyy", { locale: ptBR })}</>
                   )}
                 </div>
 
