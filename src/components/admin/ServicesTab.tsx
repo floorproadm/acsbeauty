@@ -335,11 +335,14 @@ export function ServicesTab() {
         <div className="flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <a href="/services" target="_blank" rel="noopener noreferrer">
-                <Button size="sm" variant="outline">
-                  <Eye className="w-4 h-4 mr-1" />
-                  Ver pública
-                </Button>
+              <a
+                href="/services"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-1 h-9 px-3 rounded-md border border-input bg-background text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                <Eye className="w-4 h-4 mr-1" />
+                Ver pública
               </a>
             </TooltipTrigger>
             <TooltipContent>Ver como cliente</TooltipContent>
@@ -425,14 +428,16 @@ export function ServicesTab() {
                 open={isOpen}
                 onOpenChange={() => toggleCategory(category)}
               >
-                <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                  <span className="font-semibold flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-rose-gold" />
-                    {category}
-                    <span className="text-sm font-normal text-muted-foreground">
-                      ({categoryServices.length})
+                <div className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                  <CollapsibleTrigger className="flex items-center gap-2 flex-1 min-w-0 text-left">
+                    <span className="font-semibold flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-rose-gold" />
+                      {category}
+                      <span className="text-sm font-normal text-muted-foreground">
+                        ({categoryServices.length})
+                      </span>
                     </span>
-                  </span>
+                  </CollapsibleTrigger>
                   <div className="flex items-center gap-2">
                     {(() => {
                       const catSlug = categoryServices[0]?.category_slug
@@ -444,7 +449,6 @@ export function ServicesTab() {
                               href={`/servicos/${catSlug}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
                               className="inline-flex items-center justify-center h-7 w-7 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
                               aria-label="Ver categoria como cliente"
                             >
@@ -459,18 +463,19 @@ export function ServicesTab() {
                       size="sm"
                       variant="ghost"
                       className="h-7 px-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openCreateModal(category);
-                      }}
+                      onClick={() => openCreateModal(category)}
                     >
                       <Plus className="w-3 h-3" />
                     </Button>
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform ${isOpen ? "" : "-rotate-90"}`}
-                    />
+                    <CollapsibleTrigger asChild>
+                      <button type="button" aria-label="Expandir/recolher" className="inline-flex items-center justify-center h-7 w-7 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
+                        <ChevronDown
+                          className={`w-4 h-4 transition-transform ${isOpen ? "" : "-rotate-90"}`}
+                        />
+                      </button>
+                    </CollapsibleTrigger>
                   </div>
-                </CollapsibleTrigger>
+                </div>
 
                 <CollapsibleContent className="mt-2 space-y-2">
                   {categoryServices.length === 0 ? (
