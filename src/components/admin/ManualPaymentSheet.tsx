@@ -59,19 +59,6 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [clientName, setClientName] = useState("");
-  const [clientPhone, setClientPhone] = useState("");
-  const [serviceId, setServiceId] = useState("");
-  const [totalPrice, setTotalPrice] = useState("");
-  const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
-  const [time, setTime] = useState(format(new Date(), "HH:mm"));
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const [origin, setOrigin] = useState("");
-  const [notes, setNotes] = useState("");
-
-  const { data: services = [] } = useQuery({
-    queryKey: ["active-services"],
-    queryFn: async () => {
   const [clientId, setClientId] = useState<string | null>(null);
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
