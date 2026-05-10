@@ -159,7 +159,7 @@ function AdminSidebar({
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-border">
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="p-4" style={{ paddingTop: "calc(1rem + env(safe-area-inset-top))" }}>
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-gold to-rose-gold/70 flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-white" />
@@ -225,7 +225,7 @@ function AdminSidebar({
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 mt-auto">
+      <SidebarFooter className="p-4 mt-auto" style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" }}>
         <Separator className="mb-4" />
         {!isCollapsed && user && (
           <div className="mb-3 px-2">
@@ -248,7 +248,13 @@ function AdminSidebar({
 
 function AdminHeader() {
   return (
-    <header className="h-14 border-b border-border bg-card flex items-center px-4 gap-4 sticky top-0 z-40">
+    <header
+      className="border-b border-border bg-card flex items-center px-4 gap-4 sticky top-0 z-40"
+      style={{
+        paddingTop: "env(safe-area-inset-top)",
+        height: "calc(3.5rem + env(safe-area-inset-top))",
+      }}
+    >
       <SidebarTrigger />
       <Separator orientation="vertical" className="h-6" />
       <div className="flex-1" />
@@ -341,7 +347,12 @@ export function AdminLayout({ children, activeTab, onTabChange, userRole }: Admi
         />
         <div className="flex-1 flex flex-col min-w-0">
           <AdminHeader />
-          <main className="flex-1 p-3 sm:p-6 overflow-auto">{children}</main>
+          <main
+            className="flex-1 p-3 sm:p-6 overflow-auto"
+            style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
+          >
+            {children}
+          </main>
         </div>
       </div>
     </SidebarProvider>
