@@ -30,6 +30,7 @@ import {
   Sparkles,
   Pencil,
   Upload,
+  MessageCircle,
 } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import { safeFormat } from "@/lib/safeDate";
@@ -466,15 +467,33 @@ export function ClientsTab() {
 
               {/* Contact Info */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 py-4 border-b">
-                {selectedClient.phone && (
-                  <a
-                    href={`tel:${selectedClient.phone}`}
-                    className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                  >
-                    <Phone className="w-4 h-4 text-rose-gold" />
-                    <span className="text-sm">{selectedClient.phone}</span>
-                  </a>
-                )}
+                {selectedClient.phone && (() => {
+                  const clean = selectedClient.phone.replace(/\D/g, "");
+                  const withCountry = clean.startsWith("1") ? clean : `1${clean}`;
+                  return (
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+                      <a
+                        href={`tel:${selectedClient.phone}`}
+                        className="flex items-center gap-2 flex-1 min-w-0 hover:text-rose-gold transition-colors"
+                      >
+                        <Phone className="w-4 h-4 text-rose-gold shrink-0" />
+                        <span className="text-sm truncate">{selectedClient.phone}</span>
+                      </a>
+                      {clean && (
+                        <a
+                          href={`https://wa.me/${withCountry}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Abrir WhatsApp"
+                          title="Abrir WhatsApp"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-[#25D366] hover:bg-[#20BD5A] text-white transition-colors shrink-0"
+                        >
+                          <MessageCircle className="w-4 h-4" fill="currentColor" />
+                        </a>
+                      )}
+                    </div>
+                  );
+                })()}
                 {selectedClient.email && (
                   <a
                     href={`mailto:${selectedClient.email}`}
