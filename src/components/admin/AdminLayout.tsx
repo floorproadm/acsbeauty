@@ -159,7 +159,7 @@ function AdminSidebar({
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-border">
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="p-4" style={{ paddingTop: "calc(1rem + env(safe-area-inset-top))" }}>
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-gold to-rose-gold/70 flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-white" />
