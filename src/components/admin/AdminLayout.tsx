@@ -225,7 +225,7 @@ function AdminSidebar({
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 mt-auto">
+      <SidebarFooter className="p-4 mt-auto" style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" }}>
         <Separator className="mb-4" />
         {!isCollapsed && user && (
           <div className="mb-3 px-2">
