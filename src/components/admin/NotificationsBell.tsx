@@ -171,12 +171,17 @@ export function NotificationsBell() {
                         {n.body}
                       </p>
                     )}
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      {formatDistanceToNow(new Date(n.created_at), {
-                        addSuffix: true,
-                        locale: ptBR,
-                      })}
-                    </p>
+                    {(() => {
+                      const d = n.created_at ? new Date(n.created_at) : null;
+                      const valid = d && !isNaN(d.getTime());
+                      return (
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          {valid
+                            ? formatDistanceToNow(d!, { addSuffix: true, locale: ptBR })
+                            : "agora"}
+                        </p>
+                      );
+                    })()}
                   </div>
                   {!n.read_at && (
                     <button
