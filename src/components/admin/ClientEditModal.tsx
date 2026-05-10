@@ -294,7 +294,7 @@ export function ClientEditModal({ client, open, onOpenChange, onDeleted, mode = 
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {formData.birthday
+                          {formData.birthday && !isNaN(formData.birthday.getTime())
                             ? format(formData.birthday, "dd/MM/yyyy", { locale: ptBR })
                             : "Selecionar data"}
                         </Button>
