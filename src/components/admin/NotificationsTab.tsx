@@ -260,13 +260,17 @@ export function NotificationsTab() {
                           {n.body}
                         </p>
                       )}
-                      <p className="text-[10px] text-muted-foreground mt-1">
-                        {format(new Date(n.created_at), "dd/MM/yyyy HH:mm")} ·{" "}
-                        {formatDistanceToNow(new Date(n.created_at), {
-                          addSuffix: true,
-                          locale: ptBR,
-                        })}
-                      </p>
+                      {(() => {
+                        const d = n.created_at ? new Date(n.created_at) : null;
+                        const valid = d && !isNaN(d.getTime());
+                        if (!valid) return <p className="text-[10px] text-muted-foreground mt-1">agora</p>;
+                        return (
+                          <p className="text-[10px] text-muted-foreground mt-1">
+                            {format(d!, "dd/MM/yyyy HH:mm")} ·{" "}
+                            {formatDistanceToNow(d!, { addSuffix: true, locale: ptBR })}
+                          </p>
+                        );
+                      })()}
                     </div>
                     <Button
                       variant="ghost"
