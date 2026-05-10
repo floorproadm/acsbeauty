@@ -347,7 +347,12 @@ export function AdminLayout({ children, activeTab, onTabChange, userRole }: Admi
         />
         <div className="flex-1 flex flex-col min-w-0">
           <AdminHeader />
-          <main className="flex-1 p-3 sm:p-6 overflow-auto">{children}</main>
+          <main
+            className="flex-1 p-3 sm:p-6 overflow-auto"
+            style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
+          >
+            {children}
+          </main>
         </div>
       </div>
     </SidebarProvider>
