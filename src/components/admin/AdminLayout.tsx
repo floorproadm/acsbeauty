@@ -248,7 +248,13 @@ function AdminSidebar({
 
 function AdminHeader() {
   return (
-    <header className="h-14 border-b border-border bg-card flex items-center px-4 gap-4 sticky top-0 z-40">
+    <header
+      className="border-b border-border bg-card flex items-center px-4 gap-4 sticky top-0 z-40"
+      style={{
+        paddingTop: "env(safe-area-inset-top)",
+        height: "calc(3.5rem + env(safe-area-inset-top))",
+      }}
+    >
       <SidebarTrigger />
       <Separator orientation="vertical" className="h-6" />
       <div className="flex-1" />
