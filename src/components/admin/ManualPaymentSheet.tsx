@@ -72,11 +72,46 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
   const { data: services = [] } = useQuery({
     queryKey: ["active-services"],
     queryFn: async () => {
+  const [clientId, setClientId] = useState<string | null>(null);
+  const [clientName, setClientName] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
+  const [clientPickerOpen, setClientPickerOpen] = useState(false);
+  const [clientSearch, setClientSearch] = useState("");
+  const [serviceId, setServiceId] = useState("");
+  const [totalPrice, setTotalPrice] = useState("");
+  const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [time, setTime] = useState(format(new Date(), "HH:mm"));
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [origin, setOrigin] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const { data: services = [] } = useQuery({
+    queryKey: ["active-services"],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from("services")
         .select("id, name, price, duration_minutes")
         .eq("is_active", true)
         .order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: clients = [] } = useQuery({
+    queryKey: ["crm-clients-picker", clientSearch],
+    enabled: clientPickerOpen,
+    queryFn: async () => {
+      let q = supabase
+        .from("clients")
+        .select("id, name, phone, email")
+        .order("name")
+        .limit(50);
+      if (clientSearch.trim()) {
+        const s = `%${clientSearch.trim()}%`;
+        q = q.or(`name.ilike.${s},phone.ilike.${s}`);
+      }
+      const { data, error } = await q;
       if (error) throw error;
       return data ?? [];
     },
@@ -88,9 +123,24 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
     if (svc) setTotalPrice(String(svc.price));
   };
 
-  const resetForm = () => {
+  const selectClient = (c: { id: string; name: string; phone: string | null }) => {
+    setClientId(c.id);
+    setClientName(c.name);
+    setClientPhone(c.phone ?? "");
+    setClientPickerOpen(false);
+  };
+
+  const clearClient = () => {
+    setClientId(null);
     setClientName("");
     setClientPhone("");
+  };
+
+  const resetForm = () => {
+    setClientId(null);
+    setClientName("");
+    setClientPhone("");
+    setClientSearch("");
     setServiceId("");
     setTotalPrice("");
     setDate(format(new Date(), "yyyy-MM-dd"));
@@ -107,7 +157,24 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
       const endTime = addMinutes(startTime, svc?.duration_minutes ?? 60);
       const originPrefix = origin ? `[${ORIGINS.find((o) => o.value === origin)?.label ?? origin}] ` : "";
 
+      // Create client in CRM if none selected
+      let finalClientId = clientId;
+      if (!finalClientId && clientName.trim() && clientPhone.trim()) {
+        const { data: newClient, error: cErr } = await supabase
+          .from("clients")
+          .insert({
+            name: clientName.trim(),
+            phone: clientPhone.trim(),
+            acquisition_source: origin || "walk-in",
+          })
+          .select("id")
+          .single();
+        if (cErr) throw cErr;
+        finalClientId = newClient.id;
+      }
+
       const { error } = await supabase.from("bookings").insert({
+        client_id: finalClientId,
         client_name: clientName.trim(),
         client_phone: clientPhone.trim(),
         client_email: `manual_${Date.now()}@acsbeauty.app`,
