@@ -315,10 +315,10 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
           <div className="space-y-1.5">
             <Label className="text-xs font-medium">
               Serviços {serviceIds.length > 0 && (
-                <span className="text-muted-foreground font-normal">· {serviceIds.length} selecionado{serviceIds.length > 1 ? "s" : ""}</span>
+                <span className="text-muted-foreground font-normal">· {serviceIds.length}</span>
               )}
             </Label>
-            <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto p-1 rounded-md border border-input">
+            <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
               {services.map((s) => {
                 const active = serviceIds.includes(s.id);
                 return (
@@ -327,21 +327,17 @@ export function ManualPaymentSheet({ open, onOpenChange }: ManualPaymentSheetPro
                     type="button"
                     onClick={() => toggleService(s.id)}
                     className={cn(
-                      "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors border",
+                      "px-2.5 py-1 rounded-full text-xs transition-colors border",
                       active
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                        ? "bg-foreground text-background border-foreground"
+                        : "bg-transparent text-muted-foreground border-border hover:text-foreground"
                     )}
                   >
-                    {active && <Check className="w-3 h-3" />}
-                    {s.name} · ${s.price}
+                    {s.name}
                   </button>
                 );
               })}
             </div>
-            <p className="text-[11px] text-muted-foreground">
-              Toque em vários para registrar mais de um serviço na mesma visita.
-            </p>
           </div>
 
           {/* Total price */}
