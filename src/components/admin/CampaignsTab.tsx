@@ -39,6 +39,32 @@ export function CampaignsTab() {
   const [reengageSegment, setReengageSegment] = useState<"all" | "occasional" | "absent" | "inactive">("all");
   const [reengageTestEmail, setReengageTestEmail] = useState("");
   const [reengageBusy, setReengageBusy] = useState(false);
+  const [birthdayBusy, setBirthdayBusy] = useState(false);
+
+  const runBirthdays = async (mode: "preview" | "send") => {
+    setBirthdayBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-birthday-emails", {
+        body: { dryRun: mode === "preview" },
+      });
+      if (error) throw error;
+      if (mode === "preview") {
+        toast({
+          title: `Aniversariantes hoje (${data?.date ?? "—"})`,
+          description: `Elegíveis: ${data?.eligible ?? 0} • Já enviados: ${data?.already_sent ?? 0}`,
+        });
+      } else {
+        toast({
+          title: "Emails de aniversário disparados",
+          description: `Enviados: ${data?.sent ?? 0} • Falhas: ${data?.failed ?? 0} • Já enviados antes: ${data?.skipped_already_sent ?? 0}`,
+        });
+      }
+    } catch (e: any) {
+      toast({ title: "Erro", description: e.message || "Tente novamente.", variant: "destructive" });
+    } finally {
+      setBirthdayBusy(false);
+    }
+  };
 
   const runReengagement = async (mode: "preview" | "test" | "send") => {
     setReengageBusy(true);
