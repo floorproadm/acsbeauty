@@ -9,10 +9,36 @@ const corsHeaders = {
 };
 
 const GATEWAY_URL = 'https://connector-gateway.lovable.dev/google_mail/gmail/v1';
-const FROM = 'ACS Beauty Studio <acsbeautystudio@gmail.com>';
-const INTERNAL_TO = 'acsbeautystudio@gmail.com';
-const STUDIO_ADDRESS = '375 Chestnut St, 3rd Fl, Suite 3B, Newark, NJ';
-const STUDIO_PHONE = '(732) 915-3430';
+let FROM = 'ACS Beauty Studio <acsbeautystudio@gmail.com>';
+let INTERNAL_TO = 'acsbeautystudio@gmail.com';
+let STUDIO_ADDRESS = '375 Chestnut St, 3rd Fl, Suite 3B, Newark, NJ';
+let STUDIO_PHONE = '(732) 915-3430';
+let SETTINGS_LOADED = false;
+
+async function loadStudioSettings(): Promise<void> {
+  if (SETTINGS_LOADED) return;
+  SETTINGS_LOADED = true;
+  try {
+    const url = Deno.env.get('SUPABASE_URL');
+    const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !key) return;
+    const res = await fetch(`${url}/rest/v1/studio_settings?key=eq.studio_info&select=value`, {
+      headers: { apikey: key, Authorization: `Bearer ${key}` },
+    });
+    if (!res.ok) return;
+    const rows = await res.json();
+    const v = rows?.[0]?.value;
+    if (!v) return;
+    if (v.email) {
+      FROM = `${v.name || 'ACS Beauty Studio'} <${v.email}>`;
+      INTERNAL_TO = v.email;
+    }
+    if (v.address) STUDIO_ADDRESS = v.address;
+    if (v.phone) STUDIO_PHONE = v.phone;
+  } catch (e) {
+    console.warn('[notify-internal] loadStudioSettings failed', e);
+  }
+}
 
 type NotifyType =
   | 'booking_requested'
@@ -307,6 +333,7 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
+    await loadStudioSettings();
     const payload = (await req.json()) as Payload;
     if (!payload?.type) {
       return new Response(JSON.stringify({ success: false, error: 'type required' }), {
