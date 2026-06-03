@@ -56,6 +56,8 @@ export default function Admin() {
         return <TeamTab />;
       case "notifications":
         return <NotificationsTab />;
+      case "settings":
+        return <SettingsTab />;
       case "access":
         return <AdminInvitesTab />;
       default:
