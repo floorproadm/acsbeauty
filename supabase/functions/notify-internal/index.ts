@@ -205,19 +205,32 @@ function giftCardClientEmails(p: Payload): Array<{ subject: string; html: string
   const out: Array<{ subject: string; html: string; to: string }> = [];
   const amount = `$${Number(p.amount ?? 0).toFixed(2)}`;
   const code = p.code || '';
+  const bookCta = `<div style="text-align:center;margin:8px 0 24px;">
+    <a href="https://acsbeautystudio.com/portal" style="display:inline-block;padding:14px 32px;background:#3d3d38;color:#f5f0eb;text-decoration:none;border-radius:6px;font-size:14px;font-weight:500;letter-spacing:1px;text-transform:uppercase;">Agendar Agora</a>
+  </div>`;
   const giftCardBox = `
-    <div style="background:linear-gradient(135deg,#8b7355,#3d3d38);color:#f5f0eb;padding:32px 24px;border-radius:12px;text-align:center;margin:0 0 24px;">
-      <p style="margin:0 0 8px;font-size:12px;letter-spacing:3px;text-transform:uppercase;opacity:.8;">Gift Card</p>
-      <p style="font-family:'Playfair Display',Georgia,serif;font-size:42px;margin:0 0 16px;font-weight:300;">${amount}</p>
-      <div style="background:rgba(245,240,235,.15);padding:12px 16px;border-radius:6px;display:inline-block;">
-        <p style="margin:0;font-size:11px;letter-spacing:2px;opacity:.8;">CÓDIGO</p>
-        <p style="margin:4px 0 0;font-family:monospace;font-size:18px;letter-spacing:2px;font-weight:600;">${code}</p>
+    <div style="background:linear-gradient(135deg,#b76e79 0%,#d4a574 50%,#8b7355 100%);color:#fff;padding:36px 24px;border-radius:14px;text-align:center;margin:0 0 24px;box-shadow:0 8px 24px rgba(139,115,85,.25);">
+      <p style="margin:0 0 8px;font-size:11px;letter-spacing:4px;text-transform:uppercase;opacity:.9;">ACS Beauty Studio</p>
+      <p style="margin:0 0 4px;font-size:13px;letter-spacing:2px;text-transform:uppercase;opacity:.85;">Gift Card</p>
+      <p style="font-family:'Playfair Display',Georgia,serif;font-size:52px;margin:0 0 20px;font-weight:300;letter-spacing:1px;">${amount}</p>
+      <div style="background:rgba(255,255,255,.18);padding:14px 20px;border-radius:8px;display:inline-block;">
+        <p style="margin:0;font-size:10px;letter-spacing:3px;opacity:.85;">CÓDIGO DE RESGATE</p>
+        <p style="margin:6px 0 0;font-family:'Courier New',monospace;font-size:22px;letter-spacing:4px;font-weight:700;">${code}</p>
       </div>
-      ${p.occasion ? `<p style="margin:16px 0 0;font-size:13px;opacity:.9;">Ocasião: ${p.occasion}</p>` : ''}
+      ${p.occasion ? `<p style="margin:18px 0 0;font-size:13px;opacity:.95;font-style:italic;">${p.occasion}</p>` : ''}
     </div>`;
   const personalMsg = p.personal_message
-    ? `<div style="border-left:3px solid #8b7355;padding:12px 20px;margin:0 0 24px;background:#f5f0eb;font-style:italic;color:#3d3d38;font-size:14px;line-height:1.6;">"${p.personal_message}"</div>`
+    ? `<div style="border-left:3px solid #b76e79;padding:14px 22px;margin:0 0 24px;background:#faf5f0;font-style:italic;color:#3d3d38;font-size:14px;line-height:1.7;">"${p.personal_message}"</div>`
     : '';
+  const redeemInstructions = `
+    <div style="background:#f5f0eb;padding:20px 24px;border-radius:10px;margin:0 0 24px;">
+      <p style="margin:0 0 10px;font-size:13px;font-weight:600;color:#3d3d38;letter-spacing:.5px;text-transform:uppercase;">Como resgatar</p>
+      <ol style="margin:0;padding-left:18px;color:#3d3d38;font-size:13px;line-height:1.8;">
+        <li>Agende em <a href="https://acsbeautystudio.com" style="color:#b76e79;">acsbeautystudio.com</a> ou WhatsApp ${STUDIO_PHONE}</li>
+        <li>Informe o código <strong>${code}</strong> ao reservar</li>
+        <li>Aproveite a experiência ACS Beauty em ${STUDIO_ADDRESS}</li>
+      </ol>
+    </div>`;
 
   if (p.buyer_email) {
     out.push({
@@ -227,19 +240,18 @@ function giftCardClientEmails(p: Payload): Array<{ subject: string; html: string
         `Obrigada pela sua compra, ${p.buyer_name?.split(' ')[0] || ''}!`,
         `Seu Gift Card foi gerado com sucesso${p.recipient_name ? ` para <strong>${p.recipient_name}</strong>` : ''}. Guarde este código com carinho:`,
         giftCardBox + personalMsg,
-        `<p style="font-size:13px;color:#8b7355;line-height:1.6;margin:0;">O código pode ser usado em qualquer serviço, sem prazo de validade. Para agendar, basta apresentar o código pelo WhatsApp ${STUDIO_PHONE}.</p>`
+        `<p style="font-size:13px;color:#8b7355;line-height:1.6;margin:0;">O código pode ser usado em qualquer serviço. Para agendar, é só apresentar o código pelo WhatsApp ${STUDIO_PHONE}.</p>`
       ),
     });
   }
   if (p.recipient_email && p.recipient_email !== p.buyer_email) {
     out.push({
       to: p.recipient_email,
-      subject: `💝 Você recebeu um Gift Card ACS Beauty Studio — ${amount}`,
+      subject: `💝 Você recebeu um Gift Card ACS Beauty Studio!`,
       html: clientShell(
         `${p.recipient_name?.split(' ')[0] || 'Você'}, você foi presenteada! 💝`,
-        `${p.buyer_name || 'Alguém especial'} preparou este presente para você na ACS Beauty Studio:`,
-        giftCardBox + personalMsg,
-        `<p style="font-size:13px;color:#8b7355;line-height:1.6;margin:0;">Para agendar, é só nos chamar no WhatsApp ${STUDIO_PHONE} com este código.</p>`
+        `${p.buyer_name || 'Alguém especial'} preparou um presente para você na ACS Beauty Studio — um momento dedicado à sua beleza e bem-estar.`,
+        giftCardBox + personalMsg + redeemInstructions + bookCta
       ),
     });
   }
