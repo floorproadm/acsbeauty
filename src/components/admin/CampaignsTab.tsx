@@ -185,6 +185,73 @@ export function CampaignsTab() {
         </div>
         
         <div className="flex flex-wrap gap-2">
+          <Dialog open={reengageOpen} onOpenChange={(o) => { setReengageOpen(o); if (o) { setReengageAudience(null); runReengagement("preview"); } }}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Users className="w-4 h-4 mr-2" />
+                Disparar Reengajamento
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Reengajamento de Clientes Inativos</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <p className="text-xs text-muted-foreground">
+                  Segmenta clientes por inatividade (baseado no último booking confirmado) e envia email personalizado. Cooldown de 90 dias por cliente/segmento evita duplicatas.
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Occasional</p>
+                    <p className="text-[10px] text-muted-foreground mb-1">60–89d</p>
+                    <p className="text-2xl font-serif">{reengageAudience?.occasional ?? "—"}</p>
+                  </div>
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Absent</p>
+                    <p className="text-[10px] text-muted-foreground mb-1">90–179d</p>
+                    <p className="text-2xl font-serif">{reengageAudience?.absent ?? "—"}</p>
+                  </div>
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Inactive</p>
+                    <p className="text-[10px] text-muted-foreground mb-1">180+d</p>
+                    <p className="text-2xl font-serif">{reengageAudience?.inactive ?? "—"}</p>
+                  </div>
+                </div>
+                <div>
+                  <Label>Segmento</Label>
+                  <Select value={reengageSegment} onValueChange={(v) => setReengageSegment(v as any)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os segmentos</SelectItem>
+                      <SelectItem value="occasional">Occasional (60–89d)</SelectItem>
+                      <SelectItem value="absent">Absent (90–179d)</SelectItem>
+                      <SelectItem value="inactive">Inactive (180+d)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Email de teste</Label>
+                  <Input type="email" value={reengageTestEmail} onChange={(e) => setReengageTestEmail(e.target.value)} placeholder="seu@email.com" />
+                </div>
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <Button variant="outline" size="sm" onClick={() => runReengagement("preview")} disabled={reengageBusy}>
+                    Recalcular audiência
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => runReengagement("test")} disabled={reengageBusy || !reengageTestEmail}>
+                    <Send className="w-3 h-3 mr-1" />
+                    Enviar teste
+                  </Button>
+                  <Button size="sm" onClick={() => runReengagement("send")} disabled={reengageBusy || !reengageAudience || reengageAudience.total === 0}>
+                    <Send className="w-3 h-3 mr-1" />
+                    {reengageBusy ? "Enviando..." : `Disparar (${
+                      reengageSegment === "all" ? reengageAudience?.total ?? 0 : reengageAudience?.[reengageSegment] ?? 0
+                    })`}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline">
