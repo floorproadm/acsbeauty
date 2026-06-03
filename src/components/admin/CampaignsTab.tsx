@@ -4,12 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Megaphone, Plus, ExternalLink, Copy, TrendingUp } from "lucide-react";
+import { Megaphone, Plus, ExternalLink, Copy, TrendingUp, Mail, Send } from "lucide-react";
 
 type CampaignStatus = "draft" | "active" | "paused" | "completed";
 
@@ -22,6 +23,17 @@ const statusConfig: Record<CampaignStatus, { label: string; color: string }> = {
 
 export function CampaignsTab() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [emailCampaign, setEmailCampaign] = useState({
+    subject: "",
+    title: "",
+    intro: "",
+    bodyHtml: "",
+    ctaLabel: "",
+    ctaUrl: "",
+    testEmail: "",
+  });
+  const [emailSending, setEmailSending] = useState(false);
   const [newCampaign, setNewCampaign] = useState({
     name: "",
     channel: "instagram",
@@ -31,6 +43,39 @@ export function CampaignsTab() {
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const sendCampaignEmail = async (dryRun: boolean, useTest: boolean) => {
+    if (!emailCampaign.subject.trim()) {
+      toast({ title: "Assunto obrigatório", variant: "destructive" });
+      return;
+    }
+    setEmailSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-campaign-email", {
+        body: {
+          subject: emailCampaign.subject,
+          title: emailCampaign.title || emailCampaign.subject,
+          intro: emailCampaign.intro,
+          bodyHtml: emailCampaign.bodyHtml,
+          ctaLabel: emailCampaign.ctaLabel || undefined,
+          ctaUrl: emailCampaign.ctaUrl || undefined,
+          testEmail: useTest && emailCampaign.testEmail ? emailCampaign.testEmail : undefined,
+          dryRun,
+        },
+      });
+      if (error) throw error;
+      if (dryRun) {
+        toast({ title: "Audiência calculada", description: `${data?.recipients ?? 0} clientes receberão o email.` });
+      } else {
+        toast({ title: "Envio concluído", description: `Enviados: ${data?.sent ?? 0} • Falhas: ${data?.failed ?? 0}` });
+        if (!useTest) setEmailDialogOpen(false);
+      }
+    } catch (e: any) {
+      toast({ title: "Erro no envio", description: e.message || "Tente novamente.", variant: "destructive" });
+    } finally {
+      setEmailSending(false);
+    }
+  };
 
   const { data: campaigns, isLoading } = useQuery({
     queryKey: ["admin-campaigns"],
