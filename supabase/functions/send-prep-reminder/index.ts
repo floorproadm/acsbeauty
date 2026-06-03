@@ -126,48 +126,78 @@ serve(async (req) => {
     const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
     const settings = await loadSettings(supabase);
 
-    // Window: bookings starting 23–25h from now (handles hourly cron with slack)
-    const now = new Date();
-    const from = new Date(now.getTime() + 23 * 60 * 60 * 1000);
-    const to = new Date(now.getTime() + 25 * 60 * 60 * 1000);
+    let body: any = {};
+    try { body = await req.json(); } catch { /* cron may not send body */ }
+    const dryRun = body?.dryRun === true;
+    const force = body?.force === true;
+    const explicitIds: string[] | undefined = Array.isArray(body?.bookingIds) ? body.bookingIds : undefined;
 
-    const { data: bookings, error } = await supabase
+    let query = supabase
       .from('bookings')
       .select(`
         id, client_name, client_email, start_time, end_time,
         services:service_id (name, category),
         service_skus:sku_id (name)
       `)
-      .eq('status', 'confirmed')
-      .gte('start_time', from.toISOString())
-      .lte('start_time', to.toISOString());
+      .eq('status', 'confirmed');
+
+    if (explicitIds && explicitIds.length > 0) {
+      query = query.in('id', explicitIds);
+    } else {
+      // Window: bookings starting 23–25h from now
+      const now = new Date();
+      const from = new Date(now.getTime() + 23 * 60 * 60 * 1000);
+      const to = new Date(now.getTime() + 25 * 60 * 60 * 1000);
+      query = query.gte('start_time', from.toISOString()).lte('start_time', to.toISOString());
+    }
+
+    const { data: bookings, error } = await query;
     if (error) throw error;
 
     if (!bookings || bookings.length === 0) {
-      return new Response(JSON.stringify({ success: true, sent: 0, message: 'no bookings in window' }), {
+      return new Response(JSON.stringify({ success: true, sent: 0, eligible: 0, found: 0, message: 'no bookings' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Dedup
-    const ids = bookings.map(b => b.id);
-    const { data: existing } = await supabase
-      .from('booking_reminders')
-      .select('booking_id')
-      .in('booking_id', ids)
-      .eq('reminder_type', '24h_prep')
-      .eq('channel', 'email');
-    const sentSet = new Set((existing || []).map((r: any) => r.booking_id));
+    // Dedup (skip when force=true or explicit IDs)
+    let sentSet = new Set<string>();
+    if (!force && !explicitIds) {
+      const ids = bookings.map(b => b.id);
+      const { data: existing } = await supabase
+        .from('booking_reminders')
+        .select('booking_id')
+        .in('booking_id', ids)
+        .eq('reminder_type', '24h_prep')
+        .eq('channel', 'email');
+      sentSet = new Set((existing || []).map((r: any) => r.booking_id));
+    }
 
-    let sent = 0; let failed = 0; let skipped = 0;
-    for (const b of bookings) {
-      if (!b.client_email || b.client_email.includes('@acsbeauty.app') || sentSet.has(b.id)) { skipped++; continue; }
+    const eligible = bookings.filter(b =>
+      b.client_email && !b.client_email.includes('@acsbeauty.app') && !sentSet.has(b.id)
+    );
+
+    if (dryRun) {
+      return new Response(JSON.stringify({
+        success: true, dryRun: true,
+        found: bookings.length,
+        eligible: eligible.length,
+        already_sent: bookings.length - eligible.length,
+        sample: eligible.slice(0, 10).map(b => ({
+          id: b.id, client_name: b.client_name, client_email: b.client_email,
+          start_time: b.start_time,
+          service: (b.service_skus as any)?.name || (b.services as any)?.name,
+        })),
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    let sent = 0; let failed = 0; const skipped = bookings.length - eligible.length;
+    for (const b of eligible) {
       const serviceName = (b.service_skus as any)?.name || (b.services as any)?.name || 'seu agendamento';
       const category = (b.services as any)?.category as string | undefined;
       const prepHtml = (category && settings.prep_by_category[category]) || settings.prep_default;
-      const ok = await sendGmail(
-        settings.from, b.client_email,
-        `Seu atendimento é amanhã — veja como se preparar 💅`,
+      const subject = `Seu atendimento é amanhã — veja como se preparar 💅`;
+      const ok = await sendGmail(settings.from, b.client_email!, subject,
         buildHtml({
           name: b.client_name || '', service: serviceName,
           whenStr: fmtNY(b.start_time), prepHtml, s: settings,
@@ -175,10 +205,20 @@ serve(async (req) => {
       );
       if (ok) {
         sent++;
+        // Only insert dedup record on normal flow; force/explicit also tracks for log purposes
         await supabase.from('booking_reminders').insert({
           booking_id: b.id, reminder_type: '24h_prep', channel: 'email',
         });
       } else { failed++; }
+      await supabase.from('email_logs').insert({
+        email_type: 'prep_reminder',
+        recipient_email: b.client_email,
+        recipient_name: b.client_name,
+        subject,
+        status: ok ? 'sent' : 'failed',
+        booking_id: b.id,
+        metadata: { service: serviceName, start_time: b.start_time, forced: force || !!explicitIds },
+      });
     }
 
     return new Response(JSON.stringify({ success: true, found: bookings.length, sent, failed, skipped }), {
