@@ -13,13 +13,13 @@ export function useStudioSettings<T = any>(key: StudioSettingKey) {
   const query = useQuery({
     queryKey: ["studio_settings", key],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("studio_settings" as any)
+      const { data, error } = await (supabase as any)
+        .from("studio_settings")
         .select("value")
         .eq("key", key)
         .maybeSingle();
       if (error) throw error;
-      return (data?.value ?? null) as T | null;
+      return ((data as any)?.value ?? null) as T | null;
     },
   });
 
