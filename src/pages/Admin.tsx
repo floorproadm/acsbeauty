@@ -17,6 +17,7 @@ import { TeamTab } from "@/components/admin/TeamTab";
 import { ConversationsTab } from "@/components/admin/ConversationsTab";
 import { NotificationsTab } from "@/components/admin/NotificationsTab";
 import { SettingsTab } from "@/components/admin/SettingsTab";
+import { EmailLogsTab } from "@/components/admin/EmailLogsTab";
 import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Admin() {
