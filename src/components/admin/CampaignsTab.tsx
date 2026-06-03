@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Megaphone, Plus, ExternalLink, Copy, TrendingUp, Mail, Send, Users, Cake } from "lucide-react";
+import { Megaphone, Plus, ExternalLink, Copy, TrendingUp, Mail, Send, Users, Cake, Bell, RefreshCw, Calendar as CalIcon } from "lucide-react";
 
 type CampaignStatus = "draft" | "active" | "paused" | "completed";
 
