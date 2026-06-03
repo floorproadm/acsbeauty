@@ -138,6 +138,14 @@ function internalEmail(p: Payload): { subject: string; html: string } {
           ['Cliente', p.client_name ?? ''], ['Telefone', p.client_phone ?? ''],
           ['Serviço', p.service_name ?? ''], ['Data/Hora (NY)', fmtNY(p.start_time)],
         ]) };
+    case 'booking_rescheduled':
+      return { subject: `📅 Booking remarcado — ${p.client_name ?? 'cliente'} → ${fmtNY(p.start_time)}`,
+        html: wrap('Booking remarcado', [
+          ['Cliente', p.client_name ?? ''], ['Telefone', p.client_phone ?? ''],
+          ['Serviço', p.service_name ?? ''],
+          ['Antes (NY)', fmtNY(p.previous_start_time)],
+          ['Agora (NY)', fmtNY(p.start_time)],
+        ]) };
     case 'giftcard_purchased':
       return { subject: `🎁 Nova compra Gift Card — $${Number(p.amount ?? 0).toFixed(0)}`,
         html: wrap('Nova compra de Gift Card', [
