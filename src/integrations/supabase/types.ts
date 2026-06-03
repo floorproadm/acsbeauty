@@ -122,6 +122,35 @@ export type Database = {
         }
         Relationships: []
       }
+      birthday_emails_sent: {
+        Row: {
+          client_id: string
+          id: string
+          sent_at: string
+          year: number
+        }
+        Insert: {
+          client_id: string
+          id?: string
+          sent_at?: string
+          year: number
+        }
+        Update: {
+          client_id?: string
+          id?: string
+          sent_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "birthday_emails_sent_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_holds: {
         Row: {
           calendar_id: string | null
