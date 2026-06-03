@@ -303,6 +303,166 @@ export function CampaignsTab() {
             <Cake className="w-4 h-4 mr-2" />
             {birthdayBusy ? "Enviando..." : "Disparar Aniversários"}
           </Button>
+
+          {/* Prep reminder */}
+          <Dialog open={prepOpen} onOpenChange={(o) => { setPrepOpen(o); if (o) { setPrepPreview(null); setPrepForce(false); runPrep("preview"); } }}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Bell className="w-4 h-4 mr-2" />
+                Reenviar Lembretes 24h
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Lembretes de Preparo (24h antes)</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <p className="text-xs text-muted-foreground">
+                  Dispara emails de preparo para bookings confirmados na janela 23–25h a partir de agora.
+                  Por padrão pula os que já receberam — marque "Forçar reenvio" para ignorar a dedup.
+                </p>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Na janela</p>
+                    <p className="text-2xl font-serif">{prepPreview?.found ?? "—"}</p>
+                  </div>
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-[10px] uppercase tracking-wider text-green-700">Elegíveis</p>
+                    <p className="text-2xl font-serif">{prepPreview?.eligible ?? "—"}</p>
+                  </div>
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Já enviados</p>
+                    <p className="text-2xl font-serif">{prepPreview?.already_sent ?? "—"}</p>
+                  </div>
+                </div>
+
+                {prepPreview?.sample && prepPreview.sample.length > 0 && (
+                  <div className="rounded-lg border max-h-48 overflow-y-auto">
+                    <ul className="text-xs divide-y">
+                      {prepPreview.sample.map((b: any) => (
+                        <li key={b.id} className="px-3 py-2 flex items-center justify-between gap-2">
+                          <div>
+                            <div className="font-medium">{b.client_name}</div>
+                            <div className="text-muted-foreground">{b.client_email}</div>
+                          </div>
+                          <div className="text-right text-muted-foreground">
+                            <div>{b.service}</div>
+                            <div className="text-[10px]">{new Date(b.start_time).toLocaleString("pt-BR", { timeZone: "America/New_York" })}</div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <label className="flex items-center gap-2 text-xs cursor-pointer">
+                  <input type="checkbox" checked={prepForce} onChange={(e) => setPrepForce(e.target.checked)} />
+                  Forçar reenvio mesmo para quem já recebeu
+                </label>
+
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <Button variant="outline" size="sm" onClick={() => runPrep("preview")} disabled={prepBusy}>
+                    <RefreshCw className={`w-3 h-3 mr-1 ${prepBusy ? "animate-spin" : ""}`} />
+                    Recalcular
+                  </Button>
+                  <Button size="sm" onClick={() => runPrep("send")} disabled={prepBusy || !prepPreview || (prepPreview.eligible === 0 && !prepForce)}>
+                    <Send className="w-3 h-3 mr-1" />
+                    {prepBusy ? "Enviando..." : `Disparar (${prepForce ? prepPreview?.found ?? 0 : prepPreview?.eligible ?? 0})`}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Status resend */}
+          <Dialog open={statusOpen} onOpenChange={(o) => { setStatusOpen(o); if (!o) { setStatusSelectedBookingId(null); setStatusBookingSearch(""); } }}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <CalIcon className="w-4 h-4 mr-2" />
+                Reenviar Status
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Reenviar email de status</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <p className="text-xs text-muted-foreground">
+                  Selecione um booking e o tipo de email para reenviar (confirmação, cancelamento ou remarcação).
+                  O email vai para o endereço do cliente cadastrado no booking.
+                </p>
+
+                <div>
+                  <Label>Buscar booking</Label>
+                  <Input
+                    value={statusBookingSearch}
+                    onChange={(e) => setStatusBookingSearch(e.target.value)}
+                    placeholder="Nome, email ou telefone do cliente..."
+                  />
+                </div>
+
+                <div className="rounded-lg border max-h-60 overflow-y-auto">
+                  {bookingsQuery.isLoading ? (
+                    <p className="p-4 text-sm text-muted-foreground">Carregando…</p>
+                  ) : !bookingsQuery.data || bookingsQuery.data.length === 0 ? (
+                    <p className="p-4 text-sm text-muted-foreground">Nenhum booking encontrado.</p>
+                  ) : (
+                    <ul className="text-sm divide-y">
+                      {bookingsQuery.data.map((b: any) => (
+                        <li
+                          key={b.id}
+                          onClick={() => setStatusSelectedBookingId(b.id)}
+                          className={`px-3 py-2 cursor-pointer hover:bg-muted ${statusSelectedBookingId === b.id ? "bg-muted" : ""}`}
+                        >
+                          <div className="flex justify-between gap-2">
+                            <div>
+                              <div className="font-medium">{b.client_name}</div>
+                              <div className="text-xs text-muted-foreground">{b.client_email}</div>
+                            </div>
+                            <div className="text-right text-xs text-muted-foreground">
+                              <div>{(b as any).services?.name || "—"}</div>
+                              <div>{new Date(b.start_time).toLocaleString("pt-BR", { timeZone: "America/New_York" })}</div>
+                              <Badge variant="secondary" className="text-[10px]">{b.status}</Badge>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div>
+                  <Label>Tipo de email</Label>
+                  <Select value={statusType} onValueChange={(v) => setStatusType(v as any)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="booking_confirmed">✅ Confirmação</SelectItem>
+                      <SelectItem value="booking_cancelled">❌ Cancelamento</SelectItem>
+                      <SelectItem value="booking_rescheduled">📅 Remarcação</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {selectedBooking && (
+                  <div className="rounded-lg border bg-muted/30 p-3 text-xs space-y-1">
+                    <p><strong>Para:</strong> {selectedBooking.client_email}</p>
+                    <p><strong>Cliente:</strong> {selectedBooking.client_name}</p>
+                    <p><strong>Serviço:</strong> {(selectedBooking as any).services?.name || "—"}</p>
+                    <p><strong>Data/Hora:</strong> {new Date(selectedBooking.start_time).toLocaleString("pt-BR", { timeZone: "America/New_York" })}</p>
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button variant="outline" size="sm" onClick={() => setStatusOpen(false)}>Cancelar</Button>
+                  <Button size="sm" onClick={runStatusResend} disabled={statusBusy || !selectedBooking}>
+                    <Send className="w-3 h-3 mr-1" />
+                    {statusBusy ? "Enviando..." : "Reenviar agora"}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Dialog open={reengageOpen} onOpenChange={(o) => { setReengageOpen(o); if (o) { setReengageAudience(null); runReengagement("preview"); } }}>
             <DialogTrigger asChild>
               <Button variant="outline">
