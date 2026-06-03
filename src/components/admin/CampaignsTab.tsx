@@ -66,6 +66,90 @@ export function CampaignsTab() {
     }
   };
 
+  // ── Prep reminder (24h) ──
+  const [prepOpen, setPrepOpen] = useState(false);
+  const [prepBusy, setPrepBusy] = useState(false);
+  const [prepPreview, setPrepPreview] = useState<{ found: number; eligible: number; already_sent: number; sample: any[] } | null>(null);
+  const [prepForce, setPrepForce] = useState(false);
+
+  const runPrep = async (mode: "preview" | "send") => {
+    setPrepBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-prep-reminder", {
+        body: { dryRun: mode === "preview", force: mode === "send" && prepForce },
+      });
+      if (error) throw error;
+      if (mode === "preview") {
+        setPrepPreview(data);
+        toast({ title: "Preview calculado", description: `Elegíveis: ${data?.eligible ?? 0} • Já enviados: ${data?.already_sent ?? 0}` });
+      } else {
+        toast({ title: "Lembretes disparados", description: `Enviados: ${data?.sent ?? 0} • Falhas: ${data?.failed ?? 0}` });
+        setPrepOpen(false);
+      }
+    } catch (e: any) {
+      toast({ title: "Erro", description: e.message || "Tente novamente.", variant: "destructive" });
+    } finally {
+      setPrepBusy(false);
+    }
+  };
+
+  // ── Status email resend (single booking) ──
+  const [statusOpen, setStatusOpen] = useState(false);
+  const [statusBusy, setStatusBusy] = useState(false);
+  const [statusBookingSearch, setStatusBookingSearch] = useState("");
+  const [statusSelectedBookingId, setStatusSelectedBookingId] = useState<string | null>(null);
+  const [statusType, setStatusType] = useState<"booking_confirmed" | "booking_cancelled" | "booking_rescheduled">("booking_confirmed");
+
+  const bookingsQuery = useQuery({
+    queryKey: ["status-resend-bookings", statusBookingSearch],
+    enabled: statusOpen,
+    queryFn: async () => {
+      let q = supabase
+        .from("bookings")
+        .select("id, client_name, client_email, client_phone, start_time, status, total_price, service_id, services:service_id(name)")
+        .order("start_time", { ascending: false })
+        .limit(20);
+      if (statusBookingSearch.trim()) {
+        const s = statusBookingSearch.trim();
+        q = q.or(`client_name.ilike.%${s}%,client_email.ilike.%${s}%,client_phone.ilike.%${s}%`);
+      }
+      const { data, error } = await q;
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const selectedBooking = bookingsQuery.data?.find((b: any) => b.id === statusSelectedBookingId) || null;
+
+  const runStatusResend = async () => {
+    if (!selectedBooking) return;
+    setStatusBusy(true);
+    try {
+      const { error } = await supabase.functions.invoke("notify-internal", {
+        body: {
+          type: statusType,
+          booking_id: selectedBooking.id,
+          client_name: selectedBooking.client_name,
+          client_phone: selectedBooking.client_phone,
+          client_email: selectedBooking.client_email,
+          service_name: (selectedBooking as any).services?.name ?? null,
+          start_time: selectedBooking.start_time,
+          end_time: selectedBooking.start_time,
+          total_price: selectedBooking.total_price,
+        },
+      });
+      if (error) throw error;
+      toast({ title: "Email reenviado", description: `Enviado para ${selectedBooking.client_email}` });
+      setStatusOpen(false);
+      setStatusSelectedBookingId(null);
+    } catch (e: any) {
+      toast({ title: "Erro", description: e.message || "Tente novamente.", variant: "destructive" });
+    } finally {
+      setStatusBusy(false);
+    }
+  };
+
+
   const runReengagement = async (mode: "preview" | "test" | "send") => {
     setReengageBusy(true);
     try {
