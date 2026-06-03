@@ -44,6 +44,7 @@ type NotifyType =
   | 'booking_requested'
   | 'booking_confirmed'
   | 'booking_cancelled'
+  | 'booking_rescheduled'
   | 'giftcard_purchased'
   | 'lead_received';
 
