@@ -233,6 +233,25 @@ function clientEmail(p: Payload): { subject: string; html: string; to: string } 
       ),
     };
   }
+  if (p.type === 'booking_rescheduled' && p.client_email && !p.client_email.includes('@acsbeauty.app')) {
+    const gcal = gcalLink(p);
+    const cta = gcal ? `<div style="text-align:center;margin:8px 0 24px;">
+      <a href="${gcal}" style="display:inline-block;padding:14px 28px;background:#8b7355;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:500;letter-spacing:.5px;">📅 Atualizar no Google Calendar</a>
+    </div>` : '';
+    const prev = p.previous_start_time ? `<p style="font-size:13px;color:#8b7355;margin:0 0 16px;">Horário anterior: <s>${fmtNY(p.previous_start_time)}</s></p>` : '';
+    return {
+      to: p.client_email,
+      subject: `📅 Seu agendamento foi remarcado — ${fmtNY(p.start_time)}`,
+      html: clientShell(
+        `Agendamento remarcado, ${p.client_name?.split(' ')[0] || ''}!`,
+        'Confirmamos a nova data/hora do seu atendimento. Aqui estão os detalhes atualizados:',
+        prev + clientDetailsTable(p) + cta,
+        `<p style="font-size:13px;color:#8b7355;line-height:1.6;margin:24px 0 0;">
+          Qualquer ajuste? Fale com a gente no WhatsApp ${STUDIO_PHONE}.
+        </p>`
+      ),
+    };
+  }
   return null;
 }
 
