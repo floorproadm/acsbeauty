@@ -330,6 +330,7 @@ export function CampaignsTab() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Campaigns List */}
