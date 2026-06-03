@@ -59,6 +59,8 @@ export default function Admin() {
         return <NotificationsTab />;
       case "settings":
         return <SettingsTab />;
+      case "email-logs":
+        return <EmailLogsTab />;
       case "access":
         return <AdminInvitesTab />;
       default:
