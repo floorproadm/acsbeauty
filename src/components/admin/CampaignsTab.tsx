@@ -211,6 +211,14 @@ export function CampaignsTab() {
         </div>
         
         <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => runBirthdays("preview")} disabled={birthdayBusy} title="Ver quantos aniversariantes hoje">
+            <Cake className="w-4 h-4 mr-2" />
+            Aniversariantes hoje
+          </Button>
+          <Button onClick={() => runBirthdays("send")} disabled={birthdayBusy}>
+            <Cake className="w-4 h-4 mr-2" />
+            {birthdayBusy ? "Enviando..." : "Disparar Aniversários"}
+          </Button>
           <Dialog open={reengageOpen} onOpenChange={(o) => { setReengageOpen(o); if (o) { setReengageAudience(null); runReengagement("preview"); } }}>
             <DialogTrigger asChild>
               <Button variant="outline">
