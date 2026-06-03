@@ -699,6 +699,56 @@ export type Database = {
         }
         Relationships: []
       }
+      email_logs: {
+        Row: {
+          booking_id: string | null
+          client_id: string | null
+          email_type: string
+          error_message: string | null
+          id: string
+          metadata: Json
+          recipient_email: string
+          recipient_name: string | null
+          sent_at: string
+          status: string
+          subject: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          client_id?: string | null
+          email_type: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json
+          recipient_email: string
+          recipient_name?: string | null
+          sent_at?: string
+          status?: string
+          subject?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          client_id?: string | null
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json
+          recipient_email?: string
+          recipient_name?: string | null
+          sent_at?: string
+          status?: string
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gallery_categories: {
         Row: {
           created_at: string
