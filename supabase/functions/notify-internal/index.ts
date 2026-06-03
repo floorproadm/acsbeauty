@@ -358,6 +358,32 @@ async function sendGmail(to: string, subject: string, html: string, label: strin
   }
 }
 
+async function logEmail(entry: {
+  email_type: string; recipient_email: string; recipient_name?: string | null;
+  subject: string; status: 'sent' | 'failed'; error_message?: string | null;
+  booking_id?: string | null; metadata?: Record<string, unknown>;
+}): Promise<void> {
+  const url = Deno.env.get('SUPABASE_URL');
+  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!url || !key) return;
+  try {
+    await fetch(`${url}/rest/v1/email_logs`, {
+      method: 'POST',
+      headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email_type: entry.email_type,
+        recipient_email: entry.recipient_email,
+        recipient_name: entry.recipient_name ?? null,
+        subject: entry.subject,
+        status: entry.status,
+        error_message: entry.error_message ?? null,
+        booking_id: entry.booking_id ?? null,
+        metadata: entry.metadata ?? {},
+      }),
+    });
+  } catch (e) { console.warn('[notify-internal] logEmail failed', e); }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
@@ -373,21 +399,53 @@ serve(async (req) => {
     // Internal email (always)
     const internal = internalEmail(payload);
     const internalOk = await sendGmail(INTERNAL_TO, internal.subject, internal.html, `internal:${payload.type}`);
+    await logEmail({
+      email_type: `internal:${payload.type}`,
+      recipient_email: INTERNAL_TO,
+      subject: internal.subject,
+      status: internalOk ? 'sent' : 'failed',
+      booking_id: payload.booking_id ?? null,
+      metadata: { client_name: payload.client_name, service_name: payload.service_name },
+    });
 
     // Client-facing emails (best effort, in parallel)
-    const clientJobs: Promise<boolean>[] = [];
     const directClient = clientEmail(payload);
-    if (directClient) clientJobs.push(sendGmail(directClient.to, directClient.subject, directClient.html, `client:${payload.type}`));
-    for (const gc of giftCardClientEmails(payload)) {
-      clientJobs.push(sendGmail(gc.to, gc.subject, gc.html, `giftcard:${gc.to}`));
+    const giftCards = giftCardClientEmails(payload);
+
+    const clientJobs: Array<Promise<void>> = [];
+    if (directClient) {
+      clientJobs.push((async () => {
+        const ok = await sendGmail(directClient.to, directClient.subject, directClient.html, `client:${payload.type}`);
+        await logEmail({
+          email_type: `client:${payload.type}`,
+          recipient_email: directClient.to,
+          recipient_name: payload.client_name ?? null,
+          subject: directClient.subject,
+          status: ok ? 'sent' : 'failed',
+          booking_id: payload.booking_id ?? null,
+          metadata: { service_name: payload.service_name, start_time: payload.start_time },
+        });
+      })());
     }
-    const clientResults = await Promise.all(clientJobs);
+    for (const gc of giftCards) {
+      clientJobs.push((async () => {
+        const ok = await sendGmail(gc.to, gc.subject, gc.html, `giftcard:${gc.to}`);
+        await logEmail({
+          email_type: 'client:giftcard',
+          recipient_email: gc.to,
+          recipient_name: payload.recipient_name ?? payload.buyer_name ?? null,
+          subject: gc.subject,
+          status: ok ? 'sent' : 'failed',
+          metadata: { amount: payload.amount, code: payload.code, occasion: payload.occasion },
+        });
+      })());
+    }
+    await Promise.all(clientJobs);
 
     return new Response(JSON.stringify({
       success: true,
       internal_sent: internalOk,
-      client_sent: clientResults.filter(Boolean).length,
-      client_attempted: clientResults.length,
+      client_sent: (directClient ? 1 : 0) + giftCards.length,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
