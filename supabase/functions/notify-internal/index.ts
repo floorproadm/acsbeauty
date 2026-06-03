@@ -74,6 +74,7 @@ interface Payload {
   lead_service?: string;
   lead_message?: string;
   lead_source?: string;
+  previous_start_time?: string;
 }
 
 function fmtNY(iso?: string): string {
