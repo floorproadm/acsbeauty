@@ -252,9 +252,11 @@ export function GiftCardForm({ onFieldChange }: GiftCardFormProps) {
             type: "giftcard_purchased",
             amount: effectiveAmount,
             recipient_name: recipientName.trim(),
+            recipient_email: recipientEmail.trim(),
             buyer_name: buyerName.trim(),
             buyer_email: buyerEmail.trim(),
             occasion: occasions.find((o) => o.value === occasion)?.label || occasion,
+            personal_message: personalMessage || null,
             code,
           },
         }).catch((e) => console.warn("notify-internal failed:", e));
