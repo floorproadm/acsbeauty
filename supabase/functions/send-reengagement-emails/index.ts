@@ -97,9 +97,9 @@ const SEGMENTS: Record<Segment, SegmentConfig> = {
 };
 
 function classify(daysSince: number): Segment | null {
-  if (daysSince >= 180) return 'inactive';
-  if (daysSince >= 90) return 'absent';
-  if (daysSince >= 60) return 'occasional';
+  if (daysSince >= SEGMENT_DAYS.inactive) return 'inactive';
+  if (daysSince >= SEGMENT_DAYS.absent) return 'absent';
+  if (daysSince >= SEGMENT_DAYS.occasional) return 'occasional';
   return null;
 }
 
