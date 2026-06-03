@@ -163,6 +163,28 @@ serve(async (req) => {
 
     console.log('Booking rescheduled successfully');
 
+    try {
+      let serviceName: string | null = null;
+      if (booking.service_id) {
+        const { data: svc } = await supabase.from('services').select('name').eq('id', booking.service_id).single();
+        serviceName = svc?.name ?? null;
+      }
+      await supabase.functions.invoke('notify-internal', {
+        body: {
+          type: 'booking_rescheduled',
+          booking_id,
+          client_name: booking.client_name,
+          client_phone: booking.client_phone,
+          client_email: booking.client_email,
+          service_name: serviceName,
+          start_time: new_start_time,
+          end_time: new_end_time,
+          previous_start_time: booking.start_time,
+          total_price: booking.total_price,
+        },
+      });
+    } catch (e) { console.warn('notify-internal failed:', e); }
+
     return new Response(JSON.stringify({
       success: true, message: 'Booking rescheduled successfully', new_start_time, new_end_time,
     }), {

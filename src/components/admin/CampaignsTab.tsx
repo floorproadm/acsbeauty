@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Megaphone, Plus, ExternalLink, Copy, TrendingUp, Mail, Send, Users } from "lucide-react";
+import { Megaphone, Plus, ExternalLink, Copy, TrendingUp, Mail, Send, Users, Cake } from "lucide-react";
 
 type CampaignStatus = "draft" | "active" | "paused" | "completed";
 
@@ -39,6 +39,32 @@ export function CampaignsTab() {
   const [reengageSegment, setReengageSegment] = useState<"all" | "occasional" | "absent" | "inactive">("all");
   const [reengageTestEmail, setReengageTestEmail] = useState("");
   const [reengageBusy, setReengageBusy] = useState(false);
+  const [birthdayBusy, setBirthdayBusy] = useState(false);
+
+  const runBirthdays = async (mode: "preview" | "send") => {
+    setBirthdayBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-birthday-emails", {
+        body: { dryRun: mode === "preview" },
+      });
+      if (error) throw error;
+      if (mode === "preview") {
+        toast({
+          title: `Aniversariantes hoje (${data?.date ?? "—"})`,
+          description: `Elegíveis: ${data?.eligible ?? 0} • Já enviados: ${data?.already_sent ?? 0}`,
+        });
+      } else {
+        toast({
+          title: "Emails de aniversário disparados",
+          description: `Enviados: ${data?.sent ?? 0} • Falhas: ${data?.failed ?? 0} • Já enviados antes: ${data?.skipped_already_sent ?? 0}`,
+        });
+      }
+    } catch (e: any) {
+      toast({ title: "Erro", description: e.message || "Tente novamente.", variant: "destructive" });
+    } finally {
+      setBirthdayBusy(false);
+    }
+  };
 
   const runReengagement = async (mode: "preview" | "test" | "send") => {
     setReengageBusy(true);
@@ -185,6 +211,14 @@ export function CampaignsTab() {
         </div>
         
         <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => runBirthdays("preview")} disabled={birthdayBusy} title="Ver quantos aniversariantes hoje">
+            <Cake className="w-4 h-4 mr-2" />
+            Aniversariantes hoje
+          </Button>
+          <Button onClick={() => runBirthdays("send")} disabled={birthdayBusy}>
+            <Cake className="w-4 h-4 mr-2" />
+            {birthdayBusy ? "Enviando..." : "Disparar Aniversários"}
+          </Button>
           <Dialog open={reengageOpen} onOpenChange={(o) => { setReengageOpen(o); if (o) { setReengageAudience(null); runReengagement("preview"); } }}>
             <DialogTrigger asChild>
               <Button variant="outline">

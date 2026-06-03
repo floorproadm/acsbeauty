@@ -44,6 +44,7 @@ type NotifyType =
   | 'booking_requested'
   | 'booking_confirmed'
   | 'booking_cancelled'
+  | 'booking_rescheduled'
   | 'giftcard_purchased'
   | 'lead_received';
 
@@ -73,6 +74,7 @@ interface Payload {
   lead_service?: string;
   lead_message?: string;
   lead_source?: string;
+  previous_start_time?: string;
 }
 
 function fmtNY(iso?: string): string {
@@ -135,6 +137,14 @@ function internalEmail(p: Payload): { subject: string; html: string } {
         html: wrap('Booking cancelado', [
           ['Cliente', p.client_name ?? ''], ['Telefone', p.client_phone ?? ''],
           ['Serviço', p.service_name ?? ''], ['Data/Hora (NY)', fmtNY(p.start_time)],
+        ]) };
+    case 'booking_rescheduled':
+      return { subject: `📅 Booking remarcado — ${p.client_name ?? 'cliente'} → ${fmtNY(p.start_time)}`,
+        html: wrap('Booking remarcado', [
+          ['Cliente', p.client_name ?? ''], ['Telefone', p.client_phone ?? ''],
+          ['Serviço', p.service_name ?? ''],
+          ['Antes (NY)', fmtNY(p.previous_start_time)],
+          ['Agora (NY)', fmtNY(p.start_time)],
         ]) };
     case 'giftcard_purchased':
       return { subject: `🎁 Nova compra Gift Card — $${Number(p.amount ?? 0).toFixed(0)}`,
@@ -219,6 +229,25 @@ function clientEmail(p: Payload): { subject: string; html: string; to: string } 
         clientDetailsTable(p),
         `<p style="font-size:14px;color:#3d3d38;line-height:1.6;margin:24px 0 0;">
           Esperamos te ver em breve. Para remarcar, é só chamar no WhatsApp <a href="https://wa.me/1${STUDIO_PHONE.replace(/\D/g, '')}" style="color:#8b7355;">${STUDIO_PHONE}</a>.
+        </p>`
+      ),
+    };
+  }
+  if (p.type === 'booking_rescheduled' && p.client_email && !p.client_email.includes('@acsbeauty.app')) {
+    const gcal = gcalLink(p);
+    const cta = gcal ? `<div style="text-align:center;margin:8px 0 24px;">
+      <a href="${gcal}" style="display:inline-block;padding:14px 28px;background:#8b7355;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:500;letter-spacing:.5px;">📅 Atualizar no Google Calendar</a>
+    </div>` : '';
+    const prev = p.previous_start_time ? `<p style="font-size:13px;color:#8b7355;margin:0 0 16px;">Horário anterior: <s>${fmtNY(p.previous_start_time)}</s></p>` : '';
+    return {
+      to: p.client_email,
+      subject: `📅 Seu agendamento foi remarcado — ${fmtNY(p.start_time)}`,
+      html: clientShell(
+        `Agendamento remarcado, ${p.client_name?.split(' ')[0] || ''}!`,
+        'Confirmamos a nova data/hora do seu atendimento. Aqui estão os detalhes atualizados:',
+        prev + clientDetailsTable(p) + cta,
+        `<p style="font-size:13px;color:#8b7355;line-height:1.6;margin:24px 0 0;">
+          Qualquer ajuste? Fale com a gente no WhatsApp ${STUDIO_PHONE}.
         </p>`
       ),
     };
