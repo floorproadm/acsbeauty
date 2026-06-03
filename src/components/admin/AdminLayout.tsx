@@ -62,6 +62,7 @@ export type AdminTab =
   | "gift-cards"
   | "team"
   | "notifications"
+  | "email-logs"
   | "settings"
   | "access";
 
