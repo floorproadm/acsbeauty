@@ -25,9 +25,9 @@ export function useStudioSettings<T = any>(key: StudioSettingKey) {
 
   const update = useMutation({
     mutationFn: async (value: T) => {
-      const { error } = await supabase
-        .from("studio_settings" as any)
-        .upsert({ key, value: value as any, updated_at: new Date().toISOString() }, { onConflict: "key" });
+      const { error } = await (supabase as any)
+        .from("studio_settings")
+        .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: "key" });
       if (error) throw error;
       return value;
     },
