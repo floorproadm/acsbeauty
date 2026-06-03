@@ -56,7 +56,7 @@ export type AdminTab =
   | "crm"
   | "services"
   | "offers"
-  
+  | "campaigns"
   | "tasks"
   | "gallery"
   | "gift-cards"
