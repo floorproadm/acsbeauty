@@ -34,6 +34,39 @@ export function CampaignsTab() {
     testEmail: "",
   });
   const [emailSending, setEmailSending] = useState(false);
+  const [reengageOpen, setReengageOpen] = useState(false);
+  const [reengageAudience, setReengageAudience] = useState<{ occasional: number; absent: number; inactive: number; total: number } | null>(null);
+  const [reengageSegment, setReengageSegment] = useState<"all" | "occasional" | "absent" | "inactive">("all");
+  const [reengageTestEmail, setReengageTestEmail] = useState("");
+  const [reengageBusy, setReengageBusy] = useState(false);
+
+  const runReengagement = async (mode: "preview" | "test" | "send") => {
+    setReengageBusy(true);
+    try {
+      const seg = reengageSegment === "all" ? undefined : reengageSegment;
+      const { data, error } = await supabase.functions.invoke("send-reengagement-emails", {
+        body: {
+          dryRun: mode === "preview",
+          segment: seg,
+          testEmail: mode === "test" ? reengageTestEmail : undefined,
+        },
+      });
+      if (error) throw error;
+      if (mode === "preview") {
+        setReengageAudience(data?.audience ?? null);
+        toast({ title: "Audiência calculada", description: `Total elegível: ${data?.audience?.total ?? 0}` });
+      } else if (mode === "test") {
+        toast({ title: "Teste enviado", description: `Segmentos: ${(data?.segments_sent || []).join(", ") || "—"}` });
+      } else {
+        toast({ title: "Reengajamento disparado", description: `Enviados: ${data?.sent ?? 0} • Falhas: ${data?.failed ?? 0}` });
+        setReengageOpen(false);
+      }
+    } catch (e: any) {
+      toast({ title: "Erro", description: e.message || "Tente novamente.", variant: "destructive" });
+    } finally {
+      setReengageBusy(false);
+    }
+  };
   const [newCampaign, setNewCampaign] = useState({
     name: "",
     channel: "instagram",
