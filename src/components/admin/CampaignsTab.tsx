@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Megaphone, Plus, ExternalLink, Copy, TrendingUp, Mail, Send, Users, Cake, Bell, RefreshCw, Calendar as CalIcon } from "lucide-react";
+import { EmailPreviewButton } from "./EmailPreviewButton";
 
 type CampaignStatus = "draft" | "active" | "paused" | "completed";
 
@@ -295,6 +296,7 @@ export function CampaignsTab() {
         </div>
         
         <div className="flex flex-wrap gap-2">
+          <EmailPreviewButton template="birthday" label="Preview Aniversário" />
           <Button variant="outline" onClick={() => runBirthdays("preview")} disabled={birthdayBusy} title="Ver quantos aniversariantes hoje">
             <Cake className="w-4 h-4 mr-2" />
             Aniversariantes hoje
@@ -303,6 +305,10 @@ export function CampaignsTab() {
             <Cake className="w-4 h-4 mr-2" />
             {birthdayBusy ? "Enviando..." : "Disparar Aniversários"}
           </Button>
+
+          <EmailPreviewButton template="prep" label="Preview Preparo 24h" />
+          <EmailPreviewButton template="booking-reminder" label="Preview Lembrete" />
+          <EmailPreviewButton template="reschedule" label="Preview Remarcação" />
 
           {/* Prep reminder */}
           <Dialog open={prepOpen} onOpenChange={(o) => { setPrepOpen(o); if (o) { setPrepPreview(null); setPrepForce(false); runPrep("preview"); } }}>
