@@ -1441,6 +1441,27 @@ export type Database = {
         }
         Relationships: []
       }
+      reengagement_sent: {
+        Row: {
+          client_email: string
+          id: string
+          segment: string
+          sent_at: string
+        }
+        Insert: {
+          client_email: string
+          id?: string
+          segment: string
+          sent_at?: string
+        }
+        Update: {
+          client_email?: string
+          id?: string
+          segment?: string
+          sent_at?: string
+        }
+        Relationships: []
+      }
       scheduling_settings: {
         Row: {
           buffer_minutes: number
