@@ -151,13 +151,107 @@ export function CampaignsTab() {
           </p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Campanha
-            </Button>
-          </DialogTrigger>
+        <div className="flex flex-wrap gap-2">
+          <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Mail className="w-4 h-4 mr-2" />
+                Email em Lote
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Campanha por Email</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3 pt-2 max-h-[70vh] overflow-y-auto">
+                <p className="text-xs text-muted-foreground">
+                  Envia para todos os clientes com bookings confirmados (emails únicos, exceto walk-ins).
+                </p>
+                <div>
+                  <Label>Assunto *</Label>
+                  <Input
+                    value={emailCampaign.subject}
+                    onChange={(e) => setEmailCampaign({ ...emailCampaign, subject: e.target.value })}
+                    placeholder="Ex: 💝 Especial Dia das Mães"
+                  />
+                </div>
+                <div>
+                  <Label>Título (cabeçalho do email)</Label>
+                  <Input
+                    value={emailCampaign.title}
+                    onChange={(e) => setEmailCampaign({ ...emailCampaign, title: e.target.value })}
+                    placeholder="(opcional) usa o assunto se vazio"
+                  />
+                </div>
+                <div>
+                  <Label>Introdução</Label>
+                  <Textarea
+                    rows={2}
+                    value={emailCampaign.intro}
+                    onChange={(e) => setEmailCampaign({ ...emailCampaign, intro: e.target.value })}
+                    placeholder="Texto curto de abertura."
+                  />
+                </div>
+                <div>
+                  <Label>Corpo (HTML permitido)</Label>
+                  <Textarea
+                    rows={5}
+                    value={emailCampaign.bodyHtml}
+                    onChange={(e) => setEmailCampaign({ ...emailCampaign, bodyHtml: e.target.value })}
+                    placeholder="<p>Sua mensagem aqui...</p>"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label>CTA Texto</Label>
+                    <Input
+                      value={emailCampaign.ctaLabel}
+                      onChange={(e) => setEmailCampaign({ ...emailCampaign, ctaLabel: e.target.value })}
+                      placeholder="Agendar agora"
+                    />
+                  </div>
+                  <div>
+                    <Label>CTA URL</Label>
+                    <Input
+                      value={emailCampaign.ctaUrl}
+                      onChange={(e) => setEmailCampaign({ ...emailCampaign, ctaUrl: e.target.value })}
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label>Email de teste</Label>
+                  <Input
+                    type="email"
+                    value={emailCampaign.testEmail}
+                    onChange={(e) => setEmailCampaign({ ...emailCampaign, testEmail: e.target.value })}
+                    placeholder="seu@email.com"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <Button variant="outline" size="sm" onClick={() => sendCampaignEmail(true, false)} disabled={emailSending}>
+                    Calcular audiência
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => sendCampaignEmail(false, true)} disabled={emailSending || !emailCampaign.testEmail}>
+                    <Send className="w-3 h-3 mr-1" />
+                    Enviar teste
+                  </Button>
+                  <Button size="sm" onClick={() => sendCampaignEmail(false, false)} disabled={emailSending}>
+                    <Send className="w-3 h-3 mr-1" />
+                    {emailSending ? "Enviando..." : "Enviar para todos"}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Campanha
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Nova Campanha</DialogTitle>
