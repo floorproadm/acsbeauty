@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Megaphone, Plus, ExternalLink, Copy, TrendingUp, Mail, Send, Users, Cake, Bell, RefreshCw, Calendar as CalIcon } from "lucide-react";
+import { EmailPreviewButton } from "./EmailPreviewButton";
 
 type CampaignStatus = "draft" | "active" | "paused" | "completed";
 
