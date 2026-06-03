@@ -167,6 +167,7 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
+    await loadStudioSettings();
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
     const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
