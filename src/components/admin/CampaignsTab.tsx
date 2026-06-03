@@ -4,12 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Megaphone, Plus, ExternalLink, Copy, TrendingUp } from "lucide-react";
+import { Megaphone, Plus, ExternalLink, Copy, TrendingUp, Mail, Send } from "lucide-react";
 
 type CampaignStatus = "draft" | "active" | "paused" | "completed";
 
@@ -22,6 +23,17 @@ const statusConfig: Record<CampaignStatus, { label: string; color: string }> = {
 
 export function CampaignsTab() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [emailCampaign, setEmailCampaign] = useState({
+    subject: "",
+    title: "",
+    intro: "",
+    bodyHtml: "",
+    ctaLabel: "",
+    ctaUrl: "",
+    testEmail: "",
+  });
+  const [emailSending, setEmailSending] = useState(false);
   const [newCampaign, setNewCampaign] = useState({
     name: "",
     channel: "instagram",
@@ -31,6 +43,39 @@ export function CampaignsTab() {
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const sendCampaignEmail = async (dryRun: boolean, useTest: boolean) => {
+    if (!emailCampaign.subject.trim()) {
+      toast({ title: "Assunto obrigatório", variant: "destructive" });
+      return;
+    }
+    setEmailSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-campaign-email", {
+        body: {
+          subject: emailCampaign.subject,
+          title: emailCampaign.title || emailCampaign.subject,
+          intro: emailCampaign.intro,
+          bodyHtml: emailCampaign.bodyHtml,
+          ctaLabel: emailCampaign.ctaLabel || undefined,
+          ctaUrl: emailCampaign.ctaUrl || undefined,
+          testEmail: useTest && emailCampaign.testEmail ? emailCampaign.testEmail : undefined,
+          dryRun,
+        },
+      });
+      if (error) throw error;
+      if (dryRun) {
+        toast({ title: "Audiência calculada", description: `${data?.recipients ?? 0} clientes receberão o email.` });
+      } else {
+        toast({ title: "Envio concluído", description: `Enviados: ${data?.sent ?? 0} • Falhas: ${data?.failed ?? 0}` });
+        if (!useTest) setEmailDialogOpen(false);
+      }
+    } catch (e: any) {
+      toast({ title: "Erro no envio", description: e.message || "Tente novamente.", variant: "destructive" });
+    } finally {
+      setEmailSending(false);
+    }
+  };
 
   const { data: campaigns, isLoading } = useQuery({
     queryKey: ["admin-campaigns"],
@@ -106,13 +151,107 @@ export function CampaignsTab() {
           </p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Campanha
-            </Button>
-          </DialogTrigger>
+        <div className="flex flex-wrap gap-2">
+          <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Mail className="w-4 h-4 mr-2" />
+                Email em Lote
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Campanha por Email</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3 pt-2 max-h-[70vh] overflow-y-auto">
+                <p className="text-xs text-muted-foreground">
+                  Envia para todos os clientes com bookings confirmados (emails únicos, exceto walk-ins).
+                </p>
+                <div>
+                  <Label>Assunto *</Label>
+                  <Input
+                    value={emailCampaign.subject}
+                    onChange={(e) => setEmailCampaign({ ...emailCampaign, subject: e.target.value })}
+                    placeholder="Ex: 💝 Especial Dia das Mães"
+                  />
+                </div>
+                <div>
+                  <Label>Título (cabeçalho do email)</Label>
+                  <Input
+                    value={emailCampaign.title}
+                    onChange={(e) => setEmailCampaign({ ...emailCampaign, title: e.target.value })}
+                    placeholder="(opcional) usa o assunto se vazio"
+                  />
+                </div>
+                <div>
+                  <Label>Introdução</Label>
+                  <Textarea
+                    rows={2}
+                    value={emailCampaign.intro}
+                    onChange={(e) => setEmailCampaign({ ...emailCampaign, intro: e.target.value })}
+                    placeholder="Texto curto de abertura."
+                  />
+                </div>
+                <div>
+                  <Label>Corpo (HTML permitido)</Label>
+                  <Textarea
+                    rows={5}
+                    value={emailCampaign.bodyHtml}
+                    onChange={(e) => setEmailCampaign({ ...emailCampaign, bodyHtml: e.target.value })}
+                    placeholder="<p>Sua mensagem aqui...</p>"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label>CTA Texto</Label>
+                    <Input
+                      value={emailCampaign.ctaLabel}
+                      onChange={(e) => setEmailCampaign({ ...emailCampaign, ctaLabel: e.target.value })}
+                      placeholder="Agendar agora"
+                    />
+                  </div>
+                  <div>
+                    <Label>CTA URL</Label>
+                    <Input
+                      value={emailCampaign.ctaUrl}
+                      onChange={(e) => setEmailCampaign({ ...emailCampaign, ctaUrl: e.target.value })}
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label>Email de teste</Label>
+                  <Input
+                    type="email"
+                    value={emailCampaign.testEmail}
+                    onChange={(e) => setEmailCampaign({ ...emailCampaign, testEmail: e.target.value })}
+                    placeholder="seu@email.com"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <Button variant="outline" size="sm" onClick={() => sendCampaignEmail(true, false)} disabled={emailSending}>
+                    Calcular audiência
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => sendCampaignEmail(false, true)} disabled={emailSending || !emailCampaign.testEmail}>
+                    <Send className="w-3 h-3 mr-1" />
+                    Enviar teste
+                  </Button>
+                  <Button size="sm" onClick={() => sendCampaignEmail(false, false)} disabled={emailSending}>
+                    <Send className="w-3 h-3 mr-1" />
+                    {emailSending ? "Enviando..." : "Enviar para todos"}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Campanha
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Nova Campanha</DialogTitle>
@@ -191,6 +330,7 @@ export function CampaignsTab() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Campaigns List */}
