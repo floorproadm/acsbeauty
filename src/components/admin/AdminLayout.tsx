@@ -85,6 +85,7 @@ const allTabs: { id: AdminTab; label: string; icon: React.ElementType; roles: Ap
   
   { id: "team", label: "Equipe", icon: UsersRound, roles: ["admin_owner"] },
   { id: "notifications", label: "Notificações", icon: Bell, roles: ["admin_owner", "staff"] },
+  { id: "email-logs", label: "Logs de Email", icon: Mail, roles: ["admin_owner"] },
   { id: "settings", label: "Configurações", icon: Settings, roles: ["admin_owner"] },
   { id: "access", label: "Acessos", icon: ShieldCheck, roles: ["admin_owner"] },
 ];
