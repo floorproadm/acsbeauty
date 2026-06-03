@@ -333,6 +333,7 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
+    await loadStudioSettings();
     const payload = (await req.json()) as Payload;
     if (!payload?.type) {
       return new Response(JSON.stringify({ success: false, error: 'type required' }), {
