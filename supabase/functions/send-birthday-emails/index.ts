@@ -193,14 +193,20 @@ serve(async (req) => {
     for (let i = 0; i < eligible.length; i += BATCH) {
       const batch = eligible.slice(i, i + BATCH);
       const results = await Promise.all(batch.map(async (c: any) => {
-        const ok = await sendGmail(
-          settings.from, c.email,
-          `Feliz Aniversário, ${(c.name || '').split(' ')[0] || 'querida'}! 🎂 Um presente especial da ACS Beauty`,
-          buildHtml(c.name || '', settings)
-        );
+        const subject = `Feliz Aniversário, ${(c.name || '').split(' ')[0] || 'querida'}! 🎂 Um presente especial da ACS Beauty`;
+        const ok = await sendGmail(settings.from, c.email, subject, buildHtml(c.name || '', settings));
         if (ok) {
           await supabase.from('birthday_emails_sent').insert({ client_id: c.id, year });
         }
+        await supabase.from('email_logs').insert({
+          email_type: 'birthday',
+          recipient_email: c.email,
+          recipient_name: c.name,
+          subject,
+          status: ok ? 'sent' : 'failed',
+          client_id: c.id,
+          metadata: { year, birthday: c.birthday },
+        });
         return ok;
       }));
       sent += results.filter(Boolean).length;
