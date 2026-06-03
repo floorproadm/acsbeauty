@@ -61,6 +61,7 @@ export type AdminTab =
   | "gift-cards"
   | "team"
   | "notifications"
+  | "settings"
   | "access";
 
 interface AdminLayoutProps {
