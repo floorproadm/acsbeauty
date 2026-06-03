@@ -11,11 +11,46 @@ const corsHeaders = {
 };
 
 const GATEWAY_URL = 'https://connector-gateway.lovable.dev/google_mail/gmail/v1';
-const FROM = 'ACS Beauty Studio <acsbeautystudio@gmail.com>';
-const STUDIO_ADDRESS = '375 Chestnut St, 3rd Fl, Suite 3B, Newark, NJ';
-const STUDIO_PHONE = '(732) 915-3430';
+let FROM = 'ACS Beauty Studio <acsbeautystudio@gmail.com>';
+let STUDIO_ADDRESS = '375 Chestnut St, 3rd Fl, Suite 3B, Newark, NJ';
+let STUDIO_PHONE = '(732) 915-3430';
 const BOOK_URL = 'https://acsbeautystudio.com/portal';
-const COOLDOWN_DAYS = 90;
+let COOLDOWN_DAYS = 90;
+let SEGMENT_DAYS = { occasional: 60, absent: 90, inactive: 180 };
+let SETTINGS_LOADED = false;
+
+async function loadStudioSettings(): Promise<void> {
+  if (SETTINGS_LOADED) return;
+  SETTINGS_LOADED = true;
+  try {
+    const url = Deno.env.get('SUPABASE_URL');
+    const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !key) return;
+    const res = await fetch(`${url}/rest/v1/studio_settings?key=in.(studio_info,email_config)&select=key,value`, {
+      headers: { apikey: key, Authorization: `Bearer ${key}` },
+    });
+    if (!res.ok) return;
+    const rows = await res.json();
+    for (const r of rows) {
+      if (r.key === 'studio_info') {
+        const v = r.value || {};
+        if (v.email) FROM = `${v.name || 'ACS Beauty Studio'} <${v.email}>`;
+        if (v.address) STUDIO_ADDRESS = v.address;
+        if (v.phone) STUDIO_PHONE = v.phone;
+      } else if (r.key === 'email_config') {
+        const v = r.value || {};
+        if (typeof v.reengagement_cooldown_days === 'number') COOLDOWN_DAYS = v.reengagement_cooldown_days;
+        if (v.segments) {
+          SEGMENT_DAYS = {
+            occasional: v.segments.occasional_days ?? SEGMENT_DAYS.occasional,
+            absent: v.segments.absent_days ?? SEGMENT_DAYS.absent,
+            inactive: v.segments.inactive_days ?? SEGMENT_DAYS.inactive,
+          };
+        }
+      }
+    }
+  } catch (e) { console.warn('[send-reengagement-emails] settings load failed', e); }
+}
 
 type Segment = 'occasional' | 'absent' | 'inactive';
 
