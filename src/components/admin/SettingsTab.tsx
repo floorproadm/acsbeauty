@@ -242,7 +242,7 @@ function BookingRulesSection() {
 }
 
 // ============ EMAIL CONFIG ============
-function EmailConfigSection() {
+export function EmailConfigSection() {
   const { data, isLoading, update } = useStudioSettings<any>("email_config");
   const { toast } = useToast();
   const [form, setForm] = useState<any>(null);
