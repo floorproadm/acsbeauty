@@ -24,14 +24,31 @@ import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Admin() {
   const { role } = useUserRole();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
+
+  // Sync from URL ?tab=
+  useEffect(() => {
+    const t = searchParams.get("tab") as AdminTab | null;
+    if (t) setActiveTab(t);
+  }, [searchParams]);
 
   // Set default tab for non-admin roles
   useEffect(() => {
-    if (role && role !== "admin_owner") {
+    if (role && role !== "admin_owner" && !searchParams.get("tab")) {
       setActiveTab("bookings");
     }
-  }, [role]);
+  }, [role, searchParams]);
+
+  const handleTabChange = (tab: AdminTab) => {
+    setActiveTab(tab);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("tab", tab);
+      return next;
+    }, { replace: true });
+  };
+
 
   const renderTab = () => {
     switch (activeTab) {
