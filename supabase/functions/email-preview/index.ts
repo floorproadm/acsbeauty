@@ -185,6 +185,27 @@ serve(async (req) => {
         });
     }
 
+    // Apply admin overrides from studio_settings (no redeploy needed)
+    try {
+      const { data: ovRow } = await supabase
+        .from('studio_settings')
+        .select('value')
+        .eq('key', 'email_templates_overrides')
+        .maybeSingle();
+      const ov = (ovRow as any)?.value?.[template] || (ovRow as any)?.value?.[template === 'prep-reminder' ? 'prep' : template];
+      if (ov) {
+        const replace = (s: string) => s
+          .replace(/\{\{\s*name\s*\}\}/g, name)
+          .replace(/\{\{\s*service\s*\}\}/g, service)
+          .replace(/\{\{\s*date\s*\}\}/g, date)
+          .replace(/\{\{\s*time\s*\}\}/g, time)
+          .replace(/\{\{\s*whenStr\s*\}\}/g, whenStr);
+        if (typeof ov.subject === 'string' && ov.subject.length) out.subject = replace(ov.subject);
+        if (typeof ov.html === 'string' && ov.html.length) out.html = replace(ov.html);
+      }
+    } catch (e) { console.warn('[email-preview] overrides load failed', e); }
+
+
     return new Response(JSON.stringify({ success: true, ...out, from: `${studio.name} <${studio.email}>` }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
