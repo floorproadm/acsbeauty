@@ -18,7 +18,7 @@ export default function BlogPost() {
     queryFn: async () => {
       const { data } = await supabase
         .from("blog_posts")
-        .select("*, category:blog_categories(name_pt,slug), author:team_members(name,photo_url), service:services(id,name,slug)")
+        .select("*, category:blog_categories(name_pt,slug), author:team_members(name), service:services(id,name,slug)")
         .eq("slug", slug!)
         .eq("status", "published")
         .maybeSingle();

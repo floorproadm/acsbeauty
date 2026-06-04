@@ -30,6 +30,8 @@ import ClientPortal from "./pages/ClientPortal";
 import NotFound from "./pages/NotFound";
 import ReviewRequest from "./pages/ReviewRequest";
 import CampaignDiaDasMaes from "./pages/CampaignDiaDasMaes";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +69,8 @@ const App = () => (
           <Route path="/portal" element={<ClientPortal />} />
           <Route path="/review" element={<ReviewRequest />} />
           <Route path="/campaign-dia-das-maes" element={<CampaignDiaDasMaes />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
