@@ -132,7 +132,13 @@ function AdminSidebar({
 }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
-  const tabs = allTabs.filter((t) => !userRole || t.roles.includes(userRole));
+  const groups = tabGroups
+    .map((g) => ({
+      ...g,
+      items: g.items.filter((t) => !userRole || t.roles.includes(userRole)),
+    }))
+    .filter((g) => g.items.length > 0);
+
 
   // Fetch pending bookings count
   const { data: pendingCount } = useQuery({
