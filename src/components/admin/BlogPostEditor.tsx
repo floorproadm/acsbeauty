@@ -11,8 +11,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Loader2, Upload } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Upload, Eye } from "lucide-react";
 import { RichTextEditor } from "@/components/blog/RichTextEditor";
+import { BlogPostPreview } from "./BlogPostPreview";
 import slugify from "slugify";
 import { toast } from "sonner";
 
@@ -37,6 +38,7 @@ export function BlogPostEditor({ postId, onClose }: Props) {
   const [post, setPost] = useState<any>(empty);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const { data: existing, isLoading } = useQuery({
     queryKey: ["blog-post", postId],
@@ -126,10 +128,24 @@ export function BlogPostEditor({ postId, onClose }: Props) {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
         <Button variant="ghost" onClick={onClose} className="gap-2"><ArrowLeft className="w-4 h-4" /> Voltar</Button>
-        <Button onClick={save} disabled={saving} className="gap-2">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Salvar
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setPreviewOpen(true)} className="gap-2">
+            <Eye className="w-4 h-4" /> Visualizar
+          </Button>
+          <Button onClick={save} disabled={saving} className="gap-2">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Salvar
+          </Button>
+        </div>
       </div>
+
+      <BlogPostPreview
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        post={post}
+        categoryName={(categories || []).find((c: any) => c.id === post.category_id)?.name_pt}
+        authorName={(team || []).find((m: any) => m.id === post.author_id)?.name}
+        serviceName={(services || []).find((s: any) => s.id === post.related_service_id)?.name}
+      />
 
       <div className="grid lg:grid-cols-[1fr,320px] gap-4">
         <div className="space-y-4">
