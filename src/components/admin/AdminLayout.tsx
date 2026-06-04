@@ -110,9 +110,9 @@ const tabGroups: TabGroup[] = [
     label: "Marketing",
     items: [
       { id: "email", label: "Email", icon: Mail, roles: ["admin_owner"] },
-      { id: "notifications", label: "Notificações", icon: Bell, roles: ["admin_owner", "staff"] },
     ],
   },
+
   {
     label: "Sistema",
     items: [
