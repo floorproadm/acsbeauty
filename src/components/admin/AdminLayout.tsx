@@ -56,13 +56,12 @@ export type AdminTab =
   | "crm"
   | "services"
   | "offers"
-  | "campaigns"
+  | "email"
   | "tasks"
   | "gallery"
   | "gift-cards"
   | "team"
   | "notifications"
-  | "email-logs"
   | "settings"
   | "access";
 
@@ -73,23 +72,50 @@ interface AdminLayoutProps {
   userRole?: AppRole | null;
 }
 
-const allTabs: { id: AdminTab; label: string; icon: React.ElementType; roles: AppRole[] }[] = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin_owner"] },
-  { id: "crm", label: "CRM", icon: Users, roles: ["admin_owner", "staff"] },
-  { id: "bookings", label: "Agendamentos", icon: Calendar, roles: ["admin_owner", "staff"] },
-  { id: "gift-cards", label: "Gift Cards", icon: Gift, roles: ["admin_owner"] },
-  { id: "payments", label: "Pagamentos", icon: DollarSign, roles: ["admin_owner"] },
-  { id: "services", label: "Serviços", icon: Sparkles, roles: ["admin_owner"] },
-  { id: "gallery", label: "Galeria", icon: ImageIcon, roles: ["admin_owner"] },
-  { id: "tasks", label: "Tarefas", icon: ClipboardList, roles: ["admin_owner", "staff"] },
-  
-  { id: "team", label: "Equipe", icon: UsersRound, roles: ["admin_owner"] },
-  { id: "notifications", label: "Notificações", icon: Bell, roles: ["admin_owner", "staff"] },
-  { id: "campaigns", label: "Campanhas", icon: Megaphone, roles: ["admin_owner"] },
-  { id: "email-logs", label: "Logs de Email", icon: Mail, roles: ["admin_owner"] },
-  { id: "settings", label: "Configurações", icon: Settings, roles: ["admin_owner"] },
-  { id: "access", label: "Acessos", icon: ShieldCheck, roles: ["admin_owner"] },
+type TabItem = { id: AdminTab; label: string; icon: React.ElementType; roles: AppRole[] };
+type TabGroup = { label: string; items: TabItem[] };
+
+const tabGroups: TabGroup[] = [
+  {
+    label: "Operação",
+    items: [
+      { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin_owner"] },
+      { id: "crm", label: "CRM", icon: Users, roles: ["admin_owner", "staff"] },
+      { id: "bookings", label: "Agendamentos", icon: Calendar, roles: ["admin_owner", "staff"] },
+      { id: "tasks", label: "Tarefas", icon: ClipboardList, roles: ["admin_owner", "staff"] },
+    ],
+  },
+  {
+    label: "Vendas",
+    items: [
+      { id: "gift-cards", label: "Gift Cards", icon: Gift, roles: ["admin_owner"] },
+      { id: "payments", label: "Pagamentos", icon: DollarSign, roles: ["admin_owner"] },
+    ],
+  },
+  {
+    label: "Conteúdo",
+    items: [
+      { id: "services", label: "Serviços", icon: Sparkles, roles: ["admin_owner"] },
+      { id: "gallery", label: "Galeria", icon: ImageIcon, roles: ["admin_owner"] },
+      { id: "team", label: "Equipe", icon: UsersRound, roles: ["admin_owner"] },
+    ],
+  },
+  {
+    label: "Comunicação",
+    items: [
+      { id: "notifications", label: "Notificações", icon: Bell, roles: ["admin_owner", "staff"] },
+      { id: "email", label: "Email", icon: Mail, roles: ["admin_owner"] },
+    ],
+  },
+  {
+    label: "Sistema",
+    items: [
+      { id: "settings", label: "Configurações", icon: Settings, roles: ["admin_owner"] },
+      { id: "access", label: "Acessos", icon: ShieldCheck, roles: ["admin_owner"] },
+    ],
+  },
 ];
+
 
 function AdminSidebar({
   activeTab,
