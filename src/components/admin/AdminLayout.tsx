@@ -87,25 +87,30 @@ const tabGroups: TabGroup[] = [
     ],
   },
   {
-    label: "Vendas",
+    label: "Catálogo",
     items: [
+      { id: "services", label: "Serviços", icon: Sparkles, roles: ["admin_owner"] },
       { id: "gift-cards", label: "Gift Cards", icon: Gift, roles: ["admin_owner"] },
+    ],
+  },
+  {
+    label: "Financeiro",
+    items: [
       { id: "payments", label: "Pagamentos", icon: DollarSign, roles: ["admin_owner"] },
     ],
   },
   {
-    label: "Conteúdo",
+    label: "Estúdio",
     items: [
-      { id: "services", label: "Serviços", icon: Sparkles, roles: ["admin_owner"] },
-      { id: "gallery", label: "Galeria", icon: ImageIcon, roles: ["admin_owner"] },
       { id: "team", label: "Equipe", icon: UsersRound, roles: ["admin_owner"] },
+      { id: "gallery", label: "Galeria", icon: ImageIcon, roles: ["admin_owner"] },
     ],
   },
   {
-    label: "Comunicação",
+    label: "Marketing",
     items: [
-      { id: "notifications", label: "Notificações", icon: Bell, roles: ["admin_owner", "staff"] },
       { id: "email", label: "Email", icon: Mail, roles: ["admin_owner"] },
+      { id: "notifications", label: "Notificações", icon: Bell, roles: ["admin_owner", "staff"] },
     ],
   },
   {
@@ -115,6 +120,7 @@ const tabGroups: TabGroup[] = [
       { id: "access", label: "Acessos", icon: ShieldCheck, roles: ["admin_owner"] },
     ],
   },
+
 ];
 
 
