@@ -88,7 +88,7 @@ export default function Admin() {
   };
 
   return (
-    <AdminLayout activeTab={activeTab} onTabChange={setActiveTab} userRole={role}>
+    <AdminLayout activeTab={activeTab} onTabChange={handleTabChange} userRole={role}>
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
