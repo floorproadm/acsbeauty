@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 import { Megaphone, Plus, ExternalLink, Copy, TrendingUp, Mail, Send, Users, Cake, Bell, RefreshCw, Calendar as CalIcon } from "lucide-react";
 import { EmailPreviewButton } from "./EmailPreviewButton";
+import { EmailTemplatesEditor } from "./EmailTemplatesEditor";
 
 type CampaignStatus = "draft" | "active" | "paused" | "completed";
 
