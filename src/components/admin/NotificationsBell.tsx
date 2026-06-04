@@ -200,6 +200,18 @@ export function NotificationsBell() {
             </ul>
           )}
         </ScrollArea>
+        <div className="border-t px-4 py-2">
+          <button
+            onClick={() => {
+              setOpen(false);
+              navigate("/admin?tab=notifications");
+            }}
+            className="w-full text-[11px] text-muted-foreground hover:text-foreground transition-colors text-center"
+          >
+            Gerenciar notificações
+          </button>
+        </div>
+
       </PopoverContent>
     </Popover>
   );
