@@ -522,10 +522,9 @@ export function SettingsTab() {
       </div>
       <StudioInfoSection />
       <BookingRulesSection />
-      <EmailConfigSection />
       <IntegrationsSection />
       <AccessSection />
-      <MasterDataSection />
+
     </div>
   );
 }
