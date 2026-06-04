@@ -1,125 +1,90 @@
-## Objetivo
+## Blog ACS Beauty — MVP
 
-Substituir o fluxo atual ("admin adiciona email em `allowed_emails` → usuário cria conta sozinho") por um **fluxo de convite formal** com token único, e-mail de convite, expiração e rastreio de status.
+Blog editorial integrado ao painel, com posts públicos otimizados para SEO (atração orgânica) e visíveis também dentro do Portal do cliente (engajamento). Editor rich-text no admin, categorias/tags, SEO por post e CTA para serviço relacionado.
 
-`allowed_emails` continua existindo (é a lista de autorização que o trigger `handle_new_user` consulta), mas agora é **populada automaticamente** quando um convite é aceito — não mais manualmente.
+### Banco de dados (Lovable Cloud — aditivo)
 
----
+Três tabelas novas em `public`:
 
-## 1. Banco de dados (migration)
+- **blog_posts**
+  - `id`, `slug` (unique), `title`, `excerpt`, `content` (rich-text HTML/JSON), `cover_image_url`
+  - `status` ('draft' | 'published'), `published_at`, `audience` ('public' | 'portal' | 'both' — default 'both')
+  - `language` ('pt' | 'en'), `category_id` (fk), `related_service_id` (fk → services, nullable)
+  - `seo_title`, `seo_description`, `og_image_url`, `reading_minutes`
+  - `author_id` (fk → team_members, nullable), `views_count`
+  - `created_at`, `updated_at`
 
-Nova tabela `admin_invites`:
+- **blog_categories**: `id`, `slug`, `name_pt`, `name_en`, `display_order`, `is_active`
 
-- `id`, `created_at`, `updated_at`
-- `email` (text, único quando status = pending)
-- `role` (app_role: admin_owner | staff | marketing)
-- `token` (text, único, gerado via `gen_random_uuid()::text`)
-- `status` (enum novo `invite_status`: `pending`, `accepted`, `expired`, `revoked`)
-- `invited_by` (uuid → auth.users)
-- `expires_at` (timestamptz, default `now() + 7 days`)
-- `accepted_at` (timestamptz, nullable)
-- `accepted_by` (uuid, nullable)
+- **blog_tags** + **blog_post_tags** (join): `id`, `slug`, `name`
 
 RLS:
-- `admin_owner` faz tudo
-- Sem SELECT público (token é validado server-side via edge function)
+- Public SELECT em `blog_posts` apenas quando `status='published'` e `audience IN ('public','both')`.
+- Portal SELECT (authenticated) quando `audience IN ('portal','both')`.
+- Admin/Marketing: full CRUD via `has_role`.
+- Categorias/tags: public SELECT quando `is_active=true`; CRUD admin/marketing.
+- GRANTs explícitos para `anon` (somente SELECT condicional via policy), `authenticated`, `service_role`.
 
-Função `expire_old_invites()` (chamada por edge function ou trigger leve antes de leitura) que marca como `expired` quem passou de `expires_at`.
+Storage: reaproveitar bucket `gallery` ou criar `blog-media` (público) para capas e imagens inline.
 
-Trigger `handle_new_user` mantido — `allowed_emails` continua sendo a fonte de verdade para o signup.
+### Admin (aba Marketing)
 
----
+Nova sub-aba **Blog** dentro de `MarketingHubTab` (lado a lado com Email):
 
-## 2. Edge Functions
+- **Lista de posts**: tabela com título, status (badge), audience, categoria, autor, data, views. Filtros: status, audience, categoria, busca. Ações: editar, duplicar, publicar/despublicar, excluir.
+- **Editor (drawer ou page `/admin/blog/:id`)**:
+  - Campos: título, slug (auto a partir do título, editável), excerpt, capa (upload)
+  - Editor rich-text (Tiptap) com toolbar: H2/H3, bold/italic, listas, link, imagem (upload inline), quote, code
+  - Sidebar do editor: status, audience, idioma, data publicação, categoria, tags (multi-select com criar), serviço relacionado (combobox), autor
+  - Aba SEO: seo_title, seo_description (contadores), og_image, preview Google snippet
+  - Pré-visualização (abrir `/blog/:slug?preview=1`)
+- **Categorias**: CRUD simples inline.
 
-### `invite-admin` (verify_jwt = true, admin_owner only)
-- Input: `{ email, role }`
-- Valida que caller é `admin_owner` (via JWT + `has_role`)
-- Cria registro em `admin_invites` (status `pending`, token novo, expira em 7d)
-- Envia email via gateway Gmail (mesmo padrão de `notify-internal`) com link:
-  `https://acsbeautystudio.com/admin/accept-invite?token=XXX`
-- Template bilíngue PT, branding ACS (cream/bronze)
+Permissões: `admin_owner` e `marketing` têm acesso.
 
-### `accept-admin-invite` (verify_jwt = false, público)
-- Input: `{ token }`
-- Valida token: existe, status = `pending`, `expires_at > now()`
-- Retorna `{ email, role, valid: true }` para a página exibir
-- Endpoint separado `POST /confirm` que, após o usuário criar conta/logar, é chamado com JWT e:
-  - Confirma que `auth.uid().email == invite.email`
-  - Insere em `allowed_emails` (idempotente)
-  - Insere em `user_roles` (caso conta já exista)
-  - Marca invite como `accepted`
+### Frontend público
 
-### `revoke-admin-invite` (verify_jwt = true, admin_owner only)
-- Marca status como `revoked`
+Novas rotas:
 
-### `resend-admin-invite` (verify_jwt = true, admin_owner only)
-- Re-envia email, opcionalmente regenera token e estende `expires_at`
+- `/blog` — listagem: hero editorial, filtro por categoria, grid de cards (capa, categoria, título, excerpt, data, tempo de leitura). Paginação ou load-more.
+- `/blog/:slug` — post: hero com capa, breadcrumb, título, meta (autor, data, leitura), corpo formatado, tags, CTA "Agendar [serviço]" quando `related_service_id` setado, bloco "Posts relacionados" (mesma categoria).
+- Link **Blog** no header público (entre About e Contact) e no footer.
 
----
+SEO por post (react-helmet-async):
+- `<title>` = `seo_title || title`
+- meta description, canonical `/blog/:slug`, og:title/description/image/url, og:type=article
+- JSON-LD `Article` (headline, image, datePublished, author, publisher)
+- Sitemap: estender `scripts/generate-sitemap.ts` para incluir `/blog` + um entry por post publicado público.
 
-## 3. Frontend
+i18n: respeitar `LanguageContext`; campos `name_pt`/`name_en` em categorias; posts têm coluna `language` (filtrar pela língua ativa, fallback PT).
 
-### Nova página `src/pages/AdminAcceptInvite.tsx` (rota `/admin/accept-invite`)
-1. Lê `?token=` da URL
-2. Chama `accept-admin-invite` para validar → mostra email + role + nome do convite
-3. Se token inválido/expirado → mensagem de erro com CTA para contatar admin
-4. Se válido:
-   - Form de senha (signup) ou "Já tenho conta → fazer login"
-   - Após auth bem-sucedida, chama `accept-admin-invite/confirm` com JWT
-   - Redireciona para `/admin`
+### Portal do cliente
 
-### Substituir `AllowedEmailsTab.tsx` por `AdminInvitesTab.tsx`
-- Form: enviar convite (email + role)
-- Tabela: email, role, status (badge colorido), enviado em, expira em, ações (reenviar, revogar)
-- Mantém compatibilidade: lista também `allowed_emails` legados como "✓ ativo" no final
+Nova entrada **Novidades** no menu do Portal:
+- Lista posts com `audience IN ('portal','both')`, ordem por `published_at` desc
+- Detalhe inline (drawer) ou rota `/portal/news/:slug`
+- Badge "Novo" para posts dos últimos 7 dias
+- Mesmo CTA de serviço relacionado, levando ao fluxo de booking do Portal
 
----
+### Fora de escopo (MVP)
 
-## 4. Fluxo do usuário
+- Comentários, likes, newsletter automática a partir de post, agendamento de publicação futura, múltiplos autores por post, versionamento, busca full-text. Podem entrar em v2.
 
-```
-Admin abre painel → Convidar Admin
-  → preenche email + role → "Enviar convite"
-  → email chega na caixa do convidado com link único
-Convidado clica no link
-  → /admin/accept-invite?token=XXX
-  → vê "Você foi convidado como Staff por Ane Caroline"
-  → cria senha → conta criada → invite marcado como accepted
-  → redirecionado para /admin com acesso total
-```
+### Detalhes técnicos
 
----
+- Editor: **Tiptap** (`@tiptap/react`, `@tiptap/starter-kit`, `@tiptap/extension-link`, `@tiptap/extension-image`). Salvar como HTML em `content`.
+- Slug: gerar com slugify no client, validar unicidade na save.
+- Upload de imagens: client → Supabase Storage bucket público → URL salva no HTML.
+- Reading time: estimar no save (`words / 200`).
+- Views: incrementar via RPC `increment_post_views(slug)` (security definer) ao montar a página pública.
+- Estilo: Playfair Display nos títulos, cream/bronze, alinhado ao restante editorial.
+- Migrations: aditivas (Safe Mode), GRANTs explícitos, sem alterar tabelas existentes.
 
-## Detalhes técnicos
+### Entregáveis
 
-- Token: `crypto.randomUUID()` (32+ chars, suficiente)
-- Email subject: `🎉 Você foi convidado para o ACS Beauty OS`
-- Email body: branding ACS (cream `#f5f0eb`, bronze `#8b7355`, Playfair Display title)
-- Reuso: cabeçalho/CTA do `notify-internal` (extrair `wrap()` para `_shared/email-wrapper.ts`)
-- Idempotência: se email já em `allowed_emails`, convite ainda pode ser enviado (re-promoção de role)
-- Cleanup: convites `expired`/`revoked` mantidos para auditoria
-
----
-
-## Arquivos
-
-**Criados:**
-- `supabase/functions/invite-admin/index.ts`
-- `supabase/functions/accept-admin-invite/index.ts`
-- `supabase/functions/revoke-admin-invite/index.ts`
-- `supabase/functions/resend-admin-invite/index.ts`
-- `src/pages/AdminAcceptInvite.tsx`
-- `src/components/admin/AdminInvitesTab.tsx`
-
-**Editados:**
-- `src/App.tsx` (nova rota)
-- `src/pages/Admin.tsx` (substituir AllowedEmailsTab por AdminInvitesTab)
-- `supabase/config.toml` (4 functions novas)
-
-**Mantido:**
-- `AllowedEmailsTab.tsx` fica como referência (pode ser removido depois) ou já removo na migração.
-
----
-
-Confirma que posso implementar? Alguma decisão pra ajustar (expiração ≠ 7 dias, manter aba antiga, etc)?
+1. Migration: 3 tabelas + RLS + GRANTs + RPC views.
+2. Bucket de mídia (se necessário).
+3. Admin: `BlogTab.tsx` + editor + categorias, integrado em `MarketingHubTab`.
+4. Público: páginas `/blog` e `/blog/:slug`, link no header/footer, sitemap atualizado.
+5. Portal: aba Novidades.
+6. i18n: chaves PT/EN em `LanguageContext`.

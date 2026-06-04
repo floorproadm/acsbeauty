@@ -25,6 +25,7 @@ import {
   Bell,
   Settings,
   Mail,
+  Newspaper,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
@@ -58,6 +59,7 @@ export type AdminTab =
   | "services"
   | "offers"
   | "email"
+  | "blog"
   | "tasks"
   | "gallery"
   | "gift-cards"
@@ -110,6 +112,7 @@ const tabGroups: TabGroup[] = [
     label: "Marketing",
     items: [
       { id: "email", label: "Email", icon: Mail, roles: ["admin_owner"] },
+      { id: "blog", label: "Blog", icon: Newspaper, roles: ["admin_owner", "marketing"] },
     ],
   },
 

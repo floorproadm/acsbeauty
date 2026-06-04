@@ -20,6 +20,7 @@ import { NotificationsTab } from "@/components/admin/NotificationsTab";
 import { SettingsTab } from "@/components/admin/SettingsTab";
 import { EmailLogsTab } from "@/components/admin/EmailLogsTab";
 import { EmailHubTab } from "@/components/admin/EmailHubTab";
+import { BlogTab } from "@/components/admin/BlogTab";
 import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Admin() {
@@ -68,6 +69,8 @@ export default function Admin() {
         return <OffersTab />;
       case "email":
         return <EmailHubTab />;
+      case "blog":
+        return <BlogTab />;
       case "tasks":
         return <TasksTab />;
       case "gallery":
