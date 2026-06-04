@@ -18,7 +18,7 @@ import { ConversationsTab } from "@/components/admin/ConversationsTab";
 import { NotificationsTab } from "@/components/admin/NotificationsTab";
 import { SettingsTab } from "@/components/admin/SettingsTab";
 import { EmailLogsTab } from "@/components/admin/EmailLogsTab";
-import { CampaignsTab } from "@/components/admin/CampaignsTab";
+import { EmailHubTab } from "@/components/admin/EmailHubTab";
 import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Admin() {
@@ -48,8 +48,8 @@ export default function Admin() {
         return <ServicesTab />;
       case "offers":
         return <OffersTab />;
-      case "campaigns":
-        return <CampaignsTab />;
+      case "email":
+        return <EmailHubTab />;
       case "tasks":
         return <TasksTab />;
       case "gallery":
@@ -62,8 +62,6 @@ export default function Admin() {
         return <NotificationsTab />;
       case "settings":
         return <SettingsTab />;
-      case "email-logs":
-        return <EmailLogsTab />;
       case "access":
         return <AdminInvitesTab />;
       default:
