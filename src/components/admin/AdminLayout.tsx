@@ -117,9 +117,9 @@ const tabGroups: TabGroup[] = [
     label: "Sistema",
     items: [
       { id: "settings", label: "Configurações", icon: Settings, roles: ["admin_owner"] },
-      { id: "access", label: "Acessos", icon: ShieldCheck, roles: ["admin_owner"] },
     ],
   },
+
 
 ];
 
