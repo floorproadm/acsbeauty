@@ -38,7 +38,7 @@ export default function Blog() {
         <div className="text-center mb-12">
           <p className="text-xs tracking-[0.3em] uppercase text-bronze mb-3">ACS Journal</p>
           <h1 className="font-editorial text-4xl md:text-6xl italic mb-4">Blog</h1>
-          <p className="text-muted-foreground max-w-xl mx-auto">Inspirações, técnicas e bastidores do nosso atelier.</p>
+          <p className="text-muted-foreground max-w-xl mx-auto">Dicas, tendências e bastidores da ACS Beauty.</p>
         </div>
 
         {!posts || posts.length === 0 ? (
