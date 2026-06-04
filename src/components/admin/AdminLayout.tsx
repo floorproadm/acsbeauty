@@ -218,50 +218,58 @@ function AdminSidebar({
       <Separator />
 
       <SidebarContent className="px-2 py-4">
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {tabs.map((tab) => {
-                const badge = getBadge(tab.id);
-                return (
-                  <SidebarMenuItem key={tab.id}>
-                    <SidebarMenuButton
-                      onClick={() => onTabChange(tab.id)}
-                      isActive={activeTab === tab.id}
-                      tooltip={tab.label}
-                      className={cn(
-                        "transition-all relative text-[15px] sm:text-sm",
-                        activeTab === tab.id &&
-                          "bg-rose-light text-rose-gold hover:bg-rose-light hover:text-rose-gold"
-                      )}
-                    >
-                      <div className="relative">
-                        <tab.icon className="w-4 h-4" />
-                        {badge?.pulse && (
-                          <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+        {groups.map((group) => (
+          <SidebarGroup key={group.label}>
+            {!isCollapsed && (
+              <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/70">
+                {group.label}
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((tab) => {
+                  const badge = getBadge(tab.id);
+                  return (
+                    <SidebarMenuItem key={tab.id}>
+                      <SidebarMenuButton
+                        onClick={() => onTabChange(tab.id)}
+                        isActive={activeTab === tab.id}
+                        tooltip={tab.label}
+                        className={cn(
+                          "transition-all relative text-[15px] sm:text-sm",
+                          activeTab === tab.id &&
+                            "bg-rose-light text-rose-gold hover:bg-rose-light hover:text-rose-gold"
                         )}
-                      </div>
-                      <span className="flex-1">{tab.label}</span>
-                      {badge && !isCollapsed && (
-                        <span
-                          className={cn(
-                            "ml-auto text-[10px] font-bold min-w-[20px] h-5 flex items-center justify-center rounded-full",
-                            badge.pulse
-                              ? "bg-red-500 text-white"
-                              : "bg-muted text-muted-foreground"
+                      >
+                        <div className="relative">
+                          <tab.icon className="w-4 h-4" />
+                          {badge?.pulse && (
+                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                           )}
-                        >
-                          {badge.count > 99 ? "99+" : badge.count}
-                        </span>
-                      )}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                        </div>
+                        <span className="flex-1">{tab.label}</span>
+                        {badge && !isCollapsed && (
+                          <span
+                            className={cn(
+                              "ml-auto text-[10px] font-bold min-w-[20px] h-5 flex items-center justify-center rounded-full",
+                              badge.pulse
+                                ? "bg-red-500 text-white"
+                                : "bg-muted text-muted-foreground"
+                            )}
+                          >
+                            {badge.count > 99 ? "99+" : badge.count}
+                          </span>
+                        )}
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
+
 
       <SidebarFooter className="p-4 mt-auto" style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" }}>
         <Separator className="mb-4" />
