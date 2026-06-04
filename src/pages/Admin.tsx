@@ -48,8 +48,8 @@ export default function Admin() {
         return <ServicesTab />;
       case "offers":
         return <OffersTab />;
-      case "campaigns":
-        return <CampaignsTab />;
+      case "email":
+        return <EmailHubTab />;
       case "tasks":
         return <TasksTab />;
       case "gallery":
