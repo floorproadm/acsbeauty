@@ -840,7 +840,6 @@ function ServiceSelectionTab({
                   </div>
 
                   <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border/50">
-                    <span className="text-primary font-semibold text-sm">${svc.price.toFixed(2)}</span>
                     <span className="flex items-center gap-1 text-muted-foreground text-xs">
                       <Clock className="w-3.5 h-3.5" />
                       {svc.duration_minutes} min
