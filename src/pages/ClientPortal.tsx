@@ -818,8 +818,6 @@ export default function ClientPortal() {
   const [tab, setTab] = useState<Tab>("home");
   const [profile, setProfile] = useState<ClientProfile | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [points, setPoints] = useState(0);
-  const [transactions, setTransactions] = useState<PointTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
