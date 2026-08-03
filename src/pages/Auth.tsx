@@ -430,6 +430,14 @@ export default function Auth() {
                   </div>
 
                   <div>
+                    <label className="text-sm font-medium text-foreground mb-1.5 block">{isPt ? "Email (opcional, para recuperar senha)" : "Email (optional, for password recovery)"}</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input type="email" placeholder="email@example.com" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} className={`${inputClass} pl-10 pr-4`} />
+                    </div>
+                  </div>
+
+                  <div>
                     <label className="text-sm font-medium text-foreground mb-1.5 block">{isPt ? "Data de nascimento (opcional)" : "Birth Date (Optional)"}</label>
                     <div className="relative">
                       <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
