@@ -111,6 +111,9 @@ export default function Auth() {
     if (!firstName || !regPhone || !regPassword || !regConfirm) {
       return toast({ title: isPt ? "Preencha todos os campos obrigatórios" : "Fill in all required fields", variant: "destructive" });
     }
+    if (regEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEmail)) {
+      return toast({ title: isPt ? "Email inválido" : "Invalid email", variant: "destructive" });
+    }
     if (regPassword !== regConfirm) {
       return toast({ title: isPt ? "Senhas não coincidem" : "Passwords don't match", variant: "destructive" });
     }
@@ -131,7 +134,7 @@ export default function Auth() {
         password: regPassword,
         phone: regPhone ? `+1${regPhone.replace(/\D/g, "")}` : undefined,
         options: {
-          data: { full_name: fullName, phone: regPhone, birth_date: birthDate || null },
+          data: { full_name: fullName, phone: regPhone, birth_date: birthDate || null, email: regEmail || null },
         },
       });
       if (error) throw error;
@@ -141,6 +144,7 @@ export default function Auth() {
         await supabase.from("clients").insert({
           name: fullName,
           phone: regPhone,
+          email: regEmail || null,
           birthday: birthDate || null,
         });
       }
