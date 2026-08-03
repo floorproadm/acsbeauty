@@ -1,0 +1,1 @@
+DELETE FROM public.password_reset_codes WHERE phone = '5555555555'; DELETE FROM public.clients WHERE phone = '5555555555';
