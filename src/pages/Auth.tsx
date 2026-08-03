@@ -31,6 +31,7 @@ export default function Auth() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [regPhone, setRegPhone] = useState("");
+  const [regEmail, setRegEmail] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [regConfirm, setRegConfirm] = useState("");
