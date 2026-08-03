@@ -182,34 +182,6 @@ function HomeTab({
         
       </motion.button>
 
-      {/* About Us */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, delay: 0.08 }}
-      >
-        <h2 className="font-serif text-base font-bold text-foreground mb-2">
-          {isPt ? "Sobre nós" : "About Us"}
-        </h2>
-        <button
-          onClick={() => navigate("/about")}
-          className="w-full text-left rounded-2xl border border-border bg-card p-4 hover:border-primary/30 transition"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-sm font-medium text-foreground">
-                {isPt ? "Conheça a ACS Beauty" : "Meet ACS Beauty"}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                {isPt
-                  ? "Nossa história, valores e o time que cuida de você."
-                  : "Our story, values, and the team that takes care of you."}
-              </p>
-            </div>
-            <ArrowUpRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-          </div>
-        </button>
-      </motion.div>
 
 
       {/* Upcoming appointments */}
