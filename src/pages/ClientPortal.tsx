@@ -729,12 +729,8 @@ function ServiceSelectionTab({
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border/50">
-                    <span className="flex items-center gap-1 text-muted-foreground text-xs">
-                      <Clock className="w-3.5 h-3.5" />
-                      {svc.duration_minutes} min
-                    </span>
-                    <div className="ml-auto w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <div className="flex items-center justify-end mt-3 pt-3 border-t border-border/50">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                       <ChevronRight className="w-4 h-4 text-primary" />
                     </div>
                   </div>
