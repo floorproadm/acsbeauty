@@ -162,6 +162,7 @@ serve(async (req) => {
       .insert({
         client_id: client.id,
         phone,
+        email: client.email,
         code,
         expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
       });
