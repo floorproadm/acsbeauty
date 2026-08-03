@@ -805,10 +805,10 @@ function ServiceSelectionTab({
 
 // ─── Bottom Nav ───────────────────────────────────────────────────────────────
 
-const navItems: { id: Tab; icon: typeof Home; labelPt: string; labelEn: string }[] = [
+const navItems: { id: Tab | "about"; icon: typeof Home; labelPt: string; labelEn: string; href?: string }[] = [
   { id: "home",    icon: Home,     labelPt: "Início",         labelEn: "Home" },
   { id: "book",    icon: Calendar, labelPt: "Agendamentos",   labelEn: "Book" },
-  { id: "points",  icon: Star,     labelPt: "ACS Points",     labelEn: "ACS Points" },
+  { id: "about",   icon: Users,    labelPt: "Sobre nós",      labelEn: "About Us", href: "/about" },
   { id: "profile", icon: User,     labelPt: "Perfil",         labelEn: "Profile" },
 ];
 
