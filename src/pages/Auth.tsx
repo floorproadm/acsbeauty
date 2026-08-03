@@ -351,7 +351,7 @@ export default function Auth() {
                       </div>
 
                       <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full h-[52px] mt-2 rounded-2xl bg-primary text-primary-foreground font-medium text-sm uppercase tracking-wider disabled:opacity-60">
-                        {loading ? (isPt ? "Enviando..." : "Sending...") : (isPt ? "Enviar código SMS" : "Send SMS code")}
+                        {loading ? (isPt ? "Enviando..." : "Sending...") : (isPt ? "Enviar código por email" : "Send code by email")}
                       </motion.button>
 
                       <p className="text-center text-xs text-muted-foreground">
