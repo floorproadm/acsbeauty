@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Eye, EyeOff, Phone, Lock, User, Calendar, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Phone, Lock, User, Calendar, ArrowLeft, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import acsLogo from "@/assets/acs-logo.png";
 
-type Mode = "login" | "register";
+type Mode = "login" | "register" | "forgot";
 
 // Clientes usam telefone como identificador
 // O email fake garante que nunca conflita com admins (que usam email real)
@@ -31,12 +31,20 @@ export default function Auth() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [regPhone, setRegPhone] = useState("");
+  const [regEmail, setRegEmail] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [regConfirm, setRegConfirm] = useState("");
   const [showRegPass, setShowRegPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  const [forgotPhone, setForgotPhone] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -103,6 +111,9 @@ export default function Auth() {
     if (!firstName || !regPhone || !regPassword || !regConfirm) {
       return toast({ title: isPt ? "Preencha todos os campos obrigatórios" : "Fill in all required fields", variant: "destructive" });
     }
+    if (regEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEmail)) {
+      return toast({ title: isPt ? "Email inválido" : "Invalid email", variant: "destructive" });
+    }
     if (regPassword !== regConfirm) {
       return toast({ title: isPt ? "Senhas não coincidem" : "Passwords don't match", variant: "destructive" });
     }
@@ -121,8 +132,9 @@ export default function Auth() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password: regPassword,
+        phone: regPhone ? `+1${regPhone.replace(/\D/g, "")}` : undefined,
         options: {
-          data: { full_name: fullName, phone: regPhone, birth_date: birthDate || null },
+          data: { full_name: fullName, phone: regPhone, birth_date: birthDate || null, email: regEmail || null },
         },
       });
       if (error) throw error;
@@ -132,6 +144,7 @@ export default function Auth() {
         await supabase.from("clients").insert({
           name: fullName,
           phone: regPhone,
+          email: regEmail || null,
           birthday: birthDate || null,
         });
       }
@@ -152,6 +165,73 @@ export default function Auth() {
     }
   }
 
+  async function handleForgot(e: React.FormEvent) {
+    e.preventDefault();
+    if (!forgotPhone || forgotPhone.length < 10) {
+      toast({ title: isPt ? "Informe um telefone válido" : "Enter a valid phone", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke("client-password-reset", {
+        body: {
+          action: "request",
+          phone: forgotPhone,
+          language: lang,
+        },
+      });
+      if (error) throw error;
+      setOtpSent(true);
+      toast({ title: isPt ? "Código enviado por email" : "Code sent by email", description: isPt ? "Verifique sua caixa de entrada." : "Check your inbox." });
+    } catch (err: any) {
+      toast({ title: isPt ? "Não foi possível enviar o código" : "Could not send code", description: err?.message ?? "", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleReset(e: React.FormEvent) {
+    e.preventDefault();
+    if (!otpCode || otpCode.length < 6) {
+      toast({ title: isPt ? "Informe o código de 6 dígitos" : "Enter the 6-digit code", variant: "destructive" });
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast({ title: isPt ? "Senha mínima: 6 caracteres" : "Minimum 6 characters", variant: "destructive" });
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      toast({ title: isPt ? "Senhas não coincidem" : "Passwords don't match", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("client-password-reset", {
+        body: {
+          action: "confirm",
+          phone: forgotPhone,
+          code: otpCode,
+          new_password: newPassword,
+          language: lang,
+        },
+      });
+      if (error) throw error;
+      if (!data?.message) throw new Error("Resposta inesperada");
+
+      toast({ title: isPt ? "Senha redefinida!" : "Password reset!", description: isPt ? "Entre com sua nova senha." : "Sign in with your new password." });
+      setMode("login");
+      setForgotPhone("");
+      setOtpCode("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setOtpSent(false);
+    } catch (err: any) {
+      toast({ title: isPt ? "Erro ao redefinir senha" : "Error resetting password", description: err?.message ?? "", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const inputClass = "w-full h-12 border border-border rounded-2xl bg-muted/20 text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/30 focus:border-rose-gold transition";
 
   return (
@@ -166,7 +246,7 @@ export default function Auth() {
           <div className="px-8 pt-8 pb-4">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
-                {mode === "register" ? (
+                {mode === "register" || mode === "forgot" ? (
                   <button onClick={() => setMode("login")} className="p-1.5 rounded-full hover:bg-muted transition-colors">
                     <ArrowLeft className="w-4 h-4 text-muted-foreground" />
                   </button>
@@ -191,12 +271,20 @@ export default function Auth() {
             </div>
 
             <AnimatePresence mode="wait">
-              <motion.div key={mode} initial={{ opacity: 0, x: mode === "register" ? 16 : -16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+              <motion.div key={mode} initial={{ opacity: 0, x: mode === "register" || mode === "forgot" ? 16 : -16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
                 <h1 className="font-serif text-2xl font-bold text-foreground">
-                  {mode === "login" ? (isPt ? "Bem-vinda de volta" : "Welcome back") : (isPt ? "Criar sua conta" : "Create your account")}
+                  {mode === "login"
+                    ? (isPt ? "Bem-vinda de volta" : "Welcome back")
+                    : mode === "register"
+                      ? (isPt ? "Criar sua conta" : "Create your account")
+                      : (isPt ? "Recuperar senha" : "Reset password")}
                 </h1>
                 <p className="text-muted-foreground text-sm mt-1">
-                  {mode === "login" ? (isPt ? "Entre para acessar sua conta" : "Sign in to access your account") : (isPt ? "Junte-se à ACS Beauty" : "Join ACS Beauty")}
+                  {mode === "login"
+                    ? (isPt ? "Entre para acessar sua conta" : "Sign in to access your account")
+                    : mode === "register"
+                      ? (isPt ? "Junte-se à ACS Beauty" : "Join ACS Beauty")
+                      : (isPt ? "Informe seu telefone para receber o código por SMS" : "Enter your phone to receive the SMS code")}
                 </p>
               </motion.div>
             </AnimatePresence>
@@ -204,7 +292,7 @@ export default function Auth() {
 
           <div className="px-8 pb-8">
             <AnimatePresence mode="wait">
-              {mode === "login" ? (
+              {mode === "login" && (
                 <motion.form key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} onSubmit={handleLogin} className="space-y-4 mt-6">
                   <div>
                     <label className="text-sm font-medium text-foreground mb-1.5 block">{isPt ? "Telefone" : "Phone"}</label>
@@ -227,7 +315,7 @@ export default function Auth() {
                       </button>
                     </div>
                     <div className="text-right mt-1.5">
-                      <button type="button" className="text-xs text-rose-gold hover:underline">{isPt ? "Esqueci a senha" : "Forgot password?"}</button>
+                      <button type="button" onClick={() => setMode("forgot")} className="text-xs text-rose-gold hover:underline">{isPt ? "Esqueci a senha" : "Forgot password?"}</button>
                     </div>
                   </div>
 
@@ -245,7 +333,73 @@ export default function Auth() {
                     <button type="button" onClick={() => setMode("register")} className="text-rose-gold font-medium hover:underline">{isPt ? "Criar conta" : "Create account"}</button>
                   </p>
                 </motion.form>
-              ) : (
+              )}
+
+              {mode === "forgot" && (
+                <motion.form key="forgot" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} onSubmit={otpSent ? handleReset : handleForgot} className="space-y-4 mt-6">
+                  {!otpSent ? (
+                    <>
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-1.5 block">{isPt ? "Telefone" : "Phone"}</label>
+                        <div className="flex gap-2">
+                          <div className="flex items-center gap-1.5 px-3 h-12 border border-border rounded-2xl bg-muted/30 text-sm shrink-0">🇺🇸 <span className="text-muted-foreground text-xs">+1</span></div>
+                          <div className="relative flex-1">
+                            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <input type="tel" placeholder="(201) 555-0123" value={forgotPhone} onChange={(e) => setForgotPhone(formatPhone(e.target.value))} className={`${inputClass} pl-10 pr-4`} required />
+                          </div>
+                        </div>
+                      </div>
+
+                      <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full h-[52px] mt-2 rounded-2xl bg-primary text-primary-foreground font-medium text-sm uppercase tracking-wider disabled:opacity-60">
+                        {loading ? (isPt ? "Enviando..." : "Sending...") : (isPt ? "Enviar código por email" : "Send code by email")}
+                      </motion.button>
+
+                      <p className="text-center text-xs text-muted-foreground">
+                        {isPt ? "Lembrou a senha? " : "Remember your password? "}
+                        <button type="button" onClick={() => setMode("login")} className="text-rose-gold font-medium hover:underline">{isPt ? "Entrar" : "Sign in"}</button>
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-1.5 block">{isPt ? "Código de verificação" : "Verification code"}</label>
+                        <div className="relative">
+                          <input type="text" inputMode="numeric" maxLength={6} placeholder="123456" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} className={`${inputClass} px-4 text-center tracking-[0.25em] text-base`} required />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-1.5 block">{isPt ? "Nova senha" : "New password"}</label>
+                        <div className="relative">
+                          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <input type={showNewPass ? "text" : "password"} placeholder="••••••••" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className={`${inputClass} pl-10 pr-12`} required />
+                          <button type="button" onClick={() => setShowNewPass(!showNewPass)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                            {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-1.5 block">{isPt ? "Confirmar nova senha" : "Confirm new password"}</label>
+                        <div className="relative">
+                          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <input type={showNewPass ? "text" : "password"} placeholder="••••••••" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} className={`${inputClass} pl-10 pr-12`} required />
+                        </div>
+                      </div>
+
+                      <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full h-[52px] mt-2 rounded-2xl bg-primary text-primary-foreground font-medium text-sm uppercase tracking-wider disabled:opacity-60">
+                        {loading ? (isPt ? "Redefinindo..." : "Resetting...") : (isPt ? "Redefinir senha" : "Reset password")}
+                      </motion.button>
+
+                      <p className="text-center text-xs text-muted-foreground">
+                        <button type="button" onClick={() => setOtpSent(false)} className="text-rose-gold hover:underline">{isPt ? "Reenviar código" : "Resend code"}</button>
+                      </p>
+                    </>
+                  )}
+                </motion.form>
+              )}
+
+              {mode === "register" && (
                 <motion.form key="register" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} onSubmit={handleRegister} className="space-y-4 mt-6">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
@@ -272,6 +426,14 @@ export default function Auth() {
                         <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <input type="tel" placeholder="(201) 555-0123" value={regPhone} onChange={(e) => setRegPhone(formatPhone(e.target.value))} className={`${inputClass} pl-10 pr-4`} required />
                       </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-1.5 block">{isPt ? "Email (opcional, para recuperar senha)" : "Email (optional, for password recovery)"}</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input type="email" placeholder="email@example.com" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} className={`${inputClass} pl-10 pr-4`} />
                     </div>
                   </div>
 

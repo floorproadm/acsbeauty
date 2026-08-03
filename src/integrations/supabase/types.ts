@@ -1352,6 +1352,47 @@ export type Database = {
         }
         Relationships: []
       }
+      password_reset_codes: {
+        Row: {
+          client_id: string | null
+          code: string
+          created_at: string
+          email: string | null
+          expires_at: string
+          id: string
+          phone: string
+          used: boolean
+        }
+        Insert: {
+          client_id?: string | null
+          code: string
+          created_at?: string
+          email?: string | null
+          expires_at?: string
+          id?: string
+          phone: string
+          used?: boolean
+        }
+        Update: {
+          client_id?: string | null
+          code?: string
+          created_at?: string
+          email?: string | null
+          expires_at?: string
+          id?: string
+          phone?: string
+          used?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "password_reset_codes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       point_transactions: {
         Row: {
           booking_id: string | null
