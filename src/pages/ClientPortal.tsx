@@ -894,25 +894,6 @@ export default function ClientPortal() {
         .order("start_time", { ascending: false })
         .limit(20);
       setBookings((bookingData as Booking[]) ?? []);
-
-      // ACS Points
-      const { data: pointsData } = await (supabase as any)
-        .from("client_points")
-        .select("total_points, redeemed_points")
-        .eq("client_id", clientData.id)
-        .maybeSingle();
-      if (pointsData) {
-        setPoints(pointsData.total_points - pointsData.redeemed_points);
-      }
-
-      // Transações de pontos
-      const { data: txData } = await (supabase as any)
-        .from("point_transactions")
-        .select("*")
-        .eq("client_id", clientData.id)
-        .order("created_at", { ascending: false })
-        .limit(20);
-      setTransactions((txData as PointTransaction[]) ?? []);
     }
 
     setLoading(false);
