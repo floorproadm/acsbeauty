@@ -4,14 +4,13 @@ import { useNavigate } from "react-router-dom";
 import {
   Home,
   Calendar,
-  Star,
+  Users,
   User,
   LogOut,
   ChevronRight,
   Clock,
   CheckCircle2,
   XCircle,
-  Sparkles,
   Edit2,
   Phone,
   CalendarDays,
@@ -49,15 +48,7 @@ interface Booking {
   services?: { name: string } | null;
 }
 
-interface PointTransaction {
-  id: string;
-  type: string;
-  points: number;
-  description: string | null;
-  created_at: string;
-}
-
-type Tab = "home" | "book" | "select-service" | "points" | "profile";
+type Tab = "home" | "book" | "select-service" | "profile";
 
 interface ServiceItem {
   id: string;
@@ -191,34 +182,6 @@ function HomeTab({
         
       </motion.button>
 
-      {/* About Us */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, delay: 0.08 }}
-      >
-        <h2 className="font-serif text-base font-bold text-foreground mb-2">
-          {isPt ? "Sobre nós" : "About Us"}
-        </h2>
-        <button
-          onClick={() => navigate("/about")}
-          className="w-full text-left rounded-2xl border border-border bg-card p-4 hover:border-primary/30 transition"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-sm font-medium text-foreground">
-                {isPt ? "Conheça a ACS Beauty" : "Meet ACS Beauty"}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                {isPt
-                  ? "Nossa história, valores e o time que cuida de você."
-                  : "Our story, values, and the team that takes care of you."}
-              </p>
-            </div>
-            <ArrowUpRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-          </div>
-        </button>
-      </motion.div>
 
 
       {/* Upcoming appointments */}
@@ -340,79 +303,6 @@ function BookingsTab({ bookings, isPt }: { bookings: Booking[]; isPt: boolean })
   );
 }
 
-function PointsTab({
-  points,
-  transactions,
-  isPt,
-}: {
-  points: number;
-  transactions: PointTransaction[];
-  isPt: boolean;
-}) {
-  return (
-    <div className="space-y-5 pb-24">
-      {/* Header card */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl bg-primary text-primary-foreground p-6 text-center"
-      >
-        <Star className="w-8 h-8 mx-auto mb-2 opacity-80" />
-        <p className="text-5xl font-light mb-1">{points}</p>
-        <p className="text-primary-foreground/70 text-sm">ACS Points</p>
-        <p className="text-primary-foreground/50 text-xs mt-3">
-          {isPt ? "1 ponto = $1 gasto · Resgate em serviços exclusivos" : "1 point = $1 spent · Redeem for exclusive services"}
-        </p>
-      </motion.div>
-
-      {/* Como funciona */}
-      <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
-        <p className="text-sm font-medium text-foreground">{isPt ? "Como funciona" : "How it works"}</p>
-        {[
-          { icon: "💅", text: isPt ? "Ganhe 1 ponto por $1 gasto em serviços" : "Earn 1 point per $1 spent on services" },
-          { icon: "⭐", text: isPt ? "Acumule e resgate por serviços exclusivos" : "Accumulate and redeem for exclusive services" },
-          { icon: "🎂", text: isPt ? "Pontos bônus no seu aniversário" : "Bonus points on your birthday" },
-        ].map(({ icon, text }) => (
-          <div key={text} className="flex items-center gap-3">
-            <span className="text-lg">{icon}</span>
-            <p className="text-muted-foreground text-sm">{text}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Histórico de transações */}
-      <div>
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-          {isPt ? "Histórico" : "History"}
-        </p>
-        {transactions.length === 0 ? (
-          <div className="text-center py-10">
-            <Sparkles className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-            <p className="text-muted-foreground text-sm">
-              {isPt ? "Seus pontos aparecerão aqui após o primeiro agendamento." : "Your points will appear here after your first booking."}
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {transactions.map((t) => (
-              <div key={t.id} className="bg-card border border-border rounded-xl p-3.5 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {t.description ?? (isPt ? "ACS Points" : "ACS Points")}
-                  </p>
-                  <p className="text-xs text-muted-foreground">{formatDate(t.created_at)}</p>
-                </div>
-                <span className={`text-sm font-semibold ${t.points > 0 ? "text-green-600" : "text-red-500"}`}>
-                  {t.points > 0 ? "+" : ""}{t.points}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 function LanguageSelector() {
   const { language, setLanguage } = useLanguage();
@@ -887,10 +777,10 @@ function ServiceSelectionTab({
 
 // ─── Bottom Nav ───────────────────────────────────────────────────────────────
 
-const navItems: { id: Tab; icon: typeof Home; labelPt: string; labelEn: string }[] = [
+const navItems: { id: Tab | "about"; icon: typeof Home; labelPt: string; labelEn: string; href?: string }[] = [
   { id: "home",    icon: Home,     labelPt: "Início",         labelEn: "Home" },
   { id: "book",    icon: Calendar, labelPt: "Agendamentos",   labelEn: "Book" },
-  { id: "points",  icon: Star,     labelPt: "ACS Points",     labelEn: "ACS Points" },
+  { id: "about",   icon: Users,    labelPt: "Sobre nós",      labelEn: "About Us", href: "/about" },
   { id: "profile", icon: User,     labelPt: "Perfil",         labelEn: "Profile" },
 ];
 
@@ -900,8 +790,6 @@ export default function ClientPortal() {
   const [tab, setTab] = useState<Tab>("home");
   const [profile, setProfile] = useState<ClientProfile | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [points, setPoints] = useState(0);
-  const [transactions, setTransactions] = useState<PointTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -978,25 +866,6 @@ export default function ClientPortal() {
         .order("start_time", { ascending: false })
         .limit(20);
       setBookings((bookingData as Booking[]) ?? []);
-
-      // ACS Points
-      const { data: pointsData } = await (supabase as any)
-        .from("client_points")
-        .select("total_points, redeemed_points")
-        .eq("client_id", clientData.id)
-        .maybeSingle();
-      if (pointsData) {
-        setPoints(pointsData.total_points - pointsData.redeemed_points);
-      }
-
-      // Transações de pontos
-      const { data: txData } = await (supabase as any)
-        .from("point_transactions")
-        .select("*")
-        .eq("client_id", clientData.id)
-        .order("created_at", { ascending: false })
-        .limit(20);
-      setTransactions((txData as PointTransaction[]) ?? []);
     }
 
     setLoading(false);
@@ -1049,7 +918,7 @@ export default function ClientPortal() {
               />
             )}
             {tab === "book" && <BookingsTab bookings={bookings} isPt={isPt} />}
-            {tab === "points" && <PointsTab points={points} transactions={transactions} isPt={isPt} />}
+            
             {tab === "profile" && (
               <ProfileTab profile={profile} isPt={isPt} onSignOut={handleSignOut} onProfileUpdate={(updated) => setProfile(prev => prev ? { ...prev, ...updated } : prev)} />
             )}
@@ -1061,12 +930,18 @@ export default function ClientPortal() {
       {tab !== "select-service" && (
         <nav className="shrink-0 border-t border-border bg-background px-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom, 8px), 8px)" }}>
           <div className="flex items-center justify-around py-2">
-            {navItems.map(({ id, icon: Icon, labelPt, labelEn }) => {
-              const active = tab === id || (id === "book" && tab === ("select-service" as Tab));
+            {navItems.map(({ id, icon: Icon, labelPt, labelEn, href }) => {
+              const active = !href && (tab === id || (id === "book" && tab === ("select-service" as Tab)));
               return (
                 <button
                   key={id}
-                  onClick={() => setTab(id === "book" ? "select-service" : id)}
+                  onClick={() => {
+                    if (href) {
+                      navigate(href);
+                    } else {
+                      setTab(id === "book" ? "select-service" : (id as Tab));
+                    }
+                  }}
                   className="flex flex-col items-center gap-1 px-3 py-2 relative"
                 >
                   {active && (
