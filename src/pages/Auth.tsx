@@ -159,6 +159,65 @@ export default function Auth() {
     }
   }
 
+  async function handleForgot(e: React.FormEvent) {
+    e.preventDefault();
+    if (!forgotPhone || forgotPhone.length < 10) {
+      toast({ title: isPt ? "Informe um telefone válido" : "Enter a valid phone", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({ phone: `+1${forgotPhone.replace(/\D/g, "")}` });
+      if (error) throw error;
+      setOtpSent(true);
+      toast({ title: isPt ? "Código enviado por SMS" : "Code sent via SMS", description: isPt ? "Verifique seu celular." : "Check your phone." });
+    } catch (err: any) {
+      toast({ title: isPt ? "Não foi possível enviar o código" : "Could not send code", description: err?.message ?? "", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleReset(e: React.FormEvent) {
+    e.preventDefault();
+    if (!otpCode || otpCode.length < 6) {
+      toast({ title: isPt ? "Informe o código de 6 dígitos" : "Enter the 6-digit code", variant: "destructive" });
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast({ title: isPt ? "Senha mínima: 6 caracteres" : "Minimum 6 characters", variant: "destructive" });
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      toast({ title: isPt ? "Senhas não coincidem" : "Passwords don't match", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        phone: `+1${forgotPhone.replace(/\D/g, "")}`,
+        token: otpCode,
+        type: "sms",
+      });
+      if (verifyError) throw verifyError;
+
+      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+      if (updateError) throw updateError;
+
+      toast({ title: isPt ? "Senha redefinida!" : "Password reset!", description: isPt ? "Entre com sua nova senha." : "Sign in with your new password." });
+      setMode("login");
+      setForgotPhone("");
+      setOtpCode("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setOtpSent(false);
+    } catch (err: any) {
+      toast({ title: isPt ? "Erro ao redefinir senha" : "Error resetting password", description: err?.message ?? "", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const inputClass = "w-full h-12 border border-border rounded-2xl bg-muted/20 text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/30 focus:border-rose-gold transition";
 
   return (
