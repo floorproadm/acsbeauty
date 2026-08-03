@@ -1039,7 +1039,6 @@ export default function ClientPortal() {
               <HomeTab
                 profile={profile}
                 bookings={bookings}
-                points={points}
                 isPt={isPt}
                 onTabChange={setTab}
               />
