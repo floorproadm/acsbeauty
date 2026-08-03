@@ -172,9 +172,10 @@ serve(async (req) => {
     }
 
     // Send email
-    const apiKey = Deno.env.get('GOOGLE_MAIL_API_KEY');
-    if (!apiKey) {
-      console.error('GOOGLE_MAIL_API_KEY not set');
+    const apiKey = Deno.env.get('LOVABLE_API_KEY');
+    const googleKey = Deno.env.get('GOOGLE_MAIL_API_KEY');
+    if (!apiKey || !googleKey) {
+      console.error('Email keys not set');
       return errorResponse('Email service not configured', 500);
     }
 
@@ -182,7 +183,7 @@ serve(async (req) => {
     const fromEmail = `${settings.name} <${settings.email}>`;
 
     try {
-      await sendResetEmail(client.email, code, settings.name, fromEmail, apiKey);
+      await sendResetEmail(client.email, code, settings.name, fromEmail, apiKey, googleKey);
     } catch (err) {
       console.error('Failed to send reset email', err);
       return errorResponse('Erro ao enviar email', 500);
