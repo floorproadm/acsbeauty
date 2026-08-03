@@ -194,52 +194,11 @@ function HomeTab({
         
       </motion.button>
 
-      {/* Quick access cards */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, delay: 0.08 }}
-        className="grid grid-cols-2 gap-3"
-      >
-        <button
-          onClick={() => navigate("/packages")}
-          className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border bg-card hover:border-primary/30 transition"
-        >
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Gift className="w-5 h-5 text-primary" />
-          </div>
-          <div className="text-center">
-            <p className="text-sm font-semibold text-foreground">
-              {isPt ? "Pacotes" : "Packages"}
-            </p>
-            <p className="text-[11px] text-muted-foreground">
-              {isPt ? "Pacotes & benefícios" : "Packages & benefits"}
-            </p>
-          </div>
-        </button>
-        <button
-          onClick={() => onTabChange("points")}
-          className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border bg-card hover:border-primary/30 transition"
-        >
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Star className="w-5 h-5 text-primary" />
-          </div>
-          <div className="text-center">
-            <p className="text-sm font-semibold text-foreground">ACS Points</p>
-            <p className="text-[11px] text-muted-foreground">
-              {points > 0
-                ? `${points} ${isPt ? "pontos" : "points"}`
-                : isPt ? "Acumule pontos" : "Earn points"}
-            </p>
-          </div>
-        </button>
-      </motion.div>
-
       {/* About Us */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, delay: 0.16 }}
+        transition={{ duration: 0.35, delay: 0.08 }}
       >
         <h2 className="font-serif text-base font-bold text-foreground mb-2">
           {isPt ? "Sobre nós" : "About Us"}
