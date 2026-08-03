@@ -27,7 +27,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import acsLogo from "@/assets/acs-logo.png";
 import founderImg from "@/assets/founder.jpg";
-import teamHero from "@/assets/team-hero.jpg";
+
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -244,14 +244,26 @@ function HomeTab({
         <h2 className="font-serif text-base font-bold text-foreground mb-2">
           {isPt ? "Sobre nós" : "About Us"}
         </h2>
-        <div className="rounded-2xl overflow-hidden cursor-pointer" onClick={() => navigate("/about")}>
-          <img
-            src={teamHero}
-            alt="ACS Beauty Team"
-            className="w-full h-44 object-cover" style={{ objectPosition: "center 30%" }}
-          />
-        </div>
+        <button
+          onClick={() => navigate("/about")}
+          className="w-full text-left rounded-2xl border border-border bg-card p-4 hover:border-primary/30 transition"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                {isPt ? "Conheça a ACS Beauty" : "Meet ACS Beauty"}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                {isPt
+                  ? "Nossa história, valores e o time que cuida de você."
+                  : "Our story, values, and the team that takes care of you."}
+              </p>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+          </div>
+        </button>
       </motion.div>
+
 
       {/* Upcoming appointments */}
       <motion.div
