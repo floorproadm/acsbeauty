@@ -17,7 +17,6 @@ import {
   CalendarDays,
   ArrowUpRight,
   Bell,
-  Gift,
   Scissors,
   Camera,
 } from "lucide-react";
