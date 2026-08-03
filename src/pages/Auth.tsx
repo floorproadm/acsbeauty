@@ -302,7 +302,7 @@ export default function Auth() {
                       </button>
                     </div>
                     <div className="text-right mt-1.5">
-                      <button type="button" className="text-xs text-rose-gold hover:underline">{isPt ? "Esqueci a senha" : "Forgot password?"}</button>
+                      <button type="button" onClick={() => setMode("forgot")} className="text-xs text-rose-gold hover:underline">{isPt ? "Esqueci a senha" : "Forgot password?"}</button>
                     </div>
                   </div>
 
