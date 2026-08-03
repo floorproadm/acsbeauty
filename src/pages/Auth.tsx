@@ -173,10 +173,16 @@ export default function Auth() {
     }
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({ phone: `+1${forgotPhone.replace(/\D/g, "")}` });
+      const { error } = await supabase.functions.invoke("client-password-reset", {
+        body: {
+          action: "request",
+          phone: forgotPhone,
+          language: lang,
+        },
+      });
       if (error) throw error;
       setOtpSent(true);
-      toast({ title: isPt ? "Código enviado por SMS" : "Code sent via SMS", description: isPt ? "Verifique seu celular." : "Check your phone." });
+      toast({ title: isPt ? "Código enviado por email" : "Code sent by email", description: isPt ? "Verifique sua caixa de entrada." : "Check your inbox." });
     } catch (err: any) {
       toast({ title: isPt ? "Não foi possível enviar o código" : "Could not send code", description: err?.message ?? "", variant: "destructive" });
     } finally {
@@ -200,15 +206,17 @@ export default function Auth() {
     }
     setLoading(true);
     try {
-      const { error: verifyError } = await supabase.auth.verifyOtp({
-        phone: `+1${forgotPhone.replace(/\D/g, "")}`,
-        token: otpCode,
-        type: "sms",
+      const { data, error } = await supabase.functions.invoke("client-password-reset", {
+        body: {
+          action: "confirm",
+          phone: forgotPhone,
+          code: otpCode,
+          new_password: newPassword,
+          language: lang,
+        },
       });
-      if (verifyError) throw verifyError;
-
-      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
-      if (updateError) throw updateError;
+      if (error) throw error;
+      if (!data?.message) throw new Error("Resposta inesperada");
 
       toast({ title: isPt ? "Senha redefinida!" : "Password reset!", description: isPt ? "Entre com sua nova senha." : "Sign in with your new password." });
       setMode("login");
