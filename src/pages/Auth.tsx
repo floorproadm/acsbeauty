@@ -258,12 +258,20 @@ export default function Auth() {
             </div>
 
             <AnimatePresence mode="wait">
-              <motion.div key={mode} initial={{ opacity: 0, x: mode === "register" ? 16 : -16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+              <motion.div key={mode} initial={{ opacity: 0, x: mode === "register" || mode === "forgot" ? 16 : -16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
                 <h1 className="font-serif text-2xl font-bold text-foreground">
-                  {mode === "login" ? (isPt ? "Bem-vinda de volta" : "Welcome back") : (isPt ? "Criar sua conta" : "Create your account")}
+                  {mode === "login"
+                    ? (isPt ? "Bem-vinda de volta" : "Welcome back")
+                    : mode === "register"
+                      ? (isPt ? "Criar sua conta" : "Create your account")
+                      : (isPt ? "Recuperar senha" : "Reset password")}
                 </h1>
                 <p className="text-muted-foreground text-sm mt-1">
-                  {mode === "login" ? (isPt ? "Entre para acessar sua conta" : "Sign in to access your account") : (isPt ? "Junte-se à ACS Beauty" : "Join ACS Beauty")}
+                  {mode === "login"
+                    ? (isPt ? "Entre para acessar sua conta" : "Sign in to access your account")
+                    : mode === "register"
+                      ? (isPt ? "Junte-se à ACS Beauty" : "Join ACS Beauty")
+                      : (isPt ? "Informe seu telefone para receber o código por SMS" : "Enter your phone to receive the SMS code")}
                 </p>
               </motion.div>
             </AnimatePresence>
