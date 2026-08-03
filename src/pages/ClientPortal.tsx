@@ -48,15 +48,7 @@ interface Booking {
   services?: { name: string } | null;
 }
 
-interface PointTransaction {
-  id: string;
-  type: string;
-  points: number;
-  description: string | null;
-  created_at: string;
-}
-
-type Tab = "home" | "book" | "select-service" | "points" | "profile";
+type Tab = "home" | "book" | "select-service" | "profile";
 
 interface ServiceItem {
   id: string;
