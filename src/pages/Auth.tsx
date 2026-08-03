@@ -362,7 +362,7 @@ export default function Auth() {
                   ) : (
                     <>
                       <div>
-                        <label className="text-sm font-medium text-foreground mb-1.5 block">{isPt ? "Código SMS" : "SMS code"}</label>
+                        <label className="text-sm font-medium text-foreground mb-1.5 block">{isPt ? "Código de verificação" : "Verification code"}</label>
                         <div className="relative">
                           <input type="text" inputMode="numeric" maxLength={6} placeholder="123456" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} className={`${inputClass} px-4 text-center tracking-[0.25em] text-base`} required />
                         </div>
