@@ -25,7 +25,21 @@ function formatCode(code: string): string {
   return code.replace(/\D/g, '').slice(0, 6);
 }
 
-async function sendResetEmail(to: string, code: string, studioName: string, fromEmail: string, apiKey: string) {
+function rfc2822ToBase64Url(from: string, to: string, subject: string, html: string): string {
+  const msg = [
+    `From: ${from}`,
+    `To: ${to}`,
+    `Subject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(subject)))}?=`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/html; charset="UTF-8"',
+    '',
+    html,
+  ].join('\r\n');
+  const utf8 = unescape(encodeURIComponent(msg));
+  return btoa(utf8).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function sendResetEmail(to: string, code: string, studioName: string, fromEmail: string, lovableKey: string, googleKey: string) {
   const subject = `${studioName} — código de redefinição de senha`;
   const html = `
   <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f0eb;padding:0;margin:0;">
@@ -45,21 +59,16 @@ async function sendResetEmail(to: string, code: string, studioName: string, from
     </div>
   </div>`;
 
-  const body = {
-    to,
-    subject,
-    html,
-    from: fromEmail,
-    from_name: studioName,
-  };
+  const raw = rfc2822ToBase64Url(fromEmail, to, subject, html);
 
-  const res = await fetch(`${GATEWAY_URL}/send`, {
+  const res = await fetch(`${GATEWAY_URL}/users/me/messages/send`, {
     method: 'POST',
     headers: {
+      'Authorization': `Bearer ${lovableKey}`,
+      'X-Connection-Api-Key': googleKey,
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ raw }),
   });
 
   if (!res.ok) {
