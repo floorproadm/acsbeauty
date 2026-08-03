@@ -279,7 +279,7 @@ export default function Auth() {
 
           <div className="px-8 pb-8">
             <AnimatePresence mode="wait">
-              {mode === "login" ? (
+              {mode === "login" && (
                 <motion.form key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} onSubmit={handleLogin} className="space-y-4 mt-6">
                   <div>
                     <label className="text-sm font-medium text-foreground mb-1.5 block">{isPt ? "Telefone" : "Phone"}</label>
@@ -320,7 +320,73 @@ export default function Auth() {
                     <button type="button" onClick={() => setMode("register")} className="text-rose-gold font-medium hover:underline">{isPt ? "Criar conta" : "Create account"}</button>
                   </p>
                 </motion.form>
-              ) : (
+              )}
+
+              {mode === "forgot" && (
+                <motion.form key="forgot" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} onSubmit={otpSent ? handleReset : handleForgot} className="space-y-4 mt-6">
+                  {!otpSent ? (
+                    <>
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-1.5 block">{isPt ? "Telefone" : "Phone"}</label>
+                        <div className="flex gap-2">
+                          <div className="flex items-center gap-1.5 px-3 h-12 border border-border rounded-2xl bg-muted/30 text-sm shrink-0">🇺🇸 <span className="text-muted-foreground text-xs">+1</span></div>
+                          <div className="relative flex-1">
+                            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <input type="tel" placeholder="(201) 555-0123" value={forgotPhone} onChange={(e) => setForgotPhone(formatPhone(e.target.value))} className={`${inputClass} pl-10 pr-4`} required />
+                          </div>
+                        </div>
+                      </div>
+
+                      <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full h-[52px] mt-2 rounded-2xl bg-primary text-primary-foreground font-medium text-sm uppercase tracking-wider disabled:opacity-60">
+                        {loading ? (isPt ? "Enviando..." : "Sending...") : (isPt ? "Enviar código SMS" : "Send SMS code")}
+                      </motion.button>
+
+                      <p className="text-center text-xs text-muted-foreground">
+                        {isPt ? "Lembrou a senha? " : "Remember your password? "}
+                        <button type="button" onClick={() => setMode("login")} className="text-rose-gold font-medium hover:underline">{isPt ? "Entrar" : "Sign in"}</button>
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-1.5 block">{isPt ? "Código SMS" : "SMS code"}</label>
+                        <div className="relative">
+                          <input type="text" inputMode="numeric" maxLength={6} placeholder="123456" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} className={`${inputClass} px-4 text-center tracking-[0.25em] text-base`} required />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-1.5 block">{isPt ? "Nova senha" : "New password"}</label>
+                        <div className="relative">
+                          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <input type={showNewPass ? "text" : "password"} placeholder="••••••••" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className={`${inputClass} pl-10 pr-12`} required />
+                          <button type="button" onClick={() => setShowNewPass(!showNewPass)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                            {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-1.5 block">{isPt ? "Confirmar nova senha" : "Confirm new password"}</label>
+                        <div className="relative">
+                          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <input type={showNewPass ? "text" : "password"} placeholder="••••••••" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} className={`${inputClass} pl-10 pr-12`} required />
+                        </div>
+                      </div>
+
+                      <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full h-[52px] mt-2 rounded-2xl bg-primary text-primary-foreground font-medium text-sm uppercase tracking-wider disabled:opacity-60">
+                        {loading ? (isPt ? "Redefinindo..." : "Resetting...") : (isPt ? "Redefinir senha" : "Reset password")}
+                      </motion.button>
+
+                      <p className="text-center text-xs text-muted-foreground">
+                        <button type="button" onClick={() => setOtpSent(false)} className="text-rose-gold hover:underline">{isPt ? "Reenviar código" : "Resend code"}</button>
+                      </p>
+                    </>
+                  )}
+                </motion.form>
+              )}
+
+              {mode === "register" && (
                 <motion.form key="register" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} onSubmit={handleRegister} className="space-y-4 mt-6">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
