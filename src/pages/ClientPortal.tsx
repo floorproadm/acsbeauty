@@ -958,12 +958,18 @@ export default function ClientPortal() {
       {tab !== "select-service" && (
         <nav className="shrink-0 border-t border-border bg-background px-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom, 8px), 8px)" }}>
           <div className="flex items-center justify-around py-2">
-            {navItems.map(({ id, icon: Icon, labelPt, labelEn }) => {
-              const active = tab === id || (id === "book" && tab === ("select-service" as Tab));
+            {navItems.map(({ id, icon: Icon, labelPt, labelEn, href }) => {
+              const active = !href && (tab === id || (id === "book" && tab === ("select-service" as Tab)));
               return (
                 <button
                   key={id}
-                  onClick={() => setTab(id === "book" ? "select-service" : id)}
+                  onClick={() => {
+                    if (href) {
+                      navigate(href);
+                    } else {
+                      setTab(id === "book" ? "select-service" : (id as Tab));
+                    }
+                  }}
                   className="flex flex-col items-center gap-1 px-3 py-2 relative"
                 >
                   {active && (
