@@ -38,6 +38,13 @@ export default function Auth() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
+  const [forgotPhone, setForgotPhone] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
