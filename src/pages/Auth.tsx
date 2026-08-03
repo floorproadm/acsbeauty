@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Eye, EyeOff, Phone, Lock, User, Calendar, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Phone, Lock, User, Calendar, ArrowLeft, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import acsLogo from "@/assets/acs-logo.png";
 
-type Mode = "login" | "register";
+type Mode = "login" | "register" | "forgot";
 
 // Clientes usam telefone como identificador
 // O email fake garante que nunca conflita com admins (que usam email real)
