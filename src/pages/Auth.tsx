@@ -128,6 +128,7 @@ export default function Auth() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password: regPassword,
+        phone: regPhone ? `+1${regPhone.replace(/\D/g, "")}` : undefined,
         options: {
           data: { full_name: fullName, phone: regPhone, birth_date: birthDate || null },
         },
