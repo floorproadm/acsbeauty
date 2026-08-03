@@ -117,13 +117,11 @@ function StatusIcon({ status }: { status: string }) {
 function HomeTab({
   profile,
   bookings,
-  points,
   isPt,
   onTabChange,
 }: {
   profile: ClientProfile | null;
   bookings: Booking[];
-  points: number;
   isPt: boolean;
   onTabChange: (tab: Tab) => void;
 }) {
