@@ -11,7 +11,7 @@ const corsHeaders = {
 const GATEWAY_URL = 'https://connector-gateway.lovable.dev/google_mail/gmail/v1';
 let FROM = 'ACS Beauty Studio <acsbeautystudio@gmail.com>';
 let INTERNAL_TO = 'acsbeautystudio@gmail.com';
-let STUDIO_ADDRESS = '375 Chestnut St, 3rd Fl, Suite 3B, Newark, NJ';
+let STUDIO_ADDRESS = '41 Wilson Ave, Newark, NJ 07105';
 let STUDIO_PHONE = '(732) 915-3430';
 let SETTINGS_LOADED = false;
 

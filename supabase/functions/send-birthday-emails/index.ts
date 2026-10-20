@@ -21,7 +21,7 @@ interface Settings {
 async function loadSettings(supabase: any): Promise<Settings> {
   const out: Settings = {
     from: 'ACS Beauty Studio <acsbeautystudio@gmail.com>',
-    studio_address: '375 Chestnut St, 3rd Fl, Suite 3B, Newark, NJ',
+    studio_address: '41 Wilson Ave, Newark, NJ 07105',
     studio_phone: '(732) 915-3430',
     offer_text: 'Como presente nosso, você ganhou <strong>15% de desconto</strong> no seu próximo serviço durante o mês do seu aniversário. Use o código <strong>BDAY15</strong> ao agendar. 💛',
   };
