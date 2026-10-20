@@ -69,11 +69,11 @@ const whatsappMsg = (isPt: boolean) =>
 const whatsappUrl = (isPt: boolean) =>
   `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMsg(isPt))}`;
 
-const ADDRESS = "375 Chestnut St, 3rd Floor, Suite 3B, Newark, NJ";
+const ADDRESS = "41 Wilson Ave, Newark, NJ 07105";
 const MAPS_LINKS = {
-  google: `https://www.google.com/maps/dir/?api=1&destination=375+Chestnut+St+Newark+NJ`,
-  apple: `https://maps.apple.com/?daddr=375+Chestnut+St,+Newark,+NJ&dirflg=d`,
-  waze: `https://waze.com/ul?q=375+Chestnut+St,+Newark,+NJ&navigate=yes`,
+  google: `https://www.google.com/maps/dir/?api=1&destination=41+Wilson+Ave+Newark+NJ`,
+  apple: `https://maps.apple.com/?daddr=41+Wilson+Ave,+Newark,+NJ&dirflg=d`,
+  waze: `https://waze.com/ul?q=41+Wilson+Ave,+Newark,+NJ&navigate=yes`,
 };
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.07, delayChildren: 0.3 } } };
@@ -274,7 +274,7 @@ export default function Links() {
           className="flex items-center gap-3 w-full rounded-full px-5 py-3.5 border border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 hover:scale-[1.02]"
         >
           <MapPin size={16} strokeWidth={2} className="text-primary shrink-0" />
-          <span className="flex-1 text-sm font-medium text-left truncate">375 Chestnut St, 3rd Floor · Newark, NJ</span>
+          <span className="flex-1 text-sm font-medium text-left truncate">41 Wilson Ave · Newark, NJ</span>
           <ChevronRight size={16} className="text-muted-foreground shrink-0" />
         </button>
       </motion.div>

@@ -19,17 +19,17 @@ const GPS_OPTIONS = [
   {
     name: "Google Maps",
     icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Google_Maps_icon_%282020%29.svg/120px-Google_Maps_icon_%282020%29.svg.png",
-    url: "https://www.google.com/maps/dir/?api=1&destination=375+Chestnut+St+Newark+NJ",
+    url: "https://www.google.com/maps/dir/?api=1&destination=41+Wilson+Ave+Newark+NJ",
   },
   {
     name: "Apple Maps",
     icon: null,
-    url: "https://maps.apple.com/?daddr=375+Chestnut+St,+Newark,+NJ&dirflg=d",
+    url: "https://maps.apple.com/?daddr=41+Wilson+Ave,+Newark,+NJ&dirflg=d",
   },
   {
     name: "Waze",
     icon: null,
-    url: "https://waze.com/ul?q=375+Chestnut+St,+Newark,+NJ&navigate=yes",
+    url: "https://waze.com/ul?q=41+Wilson+Ave,+Newark,+NJ&navigate=yes",
   },
 ];
 
@@ -131,7 +131,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <h3 className="font-medium text-foreground mb-1">{t("contact.address_title")}</h3>
-                  <p className="text-muted-foreground text-sm whitespace-pre-line">375 Chestnut St, 3rd Floor{"\n"}Suite 3B, Newark, NJ</p>
+                  <p className="text-muted-foreground text-sm whitespace-pre-line">41 Wilson Ave{"\n"}Newark, NJ 07105</p>
                   <p className="text-rose-gold text-xs mt-2 flex items-center justify-center gap-1">
                     <Navigation className="w-3 h-3" />
                     {t("contact.find_us")}
