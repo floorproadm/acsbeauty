@@ -108,8 +108,7 @@ export default function LocationNewark() {
               {/* Contact & Address */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
+                animate={{ opacity: 1, x: 0 }}
                 className="space-y-8"
               >
                 <div>
