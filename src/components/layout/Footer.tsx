@@ -77,7 +77,7 @@ export function Footer() {
                 to="/location/Newark"
                 className="text-foreground/70 hover:text-primary text-xs md:text-sm transition-colors font-light"
               >
-                Location
+                {t("footer.location")}
               </Link>
               <Link
                 to="/team"
