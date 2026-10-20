@@ -60,7 +60,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 export default function Contact() {
   const { t, language } = useLanguage();
   const isPt = language === "pt";
-  const [gpsDialogOpen, setGpsDialogOpen] = useState(false);
+
 
   const { data: members = [] } = useQuery({
     queryKey: ["team-members-contact"],
@@ -119,26 +119,6 @@ export default function Contact() {
                 </motion.div>
               ))}
             </div>
-
-            {/* Address Card with GPS picker */}
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }}>
-              <button
-                onClick={() => setGpsDialogOpen(true)}
-                className="w-full flex flex-col items-center text-center gap-3 bg-champagne/20 rounded-xl p-6 hover:shadow-soft transition-shadow duration-300 cursor-pointer"
-              >
-                <div className="w-14 h-14 rounded-full bg-rose-gold/10 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-6 h-6 text-rose-gold" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-foreground mb-1">{t("contact.address_title")}</h3>
-                  <p className="text-muted-foreground text-sm whitespace-pre-line">41 Wilson Ave{"\n"}Newark, NJ 07105</p>
-                  <p className="text-rose-gold text-xs mt-2 flex items-center justify-center gap-1">
-                    <Navigation className="w-3 h-3" />
-                    {t("contact.find_us")}
-                  </p>
-                </div>
-              </button>
-            </motion.div>
 
             {/* Team Section */}
             {members.length > 0 && (
@@ -232,31 +212,6 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* GPS Navigation Picker Dialog */}
-      <Dialog open={gpsDialogOpen} onOpenChange={setGpsDialogOpen}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="text-center font-serif">{t("contact.navigate_title")}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 pt-2">
-            {GPS_OPTIONS.map((opt) => (
-              <a
-                key={opt.name}
-                href={opt.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setGpsDialogOpen(false)}
-                className="flex items-center gap-4 p-4 rounded-xl bg-champagne/20 hover:bg-champagne/40 transition-colors duration-200 border border-border/50"
-              >
-                <div className="w-10 h-10 rounded-full bg-rose-gold/10 flex items-center justify-center shrink-0">
-                  <Navigation className="w-5 h-5 text-rose-gold" />
-                </div>
-                <span className="font-medium text-foreground">{opt.name}</span>
-              </a>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <Footer />
     </div>
