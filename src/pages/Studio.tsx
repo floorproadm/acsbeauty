@@ -3,6 +3,7 @@ import { MapPin } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import studioParking from "@/assets/studio-parking.png.asset.json";
 
 export default function Studio() {
   const { t } = useLanguage();
@@ -33,19 +34,7 @@ export default function Studio() {
         {/* Content */}
         <section className="pb-16 md:pb-20">
           <div className="container mx-auto px-4 md:px-6">
-            <div className="grid md:grid-cols-2 gap-12 items-start max-w-5xl">
-              {/* Image placeholder */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="aspect-[4/5] rounded-2xl bg-muted/50 overflow-hidden"
-              >
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
-                  <span className="text-sm font-light tracking-wider uppercase">{t("studio.photo_placeholder")}</span>
-                </div>
-              </motion.div>
-
+            <div className="max-w-3xl">
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -62,6 +51,12 @@ export default function Studio() {
                   {t("studio.comfort_text_2")}
                 </p>
 
+                <img
+                  src={studioParking.url}
+                  alt={t("studio.title")}
+                  className="block w-full h-auto"
+                />
+
                 <div className="pt-4 border-t border-border">
                   <div className="flex items-start gap-3 text-muted-foreground">
                     <MapPin className="w-5 h-5 mt-0.5 shrink-0 text-primary" />
@@ -76,23 +71,6 @@ export default function Studio() {
           </div>
         </section>
 
-        {/* Map */}
-        <section className="pb-16 md:pb-20">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="max-w-5xl rounded-2xl overflow-hidden shadow-card">
-              <iframe
-                title="ACS Beauty Studio Location"
-                src="https://www.google.com/maps?q=41+Wilson+Ave,+Newark,+NJ+07105&output=embed"
-                width="100%"
-                height="400"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
-            </div>
-          </div>
-        </section>
       </main>
       <Footer />
     </div>
