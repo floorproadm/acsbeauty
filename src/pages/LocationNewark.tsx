@@ -1,12 +1,19 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Clock } from "lucide-react";
+import { MapPin, Clock, Navigation } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import studioParking from "@/assets/studio-parking.png.asset.json";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+const GPS_OPTIONS = [
+  { name: "Google Maps", url: "https://www.google.com/maps/dir/?api=1&destination=41+Wilson+Ave+Newark+NJ" },
+  { name: "Apple Maps", url: "https://maps.apple.com/?daddr=41+Wilson+Ave,+Newark,+NJ&dirflg=d" },
+  { name: "Waze", url: "https://waze.com/ul?q=41+Wilson+Ave,+Newark,+NJ&navigate=yes" },
+];
 
 function formatTime(t: string) {
   const [h, m] = t.split(":");
@@ -18,6 +25,7 @@ function formatTime(t: string) {
 
 export default function LocationNewark() {
   const { t } = useLanguage();
+  const [gpsOpen, setGpsOpen] = useState(false);
 
   const dayNames = Array.from({ length: 7 }, (_, i) => t(`location.day_${i}`));
 
@@ -118,13 +126,41 @@ export default function LocationNewark() {
                     alt={t("location.title")}
                     className="block w-full h-auto mb-6"
                   />
-                  <div className="flex items-start gap-3 text-muted-foreground">
+                  <button
+                    type="button"
+                    onClick={() => setGpsOpen(true)}
+                    className="flex items-start gap-3 text-muted-foreground text-left hover:opacity-80 transition-opacity"
+                  >
                     <MapPin className="w-5 h-5 mt-0.5 shrink-0 text-primary" />
                     <div>
-                      <p className="font-medium text-foreground">41 Wilson Ave</p>
+                      <p className="font-medium text-foreground underline-offset-4 hover:underline">41 Wilson Ave</p>
                       <p className="text-sm">Newark, NJ 07105</p>
                     </div>
-                  </div>
+                  </button>
+                  <Dialog open={gpsOpen} onOpenChange={setGpsOpen}>
+                    <DialogContent className="sm:max-w-sm">
+                      <DialogHeader>
+                        <DialogTitle className="text-center font-serif">{t("contact.navigate_title")}</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-3 pt-2">
+                        {GPS_OPTIONS.map((opt) => (
+                          <a
+                            key={opt.name}
+                            href={opt.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setGpsOpen(false)}
+                            className="flex items-center gap-4 p-4 rounded-xl bg-champagne/20 hover:bg-champagne/40 transition-colors duration-200 border border-border/50"
+                          >
+                            <div className="w-10 h-10 rounded-full bg-rose-gold/10 flex items-center justify-center shrink-0">
+                              <Navigation className="w-5 h-5 text-rose-gold" />
+                            </div>
+                            <span className="font-medium text-foreground">{opt.name}</span>
+                          </a>
+                        ))}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
 
                 {/* Hours */}
