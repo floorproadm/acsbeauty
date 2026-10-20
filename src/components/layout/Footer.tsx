@@ -11,9 +11,9 @@ import {
 } from "@/components/ui/dialog";
 
 const GPS_OPTIONS = [
-  { name: "Google Maps", url: "https://www.google.com/maps/dir/?api=1&destination=375+Chestnut+St+Newark+NJ" },
-  { name: "Apple Maps", url: "https://maps.apple.com/?daddr=375+Chestnut+St,+Newark,+NJ&dirflg=d" },
-  { name: "Waze", url: "https://waze.com/ul?q=375+Chestnut+St,+Newark,+NJ&navigate=yes" },
+  { name: "Google Maps", url: "https://www.google.com/maps/dir/?api=1&destination=41+Wilson+Ave+Newark+NJ" },
+  { name: "Apple Maps", url: "https://maps.apple.com/?daddr=41+Wilson+Ave,+Newark,+NJ&dirflg=d" },
+  { name: "Waze", url: "https://waze.com/ul?q=41+Wilson+Ave,+Newark,+NJ&navigate=yes" },
 ];
 
 export function Footer() {
@@ -154,7 +154,7 @@ export function Footer() {
                 className="flex items-start gap-2 md:gap-3 text-foreground/70 text-xs md:text-sm hover:text-primary transition-colors font-light text-left"
               >
                 <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 mt-0.5 shrink-0" />
-                <span>375 Chestnut St<br />3rd Floor, Suite 3B<br />Newark, NJ</span>
+                <span>41 Wilson Ave<br />Newark, NJ 07105</span>
               </button>
             </div>
           </div>

@@ -108,7 +108,7 @@ serve(async (req) => {
             `📋 ${serviceName}\n` +
             `📅 ${dateStr}\n` +
             `🕐 ${timeStr}\n\n` +
-            `📍 375 Chestnut St, 3rd Floor, Suite 3B, Newark, NJ\n\n` +
+            `📍 41 Wilson Ave, Newark, NJ 07105\n\n` +
             `Precisa reagendar? Responda esta mensagem ou ligue (732) 915-3430.\n\n` +
             `Te esperamos! 💛`
           );

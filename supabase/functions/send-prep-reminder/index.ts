@@ -21,7 +21,7 @@ interface Settings {
 async function loadSettings(supabase: any): Promise<Settings> {
   const out: Settings = {
     from: 'ACS Beauty Studio <acsbeautystudio@gmail.com>',
-    studio_address: '375 Chestnut St, 3rd Fl, Suite 3B, Newark, NJ',
+    studio_address: '41 Wilson Ave, Newark, NJ 07105',
     studio_phone: '(732) 915-3430',
     prep_default: 'Chegue 5 minutos antes do horário. Evite cremes ou produtos pesados na área a ser tratada. Se tiver alguma alergia ou condição de pele, avise nossa equipe ao chegar.',
     prep_by_category: {},

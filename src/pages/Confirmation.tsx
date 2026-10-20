@@ -42,7 +42,7 @@ interface BookingData {
 }
 
 // Studio location - official address
-const STUDIO_ADDRESS = "375 Chestnut St, 3rd Floor, Suite 3B, Newark, NJ";
+const STUDIO_ADDRESS = "41 Wilson Ave, Newark, NJ 07105";
 
 export default function Confirmation() {
   const { bookingId } = useParams<{ bookingId: string }>();

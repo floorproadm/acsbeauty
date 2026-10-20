@@ -19,7 +19,7 @@ async function loadStudio(supabase: any): Promise<{ studio: StudioInfo; birthday
   const studio: StudioInfo = {
     name: 'ACS Beauty Studio',
     email: 'acsbeautystudio@gmail.com',
-    address: '375 Chestnut St, 3rd Fl, Suite 3B, Newark, NJ',
+    address: '41 Wilson Ave, Newark, NJ 07105',
     phone: '(732) 915-3430',
   };
   let birthdayOffer = 'Como presente nosso, você ganhou <strong>15% de desconto</strong> no seu próximo serviço durante o mês do seu aniversário. Use o código <strong>BDAY15</strong> ao agendar. 💛';

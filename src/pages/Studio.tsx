@@ -66,8 +66,7 @@ export default function Studio() {
                   <div className="flex items-start gap-3 text-muted-foreground">
                     <MapPin className="w-5 h-5 mt-0.5 shrink-0 text-primary" />
                     <div>
-                      <p className="font-medium text-foreground">375 Chestnut St</p>
-                      <p className="text-sm">3rd Floor, Suite 3B</p>
+                      <p className="font-medium text-foreground">41 Wilson Ave</p>
                       <p className="text-sm">Newark, NJ 07105</p>
                     </div>
                   </div>
@@ -83,7 +82,7 @@ export default function Studio() {
             <div className="max-w-5xl rounded-2xl overflow-hidden shadow-card">
               <iframe
                 title="ACS Beauty Studio Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3023.5!2d-74.17!3d40.73!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDDCsDQzJzQ4LjAiTiA3NMKwMTAnMTIuMCJX!5e0!3m2!1sen!2sus!4v1"
+                src="https://www.google.com/maps?q=41+Wilson+Ave,+Newark,+NJ+07105&output=embed"
                 width="100%"
                 height="400"
                 style={{ border: 0 }}

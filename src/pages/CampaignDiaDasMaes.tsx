@@ -529,7 +529,7 @@ export default function CampaignDiaDasMaes() {
       {/* MINIMAL FOOTER */}
       <footer className="py-8 text-center border-t border-border">
         <p className="text-xs text-muted-foreground">
-          ACS Beauty Studio · 375 Chestnut St, Newark NJ · (732) 915-3430
+          ACS Beauty Studio · 41 Wilson Ave, Newark NJ · (732) 915-3430
         </p>
       </footer>
 
