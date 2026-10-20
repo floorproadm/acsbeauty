@@ -8,30 +8,6 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-
-const GPS_OPTIONS = [
-  {
-    name: "Google Maps",
-    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Google_Maps_icon_%282020%29.svg/120px-Google_Maps_icon_%282020%29.svg.png",
-    url: "https://www.google.com/maps/dir/?api=1&destination=41+Wilson+Ave+Newark+NJ",
-  },
-  {
-    name: "Apple Maps",
-    icon: null,
-    url: "https://maps.apple.com/?daddr=41+Wilson+Ave,+Newark,+NJ&dirflg=d",
-  },
-  {
-    name: "Waze",
-    icon: null,
-    url: "https://waze.com/ul?q=41+Wilson+Ave,+Newark,+NJ&navigate=yes",
-  },
-];
 
 const WHATSAPP_BASE = "https://wa.me/";
 
