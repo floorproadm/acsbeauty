@@ -1,11 +1,12 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { MapPin, Clock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import studioParking from "@/assets/studio-parking.png.asset.json";
 
 function formatTime(t: string) {
   const [h, m] = t.split(":");
@@ -94,7 +95,7 @@ export default function LocationNewark() {
                 {t("location.title")}
               </h1>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                {t("location.description")}
+                {t("studio.description")}
               </p>
             </motion.div>
           </div>
@@ -103,7 +104,7 @@ export default function LocationNewark() {
         {/* Info Grid */}
         <section className="pb-16 md:pb-20">
           <div className="container mx-auto px-4 md:px-6">
-            <div className="grid md:grid-cols-2 gap-12 max-w-5xl">
+            <div className="max-w-3xl">
               {/* Contact & Address */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -113,26 +114,17 @@ export default function LocationNewark() {
               >
                 <div>
                   <h2 className="font-serif text-2xl font-bold text-foreground mb-4">{t("location.address_title")}</h2>
+                  <img
+                    src={studioParking.url}
+                    alt={t("location.title")}
+                    className="block w-full h-auto mb-6"
+                  />
                   <div className="flex items-start gap-3 text-muted-foreground">
                     <MapPin className="w-5 h-5 mt-0.5 shrink-0 text-primary" />
                     <div>
                       <p className="font-medium text-foreground">41 Wilson Ave</p>
                       <p className="text-sm">Newark, NJ 07105</p>
                     </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h2 className="font-serif text-2xl font-bold text-foreground mb-4">{t("location.contact_title")}</h2>
-                  <div className="space-y-3">
-                    <a href="tel:+17329153430" className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
-                      <Phone className="w-4 h-4" />
-                      (732) 915-3430
-                    </a>
-                    <a href="mailto:acsbeautystudio@gmail.com" className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
-                      <Mail className="w-4 h-4" />
-                      acsbeautystudio@gmail.com
-                    </a>
                   </div>
                 </div>
 
@@ -159,24 +151,6 @@ export default function LocationNewark() {
                 </div>
               </motion.div>
 
-              {/* Map */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="rounded-2xl overflow-hidden shadow-card"
-              >
-                <iframe
-                  title="ACS Beauty Studio Newark Location"
-                  src="https://www.google.com/maps?q=41+Wilson+Ave,+Newark,+NJ+07105&output=embed"
-                  width="100%"
-                  height="500"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
-              </motion.div>
             </div>
           </div>
         </section>

@@ -74,10 +74,10 @@ export function Footer() {
                 {t("footer.book_appointment")}
               </Link>
               <Link
-                to="/studio"
+                to="/location/Newark"
                 className="text-foreground/70 hover:text-primary text-xs md:text-sm transition-colors font-light"
               >
-                Estúdio
+                {t("location.title")}
               </Link>
               <Link
                 to="/team"
