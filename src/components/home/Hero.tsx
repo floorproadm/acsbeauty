@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -46,17 +45,6 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-col sm:flex-row gap-3 md:gap-4"
             >
-              {/* Secondary CTA */}
-              <Link to="/contact" className="w-full sm:w-auto">
-                <Button
-                  variant="hero-outline"
-                  size="lg"
-                  className="w-full sm:w-72 min-h-[52px] px-8 text-base justify-center"
-                >
-                  <Sparkles className="w-5 h-5" />
-                  {t("global.contact_us")}
-                </Button>
-              </Link>
               {/* Primary CTA - Direct to calendar */}
               <WhatsAppLink context={{ source: "home" }} className="w-full sm:w-auto">
                 <Button
