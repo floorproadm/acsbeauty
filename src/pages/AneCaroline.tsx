@@ -256,11 +256,11 @@ export default function AneCaroline() {
       {/* ============ TEAM LINK ============ */}
       <section className="px-8 pb-2 max-w-lg mx-auto text-center" style={{ backgroundColor: c.bg }}>
         <Link
-          to="/team"
+          to="/about"
           className="inline-flex items-center gap-1.5 text-[12px] tracking-wide transition-opacity hover:opacity-70"
           style={{ color: c.accent }}
         >
-          {language === "pt" ? "Conheça o restante da equipe" : "Meet the rest of the team"}
+          {t("nav.about")}
           <ChevronRight className="w-3 h-3" />
         </Link>
       </section>
