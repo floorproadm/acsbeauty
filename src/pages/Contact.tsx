@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { Phone, Mail, MapPin, Clock, Calendar, Navigation, X } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Navigation, X } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -136,19 +134,6 @@ export default function Contact() {
 
 
 
-      {/* CTA Section */}
-      <section className="py-12 md:py-20 px-5 md:px-6 bg-primary text-primary-foreground">
-        <div className="container mx-auto max-w-4xl text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-            <h2 className="font-serif text-2xl md:text-4xl font-bold mb-3 md:mb-4">{t("contact.cta_title")}</h2>
-            <p className="text-primary-foreground/70 max-w-xl mx-auto mb-6 md:mb-8 text-sm md:text-base">{t("contact.cta_description")}</p>
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-              <Link to="/services" className="w-full sm:w-auto"><Button variant="hero" size="lg" className="gap-2 w-full"><Calendar className="w-4 h-4 md:w-5 md:h-5" />{t("global.book_now")}</Button></Link>
-              <Link to="/services" className="w-full sm:w-auto"><Button variant="outline" size="lg" className="border-rose-gold/50 text-rose-gold hover:bg-rose-gold/10 w-full">{t("global.view_all_offers")}</Button></Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
 
 
       <Footer />
