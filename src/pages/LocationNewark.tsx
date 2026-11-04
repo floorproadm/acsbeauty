@@ -163,26 +163,18 @@ export default function LocationNewark() {
                   </Dialog>
                 </div>
 
-                {/* Hours */}
-                <div>
-                  <h2 className="font-serif text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-primary" />
-                    {t("location.hours_title")}
-                  </h2>
-                  {hours && hours.length > 0 ? (
-                    <div className="space-y-2">
-                      {hours.map((h) => (
-                        <div key={h.id} className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">{dayNames[h.day_of_week]}</span>
-                          <span className={h.is_open ? "text-foreground font-medium" : "text-muted-foreground/50"}>
-                            {h.is_open ? `${formatTime(h.open_time)} – ${formatTime(h.close_time)}` : t("location.closed")}
-                          </span>
-                        </div>
-                      ))}
+                {/* Hours — simplified like /contact */}
+                <div className="bg-champagne/20 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-rose-gold/10 flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-rose-gold" />
                     </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">{t("location.hours_soon")}</p>
-                  )}
+                    <h2 className="font-serif text-lg font-bold text-foreground">{t("location.hours_title")}</h2>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-foreground text-base">{t("contact.hours_tue_sat")}</span>
+                    <span className="text-muted-foreground text-base">9:00 AM – 6:00 PM</span>
+                  </div>
                 </div>
               </motion.div>
 
