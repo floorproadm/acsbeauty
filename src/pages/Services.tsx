@@ -130,8 +130,6 @@ export default function Services() {
             </p>
           </motion.div>
 
-          <div className="flex justify-center mb-8"><ServiceGuide /></div>
-
           <div className="grid md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
             {(categories || []).map((cat, index) => {
               const meta = CATEGORY_META[cat.category_slug] || { icon: Sparkles, image: hairServiceImg };
@@ -176,6 +174,7 @@ export default function Services() {
               );
             })}
           </div>
+          <div className="flex justify-center mt-8"><ServiceGuide /></div>
         </div>
       </main>
       <Footer />
