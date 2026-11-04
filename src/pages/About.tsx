@@ -31,12 +31,6 @@ export default function About() {
             >
               {t("about.badge")}
             </motion.span>
-            <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-3 leading-tight">
-              {t("about.hero_title")}
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-              {t("about.hero_description")}
-            </p>
           </motion.div>
         </div>
       </section>
