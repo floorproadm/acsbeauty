@@ -14,8 +14,8 @@ const WHATSAPP_BASE = "https://wa.me/";
 function buildWhatsAppUrl(phone: string, name: string, isPt: boolean) {
   const digits = phone.replace(/\D/g, "");
   const msg = isPt
-    ? `Olá ${name}! Vi seu perfil na ACS Beauty e gostaria de agendar um horário.`
-    : `Hi ${name}! I saw your profile at ACS Beauty and would like to book an appointment.`;
+    ? `Oi, ${name}! Vim pela página de Contato do site da ACS Beauty. Tenho uma dúvida e gostaria de conversar. ✨`
+    : `Hi ${name}! I found you through the Contact page on the ACS Beauty website. I have a question and would love to chat. ✨`;
   return `${WHATSAPP_BASE}${digits}?text=${encodeURIComponent(msg)}`;
 }
 

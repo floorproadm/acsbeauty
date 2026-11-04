@@ -282,8 +282,8 @@ const translations: Record<Language, Record<string, string>> = {
     "contact.map_placeholder": "Map integration coming soon",
     "contact.cta_title": "Ready to Book Your Appointment?",
     "contact.cta_description": "Schedule your treatment today and take the first step towards radiant skin.",
-    "contact.team_title": "Talk to Our Team",
-    "contact.team_subtitle": "Tap the icons to interact.",
+    "contact.team_title": "Prefer to Chat? Message Ane Directly.",
+    "contact.team_subtitle": "Have a question? I'd love to hear from you.",
     "contact.navigate_title": "How would you like to navigate?",
     "contact.find_us": "Find Us",
 
@@ -705,8 +705,8 @@ const translations: Record<Language, Record<string, string>> = {
     "contact.map_placeholder": "Integração com mapa em breve",
     "contact.cta_title": "Pronta para Agendar?",
     "contact.cta_description": "Marque seu tratamento hoje e dê o primeiro passo para uma pele radiante.",
-    "contact.team_title": "Fale com Nossa Equipe",
-    "contact.team_subtitle": "Toque nos ícones para interagir.",
+    "contact.team_title": "Prefere Conversar? Fale Diretamente com a Ane.",
+    "contact.team_subtitle": "Tem alguma dúvida? Será um prazer conversar com você.",
     "contact.navigate_title": "Como deseja navegar?",
     "contact.find_us": "Encontre-nos",
 
