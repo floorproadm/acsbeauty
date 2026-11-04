@@ -19,10 +19,7 @@ function buildWhatsAppUrl(phone: string, name: string, isPt: boolean) {
   return `${WHATSAPP_BASE}${digits}?text=${encodeURIComponent(msg)}`;
 }
 
-function displayName(name: string) {
-  if (name.toLowerCase().startsWith("ane caroline")) return "Ane";
-  return name;
-}
+
 
 // WhatsApp SVG icon component
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -95,59 +92,26 @@ export default function Contact() {
               ))}
             </div>
 
-            {/* Team Section */}
-            {members.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.3 }}>
-                <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground text-center mb-6">{t("contact.team_title")}</h2>
-
-                <div className="space-y-3">
-                  {members.map((member, index) => {
-                    const name = displayName(member.name);
-                    const whatsappUrl = member.phone ? buildWhatsAppUrl(member.phone, name, isPt) : null;
-
-                    return (
-                      <motion.div
-                        key={member.id}
-                        initial={{ opacity: 0, y: 12 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.4, delay: index * 0.08 }}
-                        className="flex items-center gap-3"
-                      >
-                        {/* Name card — links to profile */}
-                        {member.page_url ? (
-                          <Link
-                            to={member.page_url}
-                            className="flex-1 min-w-0 p-4 rounded-2xl bg-champagne/20 border border-border/50 hover:shadow-soft transition-all duration-200 active:scale-[0.98]"
-                          >
-                            <h3 className="text-[15px] font-semibold text-foreground truncate">{name}</h3>
-                            <p className="text-[13px] text-muted-foreground truncate">{member.role}</p>
-                          </Link>
-                        ) : (
-                          <div className="flex-1 min-w-0 p-4 rounded-2xl bg-champagne/20 border border-border/50">
-                            <h3 className="text-[15px] font-semibold text-foreground truncate">{name}</h3>
-                            <p className="text-[13px] text-muted-foreground truncate">{member.role}</p>
-                          </div>
-                        )}
-
-                        {/* WhatsApp icon — outside the card */}
-                        {whatsappUrl && (
-                          <a
-                            href={whatsappUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="shrink-0 w-12 h-12 rounded-full bg-[#25D366]/10 flex items-center justify-center hover:bg-[#25D366]/20 active:scale-95 transition-all duration-200"
-                            aria-label={`WhatsApp ${name}`}
-                          >
-                            <WhatsAppIcon className="w-5 h-5 text-[#25D366]" />
-                          </a>
-                        )}
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
+            {/* Team Section — single WhatsApp CTA */}
+            {members.length > 0 && (() => {
+              const phone = members.find((m) => m.phone)?.phone;
+              if (!phone) return null;
+              const whatsappUrl = buildWhatsAppUrl(phone, "Ane", isPt);
+              return (
+                <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.3 }}>
+                  <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground text-center mb-6">{t("contact.team_title")}</h2>
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full rounded-full bg-rose-gold text-primary-foreground py-4 font-medium hover:opacity-90 active:scale-[0.98] transition-all duration-200"
+                  >
+                    <WhatsAppIcon className="w-5 h-5" />
+                    {t("contact.whatsapp_cta")}
+                  </a>
+                </motion.div>
+              );
+            })()}
 
             {/* Hours */}
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.3 }} className="bg-champagne/20 rounded-xl p-6">
