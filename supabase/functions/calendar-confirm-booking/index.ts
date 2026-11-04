@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { skipHoldAccessStatus } from "./authorization.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -68,6 +69,29 @@ serve(async (req) => {
       service_id, package_id, offer_id, sku_id, staff_id, start_time, end_time, notes,
       status: initialStatus, total_price: providedTotalPrice
     } = body;
+
+    // Authenticate and authorize manual bookings before touching the calendar.
+    if (skip_hold) {
+      const authHeader = req.headers.get('Authorization');
+      const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+      let userId: string | null = null;
+      let roles: string[] = [];
+      if (token) {
+        const { data, error } = await supabase.auth.getUser(token);
+        if (!error && data.user) {
+          userId = data.user.id;
+          const { data: userRoles, error: roleError } = await supabase.from('user_roles').select('role').eq('user_id', userId);
+          if (!roleError) roles = (userRoles || []).map(row => row.role);
+        }
+      }
+      const accessStatus = skipHoldAccessStatus(true, userId, roles);
+      if (accessStatus !== 200) {
+        return new Response(JSON.stringify({ success: false, error: accessStatus === 401 ? 'Unauthorized' : 'Forbidden' }), {
+          status: accessStatus,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
 
     if (!client_name || !start_time || !end_time) {
       throw new Error('Missing required parameters');
