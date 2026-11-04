@@ -1,7 +1,6 @@
 import { WhatsAppLink } from "@/components/whatsapp/WhatsAppCTA";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { Calendar, ArrowRight, Instagram } from "lucide-react";
+import { Calendar, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -39,16 +38,6 @@ export function CTASection() {
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </Button>
             </WhatsAppLink>
-            <Link to="/contact" className="w-full sm:w-auto">
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-white text-white bg-white/15 hover:bg-white/25 w-full sm:w-auto"
-              >
-                <Instagram className="w-4 h-4" />
-                {t("global.contact_us")}
-              </Button>
-            </Link>
           </div>
         </motion.div>
       </div>
