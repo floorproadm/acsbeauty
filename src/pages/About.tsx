@@ -1,7 +1,7 @@
 import { WhatsAppLink } from "@/components/whatsapp/WhatsAppCTA";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sparkles, Heart, Shield, Calendar } from "lucide-react";
+import { Sparkles, Heart, Shield, Calendar, ArrowRight } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,23 @@ export default function About() {
               <p>{t("about.story_p2")}</p>
               <p>{t("about.story_p3")}</p>
             </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Founder */}
+      <section className="py-12 md:py-16 px-5 md:px-6 bg-champagne/30">
+        <div className="container mx-auto max-w-3xl text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+            <p className="text-rose-gold text-xs md:text-sm font-medium mb-4">{t("about.founder.badge")}</p>
+            <h2 className="font-serif text-2xl md:text-4xl font-bold text-foreground mb-4 md:mb-6">{t("about.founder.title")}</h2>
+            <p className="text-muted-foreground text-base md:text-lg leading-relaxed mb-6 md:mb-8">{t("about.founder.description")}</p>
+            <Button asChild variant="hero" size="lg" className="h-auto min-h-12 whitespace-normal w-full sm:w-auto gap-2">
+              <Link to="/ane-caroline">
+                {t("about.founder.cta")}
+                <ArrowRight className="w-5 h-5 shrink-0" />
+              </Link>
+            </Button>
           </motion.div>
         </div>
       </section>
