@@ -80,10 +80,10 @@ export function Footer() {
                 {t("footer.location")}
               </Link>
               <Link
-                to="/team"
+                to="/about"
                 className="text-foreground/70 hover:text-primary text-xs md:text-sm transition-colors font-light"
               >
-                Equipe
+                {t("nav.about")}
               </Link>
               <Link
                 to="/contact"

@@ -19,7 +19,6 @@ import Confirmation from "./pages/Confirmation";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 
-import Team from "./pages/Team";
 import LocationNewark from "./pages/LocationNewark";
 import Shop from "./pages/Shop";
 import GiftCards from "./pages/GiftCards";
@@ -58,7 +57,7 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/studio" element={<Navigate to="/location/Newark" replace />} />
-          <Route path="/team" element={<Team />} />
+          <Route path="/team" element={<Navigate to="/about" replace />} />
           <Route path="/location/Newark" element={<LocationNewark />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/gift-cards" element={<GiftCards />} />

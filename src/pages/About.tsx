@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sparkles, Heart, Shield, Calendar, ArrowRight, Users } from "lucide-react";
+import { Sparkles, Heart, Shield, Calendar } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -102,56 +102,6 @@ export default function About() {
                 </p>
               </motion.div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Bridge Section — Founder + Team */}
-      <section className="py-12 md:py-20 px-5 md:px-6">
-        <div className="container mx-auto max-w-5xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-8 md:mb-12"
-          >
-            <h2 className="font-serif text-2xl md:text-4xl font-bold text-foreground mb-3 md:mb-4">
-              {t("about.bridge_title")}
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto text-sm md:text-base">
-              {t("about.bridge_description")}
-            </p>
-          </motion.div>
-
-          <div className="max-w-xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <Link
-                to="/team"
-                className="group block bg-card border border-border rounded-2xl p-6 md:p-8 hover:shadow-card hover:border-rose-gold/40 transition-all duration-300"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-rose-gold/10 flex items-center justify-center shrink-0">
-                    <Users className="w-5 h-5 text-rose-gold" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-serif text-lg md:text-xl font-semibold text-foreground mb-1">
-                      {t("about.bridge_team")}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-3">ACS Beauty</p>
-                    <span className="inline-flex items-center gap-1.5 text-sm font-medium text-rose-gold group-hover:gap-2.5 transition-all">
-                      <span>→</span>
-                      <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 -ml-5 group-hover:ml-0 transition-all" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
           </div>
         </div>
       </section>
