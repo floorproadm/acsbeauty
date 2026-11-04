@@ -174,7 +174,7 @@ export default function Services() {
               );
             })}
           </div>
-          <div className="flex justify-center mt-8"><ServiceGuide /></div>
+          <div id="service-guide" className="flex justify-center mt-8 scroll-mt-24"><ServiceGuide /></div>
         </div>
       </main>
       <Footer />
