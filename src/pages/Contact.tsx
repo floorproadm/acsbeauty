@@ -159,7 +159,7 @@ export default function Contact() {
               </div>
               <div className="space-y-2">
                 {hours.map((item) => (
-                  <div key={item.dayKey} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
+                  <div key={item.dayKey} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 py-2 border-b border-border/50 last:border-0">
                     <span className="text-foreground text-sm">{t(item.dayKey)}</span>
                     <span className="text-muted-foreground text-sm">{item.time}</span>
                   </div>
