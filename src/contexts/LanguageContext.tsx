@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
+import { whatsappTranslations } from "@/lib/whatsapp";
+
 type Language = "en" | "pt";
 
 interface LanguageContextType {
@@ -8,12 +10,21 @@ interface LanguageContextType {
   t: (key: string, vars?: Record<string, string | number>) => string;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+// Keep the same context identity when Fast Refresh reloads this module.
+// The root provider may remain mounted while consumers receive the new module.
+const LanguageContext =
+  (import.meta.hot?.data.languageContext as ReturnType<typeof createContext<LanguageContextType | undefined>> | undefined)
+  ?? createContext<LanguageContextType | undefined>(undefined);
+
+if (import.meta.hot) {
+  import.meta.hot.data.languageContext = LanguageContext;
+}
 
 const STORAGE_KEY = "acs_lang";
 
 const translations: Record<Language, Record<string, string>> = {
   en: {
+    ...whatsappTranslations.en,
     // ========== GLOBAL ==========
     "global.book_now": "Book Now",
     "global.back": "Back",
@@ -437,6 +448,7 @@ const translations: Record<Language, Record<string, string>> = {
     "ane.wa.general_msg": "Hi Ane! I saw your profile and would like to schedule.",
   },
   pt: {
+    ...whatsappTranslations.pt,
     // ========== GLOBAL ==========
     "global.book_now": "Agendar",
     "global.back": "Voltar",

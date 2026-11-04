@@ -17,6 +17,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+import { WhatsAppLink } from "@/components/whatsapp/WhatsAppCTA";
+import type { Tables } from "@/integrations/supabase/types";
+
 interface FaqItem {
   question: string;
   answer: string;
@@ -242,12 +245,12 @@ export default function ServiceDetail() {
                 )}
 
 
-                <Link to={`/book?service=${service.slug}`}>
+                <WhatsAppLink context={{ source: "service", serviceName: service.name, serviceId: service.id }} bookingHref={`/book?service=${service.slug}`}>
                   <Button variant="hero" size="lg" className="group">
-                    {t("global.book_now")}
+                    {t("wa.service.cta")}
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </Button>
-                </Link>
+                </WhatsAppLink>
               </div>
 
               {(service.hero_video_url || service.hero_image_url) && (
@@ -297,7 +300,7 @@ export default function ServiceDetail() {
                           </h3>
                           <div className="grid gap-3">
                             {variationSkus.map((sku, idx) => (
-                              <SkuCard key={sku.id} sku={sku} index={idx} serviceSlug={service.slug} />
+                              <SkuCard key={sku.id} sku={sku} index={idx} serviceSlug={service.slug} serviceName={service.name} serviceId={service.id} />
                             ))}
                           </div>
                         </div>
@@ -306,7 +309,7 @@ export default function ServiceDetail() {
                     {skusByVariation.has(null) && (
                       <div className="grid gap-3">
                         {skusByVariation.get(null)!.map((sku, idx) => (
-                          <SkuCard key={sku.id} sku={sku} index={idx} serviceSlug={service.slug} />
+                          <SkuCard key={sku.id} sku={sku} index={idx} serviceSlug={service.slug} serviceName={service.name} serviceId={service.id} />
                         ))}
                       </div>
                     )}
@@ -314,7 +317,7 @@ export default function ServiceDetail() {
                 ) : (
                   <div className="grid gap-3">
                     {skus.map((sku, idx) => (
-                      <SkuCard key={sku.id} sku={sku} index={idx} serviceSlug={service.slug} />
+                      <SkuCard key={sku.id} sku={sku} index={idx} serviceSlug={service.slug} serviceName={service.name} serviceId={service.id} />
                     ))}
                   </div>
                 )}
@@ -380,12 +383,12 @@ export default function ServiceDetail() {
               <p className="text-muted-foreground mb-8">
                 {t("servicos.cta_description")}
               </p>
-              <Link to={`/book?service=${service.slug}`}>
+              <WhatsAppLink context={{ source: "service", serviceName: service.name, serviceId: service.id }} bookingHref={`/book?service=${service.slug}`}>
                 <Button variant="hero" size="lg" className="group">
-                  {t("global.book_now")}
+                  {t("wa.service.cta")}
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </Button>
-              </Link>
+              </WhatsAppLink>
             </motion.div>
           </div>
         </section>
@@ -395,7 +398,7 @@ export default function ServiceDetail() {
   );
 }
 
-function SkuCard({ sku, index, serviceSlug }: { sku: any; index: number; serviceSlug: string }) {
+function SkuCard({ sku, index, serviceSlug, serviceName, serviceId }: { sku: Tables<"service_skus">; index: number; serviceSlug: string; serviceName: string; serviceId: string }) {
   const { t } = useLanguage();
   const hasPromo = sku.promo_price != null && sku.promo_price < sku.price;
   const skuSlugParam = sku.slug ? `&sku=${sku.slug}` : "";
@@ -407,7 +410,7 @@ function SkuCard({ sku, index, serviceSlug }: { sku: any; index: number; service
       transition={{ duration: 0.3, delay: index * 0.05 }}
     >
       <Card className="hover:shadow-card transition-shadow">
-        <CardContent className="flex items-center gap-3 p-3 md:p-4">
+        <CardContent className="flex flex-wrap sm:flex-nowrap items-center gap-3 p-3 md:p-4">
           {sku.image_url ? (
             <img
               src={sku.image_url}
@@ -422,12 +425,12 @@ function SkuCard({ sku, index, serviceSlug }: { sku: any; index: number; service
               <p className="text-xs text-muted-foreground mt-0.5 whitespace-pre-line">{sku.description}</p>
             )}
           </div>
-          <Link to={`/book?service=${serviceSlug}${skuSlugParam}`}>
-            <Button variant="outline" size="sm" className="shrink-0 gap-1">
-              {t("global.book_now")}
+          <WhatsAppLink context={{ source: "sku", serviceName, serviceId, skuName: sku.name, skuId: sku.id }} bookingHref={`/book?service=${serviceSlug}${skuSlugParam}`} className="w-full sm:w-auto shrink-0">
+            <Button variant="outline" size="sm" className="w-full h-auto min-h-9 whitespace-normal shrink-0 gap-1">
+              {t("wa.sku.cta")}
               <ArrowRight className="w-3.5 h-3.5" />
             </Button>
-          </Link>
+          </WhatsAppLink>
         </CardContent>
       </Card>
     </motion.div>
