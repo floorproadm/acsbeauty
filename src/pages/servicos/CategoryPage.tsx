@@ -1,7 +1,7 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowLeft, Check, Loader2, Scissors, Eye, Sparkles, Brush, Droplet } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -20,54 +20,42 @@ import treatmentsImage from "@/assets/treatments-service.jpg";
 // Category display metadata by category_slug
 // TODO: Replace makeup/treatments fallback images with dedicated assets
 const CATEGORY_CONFIG: Record<string, {
-  icon: typeof Scissors;
   fallbackImage: string;
-  badgeKey: string;
   titleKey: string;
   subtitleKey: string;
   aboutTitleKey: string;
   aboutTextKey: string;
 }> = {
   cabelo: {
-    icon: Scissors,
     fallbackImage: hairImage,
-    badgeKey: "servicos.cabelo.badge",
     titleKey: "servicos.cabelo.title",
     subtitleKey: "servicos.cabelo.subtitle",
     aboutTitleKey: "servicos.cabelo.about_title",
     aboutTextKey: "servicos.cabelo.about_text",
   },
   sobrancelhas: {
-    icon: Eye,
     fallbackImage: browsImage,
-    badgeKey: "servicos.sobrancelhas.badge",
     titleKey: "servicos.sobrancelhas.title",
     subtitleKey: "servicos.sobrancelhas.subtitle",
     aboutTitleKey: "servicos.sobrancelhas.about_title",
     aboutTextKey: "servicos.sobrancelhas.about_text",
   },
   unhas: {
-    icon: Sparkles,
     fallbackImage: nailsImage,
-    badgeKey: "servicos.unhas.badge",
     titleKey: "servicos.unhas.title",
     subtitleKey: "servicos.unhas.subtitle",
     aboutTitleKey: "servicos.unhas.about_title",
     aboutTextKey: "servicos.unhas.about_text",
   },
   maquiagem: {
-    icon: Brush,
     fallbackImage: makeupImage,
-    badgeKey: "servicos.maquiagem.badge",
     titleKey: "servicos.maquiagem.title",
     subtitleKey: "servicos.maquiagem.subtitle",
     aboutTitleKey: "servicos.maquiagem.about_title",
     aboutTextKey: "servicos.maquiagem.about_text",
   },
   tratamentos: {
-    icon: Droplet,
     fallbackImage: treatmentsImage,
-    badgeKey: "servicos.tratamentos.badge",
     titleKey: "servicos.tratamentos.title",
     subtitleKey: "servicos.tratamentos.subtitle",
     aboutTitleKey: "servicos.tratamentos.about_title",
@@ -129,7 +117,6 @@ export default function CategoryPage() {
   });
 
 
-  const Icon = config.icon;
   const heroImage = config.fallbackImage;
 
   return (
@@ -150,12 +137,6 @@ export default function CategoryPage() {
             </Link>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-2xl">
-              <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
-                <div className="p-2 md:p-3 rounded-full bg-rose-gold/20 backdrop-blur-sm">
-                  <Icon className="w-5 h-5 md:w-6 md:h-6 text-rose-gold" />
-                </div>
-                <span className="text-xs md:text-sm font-medium tracking-wider text-rose-gold uppercase">{t(config.badgeKey)}</span>
-              </div>
               <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 text-foreground leading-tight">{t(config.titleKey)}</h1>
               <p className="text-base md:text-xl text-muted-foreground mb-6 md:mb-8 leading-relaxed">{t(config.subtitleKey)}</p>
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
