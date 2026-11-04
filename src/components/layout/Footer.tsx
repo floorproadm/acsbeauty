@@ -185,8 +185,7 @@ export function Footer() {
       <Dialog open={gpsOpen} onOpenChange={setGpsOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-foreground">
-              <Navigation className="w-5 h-5 text-primary" />
+            <DialogTitle className="text-foreground">
               {t("contact.navigate_title")}
             </DialogTitle>
           </DialogHeader>
