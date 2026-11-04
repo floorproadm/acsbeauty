@@ -15,14 +15,6 @@ const GPS_OPTIONS = [
   { name: "Waze", url: "https://waze.com/ul?q=41+Wilson+Ave,+Newark,+NJ&navigate=yes" },
 ];
 
-function formatTime(t: string) {
-  const [h, m] = t.split(":");
-  const hour = parseInt(h, 10);
-  const ampm = hour >= 12 ? "PM" : "AM";
-  const h12 = hour % 12 || 12;
-  return `${h12}:${m} ${ampm}`;
-}
-
 export default function LocationNewark() {
   const { t } = useLanguage();
   const [gpsOpen, setGpsOpen] = useState(false);
