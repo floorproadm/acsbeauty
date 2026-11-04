@@ -8,8 +8,11 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Clock, ArrowLeft, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { WhatsAppLink } from "@/components/whatsapp/WhatsAppCTA";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function BlogPost() {
+  const { t } = useLanguage();
   const { slug } = useParams();
   const navigate = useNavigate();
 
@@ -112,7 +115,7 @@ export default function BlogPost() {
               <p className="text-xs tracking-[0.2em] uppercase text-bronze mb-2">Pronta para experimentar?</p>
               <h3 className="font-editorial italic text-2xl mb-4">{post.service.name}</h3>
               <Button asChild className="gap-2">
-                <Link to="/portal"><Calendar className="w-4 h-4" /> Agendar agora</Link>
+                <WhatsAppLink context={{ source: "service", serviceName: post.service.name, serviceId: post.service.id }}><Calendar className="w-4 h-4" />{t("wa.service.cta")}</WhatsAppLink>
               </Button>
             </div>
           )}

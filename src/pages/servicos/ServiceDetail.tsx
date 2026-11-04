@@ -247,7 +247,7 @@ export default function ServiceDetail() {
 
                 <WhatsAppLink context={{ source: "service", serviceName: service.name, serviceId: service.id }} bookingHref={`/book?service=${service.slug}`}>
                   <Button variant="hero" size="lg" className="group">
-                    {t("wa.sku.cta")}
+                    {t("wa.service.cta")}
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </WhatsAppLink>
@@ -385,7 +385,7 @@ export default function ServiceDetail() {
               </p>
               <WhatsAppLink context={{ source: "service", serviceName: service.name, serviceId: service.id }} bookingHref={`/book?service=${service.slug}`}>
                 <Button variant="hero" size="lg" className="group">
-                  {t("wa.sku.cta")}
+                  {t("wa.service.cta")}
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </WhatsAppLink>
