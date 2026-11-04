@@ -284,6 +284,7 @@ const translations: Record<Language, Record<string, string>> = {
     "contact.cta_description": "Schedule your treatment today and take the first step towards radiant skin.",
     "contact.team_title": "Prefer to Chat? Message Ane Directly.",
     "contact.team_subtitle": "Have a question? I'd love to hear from you.",
+    "contact.whatsapp_cta": "Message on WhatsApp",
     "contact.navigate_title": "How would you like to navigate?",
     "contact.find_us": "Find Us",
 
@@ -707,6 +708,7 @@ const translations: Record<Language, Record<string, string>> = {
     "contact.cta_description": "Marque seu tratamento hoje e dê o primeiro passo para uma pele radiante.",
     "contact.team_title": "Prefere Conversar? Fale Diretamente com a Ane.",
     "contact.team_subtitle": "Tem alguma dúvida? Será um prazer conversar com você.",
+    "contact.whatsapp_cta": "Conversar no WhatsApp",
     "contact.navigate_title": "Como deseja navegar?",
     "contact.find_us": "Encontre-nos",
 
