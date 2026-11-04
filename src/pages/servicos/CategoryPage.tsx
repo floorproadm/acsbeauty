@@ -9,6 +9,8 @@ import { Footer } from "@/components/layout/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 
+import { WhatsAppLink } from "@/components/whatsapp/WhatsAppCTA";
+
 import hairImage from "@/assets/hair-service.png";
 import browsImage from "@/assets/brows-service.jpg";
 import nailsImage from "@/assets/nails-service.jpg";
@@ -157,12 +159,12 @@ export default function CategoryPage() {
               <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 text-foreground leading-tight">{t(config.titleKey)}</h1>
               <p className="text-base md:text-xl text-muted-foreground mb-6 md:mb-8 leading-relaxed">{t(config.subtitleKey)}</p>
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-                <Link to="/portal" className="w-full sm:w-auto">
+                <WhatsAppLink context={{ source: "category", category: categorySlug }} className="w-full sm:w-auto">
                   <Button variant="hero" size="lg" className="group w-full">
-                    {t("global.book_now")}
+                    {t("wa.category.cta")}
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </Button>
-                </Link>
+                </WhatsAppLink>
               </div>
             </motion.div>
           </div>
@@ -219,12 +221,12 @@ export default function CategoryPage() {
               <h2 className="font-serif text-2xl md:text-3xl font-bold mb-4 text-foreground">{t("servicos.cta_title")}</h2>
               <p className="text-muted-foreground mb-8">{t("servicos.cta_description")}</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/portal">
+                <WhatsAppLink context={{ source: "category", category: categorySlug }}>
                   <Button variant="hero" size="lg" className="group w-full sm:w-auto">
-                    {t("global.book_now")}
+                    {t("wa.category.cta")}
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </Button>
-                </Link>
+                </WhatsAppLink>
               </div>
             </motion.div>
           </div>

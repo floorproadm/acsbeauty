@@ -1,28 +1,13 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { supabase } from "@/integrations/supabase/client";
+import { WhatsAppLink } from "@/components/whatsapp/WhatsAppCTA";
 import founderImg from "@/assets/founder.jpg";
 
 export function Hero() {
   const { t } = useLanguage();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsLoggedIn(!!session);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const onboardingDone = typeof window !== "undefined" && localStorage.getItem("acs_onboarding_done") === "1";
-  const ctaHref = isLoggedIn ? "/portal" : onboardingDone ? "/auth" : "/onboarding";
 
   return (
     <section className="relative min-h-[85svh] lg:min-h-0 flex items-center bg-gradient-nude overflow-hidden">
@@ -73,16 +58,16 @@ export function Hero() {
                 </Button>
               </Link>
               {/* Primary CTA - Direct to calendar */}
-              <Link to={ctaHref} className="w-full sm:w-auto">
+              <WhatsAppLink context={{ source: "home" }} className="w-full sm:w-auto">
                 <Button
                   variant="hero"
                   size="lg"
                   className="group w-full sm:w-72 min-h-[52px] px-8 text-base justify-center"
                 >
-                  {t("home.hero.cta_services")}
+                  {t("wa.home.cta")}
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Button>
-              </Link>
+              </WhatsAppLink>
             </motion.div>
           </div>
 

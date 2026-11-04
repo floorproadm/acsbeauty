@@ -1,3 +1,4 @@
+import { WhatsAppLink } from "@/components/whatsapp/WhatsAppCTA";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Sparkles, Heart, Shield, Calendar } from "lucide-react";
@@ -114,12 +115,12 @@ export default function About() {
               {t("about.cta_description")}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-              <Link to="/services" className="w-full sm:w-auto">
+              <WhatsAppLink context={{ source: "home" }} className="w-full sm:w-auto">
                 <Button variant="hero" size="lg" className="gap-2 w-full">
                   <Calendar className="w-4 h-4 md:w-5 md:h-5" />
                   {t("global.book_now")}
                 </Button>
-              </Link>
+              </WhatsAppLink>
               <Link to="/services" className="w-full sm:w-auto">
                 <Button variant="outline" size="lg" className="border-rose-gold/50 text-rose-gold hover:bg-rose-gold/10 w-full">
                   {t("global.view_offers")}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Instagram, Facebook, Mail, Phone, MapPin, Navigation } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ProtectedCommercialLink } from "@/components/whatsapp/WhatsAppCTA";
 import acsLogo from "@/assets/acs-logo.png";
 import {
   Dialog,
@@ -67,12 +68,12 @@ export function Footer() {
               >
                 {t("nav.services")}
               </Link>
-              <Link
-                to="/services"
+              <ProtectedCommercialLink
+                bookingHref="/services" source="home"
                 className="text-foreground/70 hover:text-primary text-xs md:text-sm transition-colors font-light"
               >
                 {t("footer.book_appointment")}
-              </Link>
+              </ProtectedCommercialLink>
               <Link
                 to="/location/Newark"
                 className="text-foreground/70 hover:text-primary text-xs md:text-sm transition-colors font-light"

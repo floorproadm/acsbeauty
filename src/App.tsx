@@ -14,7 +14,7 @@ import Onboarding from "./pages/Onboarding";
 import Services from "./pages/Services";
 import CategoryPage from "./pages/servicos/CategoryPage";
 import ServiceDetail from "./pages/servicos/ServiceDetail";
-import Book from "./pages/Book";
+import PublicBooking from "./components/booking/PublicBooking";
 import Confirmation from "./pages/Confirmation";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -52,7 +52,7 @@ const App = () => (
           <Route path="/servicos/:categoria/:slug/:locationSlug" element={<ServiceDetail />} />
           <Route path="/servicos/:categoria/:slug" element={<ServiceDetail />} />
           <Route path="/servicos/:categoria" element={<CategoryPage />} />
-          <Route path="/book" element={<Book />} />
+          <Route path="/book" element={<PublicBooking />} />
           <Route path="/confirm/:bookingId" element={<Confirmation />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />

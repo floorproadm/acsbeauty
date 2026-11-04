@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
+import { whatsappTranslations } from "@/lib/whatsapp";
+
 type Language = "en" | "pt";
 
 interface LanguageContextType {
@@ -14,6 +16,7 @@ const STORAGE_KEY = "acs_lang";
 
 const translations: Record<Language, Record<string, string>> = {
   en: {
+    ...whatsappTranslations.en,
     // ========== GLOBAL ==========
     "global.book_now": "Book Now",
     "global.back": "Back",
@@ -437,6 +440,7 @@ const translations: Record<Language, Record<string, string>> = {
     "ane.wa.general_msg": "Hi Ane! I saw your profile and would like to schedule.",
   },
   pt: {
+    ...whatsappTranslations.pt,
     // ========== GLOBAL ==========
     "global.book_now": "Agendar",
     "global.back": "Voltar",

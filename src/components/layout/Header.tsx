@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { supabase } from "@/integrations/supabase/client";
+import { ProtectedCommercialLink } from "@/components/whatsapp/WhatsAppCTA";
 import acsLogo from "@/assets/acs-logo.png";
 
 export function Header() {
@@ -85,12 +86,12 @@ export function Header() {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4 flex-shrink-0">
             <LanguageToggle />
-            <Link to={ctaHref}>
+            <ProtectedCommercialLink bookingHref={ctaHref} source="header">
               <Button variant="hero" size="default" className="gap-2">
                 <Calendar className="w-4 h-4" />
                 {t("global.book_now")}
               </Button>
-            </Link>
+            </ProtectedCommercialLink>
           </div>
 
           {/* Mobile Menu Button */}
@@ -150,12 +151,12 @@ export function Header() {
                   </Link>
                 ))}
                 <div className="flex flex-col gap-3 pt-4 border-t border-border">
-                  <Link to={ctaHref} onClick={() => setIsMobileMenuOpen(false)}>
+                  <ProtectedCommercialLink bookingHref={ctaHref} source="header" onClick={() => setIsMobileMenuOpen(false)}>
                     <Button variant="hero" className="w-full gap-2">
                       <Calendar className="w-4 h-4" />
                       {t("global.book_now")}
                     </Button>
-                  </Link>
+                  </ProtectedCommercialLink>
                 </div>
               </nav>
             </div>

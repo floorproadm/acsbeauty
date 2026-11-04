@@ -1,3 +1,4 @@
+import { WhatsAppLink } from "@/components/whatsapp/WhatsAppCTA";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, ArrowRight, Instagram } from "lucide-react";
@@ -31,13 +32,13 @@ export function CTASection() {
             {t("home.cta.description")}
           </p>
           <div className="flex flex-col gap-3 md:gap-4 sm:flex-row justify-center">
-            <Link to="/portal" className="w-full sm:w-auto">
+            <WhatsAppLink context={{ source: "home" }} className="w-full sm:w-auto">
               <Button size="xl" className="bg-white text-primary font-medium hover:bg-white/90 shadow-elevated group w-full sm:w-auto">
                 <Calendar className="w-5 h-5" />
-                {t("home.hero.cta_services")}
+                {t("wa.home.cta")}
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </Button>
-            </Link>
+            </WhatsAppLink>
             <Link to="/contact" className="w-full sm:w-auto">
               <Button
                 variant="outline"

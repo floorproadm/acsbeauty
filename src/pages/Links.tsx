@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import acsLogo from "@/assets/acs-logo.png";
 import aneHero from "@/assets/ane-hero.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
+import { trackWhatsAppClick } from "@/components/whatsapp/WhatsAppCTA";
 import { LanguageToggle } from "@/components/LanguageToggle";
 
 function useOGMeta() {
@@ -83,7 +85,7 @@ const item = {
 };
 
 const linkItems = (isPt: boolean) => [
-  { label: isPt ? "Agendar Agora" : "Book Now", to: "/portal", icon: Calendar, primary: true, external: false },
+  { label: isPt ? "Agendar Agora" : "Book Now", to: buildWhatsAppUrl({ source: "hub", language: isPt ? "pt" : "en" }), icon: Calendar, primary: true, external: true },
   { label: isPt ? "Nossos Serviços" : "Our Services", to: "/services", icon: Scissors, external: false },
   { label: isPt ? "Sobre a Ane" : "About Ane", to: "/ane-caroline", icon: User, external: false },
   { label: "Gift Cards", to: "/gift-cards", icon: Gift, external: false },
@@ -249,7 +251,7 @@ export default function Links() {
 
           if (link.external) {
             return (
-              <a key={link.label} href={link.to} target="_blank" rel="noopener noreferrer">
+              <a key={link.label} href={link.to} target="_blank" rel="noopener noreferrer" onClick={() => { if (isPrimary) trackWhatsAppClick({ source: "hub" }); }}>
                 {inner}
               </a>
             );

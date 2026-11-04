@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 
+import { ServiceGuide } from "@/components/whatsapp/ServiceGuide";
+
 import hairServiceImg from "@/assets/hair-service.png";
 import browsServiceImg from "@/assets/brows-service.jpg";
 import nailsServiceImg from "@/assets/nails-service.jpg";
@@ -127,6 +129,8 @@ export default function Services() {
               {t("services.description")}
             </p>
           </motion.div>
+
+          <div className="flex justify-center mb-8"><ServiceGuide /></div>
 
           <div className="grid md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
             {(categories || []).map((cat, index) => {
