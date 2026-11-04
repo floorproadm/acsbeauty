@@ -20,7 +20,7 @@ export default function About() {
       <Header />
 
       {/* Hero */}
-      <section className="pt-28 md:pt-32 pb-2 px-5 md:px-6 bg-gradient-to-b from-champagne/30 to-background">
+      <section className="pt-28 md:pt-32 px-5 md:px-6 bg-gradient-to-b from-champagne/30 to-background">
         <div className="container mx-auto max-w-4xl text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <motion.span
@@ -36,7 +36,7 @@ export default function About() {
       </section>
 
       {/* Brand Story */}
-      <section className="pt-6 md:pt-10 pb-12 md:pb-20 px-5 md:px-6">
+      <section className="pt-2 md:pt-4 pb-12 md:pb-20 px-5 md:px-6">
         <div className="container mx-auto max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
