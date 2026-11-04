@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Calendar, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { WhatsAppLink } from "@/components/whatsapp/WhatsAppCTA";
@@ -64,6 +64,7 @@ export function Hero() {
                   size="lg"
                   className="group w-full sm:w-72 min-h-[52px] px-8 text-base justify-center"
                 >
+                  <Calendar className="w-5 h-5 shrink-0" />
                   {t("wa.home.cta")}
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Button>
