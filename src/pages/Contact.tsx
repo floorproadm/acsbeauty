@@ -98,8 +98,7 @@ export default function Contact() {
             {/* Team Section */}
             {members.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.3 }}>
-                <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground text-center mb-2">{t("contact.team_title")}</h2>
-                <p className="text-muted-foreground text-sm text-center mb-6">{t("contact.team_subtitle")}</p>
+                <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground text-center mb-6">{t("contact.team_title")}</h2>
 
                 <div className="space-y-3">
                   {members.map((member, index) => {
