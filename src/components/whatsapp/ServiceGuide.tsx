@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, MessageCircle, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, type ButtonProps } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { buildWhatsAppMessage, type WhatsAppContext } from "@/lib/whatsapp";
 import { WhatsAppCTA } from "./WhatsAppCTA";
 
-export function ServiceGuide() {
+export function ServiceGuide({ triggerClassName, triggerSize }: { triggerClassName?: string; triggerSize?: ButtonProps["size"] } = {}) {
   const { t, language } = useLanguage();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
@@ -27,7 +27,7 @@ export function ServiceGuide() {
   const context = { source: "guided" as const, category, serviceName: service?.name, serviceId: service?.id, intent };
   const title = step === 4 ? t("wa.guide.result") : t(`wa.guide.q${step}`);
   return <>
-    <Button variant="outline" className="h-auto min-h-11 whitespace-normal text-base" onClick={() => { setStep(1); setCategory(""); setService(null); setIntent("guidance"); setOpen(true); }}>
+    <Button variant="outline" size={triggerSize} className={`h-auto min-h-11 whitespace-normal text-base ${triggerClassName || ""}`} onClick={() => { setStep(1); setCategory(""); setService(null); setIntent("guidance"); setOpen(true); }}>
       <MessageCircle />{t("wa.guide.open")}
     </Button>
     <Dialog open={open} onOpenChange={setOpen}>

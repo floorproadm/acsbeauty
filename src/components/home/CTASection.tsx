@@ -1,7 +1,7 @@
 import { WhatsAppLink } from "@/components/whatsapp/WhatsAppCTA";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { Calendar, ArrowRight, MessageCircle } from "lucide-react";
+import { Calendar, ArrowRight } from "lucide-react";
+import { ServiceGuide } from "@/components/whatsapp/ServiceGuide";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -32,12 +32,7 @@ export function CTASection() {
             {t("home.cta.description")}
           </p>
           <div className="flex flex-col gap-3 md:gap-4 items-center">
-            <Button asChild variant="outline" size="xl" className="w-full sm:w-auto h-auto min-h-14 whitespace-normal text-base bg-transparent border-champagne text-champagne hover:bg-champagne/10 hover:text-champagne">
-              <Link to="/services#service-guide">
-                <MessageCircle className="w-5 h-5 shrink-0" />
-                {t("wa.guide.open")}
-              </Link>
-            </Button>
+            <ServiceGuide triggerSize="xl" triggerClassName="w-full sm:w-auto min-h-14 bg-transparent border-champagne text-champagne hover:bg-champagne/10 hover:text-champagne" />
             <WhatsAppLink context={{ source: "home" }} className="w-full sm:w-auto">
               <Button size="xl" className="bg-white text-primary font-medium hover:bg-white/90 shadow-elevated group w-full sm:w-auto">
                 <Calendar className="w-5 h-5" />
