@@ -37,7 +37,7 @@ export const whatsappTranslations = {
     "wa.intent.guidance": "Gostaria de orientação personalizada.",
     "wa.transition.title": "Vamos continuar pelo WhatsApp?",
     "wa.transition.description": "Para oferecer um atendimento mais personalizado, nossa equipe está realizando os agendamentos diretamente pelo WhatsApp.",
-    "wa.guide.open": "Precisa de ajuda para escolher?",
+    "wa.guide.open": "Precisa de ajuda?",
     "wa.guide.q1": "O que você procura hoje?",
     "wa.guide.q2": "Qual opção mais combina com você?",
     "wa.guide.q3": "O que gostaria de saber primeiro?",
