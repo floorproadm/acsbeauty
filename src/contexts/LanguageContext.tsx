@@ -701,7 +701,7 @@ const translations: Record<Language, Record<string, string>> = {
     "about.founder.badge": "POR TRÁS DA ACS BEAUTY",
     "about.founder.title": "Conheça a Ane",
     "about.founder.description": "Conheça a trajetória, a dedicação e a visão da profissional que inspira cada detalhe da ACS Beauty.",
-    "about.founder.cta": "Conheça a História da Ane",
+    "about.founder.cta": "Conheça a Ane",
     "about.pillars_description": "Os valores que guiam tudo o que fazemos.",
     "about.pillar_excellence_title": "Excelência",
     "about.pillar_excellence_desc": "Utilizamos apenas os melhores produtos e técnicas avançadas para entregar resultados excepcionais.",
