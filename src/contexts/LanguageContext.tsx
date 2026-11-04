@@ -10,7 +10,15 @@ interface LanguageContextType {
   t: (key: string, vars?: Record<string, string | number>) => string;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+// Keep the same context identity when Fast Refresh reloads this module.
+// The root provider may remain mounted while consumers receive the new module.
+const LanguageContext =
+  (import.meta.hot?.data.languageContext as ReturnType<typeof createContext<LanguageContextType | undefined>> | undefined)
+  ?? createContext<LanguageContextType | undefined>(undefined);
+
+if (import.meta.hot) {
+  import.meta.hot.data.languageContext = LanguageContext;
+}
 
 const STORAGE_KEY = "acs_lang";
 
