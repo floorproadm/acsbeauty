@@ -70,6 +70,9 @@ export function Hero() {
                   </>
                 }
               />
+              <p className="mt-2.5 text-center text-[13px] font-normal text-[#84786E]">
+                {t("home.hero.guide_microcopy")}
+              </p>
             </motion.div>
           </div>
 
