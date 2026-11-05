@@ -7,7 +7,7 @@ import { ServiceGuide } from "@/components/whatsapp/ServiceGuide";
 import founderImg from "@/assets/founder.jpg";
 
 export function Hero() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <section className="relative min-h-[85svh] lg:min-h-0 flex items-center bg-gradient-nude overflow-hidden">
