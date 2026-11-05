@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, HeartHandshake, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { WhatsAppLink } from "@/components/whatsapp/WhatsAppCTA";
+import { ServiceGuide } from "@/components/whatsapp/ServiceGuide";
 import founderImg from "@/assets/founder.jpg";
 
 export function Hero() {
@@ -56,18 +56,19 @@ export function Hero() {
                   {t("home.hero.cta_story")}
                 </Button>
               </Link>
-              {/* Primary CTA - Direct to calendar */}
-              <WhatsAppLink context={{ source: "home" }} className="w-full sm:w-auto">
-                <Button
-                  variant="hero"
-                  size="lg"
-                  className="group w-full sm:w-72 min-h-[52px] px-8 text-base justify-center"
-                >
-                  <Calendar className="w-5 h-5 shrink-0" />
-                  {t("wa.home.cta")}
-                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </WhatsAppLink>
+              {/* Primary CTA - Opens the service guide */}
+              <ServiceGuide
+                triggerVariant="hero"
+                triggerSize="lg"
+                triggerClassName="group w-full sm:w-72 min-h-[52px] px-8 text-base justify-center"
+                triggerContent={
+                  <>
+                    <Calendar className="w-5 h-5 shrink-0" />
+                    {t("home.hero.cta_guide")}
+                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                  </>
+                }
+              />
             </motion.div>
           </div>
 
