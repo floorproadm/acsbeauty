@@ -41,7 +41,7 @@ export default function LocationNewark() {
       "@context": "https://schema.org",
       "@type": "BeautySalon",
       name: "ACS Beauty Studio",
-      image: "https://acsbeauty.lovable.app/favicon.ico",
+      image: "https://acsbeautynj.com/icon-512.png",
       address: {
         "@type": "PostalAddress",
         streetAddress: "41 Wilson Ave",
