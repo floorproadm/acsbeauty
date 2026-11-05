@@ -61,7 +61,6 @@ export function ServiceGuide({ triggerClassName, triggerSize, triggerVariant, tr
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="w-[calc(100%-2rem)] max-w-[560px] max-h-[85dvh] overflow-y-auto rounded-2xl border-nude bg-ivory p-6 sm:p-8" closeLabel={t("wa.guide.close")}>
         <div className="flex flex-col items-center gap-1.5 text-center">
-          <span className="text-xs font-medium tracking-[0.3em] text-gold-dark" aria-hidden="true">{step > 3 ? 3 : step} / 3</span>
           <DialogTitle className="font-serif text-2xl text-foreground">{title}</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">{subtitle}</DialogDescription>
         </div>
