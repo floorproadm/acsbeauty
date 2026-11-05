@@ -1,4 +1,5 @@
 # Architecture rules
+- Resolve password-recovery callbacks globally before rendering public routes, and show an actionable expired-link state so fallback email destinations cannot strand users on Home.
 - Serve browser and mobile brand icons from stable public-root files, including a branded favicon.ico fallback, so crawlers and devices never fall back to template artwork.
 - Reuse ServiceGuide for Home and Services with configurable trigger styling so both entry points share the same flow.
 - Preserve LanguageContext identity through Vite hot updates so retained providers and refreshed consumers share the same context.
