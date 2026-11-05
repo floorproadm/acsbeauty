@@ -135,6 +135,8 @@ export default function AneCaroline() {
             <p>{t("ane.about.p3")}</p>
             <p>{t("ane.about.p4")}</p>
             <p>{t("ane.about.p5")}</p>
+            <p>{t("ane.about.p6")}</p>
+            <p>{t("ane.about.p7")}</p>
           </div>
         </motion.div>
       </section>
