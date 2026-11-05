@@ -7,7 +7,7 @@ import { ServiceGuide } from "@/components/whatsapp/ServiceGuide";
 import founderImg from "@/assets/founder.jpg";
 
 export function Hero() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <section className="relative min-h-[85svh] lg:min-h-0 flex items-center bg-gradient-nude overflow-hidden">
@@ -60,7 +60,9 @@ export function Hero() {
               <ServiceGuide
                 triggerVariant="hero"
                 triggerSize="lg"
-                triggerClassName="group w-full sm:w-72 min-h-[52px] px-8 text-base justify-center"
+                triggerClassName={`group w-full sm:w-72 min-h-[52px] px-8 justify-center whitespace-nowrap ${
+                  language === "pt" ? "text-[15px] sm:text-base" : "text-base"
+                }`}
                 triggerContent={
                   <>
                     <Calendar className="w-5 h-5 shrink-0" />
