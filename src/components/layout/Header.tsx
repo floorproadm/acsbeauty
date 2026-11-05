@@ -150,14 +150,6 @@ export function Header() {
                     {item.label}
                   </Link>
                 ))}
-                <div className="flex flex-col gap-3 pt-4 border-t border-border">
-                  <ProtectedCommercialLink bookingHref={ctaHref} source="header" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="hero" className="w-full gap-2">
-                      <Calendar className="w-4 h-4" />
-                      {t("global.book_now")}
-                    </Button>
-                  </ProtectedCommercialLink>
-                </div>
               </nav>
             </div>
           </>
