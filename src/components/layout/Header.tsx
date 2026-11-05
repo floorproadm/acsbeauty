@@ -27,10 +27,9 @@ export function Header() {
 
   const navItems = [
     { label: t("nav.services"), href: "/services" },
-    { label: "Blog", href: "/blog" },
-    { label: "Gift Cards", href: "/gift-cards" },
     { label: t("nav.about"), href: "/about" },
     { label: t("nav.contact"), href: "/contact" },
+    { label: "Gift Cards", href: "/gift-cards" },
   ];
 
   useEffect(() => {
