@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Calendar, HeartHandshake, Sparkles } from "lucide-react";
+import { Calendar, HeartHandshake, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ServiceGuide } from "@/components/whatsapp/ServiceGuide";
