@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Calendar, HeartHandshake, Sparkles } from "lucide-react";
+import { Calendar, HeartHandshake, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ServiceGuide } from "@/components/whatsapp/ServiceGuide";
@@ -67,7 +67,6 @@ export function Hero() {
                   <>
                     <Calendar className="w-5 h-5 shrink-0" />
                     {t("home.hero.cta_guide")}
-                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                   </>
                 }
               />
