@@ -67,7 +67,6 @@ export function Hero() {
                   <>
                     <Calendar className="w-5 h-5 shrink-0" />
                     {t("home.hero.cta_guide")}
-                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                   </>
                 }
               />
