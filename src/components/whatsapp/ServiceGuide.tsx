@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { buildWhatsAppMessage, type WhatsAppContext } from "@/lib/whatsapp";
 import { WhatsAppCTA } from "./WhatsAppCTA";
 
-export function ServiceGuide({ triggerClassName, triggerSize }: { triggerClassName?: string; triggerSize?: ButtonProps["size"] } = {}) {
+export function ServiceGuide({ triggerClassName, triggerSize, triggerVariant, triggerLabel, triggerContent }: { triggerClassName?: string; triggerSize?: ButtonProps["size"]; triggerVariant?: ButtonProps["variant"]; triggerLabel?: string; triggerContent?: React.ReactNode } = {}) {
   const { t, language } = useLanguage();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
@@ -27,8 +27,8 @@ export function ServiceGuide({ triggerClassName, triggerSize }: { triggerClassNa
   const context = { source: "guided" as const, category, serviceName: service?.name, serviceId: service?.id, intent };
   const title = step === 4 ? t("wa.guide.result") : t(`wa.guide.q${step}`);
   return <>
-    <Button variant="outline" size={triggerSize} className={`h-auto min-h-11 whitespace-normal text-base ${triggerClassName || ""}`} onClick={() => { setStep(1); setCategory(""); setService(null); setIntent("guidance"); setOpen(true); }}>
-      <MessageCircle />{t("wa.guide.open")}
+    <Button variant={triggerVariant || "outline"} size={triggerSize} className={`h-auto min-h-11 whitespace-normal text-base ${triggerClassName || ""}`} onClick={() => { setStep(1); setCategory(""); setService(null); setIntent("guidance"); setOpen(true); }}>
+      {triggerContent || <><MessageCircle />{triggerLabel || t("wa.guide.open")}</>}
     </Button>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="w-[calc(100%-2rem)] max-w-lg max-h-[85dvh] overflow-y-auto" closeLabel={t("wa.guide.close")}>
